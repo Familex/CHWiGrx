@@ -1,0 +1,7 @@
+for (char col : {'W', 'B'}) {
+            for (char type : {'P', 'H', 'Q', 'R', 'B', 'K'}) {
+                char fileName[256];
+                sprintf_s(fileName, "pieces\\%c%c.bmp", col, type);
+                pieces_bitmaps[col][type] = (HBITMAP)LoadImageA(NULL, fileName, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
+            }
+        }

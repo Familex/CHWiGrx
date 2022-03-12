@@ -30,3 +30,8 @@
 *.exe
 *.out
 *.app
+/.vs/Chess/v17
+/x64/Debug
+/Debug
+/ChessCore/x64/Debug
+/ChessCore/Debug
