@@ -278,6 +278,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             case 1:
                 input.from.y = cord;
                 init_globals(input.from, turn);
+                input_order_by_two = true;
                 ++input_order_by_one;
                 break;
             case 2:
