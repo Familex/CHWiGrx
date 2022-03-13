@@ -8,14 +8,14 @@ FigureBoard::FigureBoard(bool idw, std::string map) {
 }
 
 void FigureBoard::init_figures_moves(bool idw) {
-    std::list<pos>temp_left_up;
-    std::list<pos>temp_left_down;
-    std::list<pos>temp_right_up;
-    std::list<pos>temp_right_down;
-    std::list<pos>temp_left;
-    std::list<pos>temp_right;
-    std::list<pos>temp_up;
-    std::list<pos>temp_down;
+    std::vector<pos>temp_left_up;
+    std::vector<pos>temp_left_down;
+    std::vector<pos>temp_right_up;
+    std::vector<pos>temp_right_down;
+    std::vector<pos>temp_left;
+    std::vector<pos>temp_right;
+    std::vector<pos>temp_up;
+    std::vector<pos>temp_down;
 
     for (int ij = 1; ij < min(WIDTH, HEIGHT); ++ij) {
         temp_left_up.push_back({ -ij, -ij });
@@ -69,7 +69,7 @@ void FigureBoard::reset(bool idw, std::string map) {
     reset_castling();
 }
 
-void FigureBoard::append_figures(std::string map) {
+void FigureBoard::append_figures(const std::string& map) {
     /*
     кол-во (1 по умолчанию) -> цвет -> тип
     Типы не из ctoft игнорируются, то же с ctoc
@@ -79,7 +79,6 @@ void FigureBoard::append_figures(std::string map) {
     int num{};
     char type;
     char color;
-    std::list<Figure> out;
     std::regex rgx("(\\d*)([bw]?)(\\w)");
     const int IND_NUM{ 1 };
     const int IND_COLOR{ 2 };
@@ -88,11 +87,11 @@ void FigureBoard::append_figures(std::string map) {
     auto end{ map.cend() };
     std::smatch match{};
     while (std::regex_search(begin, end, match, rgx)) {
-        num = match.str(IND_NUM) != ""
+        num = !match.str(IND_NUM).empty()
             ? std::stoi(match.str(IND_NUM))
             : 1;
 
-        color = match.str(IND_COLOR) != ""
+        color = !match.str(IND_COLOR).empty()
             ? match.str(IND_COLOR)[0]
             : 'N';
 
@@ -182,10 +181,9 @@ std::list<Figure>::iterator FigureBoard::find_king(Color col) {
 }
 
 // Вроде, нормально работает... не нормально...
-std::list<std::pair<bool, pos>> FigureBoard::expand_broom(Figure in_hand, std::vector<pos> to_ignore, std::vector<pos> ours, std::vector<pos> enemies) {
+std::list<std::pair<bool, pos>> FigureBoard::expand_broom(Figure in_hand, const std::vector<pos>& to_ignore, const std::vector<pos>& ours, const std::vector<pos>& enemies) {
     std::list<std::pair<bool, pos>> possible_moves{}; // list { pair{ is_eat, targ }, ... }
     auto in_hand_pos = in_hand.position;
-    auto in_hand_it = get_fig(in_hand_pos);
     for (auto& eat_beams : eats[in_hand.type.get_data()]) {
         for (auto eat : eat_beams) {
             pos curr{ in_hand_pos + (in_hand.color == EColor::White ? eat : eat.mul_x(-1)) };
@@ -224,7 +222,7 @@ std::list<std::pair<bool, pos>> FigureBoard::expand_broom(Figure in_hand, std::v
     return possible_moves;
 }
 
-std::list<std::pair<bool, pos>> FigureBoard::get_all_possible_moves(Figure in_hand, std::vector<pos> to_ignore, std::vector<pos> ours, std::vector<pos> enemies) {
+std::list<std::pair<bool, pos>> FigureBoard::get_all_possible_moves(Figure in_hand, const std::vector<pos>& to_ignore, const std::vector<pos>& ours, const std::vector<pos>&enemies) {
     std::list<std::pair<bool, pos>> all_possible_moves{ expand_broom(in_hand, to_ignore, ours, enemies) };
     pos in_hand_pos = in_hand.position;
     std::list<Figure>::iterator in_hand_it{ get_fig(in_hand_pos) };
@@ -296,7 +294,7 @@ std::list<std::pair<bool, pos>> FigureBoard::get_all_possible_moves(Figure in_ha
 }
 
 // Мастер функция
-bool FigureBoard::check_for_when(Color col, std::vector<pos> to_ignore, pos to_defend, std::vector<Figure> ours, std::vector<Figure> enemies) {
+bool FigureBoard::check_for_when(Color col, const std::vector<pos>& to_ignore, pos to_defend, const std::vector<Figure>& ours, const std::vector<Figure>& enemies) {
     auto king_it = find_king(col);
     if (to_defend == pos()) {
         if (king_it == figures.end()) {
@@ -311,7 +309,7 @@ bool FigureBoard::check_for_when(Color col, std::vector<pos> to_ignore, pos to_d
             if (std::find(enemies.begin(), enemies.end(), enemy) == enemies.end()) // Пока не нужно, но должно быть тут на всякий
                 continue;
         }
-        for (const auto& [is_eat, curr] : expand_broom(enemy, to_ignore, {}, to_pos_vector(ours) + to_defend)) {
+        for (const auto& [is_eat, curr] : expand_broom(enemy, to_ignore, to_pos_vector(enemies), to_pos_vector(ours) + to_defend)) {
             if (is_eat && curr == to_defend) {
                 return true;
             }
@@ -320,7 +318,7 @@ bool FigureBoard::check_for_when(Color col, std::vector<pos> to_ignore, pos to_d
     return false; // Никто не атакует
 }
 
-bool FigureBoard::stalemate_for(Color col, std::vector<pos> to_ignore, pos to_defend) {
+bool FigureBoard::stalemate_for(Color col, const std::vector<pos>& to_ignore, pos to_defend) {
     auto king_it = find_king(col);
     if (king_it == figures.end()) return true; // Нет короля
     if (to_defend == pos()) to_defend = king_it->position;
@@ -343,7 +341,7 @@ bool FigureBoard::stalemate_for(Color col, std::vector<pos> to_ignore, pos to_de
     return true;
 }
 
-bool FigureBoard::checkmate_for(Color col, std::vector<pos> to_ignore, pos to_defend /*тут, возможно, не король*/) {
+bool FigureBoard::checkmate_for(Color col, const std::vector<pos>& to_ignore, pos to_defend /*тут, возможно, не король*/) {
     auto king_it = find_king(col);
     if (to_defend == pos()) {
         if (king_it == figures.end()) {
@@ -371,7 +369,7 @@ bool FigureBoard::checkmate_for(Color col, std::vector<pos> to_ignore, pos to_de
     return true;
 }
 
-std::tuple<bool, MoveMessage, std::list<Figure>::iterator, std::list<Figure>::iterator> FigureBoard::castling_check(MoveMessage move_message, std::list<Figure>::iterator in_hand, Input input, int king_end_col, int rook_end_col) {
+std::tuple<bool, MoveMessage, std::list<Figure>::iterator, std::list<Figure>::iterator> FigureBoard::castling_check(MoveMessage move_message, std::list<Figure>::iterator in_hand, const Input& input, int king_end_col, int rook_end_col) {
     /* Рокировка как в 960 (пока что ширина обязательно 8)
         Условия:
     * Король и рокируемая ладья не ходили ранее;
@@ -387,13 +385,14 @@ std::tuple<bool, MoveMessage, std::list<Figure>::iterator, std::list<Figure>::it
     Id must_be_empty = ERR_ID;
     auto king = in_hand->type == EFigureType::King ? in_hand : find_king(in_hand->color);
     if (king->id == ERR_ID) return { false, move_message, get_default_fig(), get_default_fig() };
+    pos king_pos = king->position;
     if (in_hand->type == EFigureType::King && input.target.y == king_end_col && in_hand->position.y != king_end_col ||
-        king->position.y == king_end_col && in_hand->type == EFigureType::Rook && input.target.y == rook_end_col && in_hand->position.y != rook_end_col) {
+        king_pos.y == king_end_col && in_hand->type == EFigureType::Rook && input.target.y == rook_end_col && in_hand->position.y != rook_end_col) {
         // input правильный (король уже мог быть на g вертикали, так что доступна возможность рокировки от ладьи)
         // Нужно проверить, что все промежуточные позиции (где идёт король) не под шахом
         std::list<Figure>::iterator rook{ figures.begin() };
-        int step{ king_end_col - king->position.y > 0 ? 1 : -1 };
-        for (pos rook_aspt_pos{ king->position };
+        int step{ king_end_col - king_pos.y > 0 ? 1 : -1 };
+        for (pos rook_aspt_pos{ king_pos };
             is_valid_coords(rook_aspt_pos); rook_aspt_pos.y += step) {
             rook = get_fig(rook_aspt_pos);
             if (rook->color == in_hand->color && rook->type == EFigureType::Rook) {
@@ -401,27 +400,26 @@ std::tuple<bool, MoveMessage, std::list<Figure>::iterator, std::list<Figure>::it
             }
         }
         if (rook->id == ERR_ID) return { false, move_message, get_default_fig(), get_default_fig()};
-        if (king->position.x != input.target.x && rook->position.x != input.target.x) return { false, move_message, get_default_fig(), get_default_fig() };
+        if (king_pos.x != input.target.x && rook->position.x != input.target.x) return { false, move_message, get_default_fig(), get_default_fig() };
 
-        pos king_pos{ king->position };
-        pos target{ king->position.x, king_end_col };
+        pos target{ king_pos.x, king_end_col };
         for (int step = king_pos < target ? 1 : -1; king_pos != target; king_pos.y += step) {
-            castling_can_be_done &= not check_for_when(in_hand->color, { king->position, rook->position }, king_pos);
+            castling_can_be_done &= not check_for_when(in_hand->color, { king_pos, rook->position }, king_pos);
         }
         for (int step = king_pos < rook->position ? 1 : -1; king_pos != rook->position; king_pos.y += step) {
             must_be_empty = get_fig(king_pos)->id;
             castling_can_be_done &= must_be_empty == ERR_ID || must_be_empty == king->id || must_be_empty == rook->id;
         }
-        castling_can_be_done &= not check_for_when(in_hand->color, { king->position, rook->position }, { king->position.x, king_end_col });
-        must_be_empty = get_fig({ king->position.x, rook_end_col })->id;
+        castling_can_be_done &= not check_for_when(in_hand->color, { king_pos, rook->position }, { king_pos.x, king_end_col });
+        must_be_empty = get_fig({ king_pos.x, rook_end_col })->id;
         castling_can_be_done &= must_be_empty == ERR_ID || must_be_empty == king->id || must_be_empty == rook->id;
         if (castling_can_be_done) {
             move_message.main_ev = MainEvent::CASTLING;
             if (in_hand->type == EFigureType::King) {
-                move_message.to_move.push_back({ rook, {king->position.x, rook_end_col} });
+                move_message.to_move.push_back({ rook, {king_pos.x, rook_end_col} });
             }
             else {
-                move_message.to_move.push_back({ king, {king->position.x, king_end_col} });
+                move_message.to_move.push_back({ king, {king_pos.x, king_end_col} });
             }
             return { true, move_message, king, rook };
         }
@@ -468,7 +466,6 @@ bool FigureBoard::game_end(Color col) {
 }
 
 MoveMessage FigureBoard::move_check(std::list<Figure>::iterator in_hand, Input input) {
-    pos shift{ input.target - input.from };
     MoveMessage move_message{ MainEvent::E, {} };
     std::list<Figure>::iterator targ{ get_fig(input.target) };
 
@@ -525,6 +522,7 @@ MoveMessage FigureBoard::move_check(std::list<Figure>::iterator in_hand, Input i
     }
 
     if (in_hand->type == EFigureType::Pawn) {
+        pos shift{ input.target - input.from };
         // Ход пешки на 2 (смотрю свои фигуры на 2 линии)
         if (shift.y == 0 && is_empty(input.target) && (
             in_hand->color == EColor::White && (

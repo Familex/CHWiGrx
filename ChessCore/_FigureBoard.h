@@ -28,13 +28,13 @@ public:
     bool capture_figure(std::list<Figure>::iterator);
     std::list<Figure>::iterator find_king(Color);
     std::vector<Figure> get_figures_of(Color);
-    std::list<std::pair<bool, pos>> expand_broom(Figure, std::vector<pos> = {}, std::vector<pos> = {}, std::vector<pos> = {});
-    std::list<std::pair<bool, pos>> get_all_possible_moves(Figure, std::vector<pos> = {}, std::vector<pos> = {}, std::vector<pos> = {});
-    bool checkmate_for(Color, std::vector<pos> = {}, pos = {});
-    bool stalemate_for(Color, std::vector<pos> = {}, pos = {});
-    bool check_for_when(Color, std::vector<pos> = {}, pos = {}, std::vector<Figure> = {}, std::vector<Figure> = {});
+    std::list<std::pair<bool, pos>> expand_broom(Figure, const std::vector<pos>& = {}, const std::vector<pos>& = {}, const std::vector<pos>& = {});
+    std::list<std::pair<bool, pos>> get_all_possible_moves(Figure, const std::vector<pos>& = {}, const std::vector<pos>& = {}, const std::vector<pos>& = {});
+    bool checkmate_for(Color, const std::vector<pos>& = {}, pos = {});
+    bool stalemate_for(Color, const std::vector<pos>& = {}, pos = {});
+    bool check_for_when(Color, const std::vector<pos>& = {}, pos = {}, const std::vector<Figure>& = {}, const std::vector<Figure>& = {});
     MoveMessage move_check(std::list<Figure>::iterator, Input);
-    std::tuple<bool, MoveMessage, std::list<Figure>::iterator, std::list<Figure>::iterator> castling_check(MoveMessage, std::list<Figure>::iterator, Input, int, int);
+    std::tuple<bool, MoveMessage, std::list<Figure>::iterator, std::list<Figure>::iterator> castling_check(MoveMessage, std::list<Figure>::iterator, const Input&, int, int);
     void reset_castling();
     std::list<Figure>::iterator get_default_fig() { return figures.begin(); }
     std::list<Figure> all_figures() {
@@ -45,7 +45,7 @@ public:
     void off_castling(Color col, Id id) { castling[col][id] = false; }
     LastMove get_last_move() { return lm; }
     void set_last_move(const LastMove& lm) { this->lm = lm; }
-    void append_figures(std::string);
+    void append_figures(const std::string&);
     void init_figures_moves(bool);
     bool game_end(Color);
     size_t cnt_of_figures() const { return figures.size() - 1; }
@@ -57,8 +57,8 @@ private:
     std::list<Figure> figures;
     std::list<Figure> captured_figures;
     std::map<Color, std::map<Id, bool>> castling;
-    std::map<FigureType, std::list<std::list<pos>>> moves;
-    std::map<FigureType, std::list<std::list<pos>>> eats;
+    std::map<FigureType, std::vector<std::vector<pos>>> moves;
+    std::map<FigureType, std::vector<std::vector<pos>>> eats;
     const HANDLE console{ GetStdHandle(STD_OUTPUT_HANDLE) };
     const int MAX_FIGURES_AMOUNT{ HEIGHT * WIDTH };
 };
