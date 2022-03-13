@@ -27,12 +27,12 @@ public:
     bool is_empty() { return figures.size() <= 1; }
     bool capture_figure(std::list<Figure>::iterator);
     std::list<Figure>::iterator find_king(Color);
-    std::list<Figure> get_figures_of(Color);
-    std::list<std::pair<bool, pos>> expand_broom(Figure, std::list<pos> = {}, std::list<pos> = {}, std::list<pos> = {});
-    std::list<std::pair<bool, pos>> get_all_possible_moves(Figure, std::list<pos> = {}, std::list<pos> = {}, std::list<pos> = {});
-    bool checkmate_for(Color, std::list<pos> = {}, pos = {});
-    bool stalemate_for(Color, std::list<pos> = {}, pos = {});
-    bool check_for_when(Color, std::list<pos> = {}, pos = {}, std::list<Figure> = {}, std::list<Figure> = {});
+    std::vector<Figure> get_figures_of(Color);
+    std::list<std::pair<bool, pos>> expand_broom(Figure, std::vector<pos> = {}, std::vector<pos> = {}, std::vector<pos> = {});
+    std::list<std::pair<bool, pos>> get_all_possible_moves(Figure, std::vector<pos> = {}, std::vector<pos> = {}, std::vector<pos> = {});
+    bool checkmate_for(Color, std::vector<pos> = {}, pos = {});
+    bool stalemate_for(Color, std::vector<pos> = {}, pos = {});
+    bool check_for_when(Color, std::vector<pos> = {}, pos = {}, std::vector<Figure> = {}, std::vector<Figure> = {});
     MoveMessage move_check(std::list<Figure>::iterator, Input);
     std::tuple<bool, MoveMessage, std::list<Figure>::iterator, std::list<Figure>::iterator> castling_check(MoveMessage, std::list<Figure>::iterator, Input, int, int);
     void reset_castling();
@@ -44,7 +44,7 @@ public:
     bool has_castling(Color col, Id id) { return castling[col][id]; }
     void off_castling(Color col, Id id) { castling[col][id] = false; }
     LastMove get_last_move() { return lm; }
-    void set_last_move(LastMove lm) { this->lm = lm; }
+    void set_last_move(const LastMove& lm) { this->lm = lm; }
     void append_figures(std::string);
     void init_figures_moves(bool);
     bool game_end(Color);

@@ -10,13 +10,13 @@
 #include <Windows.h>
 
 template <class T>
-std::list<T> operator +(std::list<T> lst, T val) {
+std::vector<T> operator +(std::vector<T> lst, T val) {
     lst.push_back(val);
     return lst;
 }
 
 template <class T>
-std::list<T> operator +(std::list<T> l, std::list<T> r) {
+std::vector<T> operator +(std::vector<T> l, std::vector<T> r) {
     l.insert(l.end(), r.begin(), r.end());
     return l;
 }
@@ -51,7 +51,7 @@ struct pos {
         if (this->y >= max_y) this->y = 0;
         if (this->y < 0) this->y = max_y - 1;
     }
-    bool in(std::list<pos> lst) { return std::find(lst.begin(), lst.end(), *this) != lst.end(); }
+    bool in(std::vector<pos> lst) { return std::find(lst.begin(), lst.end(), *this) != lst.end(); }
 };
 
 class Color {
@@ -100,7 +100,7 @@ struct Figure {
     FigureType type;
 };
 
-std::list<pos> to_pos_list(std::list<Figure>);
+std::vector<pos> to_pos_vector(std::vector<Figure>);
 
 struct Input {
     pos from;

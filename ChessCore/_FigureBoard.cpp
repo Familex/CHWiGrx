@@ -159,8 +159,8 @@ bool is_valid_coords(pos position) {
         (y >= 0) && (y < WIDTH));
 }
 
-std::list<Figure> FigureBoard::get_figures_of(Color col) {
-    std::list<Figure> acc{};
+std::vector<Figure> FigureBoard::get_figures_of(Color col) {
+    std::vector<Figure> acc{};
     for (auto it{ ++figures.begin() }; it != figures.end(); ++it) {
         if (it->color == col) {
             acc.push_back(*it);
@@ -182,7 +182,7 @@ std::list<Figure>::iterator FigureBoard::find_king(Color col) {
 }
 
 // Вроде, нормально работает... не нормально...
-std::list<std::pair<bool, pos>> FigureBoard::expand_broom(Figure in_hand, std::list<pos> to_ignore, std::list<pos> ours, std::list<pos> enemies) {
+std::list<std::pair<bool, pos>> FigureBoard::expand_broom(Figure in_hand, std::vector<pos> to_ignore, std::vector<pos> ours, std::vector<pos> enemies) {
     std::list<std::pair<bool, pos>> possible_moves{}; // list { pair{ is_eat, targ }, ... }
     auto in_hand_pos = in_hand.position;
     auto in_hand_it = get_fig(in_hand_pos);
@@ -224,7 +224,7 @@ std::list<std::pair<bool, pos>> FigureBoard::expand_broom(Figure in_hand, std::l
     return possible_moves;
 }
 
-std::list<std::pair<bool, pos>> FigureBoard::get_all_possible_moves(Figure in_hand, std::list<pos> to_ignore, std::list<pos> ours, std::list<pos> enemies) {
+std::list<std::pair<bool, pos>> FigureBoard::get_all_possible_moves(Figure in_hand, std::vector<pos> to_ignore, std::vector<pos> ours, std::vector<pos> enemies) {
     std::list<std::pair<bool, pos>> all_possible_moves{ expand_broom(in_hand, to_ignore, ours, enemies) };
     pos in_hand_pos = in_hand.position;
     std::list<Figure>::iterator in_hand_it{ get_fig(in_hand_pos) };
@@ -296,7 +296,7 @@ std::list<std::pair<bool, pos>> FigureBoard::get_all_possible_moves(Figure in_ha
 }
 
 // Мастер функция
-bool FigureBoard::check_for_when(Color col, std::list<pos> to_ignore, pos to_defend, std::list<Figure> ours, std::list<Figure> enemies) {
+bool FigureBoard::check_for_when(Color col, std::vector<pos> to_ignore, pos to_defend, std::vector<Figure> ours, std::vector<Figure> enemies) {
     auto king_it = find_king(col);
     if (to_defend == pos()) {
         if (king_it == figures.end()) {
@@ -311,7 +311,7 @@ bool FigureBoard::check_for_when(Color col, std::list<pos> to_ignore, pos to_def
             if (std::find(enemies.begin(), enemies.end(), enemy) == enemies.end()) // Пока не нужно, но должно быть тут на всякий
                 continue;
         }
-        for (const auto& [is_eat, curr] : expand_broom(enemy, to_ignore, {}, to_pos_list(ours) + to_defend)) {
+        for (const auto& [is_eat, curr] : expand_broom(enemy, to_ignore, {}, to_pos_vector(ours) + to_defend)) {
             if (is_eat && curr == to_defend) {
                 return true;
             }
@@ -320,7 +320,7 @@ bool FigureBoard::check_for_when(Color col, std::list<pos> to_ignore, pos to_def
     return false; // Никто не атакует
 }
 
-bool FigureBoard::stalemate_for(Color col, std::list<pos> to_ignore, pos to_defend) {
+bool FigureBoard::stalemate_for(Color col, std::vector<pos> to_ignore, pos to_defend) {
     auto king_it = find_king(col);
     if (king_it == figures.end()) return true; // Нет короля
     if (to_defend == pos()) to_defend = king_it->position;
@@ -343,7 +343,7 @@ bool FigureBoard::stalemate_for(Color col, std::list<pos> to_ignore, pos to_defe
     return true;
 }
 
-bool FigureBoard::checkmate_for(Color col, std::list<pos> to_ignore, pos to_defend /*тут, возможно, не король*/) {
+bool FigureBoard::checkmate_for(Color col, std::vector<pos> to_ignore, pos to_defend /*тут, возможно, не король*/) {
     auto king_it = find_king(col);
     if (to_defend == pos()) {
         if (king_it == figures.end()) {
@@ -495,19 +495,19 @@ MoveMessage FigureBoard::move_check(std::list<Figure>::iterator in_hand, Input i
         }
         bool is_castling; MoveMessage mm; std::list<Figure>::iterator king; std::list<Figure>::iterator rook;
         std::tie(is_castling, mm, king, rook) = castling_check(move_message, in_hand, input, 6, 5);
-        if (is_castling) {
+        if (is_castling && has_castling(in_hand->color, rook->id)) {
             if (check_for_when(in_hand->color.what_next(),
                 { input.from, king->position, rook->position }, {}, {},
-                { king->submit_on({in_hand->position.x, 6 }), rook->submit_on({in_hand->position.x, 5})})) {
+                { king->submit_on({in_hand->position.x, 6 }), rook->submit_on({rook->position.x, 5})})) {
                 move_message.side_evs.push_back(SideEvent::CHECK);
             }
             return mm;
         }
         std::tie(is_castling, mm, king, rook) = castling_check(move_message, in_hand, input, 2, 3);
-        if (is_castling) {
+        if (is_castling && has_castling(in_hand->color, rook->id)) {
             if (check_for_when(in_hand->color.what_next(),
                 { input.from, king->position, rook->position }, {}, {},
-                { king->submit_on({in_hand->position.x, 2 }), rook->submit_on({in_hand->position.x, 3}) })) {
+                { king->submit_on({king->position.x, 2 }), rook->submit_on({rook->position.x, 3}) })) {
                 move_message.side_evs.push_back(SideEvent::CHECK);
             }
             return mm;

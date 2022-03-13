@@ -13,7 +13,6 @@
 #define IDC_CHWIGRX                     109
 #define IDM_RESTART                     110
 #define IDR_MAINFRAME                   128
-
 #define IDB_BLACK_PAWN                  129
 #define IDB_BLACK_ROOK                  130
 #define IDB_BLACK_KING                  131
@@ -26,6 +25,12 @@
 #define IDB_WHITE_QUEEN                 138
 #define IDB_WHITE_BISHOP                139
 #define IDB_WHITE_KNIGHT                140
+#define ID_32772                        32772
+#define ID_32773                        32773
+#define ID_32774                        32774
+#define ID_32775                        32775
+#define ID_32776                        32776
+#define ID_32777                        32777
 #define IDC_STATIC                      -1
 
 // Next default values for new objects
@@ -34,7 +39,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NO_MFC                     1
 #define _APS_NEXT_RESOURCE_VALUE        130
-#define _APS_NEXT_COMMAND_VALUE         32772
+#define _APS_NEXT_COMMAND_VALUE         32778
 #define _APS_NEXT_CONTROL_VALUE         1000
 #define _APS_NEXT_SYMED_VALUE           110
 #endif

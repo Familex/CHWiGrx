@@ -84,8 +84,8 @@ bool operator<  (const pos& left, const pos& right) {
     }
 }
 
-std::list<pos> to_pos_list(std::list<Figure> lst) {
-    std::list<pos> acc{};
+std::vector<pos> to_pos_vector(std::vector<Figure> lst) {
+    std::vector<pos> acc{};
     for (const auto& fig : lst) {
         acc.push_back(fig.position);
     }

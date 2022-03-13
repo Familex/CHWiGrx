@@ -2,7 +2,7 @@
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 // CHWiGrx.cpp : Определяет точку входа для приложения.
 //
-// #define DEBUG
+//#define DEBUG
 
 #ifdef DEBUG
 #define _CRT_SECURE_NO_WARNINGS
@@ -267,6 +267,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                     input_order_by_two = !input_order_by_two;
                     InvalidateRect(hWnd, NULL, NULL);
                     return 0;
+                default:
+                    return 0;
             }
             switch (input_order_by_one) {
             case 0:
@@ -500,7 +502,7 @@ void make_move(HWND hWnd) {
     try {
         ms = board.move_check(in_hand, input);
     }
-    catch (std::invalid_argument) {
+    catch (std::invalid_argument&) {
         clear_current_globals();
         InvalidateRect(hWnd, NULL, NULL);
         return;
