@@ -1,3 +1,5 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 #include "_FigureBoard.h"
 
 FigureBoard::FigureBoard(bool idw, std::string map) {
@@ -99,17 +101,15 @@ void FigureBoard::append_figures(std::string map) {
         while (num-- && num < MAX_FIGURES_AMOUNT) {
             ++curr_flat;
             if (NOT_FIGURES.find(std::toupper(type)) != std::string::npos) continue;
-            try {
-                figures.push_back({ ++curr_id,
-                    {(curr_flat - (curr_flat % WIDTH)) / HEIGHT,
-                    curr_flat % WIDTH},
-                    color,
-                    type
-                    });
-            }
-            catch (std::invalid_argument) {
-
-            }
+            if (COLOR_CHARS.find(std::toupper(color)) == std::string::npos) continue;
+            if (ALL_FIGURES.find(std::toupper(type)) == std::string::npos) continue;
+            figures.push_back({
+                ++curr_id,
+                {(curr_flat - (curr_flat % WIDTH)) / HEIGHT,
+                curr_flat % WIDTH},
+                color,
+                type
+            });
         }
 
         begin += match.position() + match.length();
@@ -250,6 +250,8 @@ std::list<std::pair<bool, pos>> FigureBoard::get_all_possible_moves(Figure in_ha
                 all_possible_moves.push_back({ false, in_hand_pos + pos(-2, 0) });
             }
         }
+
+        // Взятие на проходе
         if (lm.ms.main_ev == MainEvent::LMOVE && std::abs(lm.who_went->position.y - in_hand_pos.y) == 1) {
             int shift_y = lm.who_went->position.y - in_hand_pos.y;
             if (in_hand.color == EColor::White) {
@@ -448,7 +450,7 @@ bool FigureBoard::insufficient_material() {
     size_t w_cell_bishops_cnt{};
     for (const auto& fig : all_figures()) {
         if (fig.type == EFigureType::Bishop)
-            if (fig.position.x + fig.position.y % 2)
+            if ((fig.position.x + fig.position.y) % 2)
                 ++b_cell_bishops_cnt;
             else
                 ++w_cell_bishops_cnt;
@@ -465,7 +467,7 @@ bool FigureBoard::game_end(Color col) {
         insufficient_material();
 }
 
-MoveMessage FigureBoard::move_check(std::list<Figure>::iterator in_hand, Input input, LastMove lm) {
+MoveMessage FigureBoard::move_check(std::list<Figure>::iterator in_hand, Input input) {
     pos shift{ input.target - input.from };
     MoveMessage move_message{ MainEvent::E, {} };
     std::list<Figure>::iterator targ{ get_fig(input.target) };

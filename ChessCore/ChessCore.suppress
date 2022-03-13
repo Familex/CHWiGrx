@@ -1,0 +1,434 @@
+<?xml version="1.0" standalone="yes"?>
+<NewDataSet>
+  <xs:schema id="NewDataSet" xmlns="" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xs:element name="NewDataSet" msdata:IsDataSet="true" msdata:UseCurrentLocale="true">
+      <xs:complexType>
+        <xs:choice minOccurs="0" maxOccurs="unbounded">
+          <xs:element name="SuppressVersion">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="CurrentVersion" type="xs:int" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="ChessCore">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="FileName" type="xs:string" default="" />
+                <xs:element name="ErrorCode" type="xs:string" default="" />
+                <xs:element name="Message" type="xs:string" default="" />
+                <xs:element name="CodePrev" type="xs:unsignedInt" default="0" />
+                <xs:element name="CodeCurrent" type="xs:unsignedInt" default="0" />
+                <xs:element name="CodeNext" type="xs:unsignedInt" default="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+        </xs:choice>
+      </xs:complexType>
+      <xs:unique name="Constraint1" msdata:PrimaryKey="true">
+        <xs:selector xpath=".//ChessCore" />
+        <xs:field xpath="FileName" />
+        <xs:field xpath="ErrorCode" />
+        <xs:field xpath="Message" />
+        <xs:field xpath="CodePrev" />
+        <xs:field xpath="CodeCurrent" />
+        <xs:field xpath="CodeNext" />
+      </xs:unique>
+    </xs:element>
+  </xs:schema>
+  <SuppressVersion>
+    <CurrentVersion>2</CurrentVersion>
+  </SuppressVersion>
+  <ChessCore>
+    <FileName>_Stuff.cpp</FileName>
+    <ErrorCode>V826</ErrorCode>
+    <Message>Consider replacing the 'lst' std::list with std::vector. Contiguous placement of elements in memory can be more efficient.</Message>
+    <CodePrev>0</CodePrev>
+    <CodeCurrent>2214417164</CodeCurrent>
+    <CodeNext>45478181</CodeNext>
+  </ChessCore>
+  <ChessCore>
+    <FileName>_FigureBoard.cpp</FileName>
+    <ErrorCode>V112</ErrorCode>
+    <Message>Dangerous magic number _ used: ...= (HEIGHT - _) &amp;&amp; not idw...</Message>
+    <CodePrev>125</CodePrev>
+    <CodeCurrent>2746529371</CodeCurrent>
+    <CodeNext>809840384</CodeNext>
+  </ChessCore>
+  <ChessCore>
+    <FileName>_FigureBoard.cpp</FileName>
+    <ErrorCode>V112</ErrorCode>
+    <Message>Dangerous magic number _ used: ...= (HEIGHT - _) &amp;&amp; idw &amp;&amp;...</Message>
+    <CodePrev>85350101</CodePrev>
+    <CodeCurrent>3450504548</CodeCurrent>
+    <CodeNext>809840384</CodeNext>
+  </ChessCore>
+  <ChessCore>
+    <FileName>_FigureBoard.cpp</FileName>
+    <ErrorCode>V826</ErrorCode>
+    <Message>Consider replacing the 'all_possible_moves' std::list with std::vector. Contiguous placement of elements in memory can be more efficient.</Message>
+    <CodePrev>2416033354</CodePrev>
+    <CodeCurrent>1612555162</CodeCurrent>
+    <CodeNext>2909683482</CodeNext>
+  </ChessCore>
+  <ChessCore>
+    <FileName>_FigureBoard.cpp</FileName>
+    <ErrorCode>V813</ErrorCode>
+    <Message>Decreased performance. The 'in_hand', 'to_ignore', 'ours', 'enemies' arguments should probably be rendered as constant references.</Message>
+    <CodePrev>0</CodePrev>
+    <CodeCurrent>2416033354</CodeCurrent>
+    <CodeNext>1612555162</CodeNext>
+  </ChessCore>
+  <ChessCore>
+    <FileName>_FigureBoard.cpp</FileName>
+    <ErrorCode>V813</ErrorCode>
+    <Message>Decreased performance. The 'ours' argument should probably be rendered as a constant reference.</Message>
+    <CodePrev>113</CodePrev>
+    <CodeCurrent>1474806193</CodeCurrent>
+    <CodeNext>1047268432</CodeNext>
+  </ChessCore>
+  <ChessCore>
+    <FileName>_FigureBoard.cpp</FileName>
+    <ErrorCode>V813</ErrorCode>
+    <Message>Decreased performance. The 'to_ignore' argument should probably be rendered as a constant reference.</Message>
+    <CodePrev>0</CodePrev>
+    <CodeCurrent>2646285980</CodeCurrent>
+    <CodeNext>1047268432</CodeNext>
+  </ChessCore>
+  <ChessCore>
+    <FileName>_FigureBoard.cpp</FileName>
+    <ErrorCode>V807</ErrorCode>
+    <Message>Decreased performance. Consider creating a reference to avoid using the 'king-&gt;position' expression repeatedly.</Message>
+    <CodePrev>3289514155</CodePrev>
+    <CodeCurrent>4116940364</CodeCurrent>
+    <CodeNext>43341</CodeNext>
+  </ChessCore>
+  <ChessCore>
+    <FileName>_FigureBoard.cpp</FileName>
+    <ErrorCode>V813</ErrorCode>
+    <Message>Decreased performance. The 'input' argument should probably be rendered as a constant reference.</Message>
+    <CodePrev>0</CodePrev>
+    <CodeCurrent>131642248</CodeCurrent>
+    <CodeNext>6201</CodeNext>
+  </ChessCore>
+  <ChessCore>
+    <FileName>_FigureBoard.cpp</FileName>
+    <ErrorCode>V793</ErrorCode>
+    <Message>It is odd that the result of the 'fig.position.x + fig.position.y % _' statement is a part of the condition. Perhaps, this statement should have been compared with something else.</Message>
+    <CodePrev>1738022396</CodePrev>
+    <CodeCurrent>3637358612</CodeCurrent>
+    <CodeNext>43968611</CodeNext>
+  </ChessCore>
+  <ChessCore>
+    <FileName>_FigureBoard.cpp</FileName>
+    <ErrorCode>V688</ErrorCode>
+    <Message>The 'lm' function argument possesses the same name as one of the class members, which can result in a confusion.</Message>
+    <CodePrev>0</CodePrev>
+    <CodeCurrent>2521959686</CodeCurrent>
+    <CodeNext>2379533774</CodeNext>
+  </ChessCore>
+  <ChessCore>
+    <FileName>_FigureBoard.cpp</FileName>
+    <ErrorCode>V112</ErrorCode>
+    <Message>Dangerous magic number _ used: ...= (HEIGHT - _) &amp;&amp; not idw...</Message>
+    <CodePrev>2719174467</CodePrev>
+    <CodeCurrent>1393880306</CodeCurrent>
+    <CodeNext>32</CodeNext>
+  </ChessCore>
+  <ChessCore>
+    <FileName>_FigureBoard.cpp</FileName>
+    <ErrorCode>V112</ErrorCode>
+    <Message>Dangerous magic number _ used: ...= (HEIGHT - _) &amp;&amp; idw &amp;&amp;...</Message>
+    <CodePrev>992783764</CodePrev>
+    <CodeCurrent>2589501216</CodeCurrent>
+    <CodeNext>654610740</CodeNext>
+  </ChessCore>
+  <ChessCore>
+    <FileName>_FigureBoard.cpp</FileName>
+    <ErrorCode>V813</ErrorCode>
+    <Message>Decreased performance. The 'lm' argument should probably be rendered as a constant reference.</Message>
+    <CodePrev>0</CodePrev>
+    <CodeCurrent>2521959686</CodeCurrent>
+    <CodeNext>2379533774</CodeNext>
+  </ChessCore>
+  <ChessCore>
+    <FileName>_FigureBoard.cpp</FileName>
+    <ErrorCode>V821</ErrorCode>
+    <Message>Decreased performance. The 'shift' variable can be constructed in a lower level scope.</Message>
+    <CodePrev>2521959686</CodePrev>
+    <CodeCurrent>2379533774</CodeCurrent>
+    <CodeNext>1124510269</CodeNext>
+  </ChessCore>
+  <ChessCore>
+    <FileName>_Stuff.h</FileName>
+    <ErrorCode>V826</ErrorCode>
+    <Message>Consider replacing the 'lst' std::list with std::vector. Contiguous placement of elements in memory can be more efficient.</Message>
+    <CodePrev>2852498</CodePrev>
+    <CodeCurrent>1632991365</CodeCurrent>
+    <CodeNext>19014385</CodeNext>
+  </ChessCore>
+  <ChessCore>
+    <FileName>_Stuff.h</FileName>
+    <ErrorCode>V826</ErrorCode>
+    <Message>Consider replacing the 'l' std::list with std::vector. Contiguous placement of elements in memory can be more efficient.</Message>
+    <CodePrev>2852498</CodePrev>
+    <CodeCurrent>2862175585</CodeCurrent>
+    <CodeNext>539445504</CodeNext>
+  </ChessCore>
+  <ChessCore>
+    <FileName>_Stuff.h</FileName>
+    <ErrorCode>V1043</ErrorCode>
+    <Message>A global object variable 'ALL_FIGURES' is declared in the header. Multiple copies of it will be created in all translation units that include this header file.</Message>
+    <CodePrev>880831000</CodePrev>
+    <CodeCurrent>79857491</CodeCurrent>
+    <CodeNext>4125111461</CodeNext>
+  </ChessCore>
+  <ChessCore>
+    <FileName>_Stuff.h</FileName>
+    <ErrorCode>V1043</ErrorCode>
+    <Message>A global object variable 'ALL_PROMOTION_FIGURES' is declared in the header. Multiple copies of it will be created in all translation units that include this header file.</Message>
+    <CodePrev>79857491</CodePrev>
+    <CodeCurrent>4125111461</CodeCurrent>
+    <CodeNext>2418971941</CodeNext>
+  </ChessCore>
+  <ChessCore>
+    <FileName>_Stuff.h</FileName>
+    <ErrorCode>V1043</ErrorCode>
+    <Message>A global object variable 'NOT_FIGURES' is declared in the header. Multiple copies of it will be created in all translation units that include this header file.</Message>
+    <CodePrev>4125111461</CodePrev>
+    <CodeCurrent>2418971941</CodeCurrent>
+    <CodeNext>0</CodeNext>
+  </ChessCore>
+  <ChessCore>
+    <FileName>_Stuff.h</FileName>
+    <ErrorCode>V826</ErrorCode>
+    <Message>Consider replacing the 'lst' std::list with std::vector. Contiguous placement of elements in memory can be more efficient.</Message>
+    <CodePrev>125</CodePrev>
+    <CodeCurrent>1287922344</CodeCurrent>
+    <CodeNext>193</CodeNext>
+  </ChessCore>
+  <ChessCore>
+    <FileName>_FigureBoard.h</FileName>
+    <ErrorCode>V813</ErrorCode>
+    <Message>Decreased performance. The 'lm' argument should probably be rendered as a constant reference.</Message>
+    <CodePrev>2079271151</CodePrev>
+    <CodeCurrent>2351009362</CodeCurrent>
+    <CodeNext>3437371644</CodeNext>
+  </ChessCore>
+  <ChessCore>
+    <FileName>_FigureBoard.cpp</FileName>
+    <ErrorCode>V813</ErrorCode>
+    <Message>Decreased performance. The 'in_hand', 'to_ignore', 'ours', 'enemies' arguments should probably be rendered as constant references.</Message>
+    <CodePrev>13594</CodePrev>
+    <CodeCurrent>3724294161</CodeCurrent>
+    <CodeNext>2182956267</CodeNext>
+  </ChessCore>
+  <ChessCore>
+    <FileName>_FigureBoard.cpp</FileName>
+    <ErrorCode>V808</ErrorCode>
+    <Message>'in_hand_it' object of '_List_iterator' type was created but was not utilized.</Message>
+    <CodePrev>1835941756</CodePrev>
+    <CodeCurrent>1834766150</CodeCurrent>
+    <CodeNext>1425053309</CodeNext>
+  </ChessCore>
+  <ChessCore>
+    <FileName>_FigureBoard.cpp</FileName>
+    <ErrorCode>V813</ErrorCode>
+    <Message>Decreased performance. The 'to_ignore' argument should probably be rendered as a constant reference.</Message>
+    <CodePrev>0</CodePrev>
+    <CodeCurrent>2255940668</CodeCurrent>
+    <CodeNext>1047268432</CodeNext>
+  </ChessCore>
+  <ChessCore>
+    <FileName>_FigureBoard.cpp</FileName>
+    <ErrorCode>V826</ErrorCode>
+    <Message>Consider replacing the 'acc' std::list with std::vector. Contiguous placement of elements in memory can be more efficient.</Message>
+    <CodePrev>784339806</CodePrev>
+    <CodeCurrent>363600165</CodeCurrent>
+    <CodeNext>2163109146</CodeNext>
+  </ChessCore>
+  <ChessCore>
+    <FileName>_Stuff.cpp</FileName>
+    <ErrorCode>V826</ErrorCode>
+    <Message>Consider replacing the 'acc' std::list with std::vector. Contiguous placement of elements in memory can be more efficient.</Message>
+    <CodePrev>2214417164</CodePrev>
+    <CodeCurrent>45478181</CodeCurrent>
+    <CodeNext>319940769</CodeNext>
+  </ChessCore>
+  <ChessCore>
+    <FileName>_Stuff.cpp</FileName>
+    <ErrorCode>V813</ErrorCode>
+    <Message>Decreased performance. The 'lst' argument should probably be rendered as a constant reference.</Message>
+    <CodePrev>0</CodePrev>
+    <CodeCurrent>2214417164</CodeCurrent>
+    <CodeNext>45478181</CodeNext>
+  </ChessCore>
+  <ChessCore>
+    <FileName>_Stuff.cpp</FileName>
+    <ErrorCode>V112</ErrorCode>
+    <Message>Dangerous magic number _ used: ...nt i{}; i &lt; _; ++i) {.</Message>
+    <CodePrev>181129637</CodePrev>
+    <CodeCurrent>40187141</CodeCurrent>
+    <CodeNext>630238927</CodeNext>
+  </ChessCore>
+  <ChessCore>
+    <FileName>_Stuff.cpp</FileName>
+    <ErrorCode>V817</ErrorCode>
+    <Message>It is more efficient to seek ' ' character rather than a string.</Message>
+    <CodePrev>40187141</CodePrev>
+    <CodeCurrent>630238927</CodeCurrent>
+    <CodeNext>702541405</CodeNext>
+  </ChessCore>
+  <ChessCore>
+    <FileName>_FigureBoard.cpp</FileName>
+    <ErrorCode>V688</ErrorCode>
+    <Message>The 'idw' function argument possesses the same name as one of the class members, which can result in a confusion.</Message>
+    <CodePrev>0</CodePrev>
+    <CodeCurrent>4088494386</CodeCurrent>
+    <CodeNext>705213</CodeNext>
+  </ChessCore>
+  <ChessCore>
+    <FileName>_FigureBoard.cpp</FileName>
+    <ErrorCode>V688</ErrorCode>
+    <Message>The 'idw' function argument possesses the same name as one of the class members, which can result in a confusion.</Message>
+    <CodePrev>0</CodePrev>
+    <CodeCurrent>2310055932</CodeCurrent>
+    <CodeNext>1526318134</CodeNext>
+  </ChessCore>
+  <ChessCore>
+    <FileName>_FigureBoard.cpp</FileName>
+    <ErrorCode>V826</ErrorCode>
+    <Message>Consider replacing the 'temp_left_up' std::list with std::vector. Contiguous placement of elements in memory can be more efficient.</Message>
+    <CodePrev>2310055932</CodePrev>
+    <CodeCurrent>1526318134</CodeCurrent>
+    <CodeNext>1810305254</CodeNext>
+  </ChessCore>
+  <ChessCore>
+    <FileName>_FigureBoard.cpp</FileName>
+    <ErrorCode>V826</ErrorCode>
+    <Message>Consider replacing the 'possible_moves' std::list with std::vector. Contiguous placement of elements in memory can be more efficient.</Message>
+    <CodePrev>3724294161</CodePrev>
+    <CodeCurrent>2182956267</CodeCurrent>
+    <CodeNext>1835941756</CodeNext>
+  </ChessCore>
+  <ChessCore>
+    <FileName>_FigureBoard.cpp</FileName>
+    <ErrorCode>V826</ErrorCode>
+    <Message>Consider replacing the 'temp_right_down' std::list with std::vector. Contiguous placement of elements in memory can be more efficient.</Message>
+    <CodePrev>3052638453</CodePrev>
+    <CodeCurrent>3620619241</CodeCurrent>
+    <CodeNext>727660739</CodeNext>
+  </ChessCore>
+  <ChessCore>
+    <FileName>_FigureBoard.cpp</FileName>
+    <ErrorCode>V826</ErrorCode>
+    <Message>Consider replacing the 'temp_right_up' std::list with std::vector. Contiguous placement of elements in memory can be more efficient.</Message>
+    <CodePrev>1810305254</CodePrev>
+    <CodeCurrent>3052638453</CodeCurrent>
+    <CodeNext>3620619241</CodeNext>
+  </ChessCore>
+  <ChessCore>
+    <FileName>_FigureBoard.cpp</FileName>
+    <ErrorCode>V826</ErrorCode>
+    <Message>Consider replacing the 'temp_left_down' std::list with std::vector. Contiguous placement of elements in memory can be more efficient.</Message>
+    <CodePrev>1526318134</CodePrev>
+    <CodeCurrent>1810305254</CodeCurrent>
+    <CodeNext>3052638453</CodeNext>
+  </ChessCore>
+  <ChessCore>
+    <FileName>_FigureBoard.h</FileName>
+    <ErrorCode>V122</ErrorCode>
+    <Message>Memsize type is used in the struct/class.</Message>
+    <CodePrev>2922413575</CodePrev>
+    <CodeCurrent>707620088</CodeCurrent>
+    <CodeNext>2520402606</CodeNext>
+  </ChessCore>
+  <ChessCore>
+    <FileName>_FigureBoard.cpp</FileName>
+    <ErrorCode>V826</ErrorCode>
+    <Message>Consider replacing the 'temp_right' std::list with std::vector. Contiguous placement of elements in memory can be more efficient.</Message>
+    <CodePrev>727660739</CodePrev>
+    <CodeCurrent>1455321691</CodeCurrent>
+    <CodeNext>181915159</CodeNext>
+  </ChessCore>
+  <ChessCore>
+    <FileName>_FigureBoard.cpp</FileName>
+    <ErrorCode>V826</ErrorCode>
+    <Message>Consider replacing the 'temp_left' std::list with std::vector. Contiguous placement of elements in memory can be more efficient.</Message>
+    <CodePrev>3620619241</CodePrev>
+    <CodeCurrent>727660739</CodeCurrent>
+    <CodeNext>1455321691</CodeNext>
+  </ChessCore>
+  <ChessCore>
+    <FileName>_FigureBoard.cpp</FileName>
+    <ErrorCode>V826</ErrorCode>
+    <Message>Consider replacing the 'temp_down' std::list with std::vector. Contiguous placement of elements in memory can be more efficient.</Message>
+    <CodePrev>181915159</CodePrev>
+    <CodeCurrent>727660643</CodeCurrent>
+    <CodeNext>0</CodeNext>
+  </ChessCore>
+  <ChessCore>
+    <FileName>_FigureBoard.cpp</FileName>
+    <ErrorCode>V813</ErrorCode>
+    <Message>Decreased performance. The 'map' argument should probably be rendered as a constant reference.</Message>
+    <CodePrev>0</CodePrev>
+    <CodeCurrent>1731830301</CodeCurrent>
+    <CodeNext>116</CodeNext>
+  </ChessCore>
+  <ChessCore>
+    <FileName>_FigureBoard.cpp</FileName>
+    <ErrorCode>V808</ErrorCode>
+    <Message>'out' object of 'list' type was created but was not utilized.</Message>
+    <CodePrev>35475</CodePrev>
+    <CodeCurrent>90900031</CodeCurrent>
+    <CodeNext>681793514</CodeNext>
+  </ChessCore>
+  <ChessCore>
+    <FileName>_FigureBoard.cpp</FileName>
+    <ErrorCode>V688</ErrorCode>
+    <Message>The 'idw' function argument possesses the same name as one of the class members, which can result in a confusion.</Message>
+    <CodePrev>0</CodePrev>
+    <CodeCurrent>2143637556</CodeCurrent>
+    <CodeNext>705213</CodeNext>
+  </ChessCore>
+  <ChessCore>
+    <FileName>_FigureBoard.cpp</FileName>
+    <ErrorCode>V816</ErrorCode>
+    <Message>It is more efficient to catch exception by reference rather than by value.</Message>
+    <CodePrev>125</CodePrev>
+    <CodeCurrent>1202625469</CodeCurrent>
+    <CodeNext>0</CodeNext>
+  </ChessCore>
+  <ChessCore>
+    <FileName>_FigureBoard.cpp</FileName>
+    <ErrorCode>V565</ErrorCode>
+    <Message>An empty exception handler. Silent suppression of exceptions can hide the presence of bugs in source code during testing.</Message>
+    <CodePrev>125</CodePrev>
+    <CodeCurrent>1202625469</CodeCurrent>
+    <CodeNext>0</CodeNext>
+  </ChessCore>
+  <ChessCore>
+    <FileName>_FigureBoard.cpp</FileName>
+    <ErrorCode>V815</ErrorCode>
+    <Message>Decreased performance. Consider replacing the expression 'match.str(IND_NUM) != ""' with '!match.str(IND_NUM).empty()'.</Message>
+    <CodePrev>1297302090</CodePrev>
+    <CodeCurrent>2575949802</CodeCurrent>
+    <CodeNext>2174303205</CodeNext>
+  </ChessCore>
+  <ChessCore>
+    <FileName>_FigureBoard.cpp</FileName>
+    <ErrorCode>V826</ErrorCode>
+    <Message>Consider replacing the 'temp_up' std::list with std::vector. Contiguous placement of elements in memory can be more efficient.</Message>
+    <CodePrev>1455321691</CodePrev>
+    <CodeCurrent>181915159</CodeCurrent>
+    <CodeNext>727660643</CodeNext>
+  </ChessCore>
+  <ChessCore>
+    <FileName>_FigureBoard.cpp</FileName>
+    <ErrorCode>V815</ErrorCode>
+    <Message>Decreased performance. Consider replacing the expression 'match.str(IND_COLOR) != ""' with '!match.str(IND_COLOR).empty()'.</Message>
+    <CodePrev>0</CodePrev>
+    <CodeCurrent>2955372930</CodeCurrent>
+    <CodeNext>219395417</CodeNext>
+  </ChessCore>
+</NewDataSet>

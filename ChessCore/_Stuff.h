@@ -23,9 +23,10 @@ std::list<T> operator +(std::list<T> l, std::list<T> r) {
 
 enum class EFigureType { Pawn, Knight, Rook, Bishop, Queen, King, None };
 enum class EColor { Black, White, None };
-const std::string ALL_FIGURES{ "PHRBQK" };
-const std::string ALL_PROMOTION_FIGURES{ "HRBQ" };
-const std::string NOT_FIGURES{ "E" };
+inline const std::string ALL_FIGURES{ "PHRBQK" };
+inline const std::string ALL_PROMOTION_FIGURES{ "HRBQ" };
+inline const std::string NOT_FIGURES{ "E" };
+inline const std::string COLOR_CHARS{ "NBW" };
 
 typedef int Id;
 const Id ERR_ID{ -1 };

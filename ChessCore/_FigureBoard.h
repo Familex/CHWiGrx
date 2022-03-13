@@ -33,7 +33,7 @@ public:
     bool checkmate_for(Color, std::list<pos> = {}, pos = {});
     bool stalemate_for(Color, std::list<pos> = {}, pos = {});
     bool check_for_when(Color, std::list<pos> = {}, pos = {}, std::list<Figure> = {}, std::list<Figure> = {});
-    MoveMessage move_check(std::list<Figure>::iterator, Input, LastMove);
+    MoveMessage move_check(std::list<Figure>::iterator, Input);
     std::tuple<bool, MoveMessage, std::list<Figure>::iterator, std::list<Figure>::iterator> castling_check(MoveMessage, std::list<Figure>::iterator, Input, int, int);
     void reset_castling();
     std::list<Figure>::iterator get_default_fig() { return figures.begin(); }

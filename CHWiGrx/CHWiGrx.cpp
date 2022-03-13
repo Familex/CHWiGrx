@@ -1,4 +1,6 @@
-﻿// CHWiGrx.cpp : Определяет точку входа для приложения.
+﻿// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
+// CHWiGrx.cpp : Определяет точку входа для приложения.
 //
 // #define DEBUG
 
@@ -496,7 +498,7 @@ void make_move(HWND hWnd) {
     }
 
     try {
-        ms = board.move_check(in_hand, input, board.get_last_move());
+        ms = board.move_check(in_hand, input);
     }
     catch (std::invalid_argument) {
         clear_current_globals();
@@ -524,6 +526,8 @@ void make_move(HWND hWnd) {
             goto continue_flag;
         }
         break;
+    case MainEvent::E:
+        MessageBox(hWnd, L"MainEvent::E", L"Error", NULL);
     }
 
     InvalidateRect(hWnd, NULL, NULL);
@@ -550,7 +554,10 @@ void make_move(HWND hWnd) {
         case SideEvent::CHECK:
             MessageBox(hWnd, L"Check", L"Check", NULL);
             break;
+        case SideEvent::E:
+            MessageBox(hWnd, L"SideEvent::E", L"Error", NULL);
         }
+
     }
 
     turn.to_next();
