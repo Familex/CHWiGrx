@@ -28,8 +28,8 @@ public:
     bool capture_figure(std::list<Figure>::iterator);
     std::list<Figure>::iterator find_king(Color);
     std::vector<Figure> get_figures_of(Color);
-    std::list<std::pair<bool, pos>> expand_broom(Figure, const std::vector<pos>& = {}, const std::vector<pos>& = {}, const std::vector<pos>& = {});
-    std::list<std::pair<bool, pos>> get_all_possible_moves(Figure, const std::vector<pos>& = {}, const std::vector<pos>& = {}, const std::vector<pos>& = {});
+    std::vector<std::pair<bool, pos>> expand_broom(const Figure&, const std::vector<pos>& = {}, const std::vector<pos>& = {}, const std::vector<pos>& = {});
+    std::vector<std::pair<bool, pos>> get_all_possible_moves(const Figure&, const std::vector<pos>& = {}, const std::vector<pos>& = {}, const std::vector<pos>& = {});
     bool checkmate_for(Color, const std::vector<pos>& = {}, pos = {});
     bool stalemate_for(Color, const std::vector<pos>& = {}, pos = {});
     bool check_for_when(Color, const std::vector<pos>& = {}, pos = {}, const std::vector<Figure>& = {}, const std::vector<Figure>& = {});
@@ -46,7 +46,7 @@ public:
     LastMove get_last_move() { return lm; }
     void set_last_move(const LastMove& lm) { this->lm = lm; }
     void append_figures(const std::string&);
-    void init_figures_moves(bool);
+    void init_figures_moves();
     bool game_end(Color);
     size_t cnt_of_figures() const { return figures.size() - 1; }
     bool insufficient_material();

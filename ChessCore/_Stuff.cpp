@@ -84,7 +84,7 @@ bool operator<  (const pos& left, const pos& right) {
     }
 }
 
-std::vector<pos> to_pos_vector(std::vector<Figure> lst) {
+std::vector<pos> to_pos_vector(const std::vector<Figure>& lst) {
     std::vector<pos> acc{};
     for (const auto& fig : lst) {
         acc.push_back(fig.position);
@@ -95,7 +95,8 @@ std::vector<pos> to_pos_vector(std::vector<Figure> lst) {
 Input::Input(std::string str) {
     /* "from.first from.second target.first target.second" */
     str += " ";
-    std::string delimiter = " ";
+    char delimiter = ' ';
+    size_t delimiter_len = 1;
     size_t pos = 0;
     std::string token;
     std::vector<int> acc{};
@@ -103,7 +104,7 @@ Input::Input(std::string str) {
         if ((pos = str.find(delimiter)) != std::string::npos) {
             token = str.substr(0, pos);
             acc.push_back(std::stoi(token));
-            str.erase(0, pos + delimiter.length());
+            str.erase(0, pos + delimiter_len);
         }
         else { throw std::invalid_argument("unexpected end of line"); }
     }

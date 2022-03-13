@@ -21,6 +21,7 @@ std::vector<T> operator +(std::vector<T> l, std::vector<T> r) {
     return l;
 }
 
+constexpr int EN_PASSANT_INDENT = 4;
 enum class EFigureType { Pawn, Knight, Rook, Bishop, Queen, King, None };
 enum class EColor { Black, White, None };
 inline const std::string ALL_FIGURES{ "PHRBQK" };
@@ -100,7 +101,7 @@ struct Figure {
     FigureType type;
 };
 
-std::vector<pos> to_pos_vector(std::vector<Figure>);
+std::vector<pos> to_pos_vector(const std::vector<Figure>&);
 
 struct Input {
     pos from;

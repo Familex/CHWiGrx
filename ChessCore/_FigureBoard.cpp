@@ -7,7 +7,7 @@ FigureBoard::FigureBoard(bool idw, std::string map) {
     reset(idw, map);
 }
 
-void FigureBoard::init_figures_moves(bool idw) {
+void FigureBoard::init_figures_moves() {
     std::vector<pos>temp_left_up;
     std::vector<pos>temp_left_down;
     std::vector<pos>temp_right_up;
@@ -64,7 +64,7 @@ void FigureBoard::reset(bool idw, std::string map) {
             ? "bRbHbBbQbKbBbHbR8bP32E8wPwRwHwBwQwKwBwHwR"
             : "wRwHwBwQwKwBwHwR8wP32E8bPbRbHbBbQbKbBbHbR";
     }
-    init_figures_moves(idw);
+    init_figures_moves();
     append_figures(map);
     reset_castling();
 }
@@ -181,8 +181,8 @@ std::list<Figure>::iterator FigureBoard::find_king(Color col) {
 }
 
 // Вроде, нормально работает... не нормально...
-std::list<std::pair<bool, pos>> FigureBoard::expand_broom(Figure in_hand, const std::vector<pos>& to_ignore, const std::vector<pos>& ours, const std::vector<pos>& enemies) {
-    std::list<std::pair<bool, pos>> possible_moves{}; // list { pair{ is_eat, targ }, ... }
+std::vector<std::pair<bool, pos>> FigureBoard::expand_broom(const Figure& in_hand, const std::vector<pos>& to_ignore, const std::vector<pos>& ours, const std::vector<pos>& enemies) {
+    std::vector<std::pair<bool, pos>> possible_moves{}; // list { pair{ is_eat, targ }, ... }
     auto in_hand_pos = in_hand.position;
     for (auto& eat_beams : eats[in_hand.type.get_data()]) {
         for (auto eat : eat_beams) {
@@ -222,8 +222,8 @@ std::list<std::pair<bool, pos>> FigureBoard::expand_broom(Figure in_hand, const 
     return possible_moves;
 }
 
-std::list<std::pair<bool, pos>> FigureBoard::get_all_possible_moves(Figure in_hand, const std::vector<pos>& to_ignore, const std::vector<pos>& ours, const std::vector<pos>&enemies) {
-    std::list<std::pair<bool, pos>> all_possible_moves{ expand_broom(in_hand, to_ignore, ours, enemies) };
+std::vector<std::pair<bool, pos>> FigureBoard::get_all_possible_moves(const Figure& in_hand, const std::vector<pos>& to_ignore, const std::vector<pos>& ours, const std::vector<pos>&enemies) {
+    std::vector<std::pair<bool, pos>> all_possible_moves{ expand_broom(in_hand, to_ignore, ours, enemies) };
     pos in_hand_pos = in_hand.position;
     std::list<Figure>::iterator in_hand_it{ get_fig(in_hand_pos) };
     if (in_hand.type == EFigureType::Pawn) {
@@ -256,12 +256,12 @@ std::list<std::pair<bool, pos>> FigureBoard::get_all_possible_moves(Figure in_ha
                 if (in_hand_pos.x == 3 && idw && cont_fig(in_hand_pos + pos(0, shift_y)) && is_empty(in_hand_pos + pos(-1, shift_y))) {
                     all_possible_moves.push_back({ true, in_hand_pos + pos(-1, shift_y) });
                 }
-                if (in_hand_pos.x == (HEIGHT - 4) && not idw && cont_fig(in_hand_pos + pos(0, shift_y)) && is_empty(in_hand_pos + pos(1, shift_y))) {
+                if (in_hand_pos.x == (HEIGHT - EN_PASSANT_INDENT) && not idw && cont_fig(in_hand_pos + pos(0, shift_y)) && is_empty(in_hand_pos + pos(1, shift_y))) {
                     all_possible_moves.push_back({ true, in_hand_pos + pos(1, shift_y) });
                 }
             }
             if (in_hand.color == EColor::Black) {
-                if (in_hand_pos.x == (HEIGHT - 4) && idw && cont_fig(in_hand_pos + pos(0, shift_y)) && is_empty(in_hand_pos + pos(1, shift_y))) {
+                if (in_hand_pos.x == (HEIGHT - EN_PASSANT_INDENT) && idw && cont_fig(in_hand_pos + pos(0, shift_y)) && is_empty(in_hand_pos + pos(1, shift_y))) {
                     all_possible_moves.push_back({ true, in_hand_pos + pos(1, shift_y) });
                 }
                 if (in_hand_pos.x == 3 && not idw && cont_fig(in_hand_pos + pos(0, shift_y)) && is_empty(in_hand_pos + pos(-1, shift_y))) {
@@ -558,10 +558,10 @@ MoveMessage FigureBoard::move_check(std::list<Figure>::iterator in_hand, Input i
             (
                 in_hand->color == EColor::White && (
                     input.from.x == 3 && idw && shift.x == -1 && cont_fig(input.from + pos(0, shift.y)) ||
-                    input.from.x == (HEIGHT - 4) && not idw && shift.x == 1 && cont_fig(input.from + pos(0, shift.y))
+                    input.from.x == (HEIGHT - EN_PASSANT_INDENT) && not idw && shift.x == 1 && cont_fig(input.from + pos(0, shift.y))
                     ) ||
                 in_hand->color == EColor::Black && (
-                    input.from.x == (HEIGHT - 4) && idw && shift.x == 1 && cont_fig(input.from + pos(0, shift.y)) ||
+                    input.from.x == (HEIGHT - EN_PASSANT_INDENT) && idw && shift.x == 1 && cont_fig(input.from + pos(0, shift.y)) ||
                     input.from.x == 3 && not idw && shift.x == -1 && cont_fig(input.from + pos(0, shift.y))
                     )
                 )) {
