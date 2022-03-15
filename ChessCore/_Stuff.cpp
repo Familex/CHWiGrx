@@ -113,3 +113,34 @@ Input::Input(std::string str) {
     target.x = acc[2];
     target.y = acc[3];
 }
+
+MoveRec MoveLogger::get_last_move() {
+    if (prev_moves.empty())
+        return {};
+    return prev_moves.back();
+}
+
+void MoveLogger::add(const MoveRec& move_rec) {
+    prev_moves.push_back(move_rec);
+    future_moves.clear();
+}
+
+void MoveLogger::reset() {
+    prev_moves.clear();
+    future_moves.clear();
+}
+
+MoveRec MoveLogger::pop_future_move() {
+    if (future_moves.empty()) return {};
+    auto future = future_moves.back();
+    future_moves.pop_back();
+    return future;
+}
+
+MoveRec MoveLogger::move_last_to_future() {
+    if (prev_moves.empty()) return {};
+    auto last = get_last_move();
+    prev_moves.pop_back();
+    future_moves.push_back(last);
+    return last;
+}

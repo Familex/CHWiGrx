@@ -54,7 +54,6 @@ const HBRUSH GREEN              { CreateSolidBrush(RGB(0,   255, 0  )) };
 const HBRUSH DARK_GREEN         { CreateSolidBrush(RGB(0,   150, 0  )) };
 const int INDENTATION_FROM_EDGES{ 1 };
 FigureBoard board{};
-MoveMessage ms{};
 char chose{ 'Q' };
 Color turn{ EColor::White };
 POINT cursor{};
@@ -153,7 +152,7 @@ ATOM MyRegisterClass(HINSTANCE hInstance)
     wcex.cbWndExtra     = 0;
     wcex.hInstance      = hInstance;
     wcex.hIcon          = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_CHWIGRX));
-    wcex.hCursor        = LoadCursor(nullptr, IDC_ARROW);
+    wcex.hCursor        = LoadCursor(hInstance, MAKEINTRESOURCE(IDC_MINIMAL_CURSOR));
     wcex.hbrBackground  = (HBRUSH)(COLOR_WINDOW+1);
     wcex.lpszMenuName   = MAKEINTRESOURCEW(IDC_CHWIGRX);
     wcex.lpszClassName  = szWindowClass;
@@ -210,9 +209,20 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             // Разобрать выбор в меню:
             switch (wmId)
             {
+            case IDM_UNDO:
+                if (board.undo_move()) {
+                    clear_current_globals();
+                    turn.to_next();
+                }
+                break;
+            case IDM_RESTORE_MOVE:
+                if (board.restore_move()) {
+                    clear_current_globals();
+                    turn.to_next();
+                }
+                break;
             case IDM_RESTART:
                 restart();
-                InvalidateRect(hWnd, NULL, NULL);
                 break;
             case IDM_ABOUT:
                 DialogBox(hInst, MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, About);
@@ -224,6 +234,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 return DefWindowProc(hWnd, message, wParam, lParam);
             }
         }
+        InvalidateRect(hWnd, NULL, NULL);
         break;
     case WM_KEYDOWN:
         {
@@ -500,80 +511,25 @@ void make_move(HWND hWnd) {
         return;
     }
 
-    try {
-        ms = board.move_check(in_hand, input);
-    }
-    catch (std::invalid_argument&) {
+    auto [is_legal_move, move_rec] = board.provide_move(in_hand, input, turn, [c = chose] { return c; });
+
+    if (!is_legal_move) {
         clear_current_globals();
         InvalidateRect(hWnd, NULL, NULL);
         return;
     }
 
-    switch (ms.main_ev)
-    {
-    case MainEvent::MOVE: case MainEvent::LMOVE:
-        in_hand->move_to(input.target);
-        break;
-    case MainEvent::EN_PASSANT: case MainEvent::EAT:
-        in_hand->move_to(input.target);
-        for (const auto& it : ms.to_eat) board.capture_figure(it);
-        break;
-    case MainEvent::CASTLING:
-        if (board.has_castling(turn, ms.to_move.back().first->id)) {
-            in_hand->move_to(input.target);
-            for (auto& [who, whereinto] : ms.to_move) {
-                who->move_to(whereinto);
-            }
-        }
-        else {
-            goto continue_flag;
-        }
-        break;
-    case MainEvent::E:
-        MessageBox(hWnd, L"MainEvent::E", L"Error", NULL);
-    }
-
+    board.set_last_move({ *in_hand, input, turn, move_rec.ms, move_rec.promotion_choice });
+    turn.to_next();
+    clear_current_globals();
     InvalidateRect(hWnd, NULL, NULL);
 
-    for (const auto& s_ev : ms.side_evs) {
-        switch (s_ev)
-        {
-        case SideEvent::CASTLING_BREAK:
-            if (not ms.what_castling_breaks.empty() &&
-                board.has_castling(turn, ms.what_castling_breaks.back())
-                ) {
-                for (const Id& id : ms.what_castling_breaks) {
-                    board.off_castling(turn, id);
-                }
-            }
-            break;
-        case SideEvent::PROMOTION:
-            chose = 'Q';
-            do {
-                // TODO
-            } while (std::string("QRHB").find(chose) == std::string::npos);
-            in_hand->type = { chose };
-            break;
-        case SideEvent::CHECK:
-            MessageBox(hWnd, L"Check", L"Check", NULL);
-            break;
-        case SideEvent::E:
-            MessageBox(hWnd, L"SideEvent::E", L"Error", NULL);
-        }
-
-    }
-
-    turn.to_next();
-    board.set_last_move({ ms, in_hand });
-    clear_current_globals();
     if (board.game_end(turn)) {
         TCHAR tmp2[] = { turn.what_next(), ' ', 'w', 'i', 'n', 's', '!', '\0'};
         MessageBox(hWnd, tmp2, L"GAME END", NULL);
         restart();
         InvalidateRect(hWnd, NULL, NULL);
     }
-continue_flag:
-    InvalidateRect(hWnd, NULL, NULL);
 }
 
 void init_globals(pos from, Color turn) {
@@ -605,6 +561,5 @@ void restart() {
     reset_input_order();
     input = { {-1, -1}, {-1, -1} };
     turn = EColor::White;
-    ms = {};
     input_order_by_one = 0;
 }

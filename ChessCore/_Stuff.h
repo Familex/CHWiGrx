@@ -3,11 +3,13 @@
 #include <list>
 #include <regex>
 #include <tuple>
+#include <format>
 #include <vector>
 #include <utility>
 #include <algorithm>
 #include <stdexcept>
 #include <Windows.h>
+#include <functional>
 
 template <class T>
 std::vector<T> operator +(std::vector<T> lst, T val) {
@@ -109,4 +111,38 @@ struct Input {
     Input(std::string);
     Input() : from({ -1, -1 }), target({ -1, -1 }) {};
     Input(pos from, pos target) : from(from), target(target) {};
+};
+
+enum class MainEvent { E, EAT, MOVE, LMOVE, CASTLING, EN_PASSANT };
+enum class SideEvent { E, CHECK, PROMOTION, CASTLING_BREAK };
+
+struct MoveMessage {
+    MainEvent main_ev{ MainEvent::E };
+    std::list<SideEvent> side_evs;
+    std::vector<Figure> to_eat;
+    std::list<std::pair<Figure, Input>> to_move;
+    std::list<Id> what_castling_breaks;
+};
+
+struct MoveRec {
+    Figure who_went;
+    Input input;
+    Color turn;
+    MoveMessage ms;
+    char promotion_choice;
+};
+
+class MoveLogger {
+public:
+    MoveRec get_last_move();
+    void add(const MoveRec& move_rec);
+    void add_without_reset(const MoveRec& move_rec) { prev_moves.push_back(move_rec); }
+    void reset();
+    MoveRec pop_future_move();
+    MoveRec move_last_to_future();
+    bool prev_empty() const { return prev_moves.empty(); }
+    bool future_empty() const { return future_moves.empty(); }
+private:
+    std::vector<MoveRec> prev_moves;
+    std::vector<MoveRec> future_moves;
 };

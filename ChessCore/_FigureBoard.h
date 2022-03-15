@@ -1,31 +1,18 @@
 #pragma once
 #include "_Stuff.h"
 
-enum class MainEvent { E, EAT, MOVE, LMOVE, CASTLING, EN_PASSANT };
-enum class SideEvent { E, CHECK, PROMOTION, CASTLING_BREAK };
-
-struct MoveMessage {
-    MainEvent main_ev{ MainEvent::E };
-    std::list<SideEvent> side_evs;
-    std::vector<std::list<Figure>::iterator> to_eat;
-    std::list<std::pair<std::list<Figure>::iterator, pos>> to_move;
-    std::list<Id> what_castling_breaks;
-};
-
-struct LastMove {
-    MoveMessage ms;
-    std::list<Figure>::iterator who_went;
-};
-
 class FigureBoard {
 public:
     FigureBoard(bool = true, std::string = "");
     void reset(bool = true, std::string = "");
     std::list<Figure>::iterator get_fig(pos);
+    std::list<Figure>::iterator get_fig(Id);
     bool cont_fig(pos);
     bool is_empty(pos);
     bool is_empty() { return figures.size() <= 1; }
     bool capture_figure(std::list<Figure>::iterator);
+    bool capture_figure(const Figure&);
+    void uncapture_figure(const Figure&);
     std::list<Figure>::iterator find_king(Color);
     std::vector<Figure> get_figures_of(Color);
     std::vector<std::pair<bool, pos>> expand_broom(const Figure&, const std::vector<pos>& = {}, const std::vector<pos>& = {}, const std::vector<pos>& = {});
@@ -43,9 +30,15 @@ public:
     }
     bool has_castling(Color col, Id id) { return castling[col][id]; }
     void off_castling(Color col, Id id) { castling[col][id] = false; }
-    LastMove get_last_move() { return lm; }
-    void set_last_move(const LastMove& lm) { this->lm = lm; }
+    void on_castling(Color col, Id id)  { castling[col][id] = true; }
+    MoveRec get_last_move() { return move_logger.get_last_move(); }
+    void set_last_move(const MoveRec& move_rec) { this->move_logger.add(move_rec); }
+    template <typename Func> std::pair<bool, MoveRec> provide_move(std::list<Figure>::iterator, const Input&, Color turn, const Func&);
+    bool provide_move(const MoveRec&);
+    bool undo_move();
+    bool restore_move();
     void append_figures(const std::string&);
+    void place_figure(const Figure& fig) { figures.push_back(fig); }
     void init_figures_moves();
     bool game_end(Color);
     size_t cnt_of_figures() const { return figures.size() - 1; }
@@ -53,7 +46,7 @@ public:
 private:
     bool idw;
     Id curr_id{};
-    LastMove lm{};
+    MoveLogger move_logger{};
     std::list<Figure> figures;
     std::list<Figure> captured_figures;
     std::map<Color, std::map<Id, bool>> castling;
@@ -62,3 +55,23 @@ private:
     const HANDLE console{ GetStdHandle(STD_OUTPUT_HANDLE) };
     const int MAX_FIGURES_AMOUNT{ HEIGHT * WIDTH };
 };
+
+template <typename Func>
+std::pair<bool, MoveRec> FigureBoard::provide_move(std::list<Figure>::iterator in_hand, const Input& input, Color turn, const Func& get_choise) {
+    char choice = get_choise();
+    MoveMessage ms{};
+    try {
+        ms = move_check(in_hand, input);
+    }
+    catch (std::invalid_argument&) {
+        return { false, {} };
+    }
+
+    MoveRec curr_move{ *in_hand, input, turn, ms, choice };
+
+    if (!provide_move(curr_move)) {
+        return { false, {} };
+    }
+
+    return { true, curr_move };
+}

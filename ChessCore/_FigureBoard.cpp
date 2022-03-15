@@ -54,7 +54,7 @@ void FigureBoard::init_figures_moves() {
 
 void FigureBoard::reset(bool idw, std::string map) {
     this->idw = idw;
-    lm = {};
+    move_logger.reset();
     curr_id = 0;
     figures.clear();
     figures.push_back({}); // Заглушка
@@ -136,6 +136,15 @@ std::list<Figure>::iterator FigureBoard::get_fig(pos position) {
     // throw std::invalid_argument("pos: " + std::to_string(position.x) + " " + std::to_string(position.y));
 }
 
+std::list<Figure>::iterator FigureBoard::get_fig(Id id) {
+    for (auto it{ ++figures.begin() }; it != figures.end(); ++it) {
+        if (it->id == id) {
+            return it;
+        }
+    }
+    return figures.begin();
+}
+
 bool FigureBoard::cont_fig(pos position) {
     return get_fig(position)->id != ERR_ID;
 }
@@ -145,12 +154,21 @@ bool FigureBoard::is_empty(pos position) {
 }
 
 bool FigureBoard::capture_figure(std::list<Figure>::iterator it) {
-    if (it->id == ERR_ID) { return false; }
-captured_figures.push_back(*it);
-figures.erase(it);
-return true;
+    if (it->id == ERR_ID) {
+        return false;
+    }
+    captured_figures.push_back(*it);
+    figures.erase(it);
+    return true;
 }
 
+bool FigureBoard::capture_figure(const Figure& fig) {
+    if (fig.id == ERR_ID) { return false; }
+    std::list<Figure>::iterator it = get_fig(fig.id);
+    captured_figures.push_back(*it);
+    figures.erase(it);
+    return true;
+}
 
 bool is_valid_coords(pos position) {
     int x{ position.x }, y{ position.y };
@@ -250,8 +268,9 @@ std::vector<std::pair<bool, pos>> FigureBoard::get_all_possible_moves(const Figu
         }
 
         // Взятие на проходе
-        if (lm.ms.main_ev == MainEvent::LMOVE && std::abs(lm.who_went->position.y - in_hand_pos.y) == 1) {
-            int shift_y = lm.who_went->position.y - in_hand_pos.y;
+        const MoveRec& last_move = move_logger.get_last_move();
+        if (last_move.ms.main_ev == MainEvent::LMOVE && std::abs(last_move.who_went.position.y - in_hand_pos.y) == 1) {
+            int shift_y = last_move.who_went.position.y - in_hand_pos.y;
             if (in_hand.color == EColor::White) {
                 if (in_hand_pos.x == 3 && idw && cont_fig(in_hand_pos + pos(0, shift_y)) && is_empty(in_hand_pos + pos(-1, shift_y))) {
                     all_possible_moves.push_back({ true, in_hand_pos + pos(-1, shift_y) });
@@ -401,25 +420,26 @@ std::tuple<bool, MoveMessage, std::list<Figure>::iterator, std::list<Figure>::it
         }
         if (rook->id == ERR_ID) return { false, move_message, get_default_fig(), get_default_fig()};
         if (king_pos.x != input.target.x && rook->position.x != input.target.x) return { false, move_message, get_default_fig(), get_default_fig() };
-
+        
+        pos rook_pos = rook->position;
         pos target{ king_pos.x, king_end_col };
         for (int step = king_pos < target ? 1 : -1; king_pos != target; king_pos.y += step) {
-            castling_can_be_done &= not check_for_when(in_hand->color, { king_pos, rook->position }, king_pos);
+            castling_can_be_done &= not check_for_when(in_hand->color, { king_pos, rook_pos }, king_pos);
         }
-        for (int step = king_pos < rook->position ? 1 : -1; king_pos != rook->position; king_pos.y += step) {
+        for (int step = king_pos < rook_pos ? 1 : -1; king_pos != rook_pos; king_pos.y += step) {
             must_be_empty = get_fig(king_pos)->id;
             castling_can_be_done &= must_be_empty == ERR_ID || must_be_empty == king->id || must_be_empty == rook->id;
         }
-        castling_can_be_done &= not check_for_when(in_hand->color, { king_pos, rook->position }, { king_pos.x, king_end_col });
+        castling_can_be_done &= not check_for_when(in_hand->color, { king_pos, rook_pos }, { king_pos.x, king_end_col });
         must_be_empty = get_fig({ king_pos.x, rook_end_col })->id;
         castling_can_be_done &= must_be_empty == ERR_ID || must_be_empty == king->id || must_be_empty == rook->id;
         if (castling_can_be_done) {
             move_message.main_ev = MainEvent::CASTLING;
             if (in_hand->type == EFigureType::King) {
-                move_message.to_move.push_back({ rook, {king_pos.x, rook_end_col} });
+                move_message.to_move.push_back({ *rook, {rook_pos, {rook_pos.x, rook_end_col}} });
             }
             else {
-                move_message.to_move.push_back({ king, {king_pos.x, king_end_col} });
+                move_message.to_move.push_back({ *king, {king_pos, {king_pos.x, king_end_col}} });
             }
             return { true, move_message, king, rook };
         }
@@ -553,8 +573,9 @@ MoveMessage FigureBoard::move_check(std::list<Figure>::iterator in_hand, Input i
 
         // Взятие на проходе (смотрю чужие фигуры на 4 линии)
         // А ещё проверяю прошлый ход
+        const MoveRec& last_move = move_logger.get_last_move();
         if (std::abs(shift.y) == 1 && is_empty(input.target) &&
-            lm.ms.main_ev == MainEvent::LMOVE && lm.who_went->position.y == input.target.y &&
+           last_move.ms.main_ev == MainEvent::LMOVE && last_move.who_went.position.y == input.target.y &&
             (
                 in_hand->color == EColor::White && (
                     input.from.x == 3 && idw && shift.x == -1 && cont_fig(input.from + pos(0, shift.y)) ||
@@ -581,8 +602,8 @@ MoveMessage FigureBoard::move_check(std::list<Figure>::iterator in_hand, Input i
                 }
             }
             move_message.main_ev = MainEvent::EN_PASSANT;
-            move_message.to_eat.push_back(get_fig({ input.from.x, input.target.y }));
-            move_message.to_eat.push_back(targ);
+            move_message.to_eat.push_back(*get_fig({ input.from.x, input.target.y }));
+            move_message.to_eat.push_back(*targ);
             return move_message;
         }
     }
@@ -608,7 +629,7 @@ MoveMessage FigureBoard::move_check(std::list<Figure>::iterator in_hand, Input i
                     }
                 }
                 move_message.main_ev = MainEvent::EAT;
-                move_message.to_eat.push_back(targ);
+                move_message.to_eat.push_back(*targ);
                 return move_message;
             }
         }
@@ -633,4 +654,134 @@ MoveMessage FigureBoard::move_check(std::list<Figure>::iterator in_hand, Input i
         }
     }
     throw std::invalid_argument("Unforeseen move");
+}
+
+bool FigureBoard::undo_move() {
+    if (move_logger.prev_empty()) return false;
+    auto last = move_logger.move_last_to_future();
+    Figure in_hand_fig = last.who_went;
+    auto in_hand = get_fig(in_hand_fig.id);
+    char chose = last.promotion_choice;
+    auto turn = last.turn;
+    auto input = last.input;
+    MoveMessage ms = last.ms;
+    switch (ms.main_ev)
+    {
+    case MainEvent::MOVE: case MainEvent::LMOVE:
+        in_hand->move_to(input.from);
+        break;
+    case MainEvent::EN_PASSANT: case MainEvent::EAT:
+        in_hand->move_to(input.from);
+        for (const auto& it : ms.to_eat) {
+            uncapture_figure(it);
+        }
+        break;
+    case MainEvent::CASTLING:
+        in_hand->move_to(input.from);
+        for (const auto& [who, frominto] : ms.to_move) {
+            auto who_it = get_fig(who.id);
+            who_it->move_to(frominto.from);
+        }
+        break;
+    case MainEvent::E:
+        throw std::invalid_argument("MainEvent::E");
+    }
+    for (const auto& s_ev : ms.side_evs) {
+        switch (s_ev)
+        {
+        case SideEvent::CASTLING_BREAK:
+            if (not ms.what_castling_breaks.empty() &&
+                !has_castling(turn, ms.what_castling_breaks.back())
+                ) {
+                for (const Id& id : ms.what_castling_breaks) {
+                    on_castling(turn, id);
+                }
+            }
+            break;
+        case SideEvent::PROMOTION:
+            in_hand->type = EFigureType::Pawn;
+            break;
+        case SideEvent::CHECK:
+            break;
+        case SideEvent::E:
+            throw std::invalid_argument("SideEvent::E");
+        }
+    }
+    return true;
+}
+
+bool FigureBoard::provide_move(const MoveRec& move_rec) {
+    auto choice = move_rec.promotion_choice;
+    auto in_hand_fig = move_rec.who_went;
+    auto in_hand = get_fig(in_hand_fig.id);
+    auto ms = move_rec.ms;
+    auto turn = move_rec.turn;
+    auto input = move_rec.input;
+    switch (ms.main_ev)
+    {
+    case MainEvent::MOVE: case MainEvent::LMOVE:
+        in_hand->move_to(input.target);
+        break;
+    case MainEvent::EN_PASSANT: case MainEvent::EAT:
+        in_hand->move_to(input.target);
+        for (const auto& it : ms.to_eat) capture_figure(it);
+        break;
+    case MainEvent::CASTLING:
+        if (has_castling(turn, ms.to_move.back().first.id)) {
+            in_hand->move_to(input.target);
+            for (const auto& [who, frominto] : ms.to_move) {
+                auto who_it = get_fig(who.id);
+                who_it->move_to(frominto.target);
+            }
+        }
+        else {
+            return false;
+        }
+        break;
+    case MainEvent::E:
+        throw std::invalid_argument("MainEvent::E");
+    }
+    for (const auto& s_ev : ms.side_evs) {
+        switch (s_ev)
+        {
+        case SideEvent::CASTLING_BREAK:
+            if (not ms.what_castling_breaks.empty() &&
+                has_castling(turn, ms.what_castling_breaks.back())
+                ) {
+                for (const Id& id : ms.what_castling_breaks) {
+                    off_castling(turn, id);
+                }
+            }
+            break;
+        case SideEvent::PROMOTION:
+            in_hand->type = choice;
+            break;
+        case SideEvent::CHECK:
+            break;
+        case SideEvent::E:
+            throw std::invalid_argument("SideEvent::E");
+        }
+    }
+
+    return true;
+}
+
+bool FigureBoard::restore_move() {
+    if (move_logger.future_empty()) return false;
+    auto future = move_logger.pop_future_move();
+    provide_move(future);
+    move_logger.add_without_reset(future);
+    return true;
+}
+
+void FigureBoard::uncapture_figure(const Figure& fig) {
+    if (fig.id == ERR_ID) return;
+    std::list<Figure>::iterator to_resurrect = std::find_if(
+        captured_figures.begin(), captured_figures.end(),
+        [&fig] (auto&& val) { return fig.id == val.id; }
+    );
+    if (to_resurrect == captured_figures.end())
+        throw std::invalid_argument(std::format("Fig with id->{} can't be resurrected", fig.id));
+    place_figure(*to_resurrect);
+    captured_figures.erase(to_resurrect);
 }
