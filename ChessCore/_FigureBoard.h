@@ -11,8 +11,8 @@ public:
     bool is_empty(pos);
     bool is_empty() { return figures.size() <= 1; }
     bool capture_figure(std::list<Figure>::iterator);
-    bool capture_figure(const Figure&);
-    void uncapture_figure(const Figure&);
+    bool capture_figure(const Id&);
+    void uncapture_figure(const Id&);
     std::list<Figure>::iterator find_king(Color);
     std::vector<Figure> get_figures_of(Color);
     std::vector<std::pair<bool, pos>> expand_broom(const Figure&, const std::vector<pos>& = {}, const std::vector<pos>& = {}, const std::vector<pos>& = {});
@@ -43,7 +43,7 @@ public:
     bool game_end(Color);
     size_t cnt_of_figures() const { return figures.size() - 1; }
     bool insufficient_material();
-    BoardRepr get_repr();
+    BoardRepr get_repr(bool);
 private:
     bool idw{true};
     Id curr_id{};

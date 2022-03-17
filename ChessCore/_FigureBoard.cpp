@@ -85,6 +85,8 @@ void FigureBoard::apply_map(const BoardRepr& board_repr) {
     const size_t npos = std::string::npos;
     
     idw = board_repr.get_idw();
+    move_logger.set_past(board_repr.get_past());
+    move_logger.set_future(board_repr.get_future());
     const std::string map = board_repr.get_figures();
 
     std::regex board_split("(\\d*)([bBwW]?)(\\w)");
@@ -124,8 +126,10 @@ void FigureBoard::apply_map(const BoardRepr& board_repr) {
 }
 
 // Вроде, работает, хоть и написано не очень
-BoardRepr FigureBoard::get_repr() {
+BoardRepr FigureBoard::get_repr(bool save_all_moves) {
     std::string map = "";
+    std::vector<MoveRec> past{};
+    std::vector<MoveRec> future{};
     int num{ -1 };
     char prev_type{ 'N' };
     char prev_color{ 'N' };
@@ -163,7 +167,25 @@ BoardRepr FigureBoard::get_repr() {
         map += std::format("{}", prev_color);
     if (prev_type != 'N')
         map += std::format("{}", prev_type);
-    return { map + (idw ? "[t]" : "[f]") };
+    map += (idw ? "[t]" : "[f]");
+
+    if (save_all_moves) {
+        past = move_logger.get_past();
+        future = move_logger.get_future();
+    }
+    else {
+        past = { move_logger.get_last_move() };
+    }
+    map += "<";
+    for (MoveRec& mr : past)
+        map += std::format("{}, ", mr.as_string());
+    map += ">";
+    
+    map += "<";
+    for (MoveRec& mr : future)
+        map += std::format("{}, ", mr.as_string());
+    map += ">";
+    return map;
 }
 
 void FigureBoard::reset_castling() {
@@ -213,9 +235,9 @@ bool FigureBoard::capture_figure(std::list<Figure>::iterator it) {
     return true;
 }
 
-bool FigureBoard::capture_figure(const Figure& fig) {
-    if (fig.id == ERR_ID) { return false; }
-    std::list<Figure>::iterator it = get_fig(fig.id);
+bool FigureBoard::capture_figure(const Id& id) {
+    if (id == ERR_ID) { return false; }
+    std::list<Figure>::iterator it = get_fig(id);
     captured_figures.push_back(*it);
     figures.erase(it);
     return true;
@@ -487,10 +509,10 @@ std::tuple<bool, MoveMessage, std::list<Figure>::iterator, std::list<Figure>::it
         if (castling_can_be_done) {
             move_message.main_ev = MainEvent::CASTLING;
             if (in_hand->type == EFigureType::King) {
-                move_message.to_move.push_back({ *rook, {rook_pos, {rook_pos.x, rook_end_col}} });
+                move_message.to_move.push_back({ rook->id, {rook_pos, {rook_pos.x, rook_end_col}} });
             }
             else {
-                move_message.to_move.push_back({ *king, {king_pos, {king_pos.x, king_end_col}} });
+                move_message.to_move.push_back({ king->id, {king_pos, {king_pos.x, king_end_col}} });
             }
             return { true, move_message, king, rook };
         }
@@ -653,8 +675,8 @@ MoveMessage FigureBoard::move_check(std::list<Figure>::iterator in_hand, Input i
                 }
             }
             move_message.main_ev = MainEvent::EN_PASSANT;
-            move_message.to_eat.push_back(*get_fig({ input.from.x, input.target.y }));
-            move_message.to_eat.push_back(*targ);
+            move_message.to_eat.push_back(get_fig({ input.from.x, input.target.y })->id);
+            move_message.to_eat.push_back(targ->id);
             return move_message;
         }
     }
@@ -680,7 +702,7 @@ MoveMessage FigureBoard::move_check(std::list<Figure>::iterator in_hand, Input i
                     }
                 }
                 move_message.main_ev = MainEvent::EAT;
-                move_message.to_eat.push_back(*targ);
+                move_message.to_eat.push_back(targ->id);
                 return move_message;
             }
         }
@@ -730,7 +752,7 @@ bool FigureBoard::undo_move() {
     case MainEvent::CASTLING:
         in_hand->move_to(input.from);
         for (const auto& [who, frominto] : ms.to_move) {
-            auto who_it = get_fig(who.id);
+            auto who_it = get_fig(who);
             who_it->move_to(frominto.from);
         }
         break;
@@ -775,13 +797,13 @@ bool FigureBoard::provide_move(const MoveRec& move_rec) {
         break;
     case MainEvent::EN_PASSANT: case MainEvent::EAT:
         in_hand->move_to(input.target);
-        for (const auto& it : ms.to_eat) capture_figure(it);
+        for (const Id& it : ms.to_eat) capture_figure(it);
         break;
     case MainEvent::CASTLING:
-        if (has_castling(turn, ms.to_move.back().first.id)) {
+        if (has_castling(turn, ms.to_move.back().first)) {
             in_hand->move_to(input.target);
             for (const auto& [who, frominto] : ms.to_move) {
-                auto who_it = get_fig(who.id);
+                auto who_it = get_fig(who);
                 who_it->move_to(frominto.target);
             }
         }
@@ -825,14 +847,14 @@ bool FigureBoard::restore_move() {
     return true;
 }
 
-void FigureBoard::uncapture_figure(const Figure& fig) {
-    if (fig.id == ERR_ID) return;
+void FigureBoard::uncapture_figure(const Id& id) {
+    if (id == ERR_ID) return;
     std::list<Figure>::iterator to_resurrect = std::find_if(
         captured_figures.begin(), captured_figures.end(),
-        [&fig] (auto&& val) { return fig.id == val.id; }
+        [&id] (auto&& val) { return id == val.id; }
     );
     if (to_resurrect == captured_figures.end())
-        throw std::invalid_argument(std::format("Fig with id->{} can't be resurrected", fig.id));
+        throw std::invalid_argument(std::format("Fig with id->{} can't be resurrected", id));
     place_figure(*to_resurrect);
     captured_figures.erase(to_resurrect);
 }

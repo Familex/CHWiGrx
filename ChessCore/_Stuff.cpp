@@ -166,7 +166,56 @@ BoardRepr::BoardRepr(std::string board_repr) {
     else if (meta.find('b') != npos || meta.find('B') != npos) {
         turn = EColor::Black;
     }
-    if (meta_start > 2)
-        figures += board_repr.substr(0, meta_start);
-    figures += board_repr.substr(meta_end + 1);
+    board_repr.erase(board_repr.begin() + meta_start, board_repr.begin() + meta_end + 1);
+    size_t past_start = board_repr.find('<');
+    size_t past_end = board_repr.find('>');
+    // TODO
+    board_repr.erase(board_repr.begin() + past_start, board_repr.begin() + past_end + 1);
+    size_t future_start = board_repr.find('<');
+    size_t future_end = board_repr.find('>');
+    // TODO
+    board_repr.erase(board_repr.begin() + future_start, board_repr.begin() + future_end + 1);
+    figures = board_repr;
+    //TODO
+}
+
+std::string MoveRec::as_string() {
+    std::string result{ "" };
+    /*
+    who_went.id;
+    who_went.color;
+    who_went.position.x;
+    who_went.position.y;
+    who_went.color;
+    who_went.type;
+    
+    input.from.x;
+    input.from.y;
+    input.target.x;
+    input.target.y;
+
+    turn; // same as who_went.color;
+
+    ms.main_ev;
+    ms.side_evs; // list -> side_event
+    ms.to_eat; // vector -> figure(!)
+    ms.to_move; // list -> pair -> figure, input
+    ms.what_castling_breaks; // list -> id
+
+    promotion_choice;
+    */
+    return result;
+}
+
+std::string BoardRepr::as_string() {
+    std::string result{ "" };
+    result += std::format("{}[{}{}]<", figures, get_idw_char(), get_turn_char());
+    for (auto& mr : past) {
+        result += mr.as_string() + ", ";
+    }
+    result += "><";
+    for (auto& mr : future) {
+        result += mr.as_string() + ", ";
+    }
+    return result + ">";
 }

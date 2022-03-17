@@ -2,7 +2,7 @@
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 // CHWiGrx.cpp : Определяет точку входа для приложения.
 //
-//#define DEBUG
+// #define DEBUG
 
 #ifdef DEBUG
 #define _CRT_SECURE_NO_WARNINGS
@@ -53,9 +53,10 @@ const HBRUSH BLUE               { CreateSolidBrush(RGB(0,   0,   255)) };
 const HBRUSH GREEN              { CreateSolidBrush(RGB(0,   255, 0  )) };
 const HBRUSH DARK_GREEN         { CreateSolidBrush(RGB(0,   150, 0  )) };
 const int INDENTATION_FROM_EDGES{ 1 };
-const char* default_chess_board = "[TW]bRbHbBbQbKbBbHbR8bP32E8wPwRwHwBwQwKwBwHwR";
+const char* default_chess_board = "[TW]bRbHbBbQbKbBbHbR8bP32E8wPwRwHwBwQwKwBwHwR<><>";
 BoardRepr start_board_repr{ default_chess_board };
 FigureBoard board{ start_board_repr };
+bool save_all_moves = true;
 Color start_turn{ EColor::White };
 char chose{ 'Q' };
 Color turn{ EColor::White };
@@ -228,7 +229,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 break;
             case IDM_COPY_MAP:
                 {
-                    BoardRepr board_repr = board.get_repr();
+                    BoardRepr board_repr = board.get_repr(save_all_moves);
                     board_repr.set_turn(turn);
                     cpy_str_to_clip(board_repr.as_string());
                 }
@@ -241,6 +242,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                     clear_current_globals();
                 } while (0);
                 break;
+
             case IDM_PASTE_START_MAP:
                 start_board_repr = take_str_from_clip();
                 start_turn = start_board_repr.get_turn();
@@ -251,6 +253,25 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 break;
             case IDM_RESTART:
                 restart();
+                break;
+            case IDM_TOGGLE_SAVE_ALL_MOVES:
+                {
+                    HMENU hMenu = GetMenu(hWnd);
+                    MENUITEMINFO item_info;
+                    ZeroMemory(&item_info, sizeof(item_info));
+                    item_info.cbSize = sizeof(item_info);
+                    item_info.fMask = MIIM_STATE;
+                    if (!GetMenuItemInfo(hMenu, IDM_TOGGLE_SAVE_ALL_MOVES, FALSE, &item_info)) return 0;
+                    if (item_info.fState == MFS_CHECKED) {
+                        save_all_moves = false;
+                        item_info.fState = MFS_UNCHECKED;
+                    }
+                    else {
+                        save_all_moves = true;
+                        item_info.fState = MFS_CHECKED;
+                    }
+                    SetMenuItemInfoW(hMenu, IDM_TOGGLE_SAVE_ALL_MOVES, FALSE, &item_info);
+                } while (0);
                 break;
             case IDM_ABOUT:
                 DialogBox(hInst, MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, About);

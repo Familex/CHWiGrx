@@ -119,8 +119,8 @@ enum class SideEvent { E, CHECK, PROMOTION, CASTLING_BREAK };
 struct MoveMessage {
     MainEvent main_ev{ MainEvent::E };
     std::list<SideEvent> side_evs;
-    std::vector<Figure> to_eat;
-    std::list<std::pair<Figure, Input>> to_move;
+    std::vector<Id> to_eat;
+    std::list<std::pair<Id, Input>> to_move;
     std::list<Id> what_castling_breaks;
 };
 
@@ -130,6 +130,7 @@ struct MoveRec {
     Color turn;
     MoveMessage ms;
     char promotion_choice;
+    std::string as_string();
 };
 
 class MoveLogger {
@@ -142,6 +143,10 @@ public:
     MoveRec move_last_to_future();
     bool prev_empty() const { return prev_moves.empty(); }
     bool future_empty() const { return future_moves.empty(); }
+    std::vector<MoveRec> get_past() { return prev_moves; }
+    std::vector<MoveRec> get_future() { return future_moves; }
+    void   set_past(const std::vector<MoveRec>& past)   { prev_moves = past; }
+    void set_future(const std::vector<MoveRec>& future) { future_moves = future; }
 private:
     std::vector<MoveRec> prev_moves;
     std::vector<MoveRec> future_moves;
@@ -150,7 +155,7 @@ private:
 class BoardRepr {
 public:
     BoardRepr(std::string);
-    std::string as_string() { return std::format("{}[{}{}]", figures, get_idw_char(), get_turn_char()); }
+    std::string as_string();
     char get_idw_char() const { return idw ? 'T' : 'F'; }
     bool get_idw() const { return idw; }
     char get_turn_char() const { return turn == EColor::White ? 'W' : 'B'; }
@@ -161,8 +166,14 @@ public:
     void set_idw(bool idw) { this->idw = idw; }
     std::string get_figures() const { return figures; }
     std::string get_figures() { return figures; }
+    void set_past(const std::vector<MoveRec>& past) { this->past = past; }
+    void set_future(const std::vector<MoveRec>& future) { this->future = future; }
+    std::vector<MoveRec> get_past()   const { return past; }
+    std::vector<MoveRec> get_future() const { return future; }
 private:
     std::string figures{""};
     Color turn{EColor::White};
     bool idw{true};
+    std::vector<MoveRec> past;
+    std::vector<MoveRec> future;
 };
