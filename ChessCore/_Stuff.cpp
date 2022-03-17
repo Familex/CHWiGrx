@@ -144,3 +144,29 @@ MoveRec MoveLogger::move_last_to_future() {
     future_moves.push_back(last);
     return last;
 }
+
+BoardRepr::BoardRepr(std::string board_repr) {
+    const size_t npos = std::string::npos;
+    size_t meta_start = board_repr.find('[');
+    size_t meta_end = board_repr.find(']');
+    if (meta_start == npos || meta_end == npos) {
+        figures = board_repr;
+        return;
+    }
+    std::string meta = board_repr.substr(meta_start + 1, meta_end - meta_start - 1);
+    if (meta.find('t') != npos || meta.find('T') != npos) {
+        idw = true;
+    }
+    else if (meta.find('f') != npos || meta.find('F') != npos) {
+        idw = false;
+    }
+    if (meta.find('w') != npos || meta.find('W') != npos) {
+        turn = EColor::White;
+    }
+    else if (meta.find('b') != npos || meta.find('B') != npos) {
+        turn = EColor::Black;
+    }
+    if (meta_start > 2)
+        figures += board_repr.substr(0, meta_start);
+    figures += board_repr.substr(meta_end + 1);
+}

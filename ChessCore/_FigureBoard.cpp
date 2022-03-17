@@ -2,9 +2,8 @@
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 #include "_FigureBoard.h"
 
-FigureBoard::FigureBoard(bool idw, std::string map) {
-    this->idw = idw;
-    reset(idw, map);
+FigureBoard::FigureBoard(BoardRepr board_repr) {
+    reset(board_repr);
 }
 
 void FigureBoard::init_figures_moves() {
@@ -52,24 +51,28 @@ void FigureBoard::init_figures_moves() {
     eats[EFigureType::Queen] = moves[EFigureType::Queen];
 }
 
-void FigureBoard::reset(bool idw, std::string map) {
-    this->idw = idw;
+void FigureBoard::reset(BoardRepr map) {
     move_logger.reset();
     curr_id = 0;
     figures.clear();
     figures.push_back({}); // Заглушка
     captured_figures.clear();
     if (map.empty()) {
-        map = idw
-            ? "bRbHbBbQbKbBbHbR8bP32E8wPwRwHwBwQwKwBwHwR"
-            : "wRwHwBwQwKwBwHwR8wP32E8bPbRbHbBbQbKbBbHbR";
+        if (idw) {
+            map.set_figures("bRbHbBbQbKbBbHbR8bP32E8wPwRwHwBwQwKwBwHwR");
+            map.set_idw(true);
+        }
+        else {
+            map.set_figures("wRwHwBwQwKwBwHwR8wP32E8bPbRbHbBbQbKbBbHbR");
+            map.set_idw(false);
+        }
     }
     init_figures_moves();
-    append_figures(map);
+    apply_map(map);
     reset_castling();
 }
 
-void FigureBoard::append_figures(const std::string& map) {
+void FigureBoard::apply_map(const BoardRepr& board_repr) {
     /*
     кол-во (1 по умолчанию) -> цвет -> тип
     Типы не из ctoft игнорируются, то же с ctoc
@@ -79,14 +82,19 @@ void FigureBoard::append_figures(const std::string& map) {
     int num{};
     char type;
     char color;
-    std::regex rgx("(\\d*)([bw]?)(\\w)");
+    const size_t npos = std::string::npos;
+    
+    idw = board_repr.get_idw();
+    const std::string map = board_repr.get_figures();
+
+    std::regex board_split("(\\d*)([bBwW]?)(\\w)");
     const int IND_NUM{ 1 };
     const int IND_COLOR{ 2 };
     const int IND_TYPE{ 3 };
     auto begin{ map.cbegin() };
     auto end{ map.cend() };
     std::smatch match{};
-    while (std::regex_search(begin, end, match, rgx)) {
+    while (std::regex_search(begin, end, match, board_split)) {
         num = !match.str(IND_NUM).empty()
             ? std::stoi(match.str(IND_NUM))
             : 1;
@@ -99,9 +107,9 @@ void FigureBoard::append_figures(const std::string& map) {
 
         while (num-- && num < MAX_FIGURES_AMOUNT) {
             ++curr_flat;
-            if (NOT_FIGURES.find(std::toupper(type)) != std::string::npos) continue;
-            if (COLOR_CHARS.find(std::toupper(color)) == std::string::npos) continue;
-            if (ALL_FIGURES.find(std::toupper(type)) == std::string::npos) continue;
+            if (NOT_FIGURES.find(std::toupper(type))  != npos) continue;
+            if (COLOR_CHARS.find(std::toupper(color)) == npos) continue;
+            if (ALL_FIGURES.find(std::toupper(type))  == npos) continue;
             figures.push_back({
                 ++curr_id,
                 {(curr_flat - (curr_flat % WIDTH)) / HEIGHT,
@@ -113,6 +121,49 @@ void FigureBoard::append_figures(const std::string& map) {
 
         begin += match.position() + match.length();
     }
+}
+
+// Вроде, работает, хоть и написано не очень
+BoardRepr FigureBoard::get_repr() {
+    std::string map = "";
+    int num{ -1 };
+    char prev_type{ 'N' };
+    char prev_color{ 'N' };
+    auto fig{ get_default_fig() };
+    for (int i{}; i < HEIGHT; ++i) {
+        for (int j{}; j < WIDTH; ++j) {
+            fig = get_fig({ i, j });
+            char curr_type = fig->id == ERR_ID
+                ? 'E'
+                : (char)fig->type;
+
+            char curr_color = fig->id == ERR_ID
+                ? 'N'
+                : (char)fig->color;
+
+            if (curr_type == prev_type && curr_color == prev_color) {
+                ++num;
+            }
+            else {
+                if (num > 1)
+                    map += std::format("{}", num);
+                if (prev_color != 'N')
+                    map += std::format("{}", prev_color);
+                if (prev_type != 'N')
+                    map += std::format("{}", prev_type);
+                num = 1;
+                prev_color = curr_color;
+                prev_type = curr_type;
+            }
+        }
+    }
+    if (num > 1)
+        map += std::format("{}", num);
+    if (prev_color != 'N')
+        map += std::format("{}", prev_color);
+    if (prev_type != 'N')
+        map += std::format("{}", prev_type);
+    return { map + (idw ? "[t]" : "[f]") };
 }
 
 void FigureBoard::reset_castling() {

@@ -3,8 +3,8 @@
 
 class FigureBoard {
 public:
-    FigureBoard(bool = true, std::string = "");
-    void reset(bool = true, std::string = "");
+    FigureBoard(BoardRepr);
+    void reset(BoardRepr);
     std::list<Figure>::iterator get_fig(pos);
     std::list<Figure>::iterator get_fig(Id);
     bool cont_fig(pos);
@@ -37,14 +37,15 @@ public:
     bool provide_move(const MoveRec&);
     bool undo_move();
     bool restore_move();
-    void append_figures(const std::string&);
+    void apply_map(const BoardRepr&);
     void place_figure(const Figure& fig) { figures.push_back(fig); }
     void init_figures_moves();
     bool game_end(Color);
     size_t cnt_of_figures() const { return figures.size() - 1; }
     bool insufficient_material();
+    BoardRepr get_repr();
 private:
-    bool idw;
+    bool idw{true};
     Id curr_id{};
     MoveLogger move_logger{};
     std::list<Figure> figures;

@@ -12,9 +12,9 @@
 #include <functional>
 
 template <class T>
-std::vector<T> operator +(std::vector<T> lst, T val) {
-    lst.push_back(val);
-    return lst;
+std::vector<T> operator +(std::vector<T> vec, T val) {
+    vec.push_back(val);
+    return vec;
 }
 
 template <class T>
@@ -145,4 +145,24 @@ public:
 private:
     std::vector<MoveRec> prev_moves;
     std::vector<MoveRec> future_moves;
+};
+
+class BoardRepr {
+public:
+    BoardRepr(std::string);
+    std::string as_string() { return std::format("{}[{}{}]", figures, get_idw_char(), get_turn_char()); }
+    char get_idw_char() const { return idw ? 'T' : 'F'; }
+    bool get_idw() const { return idw; }
+    char get_turn_char() const { return turn == EColor::White ? 'W' : 'B'; }
+    Color get_turn() const { return turn; }
+    bool empty() const { return figures.empty(); }
+    void set_figures(std::string&& figs) { figures = figs; }
+    void set_turn(Color t) { turn = t; }
+    void set_idw(bool idw) { this->idw = idw; }
+    std::string get_figures() const { return figures; }
+    std::string get_figures() { return figures; }
+private:
+    std::string figures{""};
+    Color turn{EColor::White};
+    bool idw{true};
 };

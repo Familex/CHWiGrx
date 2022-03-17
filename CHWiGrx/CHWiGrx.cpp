@@ -53,7 +53,10 @@ const HBRUSH BLUE               { CreateSolidBrush(RGB(0,   0,   255)) };
 const HBRUSH GREEN              { CreateSolidBrush(RGB(0,   255, 0  )) };
 const HBRUSH DARK_GREEN         { CreateSolidBrush(RGB(0,   150, 0  )) };
 const int INDENTATION_FROM_EDGES{ 1 };
-FigureBoard board{};
+const char* default_chess_board = "[TW]bRbHbBbQbKbBbHbR8bP32E8wPwRwHwBwQwKwBwHwR";
+BoardRepr start_board_repr{ default_chess_board };
+FigureBoard board{ start_board_repr };
+Color start_turn{ EColor::White };
 char chose{ 'Q' };
 Color turn{ EColor::White };
 POINT cursor{};
@@ -75,6 +78,8 @@ void               make_move(HWND);
 void               init_globals(pos, Color);
 void reset_input_order() { input_order_by_one = 0; input_order_by_two = false; }
 void               restart();
+void               cpy_str_to_clip(const std::string&);
+std::string        take_str_from_clip();
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
                      _In_opt_ HINSTANCE hPrevInstance,
@@ -220,6 +225,29 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                     clear_current_globals();
                     turn.to_next();
                 }
+                break;
+            case IDM_COPY_MAP:
+                {
+                    BoardRepr board_repr = board.get_repr();
+                    board_repr.set_turn(turn);
+                    cpy_str_to_clip(board_repr.as_string());
+                }
+                break;
+            case IDM_PASTE_MAP:
+                do {
+                    BoardRepr board_repr = take_str_from_clip();
+                    turn = board_repr.get_turn();
+                    board.reset(board_repr);
+                    clear_current_globals();
+                } while (0);
+                break;
+            case IDM_PASTE_START_MAP:
+                start_board_repr = take_str_from_clip();
+                start_turn = start_board_repr.get_turn();
+                break;
+            case IDM_RESET_START_MAP:
+                start_board_repr = { default_chess_board };
+                start_turn = start_board_repr.get_turn();
                 break;
             case IDM_RESTART:
                 restart();
@@ -555,11 +583,39 @@ void init_globals(pos from, Color turn) {
 }
 
 void restart() {
-    board.reset();
+    board.reset(start_board_repr);
     in_hand = board.get_default_fig();
     all_possible_moves.clear();
     reset_input_order();
     input = { {-1, -1}, {-1, -1} };
-    turn = EColor::White;
+    turn = start_turn;
     input_order_by_one = 0;
+}
+
+void cpy_str_to_clip(const std::string& buff)
+{
+    size_t len = buff.length() + 1;
+    using symbol = char;
+    size_t size = len * sizeof(symbol);
+    HGLOBAL hMem = GlobalAlloc(GMEM_MOVEABLE, size);
+    if (hMem == NULL) return;
+    memcpy(GlobalLock(hMem), buff.c_str(), len);
+    GlobalUnlock(hMem);
+    if (OpenClipboard(NULL)) {
+        EmptyClipboard();
+        SetClipboardData(CF_TEXT, hMem);
+        CloseClipboard();
+    }
+}
+
+std::string take_str_from_clip() {
+    if (!OpenClipboard(nullptr)) return "";
+    HANDLE hData = GetClipboardData(CF_TEXT);
+    if (hData == nullptr) return "";
+    char* pszText = static_cast<char*>(GlobalLock(hData));
+    if (pszText == nullptr) return "";
+    std::string text(pszText);
+    GlobalUnlock(hData);
+    CloseClipboard();
+    return text;
 }
