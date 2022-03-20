@@ -57,72 +57,18 @@ void FigureBoard::reset(BoardRepr map) {
     figures.clear();
     figures.push_back({}); // Заглушка
     captured_figures.clear();
-    if (map.empty()) {
-        if (idw) {
-            map.set_figures("bRbHbBbQbKbBbHbR8bP32E8wPwRwHwBwQwKwBwHwR");
-            map.set_idw(true);
-        }
-        else {
-            map.set_figures("wRwHwBwQwKwBwHwR8wP32E8bPbRbHbBbQbKbBbHbR");
-            map.set_idw(false);
-        }
-    }
     init_figures_moves();
     apply_map(map);
     reset_castling();
 }
 
 void FigureBoard::apply_map(const BoardRepr& board_repr) {
-    /*
-    кол-во (1 по умолчанию) -> цвет -> тип
-    Типы не из ctoft игнорируются, то же с ctoc
-    Фигуры, не вошедшие на поле, игнорируются
-    */
-    int curr_flat{ -1 };
-    int num{};
-    char type;
-    char color;
-    const size_t npos = std::string::npos;
-    
     idw = board_repr.get_idw();
     move_logger.set_past(board_repr.get_past());
     move_logger.set_future(board_repr.get_future());
-    const std::string map = board_repr.get_figures();
-
-    std::regex board_split("(\\d*)([bBwW]?)(\\w)");
-    const int IND_NUM{ 1 };
-    const int IND_COLOR{ 2 };
-    const int IND_TYPE{ 3 };
-    auto begin{ map.cbegin() };
-    auto end{ map.cend() };
-    std::smatch match{};
-    while (std::regex_search(begin, end, match, board_split)) {
-        num = !match.str(IND_NUM).empty()
-            ? std::stoi(match.str(IND_NUM))
-            : 1;
-
-        color = !match.str(IND_COLOR).empty()
-            ? match.str(IND_COLOR)[0]
-            : 'N';
-
-        type = match.str(IND_TYPE)[0];
-
-        while (num-- && num < MAX_FIGURES_AMOUNT) {
-            ++curr_flat;
-            if (NOT_FIGURES.find(std::toupper(type))  != npos) continue;
-            if (COLOR_CHARS.find(std::toupper(color)) == npos) continue;
-            if (ALL_FIGURES.find(std::toupper(type))  == npos) continue;
-            figures.push_back({
-                ++curr_id,
-                {(curr_flat - (curr_flat % WIDTH)) / HEIGHT,
-                curr_flat % WIDTH},
-                color,
-                type
-            });
-        }
-
-        begin += match.position() + match.length();
-    }
+    captured_figures = board_repr.get_captured_figures();
+    for (const auto& fig : board_repr.get_figures())
+        figures.push_back(fig);
 }
 
 // Вроде, работает, хоть и написано не очень
@@ -130,43 +76,11 @@ BoardRepr FigureBoard::get_repr(bool save_all_moves) {
     std::string map = "";
     std::vector<MoveRec> past{};
     std::vector<MoveRec> future{};
-    int num{ -1 };
-    char prev_type{ 'N' };
-    char prev_color{ 'N' };
-    auto fig{ get_default_fig() };
-    for (int i{}; i < HEIGHT; ++i) {
-        for (int j{}; j < WIDTH; ++j) {
-            fig = get_fig({ i, j });
-            char curr_type = fig->id == ERR_ID
-                ? 'E'
-                : (char)fig->type;
-
-            char curr_color = fig->id == ERR_ID
-                ? 'N'
-                : (char)fig->color;
-
-            if (curr_type == prev_type && curr_color == prev_color) {
-                ++num;
-            }
-            else {
-                if (num > 1)
-                    map += std::format("{}", num);
-                if (prev_color != 'N')
-                    map += std::format("{}", prev_color);
-                if (prev_type != 'N')
-                    map += std::format("{}", prev_type);
-                num = 1;
-                prev_color = curr_color;
-                prev_type = curr_type;
-            }
-        }
+    for (auto& fig : figures) {
+        map += std::format("{};{};{};{};{};",
+            fig.id, fig.position.x, fig.position.y, (char)fig.color, (char)fig.type
+        );
     }
-    if (num > 1)
-        map += std::format("{}", num);
-    if (prev_color != 'N')
-        map += std::format("{}", prev_color);
-    if (prev_type != 'N')
-        map += std::format("{}", prev_type);
     map += (idw ? "[t]" : "[f]");
 
     if (save_all_moves) {
@@ -178,13 +92,18 @@ BoardRepr FigureBoard::get_repr(bool save_all_moves) {
     }
     map += "<";
     for (MoveRec& mr : past)
-        map += std::format("{}, ", mr.as_string());
+        map += std::format("{}$", mr.as_string());
     map += ">";
     
     map += "<";
     for (MoveRec& mr : future)
-        map += std::format("{}, ", mr.as_string());
-    map += ">";
+        map += std::format("{}$", mr.as_string());
+    map += ">~";
+    for (auto& fig : captured_figures) {
+        map += std::format("{},{},{},{},{},",
+            fig.id, fig.position.x, fig.position.y, (char)fig.color, (char)fig.type
+        );
+    }
     return map;
 }
 
@@ -491,7 +410,7 @@ std::tuple<bool, MoveMessage, std::list<Figure>::iterator, std::list<Figure>::it
                 break;
             }
         }
-        if (rook->id == ERR_ID) return { false, move_message, get_default_fig(), get_default_fig()};
+        if (rook->id == ERR_ID || rook->type != EFigureType::Rook) return { false, move_message, get_default_fig(), get_default_fig()};
         if (king_pos.x != input.target.x && rook->position.x != input.target.x) return { false, move_message, get_default_fig(), get_default_fig() };
         
         pos rook_pos = rook->position;
@@ -784,12 +703,12 @@ bool FigureBoard::undo_move() {
 }
 
 bool FigureBoard::provide_move(const MoveRec& move_rec) {
-    auto choice = move_rec.promotion_choice;
-    auto in_hand_fig = move_rec.who_went;
-    auto in_hand = get_fig(in_hand_fig.id);
-    auto ms = move_rec.ms;
-    auto turn = move_rec.turn;
-    auto input = move_rec.input;
+    const auto& choice = move_rec.promotion_choice;
+    const auto& in_hand_fig = move_rec.who_went;
+    const auto& in_hand = get_fig(in_hand_fig.id);
+    const auto& ms = move_rec.ms;
+    const auto& turn = move_rec.turn;
+    const auto& input = move_rec.input;
     switch (ms.main_ev)
     {
     case MainEvent::MOVE: case MainEvent::LMOVE:

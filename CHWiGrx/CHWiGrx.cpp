@@ -2,7 +2,7 @@
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 // CHWiGrx.cpp : Определяет точку входа для приложения.
 //
-// #define DEBUG
+#define DEBUG
 
 #ifdef DEBUG
 #define _CRT_SECURE_NO_WARNINGS
@@ -53,7 +53,7 @@ const HBRUSH BLUE               { CreateSolidBrush(RGB(0,   0,   255)) };
 const HBRUSH GREEN              { CreateSolidBrush(RGB(0,   255, 0  )) };
 const HBRUSH DARK_GREEN         { CreateSolidBrush(RGB(0,   150, 0  )) };
 const int INDENTATION_FROM_EDGES{ 1 };
-const char* default_chess_board = "[TW]bRbHbBbQbKbBbHbR8bP32E8wPwRwHwBwQwKwBwHwR<><>";
+const char* default_chess_board = "[TW]1;0;0;B;R;2;0;1;B;H;3;0;2;B;B;4;0;3;B;Q;5;0;4;B;K;6;0;5;B;B;7;0;6;B;H;8;0;7;B;R;9;1;0;B;P;10;1;1;B;P;11;1;2;B;P;12;1;3;B;P;13;1;4;B;P;14;1;5;B;P;15;1;6;B;P;16;1;7;B;P;17;6;0;W;P;18;6;1;W;P;19;6;2;W;P;20;6;3;W;P;21;6;4;W;P;22;6;5;W;P;23;6;6;W;P;24;6;7;W;P;25;7;0;W;R;26;7;1;W;H;27;7;2;W;B;28;7;3;W;Q;29;7;4;W;K;30;7;5;W;B;31;7;6;W;H;32;7;7;W;R;;<><>~";
 BoardRepr start_board_repr{ default_chess_board };
 FigureBoard board{ start_board_repr };
 bool save_all_moves = true;
@@ -271,7 +271,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                         item_info.fState = MFS_CHECKED;
                     }
                     SetMenuItemInfoW(hMenu, IDM_TOGGLE_SAVE_ALL_MOVES, FALSE, &item_info);
-                } while (0);
+                }
                 break;
             case IDM_ABOUT:
                 DialogBox(hInst, MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, About);
@@ -358,6 +358,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         reset_input_order();
         clear_current_globals();
         InvalidateRect(hWnd, NULL, NULL);
+        #ifdef DEBUG
+            std::cout << "Curr board: " << board.get_repr(true).as_string() << '\n';
+        #endif // DEBUG
+
         break;
     case WM_LBUTTONDOWN:
         prev_lbutton_click = { HIWORD(lParam), LOWORD(lParam) };
@@ -567,6 +571,8 @@ void make_move(HWND hWnd) {
         InvalidateRect(hWnd, NULL, NULL);
         return;
     }
+
+    std::cout << "Curr move was: " << move_rec.as_string() << '\n';
 
     board.set_last_move({ *in_hand, input, turn, move_rec.ms, move_rec.promotion_choice });
     turn.to_next();

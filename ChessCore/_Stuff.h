@@ -3,13 +3,14 @@
 #include <list>
 #include <regex>
 #include <tuple>
+#include <ranges>
 #include <format>
 #include <vector>
 #include <utility>
 #include <algorithm>
 #include <stdexcept>
 #include <Windows.h>
-#include <functional>
+#include <iostream>
 
 template <class T>
 std::vector<T> operator +(std::vector<T> vec, T val) {
@@ -97,6 +98,9 @@ struct Figure {
         return tmp;
     }
     bool operator ==(const Figure& r) const { return this->id == r.id; }
+    std::string as_string() { return std::format("{}.{}.{}.{}.{}",
+        id, position.x, position.y, (char)color, (char)type);
+    }
     Id id;
     pos position;
     Color color;
@@ -116,6 +120,9 @@ struct Input {
 enum class MainEvent { E, EAT, MOVE, LMOVE, CASTLING, EN_PASSANT };
 enum class SideEvent { E, CHECK, PROMOTION, CASTLING_BREAK };
 
+char to_char(SideEvent side_event);
+char to_char(MainEvent main_event);
+
 struct MoveMessage {
     MainEvent main_ev{ MainEvent::E };
     std::list<SideEvent> side_evs;
@@ -125,6 +132,19 @@ struct MoveMessage {
 };
 
 struct MoveRec {
+    MoveRec(Figure who_went, Input input, Color turn, MoveMessage ms, char p)
+        : who_went(who_went)
+        , input(input)
+        , turn(turn)
+        , ms(ms)
+        , promotion_choice(p) {};
+    MoveRec()
+        : who_went()
+        , input()
+        , turn()
+        , ms()
+        , promotion_choice('N') {};
+    MoveRec(std::string);
     Figure who_went;
     Input input;
     Color turn;
@@ -161,19 +181,21 @@ public:
     char get_turn_char() const { return turn == EColor::White ? 'W' : 'B'; }
     Color get_turn() const { return turn; }
     bool empty() const { return figures.empty(); }
-    void set_figures(std::string&& figs) { figures = figs; }
+    void set_figures(std::list<Figure>&& figs) { figures = figs; }
     void set_turn(Color t) { turn = t; }
     void set_idw(bool idw) { this->idw = idw; }
-    std::string get_figures() const { return figures; }
-    std::string get_figures() { return figures; }
+    std::list<Figure> get_figures() const { return figures; }
+    std::list<Figure> get_figures() { return figures; }
     void set_past(const std::vector<MoveRec>& past) { this->past = past; }
     void set_future(const std::vector<MoveRec>& future) { this->future = future; }
     std::vector<MoveRec> get_past()   const { return past; }
     std::vector<MoveRec> get_future() const { return future; }
+    std::list<Figure> get_captured_figures() const { return captured_figures; }
 private:
-    std::string figures{""};
-    Color turn{EColor::White};
-    bool idw{true};
+    std::list<Figure> figures;
+    Color turn{ EColor::White };
+    bool idw{ true };
     std::vector<MoveRec> past;
     std::vector<MoveRec> future;
+    std::list<Figure> captured_figures;
 };
