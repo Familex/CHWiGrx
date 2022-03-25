@@ -4,7 +4,7 @@
 class FigureBoard {
 public:
     FigureBoard(BoardRepr);
-    void reset(BoardRepr);
+    void reset(const BoardRepr&);
     std::list<Figure>::iterator get_fig(pos);
     std::list<Figure>::iterator get_fig(Id);
     bool cont_fig(pos);

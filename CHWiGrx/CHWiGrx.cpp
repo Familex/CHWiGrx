@@ -1,13 +1,15 @@
 ﻿// This is a personal academic project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
-// CHWiGrx.cpp : Определяет точку входа для приложения.
-//
-#define DEBUG
+
+// #define DEBUG
 
 #ifdef DEBUG
+#define DEBUG_TIMER
 #define _CRT_SECURE_NO_WARNINGS
 #include <stdio.h>
 #include <iostream>
+#include <string>
+using namespace std::string_literals;
 #endif // DEBUG
 
 #include "framework.h"
@@ -23,6 +25,7 @@
 #define VK_7 55
 #define VK_8 56
 #define VK_9 57
+#define HEADER_HEIGHT 53
 
 
 // Глобальные переменные:
@@ -41,7 +44,8 @@ int window_width = 500;
 int window_height = 500;
 pos window_pos{ 300, 300 };
 pos grab_error{ 0, 0 };
-Input input{ {-1, -1}, {-1, -1} };
+const pos DEFAULT_INPUT_FROM{ 0, -1 };
+Input input{ DEFAULT_INPUT_FROM, {-1, -1} };
 int cell_width = window_width / WIDTH;
 int cell_height = window_height / HEIGHT;
 const HBRUSH CHECKERBOARDBRIGHT { CreateSolidBrush(RGB(50,  50,  50 )) };
@@ -61,26 +65,37 @@ Color start_turn{ EColor::White };
 char chose{ 'Q' };
 Color turn{ EColor::White };
 POINT cursor{};
+bool is_hooked{ false };
 pos prev_lbutton_click{};
+bool is_curr_choice_moving{ false };
+bool is_lbutton_down{ false };
+HWND curr_chose_window{};
 int  input_order_by_one{ 0 };
 bool input_order_by_two{ false };
 std::list<Figure>::iterator in_hand = board.get_default_fig();
 std::list<std::pair<bool, pos>> all_possible_moves{};
 std::map<char, std::map<char, HBITMAP>> pieces_bitmaps;
+const DWORD compression_algorithm = COMPRESS_ALGORITHM_MSZIP;
 
 // Отправить объявления функций, включенных в этот модуль кода:
 ATOM               MyRegisterClass(HINSTANCE hInstance);
 BOOL               InitInstance(HINSTANCE, int);
 LRESULT CALLBACK   WndProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK   About(HWND, UINT, WPARAM, LPARAM);
-void               draw_figure(HDC, const Figure&, int=-1, int=-1);
+void               draw_figure(HDC, const Figure&, int=-1, int=-1, bool=true);
 void               clear_current_globals();
 void               make_move(HWND);
 void               init_globals(pos, Color);
-void reset_input_order() { input_order_by_one = 0; input_order_by_two = false; }
+void               reset_input_order() { input_order_by_one = 0; input_order_by_two = false; }
 void               restart();
 void               cpy_str_to_clip(const std::string&);
 std::string        take_str_from_clip();
+std::string        compress_string(const std::string&);
+std::string        decompress_string(const std::string&);
+HWND               createWindow(HWND, POINT, int, int, const WNDPROC);
+void               initCurrChoiceWindow(HWND);
+void               on_lbutton_up(HWND, WPARAM, LPARAM, pos where_fig);
+
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
                      _In_opt_ HINSTANCE hPrevInstance,
@@ -209,6 +224,16 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
     switch (message)
     {
+
+#ifdef DEBUG_TIMER
+    case WM_CREATE:
+        SetTimer(hWnd, 1, 1000, NULL);
+        break;
+    case WM_TIMER:
+        std::cout << "1.Is moving: " << std::hex << is_curr_choice_moving << ". Lbutton " << is_lbutton_down << "." << std::endl;
+        break;
+#endif // DEBUG
+
     case WM_COMMAND:
         {
             int wmId = LOWORD(wParam);
@@ -231,18 +256,19 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 {
                     BoardRepr board_repr = board.get_repr(save_all_moves);
                     board_repr.set_turn(turn);
-                    cpy_str_to_clip(board_repr.as_string());
+                    cpy_str_to_clip(
+                        board_repr.as_string()
+                    );
                 }
                 break;
             case IDM_PASTE_MAP:
                 do {
-                    BoardRepr board_repr = take_str_from_clip();
+                    BoardRepr board_repr(take_str_from_clip());
                     turn = board_repr.get_turn();
                     board.reset(board_repr);
                     clear_current_globals();
                 } while (0);
                 break;
-
             case IDM_PASTE_START_MAP:
                 start_board_repr = take_str_from_clip();
                 start_turn = start_board_repr.get_turn();
@@ -361,7 +387,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         #ifdef DEBUG
             std::cout << "Curr board: " << board.get_repr(true).as_string() << '\n';
         #endif // DEBUG
-
         break;
     case WM_LBUTTONDOWN:
         prev_lbutton_click = { HIWORD(lParam), LOWORD(lParam) };
@@ -373,50 +398,18 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         }
         input.from = { HIWORD(lParam) / cell_height, LOWORD(lParam) / cell_width };
         init_globals(input.from, turn);
-        /* grab_error = { // на память
-            (int)(cursor.x - (in_hand->position.y + .5) * cell_width)  - (cursor.x - in_hand->position.y * cell_width),
-            (int)(cursor.y - (in_hand->position.x + .5) * cell_height) - (cursor.y - in_hand->position.x * cell_height)
-        }; */
-        grab_error = {
-            -cell_width / 2  - (in_hand->position.y - cursor.x / cell_width ) * cell_width,
-            -cell_height / 2 - (in_hand->position.x - cursor.y / cell_height) * cell_height
-        };
         InvalidateRect(hWnd, NULL, NULL);
         break;
     case WM_LBUTTONUP:
-        input_order_by_one = 0;
-        if (input_order_by_two) {
-            make_move(hWnd);
-            clear_current_globals();
-            InvalidateRect(hWnd, NULL, NULL);
-            return 0;
-        }
-        else {
-            input.target = { HIWORD(lParam) / cell_height, LOWORD(lParam) / cell_width };
-            if (input.from == input.target) {
-                if (prev_lbutton_click != pos(HIWORD(lParam), LOWORD(lParam))) { // Отпустили в пределах клетки, но в другом месте
-                    clear_current_globals();
-                    InvalidateRect(hWnd, NULL, NULL);
-                    return 0;
-                }
-                init_globals(input.from, turn);
-                input_order_by_two = !input_order_by_two;
-                InvalidateRect(hWnd, NULL, NULL);
-            }
-            else {
-                make_move(hWnd);
-            }
-        }
+        on_lbutton_up(hWnd, wParam, lParam, {HIWORD(lParam) / cell_height, LOWORD(lParam) / cell_width});
         break;
     case WM_MOVE:
         window_pos = { LOWORD(lParam), HIWORD(lParam) };
-        return 0;
+        break;
     case WM_MOUSEMOVE:
-        GetCursorPos(&cursor); // ScreenToClient не работает почему-то
-        cursor.x -= window_pos.x;
-        cursor.y -= window_pos.y;
-        if (in_hand->id != ERR_ID) {
-            InvalidateRect(hWnd, NULL, NULL);
+        if (!is_curr_choice_moving && is_lbutton_down) {
+            is_curr_choice_moving = true;
+            initCurrChoiceWindow(hWnd);
         }
         break;
     case WM_SIZE:
@@ -485,15 +478,12 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             }
             {
                 for (const auto& figure : board.all_figures()) {
-                    if (not input_order_by_two && in_hand->id == figure.id) {
-                        draw_figure(hdcMem, figure, cursor.x + grab_error.x, cursor.y + grab_error.y);
-                    }
-                    else {
+                    if (in_hand->id != figure.id || !is_curr_choice_moving || input_order_by_two) {
                         draw_figure(hdcMem, figure);
                     }
                 }
             }
-
+            
             BitBlt(hdc, 0, 0, window_width, window_height, hdcMem, 0, 0, SRCCOPY);
 
             SelectObject(hdcMem, hOld);
@@ -532,7 +522,7 @@ INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
     return (INT_PTR)FALSE;
 }
 
-void draw_figure(HDC hdc, const Figure& figure, int w_beg, int h_beg) {
+void draw_figure(HDC hdc, const Figure& figure, int w_beg, int h_beg, bool is_transpanent) {
     if (h_beg == -1) h_beg = figure.position.x * cell_height;
     if (w_beg == -1) w_beg = figure.position.y * cell_width;
     int h_end = h_beg + cell_height;
@@ -545,12 +535,20 @@ void draw_figure(HDC hdc, const Figure& figure, int w_beg, int h_beg) {
     HDC hdcMem = CreateCompatibleDC(hdc);
     HGDIOBJ hOldBitmap = SelectObject(hdcMem, hBitmap);
     SetStretchBltMode(hdc, STRETCH_HALFTONE);
-    TransparentBlt(hdc, w_beg, h_beg, cell_width, cell_height,
-        hdcMem, 0, 0, bm.bmWidth, bm.bmHeight, RGB(255, 0, 0));
+    if (is_transpanent) {
+        TransparentBlt(hdc, w_beg, h_beg, cell_width, cell_height,
+            hdcMem, 0, 0, bm.bmWidth, bm.bmHeight, RGB(255, 0, 0));
+    }
+    else {
+        StretchBlt(hdc, w_beg, h_beg, cell_width, cell_height,
+            hdcMem, 0, 0, bm.bmWidth, bm.bmHeight, SRCCOPY);
+    }
     DeleteDC(hdcMem);
 }
 
 void clear_current_globals() {
+    is_lbutton_down = false;
+    is_curr_choice_moving = false;
     reset_input_order();
     in_hand = board.get_default_fig();
     input = { {0, -1}, {-1, -1} };
@@ -572,7 +570,9 @@ void make_move(HWND hWnd) {
         return;
     }
 
-    std::cout << "Curr move was: " << move_rec.as_string() << '\n';
+    #ifdef DEBUG
+        std::cout << "Curr move was: " << move_rec.as_string() << '\n';
+    #endif
 
     board.set_last_move({ *in_hand, input, turn, move_rec.ms, move_rec.promotion_choice });
     turn.to_next();
@@ -588,6 +588,7 @@ void make_move(HWND hWnd) {
 }
 
 void init_globals(pos from, Color turn) {
+    is_lbutton_down = true;
     in_hand = board.get_fig(from);
     input.target = from;
     if (in_hand->color == turn) {
@@ -614,7 +615,7 @@ void restart() {
     in_hand = board.get_default_fig();
     all_possible_moves.clear();
     reset_input_order();
-    input = { {-1, -1}, {-1, -1} };
+    input = { DEFAULT_INPUT_FROM, {} };
     turn = start_turn;
     input_order_by_one = 0;
 }
@@ -645,4 +646,105 @@ std::string take_str_from_clip() {
     GlobalUnlock(hData);
     CloseClipboard();
     return text;
+}
+
+HWND createWindow(HWND parent, POINT pos, int w, int h, const WNDPROC callback) {
+    UnregisterClass(L"Chosen figure", GetModuleHandle(nullptr));
+    WNDCLASSEX wc{ sizeof(WNDCLASSEX) };
+    HWND hWindow{};
+    wc.cbClsExtra = 0;
+    wc.cbWndExtra = 0;
+    wc.hbrBackground = NULL;
+    wc.hCursor = LoadCursor(nullptr, IDC_ARROW);
+    wc.hIcon = LoadIcon(nullptr, IDI_APPLICATION);
+    wc.hIconSm = LoadIcon(nullptr, IDI_APPLICATION);
+    wc.lpfnWndProc = callback;
+    wc.lpszClassName = L"Chosen figure";
+    wc.style = CS_VREDRAW | CS_HREDRAW;
+
+    const auto create_window = [&hWindow, &parent, &pos, &w, &h]() -> HWND {
+        if (hWindow = CreateWindow(L"Chosen figure", L"", WS_POPUP | WS_EX_TRANSPARENT | WS_EX_LAYERED,
+            pos.x - w / 2, pos.y - h / 2, w, h, parent, nullptr, nullptr, nullptr), !hWindow
+            )
+            return nullptr;
+        ShowWindow(hWindow, SW_SHOWDEFAULT);
+        UpdateWindow(hWindow);
+        return hWindow;
+    };
+
+    if (!RegisterClassEx(&wc))
+        return create_window();
+
+    return create_window();
+}
+
+void initCurrChoiceWindow(HWND hWnd) {
+    is_curr_choice_moving = true;
+    POINT cur_pos{};
+    GetCursorPos(&cur_pos);
+    curr_chose_window = createWindow(hWnd, cur_pos, cell_width, cell_height, [](HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
+        switch (uMsg)
+        {
+        case WM_EXITSIZEMOVE: // Фигуру отпустил
+            {
+                HWND parent = GetParent(hWnd);
+                POINT cur_pos{};
+                GetCursorPos(&cur_pos);
+                RECT parent_window;
+                GetWindowRect(parent, &parent_window);
+                pos where_fig{
+                    (cur_pos.y - parent_window.top - HEADER_HEIGHT) / cell_height,
+                    (cur_pos.x - parent_window.left) / cell_width
+                };
+                on_lbutton_up(hWnd, wParam, lParam, where_fig);
+                InvalidateRect(parent, NULL, NULL);
+                clear_current_globals();
+                DestroyWindow(hWnd);
+            }
+            break;
+        case WM_NCHITTEST:  // При перехвате нажатий мыши симулируем перетаскивание
+            return (LRESULT)HTCAPTION;
+        case WM_PAINT:
+        {
+            PAINTSTRUCT ps;
+            HDC hdc = BeginPaint(hWnd, &ps);
+            draw_figure(hdc, *in_hand, 0, 0, false);
+            EndPaint(hWnd, &ps);
+            break;
+        }
+        default:
+            return DefWindowProc(hWnd, uMsg, wParam, lParam);
+        }});
+    InvalidateRect(hWnd, NULL, NULL);
+    SetWindowPos(curr_chose_window, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
+    SetWindowLongPtr(curr_chose_window, GWL_EXSTYLE, GetWindowLongPtr(curr_chose_window, GWL_EXSTYLE) | WS_EX_LAYERED);
+    SetLayeredWindowAttributes(curr_chose_window, RGB(255, 0, 0), 255, LWA_COLORKEY);
+    SendMessage(curr_chose_window, WM_NCLBUTTONDOWN, HTCAPTION, MAKELPARAM(cur_pos.x, cur_pos.y));
+}
+
+void on_lbutton_up(HWND hWnd, WPARAM wParam, LPARAM lParam, pos where_fig) {
+    is_lbutton_down = false;
+    input_order_by_one = 0;
+    if (input_order_by_two) {
+        make_move(hWnd);
+        clear_current_globals();
+        InvalidateRect(hWnd, NULL, NULL);
+        return;
+    }
+    else {
+        input.target = { where_fig.x, where_fig.y };
+        if (input.from == input.target) {
+            if (prev_lbutton_click != pos(HIWORD(lParam), LOWORD(lParam))) { // Отпустили в пределах клетки, но в другом месте
+                clear_current_globals();
+                InvalidateRect(hWnd, NULL, NULL);
+                return;
+            }
+            init_globals(input.from, turn);
+            input_order_by_two = !input_order_by_two;
+            InvalidateRect(hWnd, NULL, NULL);
+        }
+        else {
+            make_move(hWnd);
+        }
+    }
 }

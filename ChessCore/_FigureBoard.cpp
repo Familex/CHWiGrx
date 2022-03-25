@@ -51,7 +51,7 @@ void FigureBoard::init_figures_moves() {
     eats[EFigureType::Queen] = moves[EFigureType::Queen];
 }
 
-void FigureBoard::reset(BoardRepr map) {
+void FigureBoard::reset(const BoardRepr& map) {
     move_logger.reset();
     curr_id = 0;
     figures.clear();

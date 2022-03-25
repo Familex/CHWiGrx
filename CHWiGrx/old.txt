@@ -5,3 +5,79 @@ for (char col : {'W', 'B'}) {
                 pieces_bitmaps[col][type] = (HBITMAP)LoadImageA(NULL, fileName, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
             }
         }
+
+grab_error = { // на память
+    (int)(cursor.x - (in_hand->position.y + .5) * cell_width)  - (cursor.x - in_hand->position.y * cell_width),
+    (int)(cursor.y - (in_hand->position.x + .5) * cell_height) - (cursor.y - in_hand->position.x * cell_height)
+};
+
+grab_error = {
+    -cell_width / 2  - (in_hand->position.y - cursor.x / cell_width ) * cell_width,
+    -cell_height / 2 - (in_hand->position.x - cursor.y / cell_height) * cell_height
+};
+
+
+std::string compress_string(const std::string& str) {
+    COMPRESSOR_HANDLE Compressor = NULL;
+    const char* to_compress = str.c_str();
+    char* compress_result = nullptr;
+    size_t input_size = (str.length() + 1) * sizeof(char);
+    size_t compressed_size = NULL, compressed_data_size = NULL;
+    if (!CreateCompressor(
+        compression_algorithm,
+        NULL,
+        &Compressor)) return "";
+    if (!Compress(
+        Compressor,
+        to_compress,
+        input_size,
+        NULL,
+        0,
+        &compressed_size)) return "";
+    if (!Compress(
+        Compressor,
+        to_compress,
+        input_size,
+        compress_result,
+        compressed_size,
+        &compressed_data_size)) return "";
+    if (compress_result == NULL) return ""; // always true...
+    return { compress_result };
+}
+
+std::string decompress_string(const std::string& str) {
+    DECOMPRESSOR_HANDLE Decompressor = NULL;
+    const char* to_decompress = str.c_str();
+    char* decompress_result = nullptr;
+    size_t input_size = str.length() * sizeof(char);
+    size_t decompressed_size = NULL, decompressed_data_size = NULL;
+    if (!CreateDecompressor(
+        compression_algorithm,
+        NULL,
+        &Decompressor)) return "";
+    if (!Decompress(
+        Decompressor,
+        to_decompress,
+        input_size,
+        NULL,
+        0,
+        &decompressed_size)) return "";
+    if (!Decompress(
+        Decompressor,
+        to_decompress,
+        input_size,
+        decompress_result,
+        decompressed_size,
+        &decompressed_data_size)) return "";
+    if (decompress_result == NULL) return ""; // always true...
+    return { decompress_result };
+}
+
+case WM_MOUSEMOVE:
+        GetCursorPos(&cursor); // ScreenToClient не работает почему-то
+        cursor.x -= window_pos.x;
+        cursor.y -= window_pos.y;
+        if (in_hand->id != ERR_ID) {
+            InvalidateRect(hWnd, NULL, NULL);
+        }
+        break;
