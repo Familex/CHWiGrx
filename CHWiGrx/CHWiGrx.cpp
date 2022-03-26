@@ -1,7 +1,7 @@
 ﻿// This is a personal academic project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 
-// #define DEBUG
+#define DEBUG
 
 #ifdef DEBUG
 #define DEBUG_TIMER
@@ -25,7 +25,7 @@ using namespace std::string_literals;
 #define VK_7 55
 #define VK_8 56
 #define VK_9 57
-#define HEADER_HEIGHT 53
+#define HEADER_HEIGHT 53    // Высота менюшки (добавить программное выведение)
 
 
 // Глобальные переменные:
@@ -90,8 +90,6 @@ void               reset_input_order() { input_order_by_one = 0; input_order_by_
 void               restart();
 void               cpy_str_to_clip(const std::string&);
 std::string        take_str_from_clip();
-std::string        compress_string(const std::string&);
-std::string        decompress_string(const std::string&);
 HWND               createWindow(HWND, POINT, int, int, const WNDPROC);
 void               initCurrChoiceWindow(HWND);
 void               on_lbutton_up(HWND, WPARAM, LPARAM, pos where_fig);
@@ -227,10 +225,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
 #ifdef DEBUG_TIMER
     case WM_CREATE:
-        SetTimer(hWnd, 1, 1000, NULL);
+        SetTimer(hWnd, 1, 0, NULL);
         break;
     case WM_TIMER:
-        std::cout << "1.Is moving: " << std::hex << is_curr_choice_moving << ". Lbutton " << is_lbutton_down << "." << std::endl;
+        std::cout << "Is curr moving? " << is_curr_choice_moving << ".\r";
         break;
 #endif // DEBUG
 
@@ -389,6 +387,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         #endif // DEBUG
         break;
     case WM_LBUTTONDOWN:
+        is_lbutton_down = true;
         prev_lbutton_click = { HIWORD(lParam), LOWORD(lParam) };
         input_order_by_one = 0;
         if (input_order_by_two) {
@@ -548,6 +547,7 @@ void draw_figure(HDC hdc, const Figure& figure, int w_beg, int h_beg, bool is_tr
 
 void clear_current_globals() {
     is_lbutton_down = false;
+    DestroyWindow(curr_chose_window);
     is_curr_choice_moving = false;
     reset_input_order();
     in_hand = board.get_default_fig();
@@ -580,7 +580,7 @@ void make_move(HWND hWnd) {
     InvalidateRect(hWnd, NULL, NULL);
 
     if (board.game_end(turn)) {
-        TCHAR tmp2[] = { turn.what_next(), ' ', 'w', 'i', 'n', 's', '!', '\0'};
+        TCHAR tmp2[] = { (TCHAR)turn.what_next(), ' ', 'w', 'i', 'n', 's', '!', '\0'};
         MessageBox(hWnd, tmp2, L"GAME END", NULL);
         restart();
         InvalidateRect(hWnd, NULL, NULL);
@@ -588,10 +588,9 @@ void make_move(HWND hWnd) {
 }
 
 void init_globals(pos from, Color turn) {
-    is_lbutton_down = true;
     in_hand = board.get_fig(from);
     input.target = from;
-    if (in_hand->color == turn) {
+    if (in_hand->color == turn && in_hand->id != ERR_ID ) {
         all_possible_moves.clear();
         for (const auto& [is_eat, move_pos] : board.get_all_possible_moves(*in_hand)) {
             if (in_hand->type == EFigureType::King
@@ -712,8 +711,8 @@ void initCurrChoiceWindow(HWND hWnd) {
             EndPaint(hWnd, &ps);
             break;
         }
-        default:
-            return DefWindowProc(hWnd, uMsg, wParam, lParam);
+        default:                                              // При не default ломается
+            return DefWindowProc(hWnd, uMsg, wParam, lParam); // старт движения почему-то
         }});
     InvalidateRect(hWnd, NULL, NULL);
     SetWindowPos(curr_chose_window, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
