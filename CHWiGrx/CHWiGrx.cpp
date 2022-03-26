@@ -1,7 +1,7 @@
 ﻿// This is a personal academic project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 
-#define DEBUG
+// #define DEBUG
 
 #ifdef DEBUG
 #define DEBUG_TIMER
@@ -533,7 +533,7 @@ void draw_figure(HDC hdc, const Figure& figure, int w_beg, int h_beg, bool is_tr
     GetObject(hBitmap, sizeof(BITMAP), &bm);
     HDC hdcMem = CreateCompatibleDC(hdc);
     HGDIOBJ hOldBitmap = SelectObject(hdcMem, hBitmap);
-    SetStretchBltMode(hdc, STRETCH_HALFTONE);
+    SetStretchBltMode(hdc, STRETCH_DELETESCANS);
     if (is_transpanent) {
         TransparentBlt(hdc, w_beg, h_beg, cell_width, cell_height,
             hdcMem, 0, 0, bm.bmWidth, bm.bmHeight, RGB(255, 0, 0));
