@@ -10,7 +10,6 @@
 #include <algorithm>
 #include <stdexcept>
 #include <Windows.h>
-#include <iostream>
 
 template <class T>
 std::vector<T> operator +(std::vector<T> vec, T val) {

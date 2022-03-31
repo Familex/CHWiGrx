@@ -1,5 +1,3 @@
-// This is a personal academic project. Dear PVS-Studio, please check it.
-// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 #include "_FigureBoard.h"
 
 FigureBoard::FigureBoard(BoardRepr board_repr) {
@@ -57,8 +55,8 @@ void FigureBoard::reset(const BoardRepr& map) {
     figures.clear();
     figures.push_back({}); // Заглушка
     captured_figures.clear();
-    init_figures_moves();
     apply_map(map);
+    init_figures_moves();
     reset_castling();
 }
 
