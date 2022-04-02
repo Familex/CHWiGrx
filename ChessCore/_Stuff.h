@@ -1,12 +1,9 @@
 #pragma once
 #include <map>
 #include <list>
-#include <regex>
 #include <tuple>
 #include <format>
 #include <vector>
-#include <utility>
-#include <algorithm>
 #include <stdexcept>
 #include <Windows.h>
 
