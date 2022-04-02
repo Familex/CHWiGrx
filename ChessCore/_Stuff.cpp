@@ -2,14 +2,21 @@
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 #include "_Stuff.h"
 
-auto split(const std::string& str, char delimiter) {
-    return str + ' ' |
-        std::ranges::views::split(delimiter) |
-        std::ranges::views::transform([](auto&& r) -> std::string {
-            const auto data = &*r.begin();
-            const auto size = static_cast<std::size_t>(std::ranges::distance(r));
-            return std::string{ data, size };
-        });
+auto split(std::string str, const std::string&& delimiter) {
+    size_t token_end{};
+    std::vector<std::string> tokens{};
+    while ((token_end = str.find(delimiter)) != str.npos) {
+        tokens.emplace_back(str.substr(0, token_end));
+        str.erase(0, token_end + delimiter.length());
+    }
+    for (char c : str) {
+        if (c == ' ' || delimiter.find(c) != std::string::npos) {
+            return tokens;
+        }
+    }
+    if (!str.empty())
+        tokens.push_back(str);
+    return tokens;
 }
 
 FigureType::FigureType(char ch) {
@@ -177,7 +184,7 @@ BoardRepr::BoardRepr(std::string board_repr) {
     size_t past_end = board_repr.find('>');
     if (past_end - past_start > 2) {
         std::string past_to_parse = board_repr.substr(past_start + 1, past_end - past_start - 1);
-        for (const std::string& mr_to_parse : split(past_to_parse, '$')) {
+        for (const std::string& mr_to_parse : split(past_to_parse, "$")) {
             if (!mr_to_parse.empty() && mr_to_parse != " ")
                 past.push_back(mr_to_parse);
         }
@@ -187,7 +194,7 @@ BoardRepr::BoardRepr(std::string board_repr) {
     size_t future_end = board_repr.find('>');
     if (future_end - future_start > 2) {
         std::string future_to_parse = board_repr.substr(future_start + 1, future_end - future_start - 1);
-        for (const std::string& mr_to_parse : split(future_to_parse, '$')) {
+        for (const std::string& mr_to_parse : split(future_to_parse, "$")) {
             if (!mr_to_parse.empty() && mr_to_parse != " ")
                 future.push_back(mr_to_parse);
         }
@@ -195,7 +202,7 @@ BoardRepr::BoardRepr(std::string board_repr) {
     board_repr.erase(board_repr.begin() + future_start, board_repr.begin() + future_end + 1);
     size_t deleted_start = board_repr.find('~');
     std::vector<std::string> tmp;
-    for (const std::string& fig_piece : split(board_repr.substr(deleted_start + 1), ',')) {
+    for (const std::string& fig_piece : split(board_repr.substr(deleted_start + 1), ",")) {
         if (!fig_piece.empty() && fig_piece != " ")
         tmp.push_back(fig_piece);
     }
@@ -209,7 +216,7 @@ BoardRepr::BoardRepr(std::string board_repr) {
     board_repr.erase(board_repr.begin() + deleted_start, board_repr.end());
 
     tmp.clear();
-    for (const std::string& fig_piece : split(board_repr, ';')) {
+    for (const std::string& fig_piece : split(board_repr, ";")) {
         if (!fig_piece.empty() && fig_piece != " ")
             tmp.push_back(fig_piece);
     }
@@ -259,7 +266,7 @@ MoveRec::MoveRec(std::string map) {
     if (map.empty()) throw std::invalid_argument("Empty map");
     std::string data[16]; // last always empty
     int i{ 0 };
-    for (const std::string& curr : split(map, '.')) {
+    for (const std::string& curr : split(map, ".")) {
         data[i++] = curr;
     }
 
@@ -314,14 +321,14 @@ MoveRec::MoveRec(std::string map) {
             }
     }
     if (data[12].length() >= 3) {
-        for (const std::string& curr : split(data[12].substr(1, data[12].length() - 2), ',')) {
+        for (const std::string& curr : split(data[12].substr(1, data[12].length() - 2), ",")) {
             if (!curr.empty() && curr != " ")
                 ms.to_eat.push_back(std::stoi(curr));
         }
     }
     std::vector<int> tmp;
     if (data[13].length() >= 3) {
-        for (const std::string& curr : split(data[13].substr(1, data[13].length() - 2), ',')) {
+        for (const std::string& curr : split(data[13].substr(1, data[13].length() - 2), ",")) {
             if (!curr.empty() && curr != " ")
                 tmp.push_back(std::stoi(curr));
         }
@@ -331,7 +338,7 @@ MoveRec::MoveRec(std::string map) {
         ms.to_move.push_back(to_move);
     }
     if (data[14].length() >= 5) { // 2 extra spaces from split...
-        for (const std::string& curr : split(data[14].substr(1, data[14].length() - 2), ',')) {
+        for (const std::string& curr : split(data[14].substr(1, data[14].length() - 2), ",")) {
             if (!curr.empty() && curr != " " && curr != "}" && curr != "} ")
                 ms.what_castling_breaks.push_back(std::stoi(curr));
         }
