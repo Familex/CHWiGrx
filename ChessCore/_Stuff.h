@@ -115,8 +115,8 @@ struct Input {
 enum class MainEvent { E, EAT, MOVE, LMOVE, CASTLING, EN_PASSANT };
 enum class SideEvent { E, CHECK, PROMOTION, CASTLING_BREAK };
 
-char to_char(SideEvent side_event);
-char to_char(MainEvent main_event);
+std::string to_string(SideEvent side_event);
+std::string to_string(MainEvent main_event);
 
 struct MoveMessage {
     MainEvent main_ev{ MainEvent::E };

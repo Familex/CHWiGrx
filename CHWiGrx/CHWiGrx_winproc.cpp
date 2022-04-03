@@ -125,6 +125,7 @@ LRESULT CALLBACK main_proc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam
             return DefWindowProc(hWnd, message, wParam, lParam);
         }
     }
+    update_check_title(hWnd);   // Для надёжности обновлю на все исходы
     InvalidateRect(hWnd, NULL, NULL);
     break;
     case WM_KEYDOWN:

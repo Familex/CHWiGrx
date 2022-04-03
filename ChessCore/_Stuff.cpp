@@ -237,11 +237,11 @@ std::string MoveRec::as_string() {
         input.from.y,
         input.target.x,
         input.target.y,
-        to_char(ms.main_ev),
+        to_string(ms.main_ev),
         promotion_choice
         );
     for (SideEvent& side_ev : ms.side_evs) {
-        result += to_char(side_ev) + ", ";
+        result += to_string(side_ev) + ",";
     }
     result += "}.{";
     for (Id& to_eat : ms.to_eat) {
@@ -369,38 +369,38 @@ std::string BoardRepr::as_string() {
     return result;
 }
 
-char to_char(SideEvent side_event) {
+std::string to_string(SideEvent side_event) {
     switch (side_event)
     {
     case SideEvent::E:
-        return 'E';
+        return "E";
     case SideEvent::CHECK:
-        return 'C';
+        return "C";
     case SideEvent::PROMOTION:
-        return 'P';
+        return "P";
     case SideEvent::CASTLING_BREAK:
-        return 'B';
+        return "B";
     default:
-        return 'N';
+        return "N";
     }
 }
 
-char to_char(MainEvent main_event) {
+std::string to_string(MainEvent main_event) {
     switch (main_event)
     {
     case MainEvent::E:
-        return 'E';
+        return "E";
     case MainEvent::EAT:
-        return 'T';
+        return "T";
     case MainEvent::MOVE:
-        return 'M';
+        return "M";
     case MainEvent::LMOVE:
-        return 'L';
+        return "L";
     case MainEvent::CASTLING:
-        return 'C';
+        return "C";
     case MainEvent::EN_PASSANT:
-        return 'P';
+        return "P";
     default:
-        return 'N';
+        return "N";
     }
 }

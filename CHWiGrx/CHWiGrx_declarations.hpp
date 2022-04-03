@@ -3,7 +3,6 @@
 #include "resource.h"
 #include "framework.h"
 #include "_FigureBoard.h"
-#include <regex>
 
 // #define DEBUG
 
@@ -67,6 +66,7 @@ HWND               create_curr_choice_window(HWND, Figure, POINT, int, int, cons
 void               on_lbutton_up(HWND, WPARAM, LPARAM, pos where_fig);
 bool               is_legal_board_repr(const std::string&);
 void               set_menu_checkbox(HWND, UINT, bool);
+void               update_check_title(HWND);
 
 /* Main window WinProc func (defined in CHWiGrx_winproc.cpp) */
 LRESULT CALLBACK   main_proc(HWND, UINT, WPARAM, LPARAM);
@@ -106,7 +106,7 @@ private:
     const pos EXTRA_WINDOW_SIZE = { 59, 16 };
     pos window_pos{ 300, 300 };
     pos prev_lbutton_click{};
-    pos window_size = { 500, 500 };
+    pos window_size = { 498, 498 };
     pos cell_size = { window_size.x / WIDTH, window_size.y / HEIGHT };
 };
 

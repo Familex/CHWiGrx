@@ -121,13 +121,7 @@ void make_move(HWND hWnd) {
         InvalidateRect(hWnd, NULL, NULL);
     }
 
-    std::wstring curr_text = L"CHWiGrx";
-    if (std::find(move_rec.ms.side_evs.begin(), move_rec.ms.side_evs.end(), SideEvent::CHECK) != move_rec.ms.side_evs.end()) {
-        curr_text += L" [Check to ";
-        curr_text += turn == EColor::White ? L"White" : L"Black";
-        curr_text += L"]!";
-    }
-    SetWindowText(hWnd, curr_text.c_str());
+    update_check_title(hWnd);
 }
 
 void restart() {
@@ -183,6 +177,9 @@ HWND create_curr_choice_window(HWND parent, Figure in_hand, POINT pos, int w, in
             pos.x - w / 2, pos.y - h / 2, w, h, parent, nullptr, nullptr, nullptr), !hWindow)
             return nullptr
         ;
+        SetWindowPos(hWindow, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
+        SetWindowLongPtr(hWindow, GWL_EXSTYLE, GetWindowLongPtr(hWindow, GWL_EXSTYLE) | WS_EX_LAYERED);
+        SetLayeredWindowAttributes(hWindow, RGB(255, 0, 0), 255, LWA_COLORKEY);
         SetWindowLongPtr(hWindow, GWLP_USERDATA, (LONG_PTR)for_storage);
         ShowWindow(hWindow, SW_SHOWDEFAULT);
         UpdateWindow(hWindow);
@@ -289,9 +286,6 @@ void MotionInput::init_curr_choice_window(HWND hWnd) {
             return static_cast<LRESULT>(0);
         });
     InvalidateRect(hWnd, NULL, NULL);
-    SetWindowPos(curr_chose_window, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
-    SetWindowLongPtr(curr_chose_window, GWL_EXSTYLE, GetWindowLongPtr(curr_chose_window, GWL_EXSTYLE) | WS_EX_LAYERED);
-    SetLayeredWindowAttributes(curr_chose_window, RGB(255, 0, 0), 255, LWA_COLORKEY);
     SendMessage(curr_chose_window, WM_NCLBUTTONDOWN, HTCAPTION, MAKELPARAM(cur_pos.x, cur_pos.y));
 }
 
@@ -329,4 +323,14 @@ void MotionInput::prepare(Color turn) {
     if (in_hand->color == turn && in_hand->id != ERR_ID) {
         calculate_possible_moves();
     }
+}
+
+void update_check_title(HWND hWnd) {
+    std::wstring curr_text = L"CHWiGrx";
+    if (board.check_for_when(turn)) {
+        curr_text += L" [Check to ";
+        curr_text += turn == EColor::White ? L"White" : L"Black";
+        curr_text += L"]!";
+    }
+    SetWindowText(hWnd, curr_text.c_str());
 }
