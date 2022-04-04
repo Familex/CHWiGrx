@@ -4,17 +4,14 @@
 #include "framework.h"
 #include "_FigureBoard.h"
 
-// #define DEBUG
-
-#ifdef DEBUG
-#define DEBUG_TIMER
+#ifdef ALLOCATE_CONSOLE
 #include <stdio.h>
 #include <iostream>
 #include <string>
 using namespace std::string_literals;
-#endif // DEBUG
+#endif // ALLOCATE_CONSOLE
 
-#define MAX_LOADSTRING 100
+/* virtual keys for numbers */
 #define VK_0 48
 #define VK_1 49
 #define VK_2 50
@@ -28,21 +25,12 @@ using namespace std::string_literals;
 
 /* constants */
 inline HINSTANCE hInst;
-inline const HBRUSH CHECKERBOARDBRIGHT { CreateSolidBrush(RGB(50,  50,  50 )) };
-inline const HBRUSH CHECKERBOARDDARK   { CreateSolidBrush(RGB(128, 128, 128)) };
-inline const HBRUSH BLACK              { CreateSolidBrush(RGB(0,   0,   0  )) };
-inline const HBRUSH WHITE              { CreateSolidBrush(RGB(255, 255, 255)) };
-inline const HBRUSH RED                { CreateSolidBrush(RGB(255, 0,   0  )) };
-inline const HBRUSH BLUE               { CreateSolidBrush(RGB(0,   0,   255)) };
-inline const HBRUSH GREEN              { CreateSolidBrush(RGB(0,   255, 0  )) };
-inline const HBRUSH DARK_GREEN         { CreateSolidBrush(RGB(0,   150, 0  )) };
-inline int INDENTATION_FROM_EDGES{ 1 };
-inline const int HEADER_HEIGHT = GetSystemMetrics(SM_CYMENUSIZE)    +
-                                GetSystemMetrics(SM_CXPADDEDBORDER) +
-                                GetSystemMetrics(SM_CYCAPTION)      +
-                                GetSystemMetrics(SM_CYFRAME);
 inline const char* DEFAULT_CHESS_BOARD_IDW =  "1;0;0;B;R;2;0;1;B;H;3;0;2;B;B;4;0;3;B;Q;5;0;4;B;K;6;0;5;B;B;7;0;6;B;H;8;0;7;B;R;9;1;0;B;P;10;1;1;B;P;11;1;2;B;P;12;1;3;B;P;13;1;4;B;P;14;1;5;B;P;15;1;6;B;P;16;1;7;B;P;17;6;0;W;P;18;6;1;W;P;19;6;2;W;P;20;6;3;W;P;21;6;4;W;P;22;6;5;W;P;23;6;6;W;P;24;6;7;W;P;25;7;0;W;R;26;7;1;W;H;27;7;2;W;B;28;7;3;W;Q;29;7;4;W;K;30;7;5;W;B;31;7;6;W;H;32;7;7;W;R;[TW]<><>~";
 inline const char* DEFAULT_CHESS_BOARD_NIDW = "1;0;0;W;R;2;0;1;W;H;3;0;2;W;B;4;0;3;W;Q;5;0;4;W;K;6;0;5;W;B;7;0;6;W;H;8;0;7;W;R;9;1;0;W;P;10;1;1;W;P;11;1;2;W;P;12;1;3;W;P;13;1;4;W;P;14;1;5;W;P;15;1;6;W;P;16;1;7;W;P;17;6;0;B;P;18;6;1;B;P;19;6;2;B;P;20;6;3;B;P;21;6;4;B;P;22;6;5;B;P;23;6;6;B;P;24;6;7;B;P;25;7;0;B;R;26;7;1;B;H;27;7;2;B;B;28;7;3;B;Q;29;7;4;B;K;30;7;5;B;B;31;7;6;B;H;32;7;7;B;R;[FW]<><>~";
+const int HEADER_HEIGHT = GetSystemMetrics(SM_CXPADDEDBORDER) +
+                          GetSystemMetrics(SM_CYMENUSIZE)     +
+                          GetSystemMetrics(SM_CYCAPTION)      +
+                          GetSystemMetrics(SM_CYFRAME);
 
 /* single mutable globals */
 inline BoardRepr start_board_repr{ DEFAULT_CHESS_BOARD_IDW };
@@ -53,9 +41,9 @@ inline char chose{ 'Q' };
 inline std::map<char, std::map<char, HBITMAP>> pieces_bitmaps;
 inline bool save_all_moves = true;
 
-/* functions (defined in CHWiGrx_funcs.cpp) */
+/* misc functions (defined in CHWiGrx_funcs.cpp) */
 ATOM               register_main_window_class(HINSTANCE hInstance, LPTSTR, LPTSTR);
-BOOL               init_instance(HINSTANCE, LPTSTR, LPTSTR, int);
+bool               init_instance(HINSTANCE, LPTSTR, LPTSTR, int);
 INT_PTR CALLBACK   about_proc(HWND, UINT, WPARAM, LPARAM);
 void               draw_figure(HDC, const Figure&, int = -1, int = -1, bool = true);
 void               make_move(HWND);
@@ -67,11 +55,13 @@ void               on_lbutton_up(HWND, WPARAM, LPARAM, pos where_fig);
 bool               is_legal_board_repr(const std::string&);
 void               set_menu_checkbox(HWND, UINT, bool);
 void               update_check_title(HWND);
+inline void        Rectangle(HDC hdc, RECT rect) { Rectangle(hdc, rect.left, rect.top, rect.right, rect.bottom); }
 
 /* Main window WinProc func (defined in CHWiGrx_winproc.cpp) */
 LRESULT CALLBACK   main_proc(HWND, UINT, WPARAM, LPARAM);
 
 class WindowStats {
+    /* Габариты окна для отрисовки и захвата ввода */
     /*  x-axis from left to right  (→)  **
     **  y-axis from top  to bottom (↓)  */
 public:
@@ -102,19 +92,30 @@ public:
     inline pos divide_by_cell_size(int x, int y) {
         return {x / cell_size.x, y / cell_size.y};
     }
+    inline RECT get_cell(pos start) {
+        return {
+            start.y * cell_size.y + INDENTATION_FROM_EDGES,
+            start.x * cell_size.x + INDENTATION_FROM_EDGES,
+            (start.y + 1) * cell_size.y - INDENTATION_FROM_EDGES * 2,
+            (start.x + 1) * cell_size.x - INDENTATION_FROM_EDGES * 2
+        };
+    }
+    inline RECT get_cell(int i, int j) { return get_cell({ i, j }); }
 private:
     const pos EXTRA_WINDOW_SIZE = { 59, 16 };
     pos window_pos{ 300, 300 };
     pos prev_lbutton_click{};
     pos window_size = { 498, 498 };
     pos cell_size = { window_size.x / WIDTH, window_size.y / HEIGHT };
+    const int INDENTATION_FROM_EDGES{ 0 };
 };
 
 inline WindowStats window_stats{};
 
 class MotionInput {
-    /* переименовать тут всё */
+    /* Состояние текущего состояния ввода */
 public:
+    /* переименовать тут всё */
     MotionInput(FigureBoard* board) : board(board) {};
     void clear();
     void prepare(Color turn);
@@ -141,7 +142,7 @@ public:
     inline void set_target_x(int val) { input.target.x = val; }
     inline void set_target_y(int val) { input.target.y = val; }
     inline auto get_single_state() { return input_order_by_one; }
-    inline bool is_drags() { return !is_curr_choice_moving && is_lbutton_down; }
+    inline bool is_drags() { return !is_curr_choice_moving && is_lbutton_down && in_hand->id != ERR_ID; }
     inline auto get_possible_moves() { return all_possible_moves; }
     inline bool is_figure_dragged(Id id) { return in_hand->id == id && is_curr_choice_moving && !input_order_by_two; }
     inline void reset_input_order() {

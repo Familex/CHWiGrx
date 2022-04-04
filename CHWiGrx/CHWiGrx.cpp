@@ -8,6 +8,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     UNREFERENCED_PARAMETER(hPrevInstance);
     UNREFERENCED_PARAMETER(lpCmdLine);
 
+    constexpr auto MAX_LOADSTRING = 100;    // Похоже, от этого не избавиться
+
     WCHAR szTitle[MAX_LOADSTRING];
     WCHAR szWindowClass[MAX_LOADSTRING];
 
@@ -30,14 +32,14 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     pieces_bitmaps['W']['H'] = LoadBitmap(hInstance, MAKEINTRESOURCE(IDB_WHITE_KNIGHT ));
 
 
-    #ifdef DEBUG
-    FILE* tmp;
+    #ifdef ALLOCATE_CONSOLE
     if (AllocConsole()) {
+        FILE* tmp;
         freopen_s(&tmp, "conin$", "r", stdin);
         freopen_s(&tmp, "conout$", "w", stdout);
         freopen_s(&tmp, "conout$", "w", stderr);
     }
-    #endif // DEBUG
+    #endif // ALLOCATE_CONSOLE
 
     // Выполнить инициализацию приложения:
     if (!init_instance (hInstance, szTitle, szWindowClass, nCmdShow))

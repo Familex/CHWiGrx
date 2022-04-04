@@ -20,7 +20,7 @@ ATOM register_main_window_class(HINSTANCE hInstance, LPTSTR szTitle, LPTSTR szWi
     return RegisterClassExW(&wcex);
 }
 
-BOOL init_instance(HINSTANCE hInstance, LPTSTR szTitle, LPTSTR szWindowClass, int nCmdShow)
+bool init_instance(HINSTANCE hInstance, LPTSTR szTitle, LPTSTR szWindowClass, int nCmdShow)
 {
     hInst = hInstance; // Сохранить маркер экземпляра в глобальной переменной
 
@@ -30,15 +30,14 @@ BOOL init_instance(HINSTANCE hInstance, LPTSTR szTitle, LPTSTR szWindowClass, in
         nullptr, nullptr, hInstance, nullptr
     );
 
-    if (!hWnd)
-    {
-        return FALSE;
+    if (!hWnd) {
+        return false;
     }
 
     ShowWindow(hWnd, nCmdShow);
     UpdateWindow(hWnd);
 
-    return TRUE;
+    return true;
 }
 
 // Обработчик сообщений для окна "О программе".
@@ -48,17 +47,17 @@ INT_PTR CALLBACK about_proc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPara
     switch (message)
     {
     case WM_INITDIALOG:
-        return (INT_PTR)TRUE;
+        return static_cast<INT_PTR>(TRUE);
 
     case WM_COMMAND:
         if (LOWORD(wParam) == IDOK || LOWORD(wParam) == IDCANCEL)
         {
             EndDialog(hDlg, LOWORD(wParam));
-            return (INT_PTR)TRUE;
+            return static_cast<INT_PTR>(TRUE);
         }
         break;
     }
-    return (INT_PTR)FALSE;
+    return static_cast<INT_PTR>(FALSE);
 }
 
 void draw_figure(HDC hdc, const Figure& figure, int w_beg, int h_beg, bool is_transpanent) {
@@ -105,9 +104,9 @@ void make_move(HWND hWnd) {
         return;
     }
 
-    #ifdef DEBUG
+    #ifdef ALLOCATE_CONSOLE
         std::cout << "Curr move was: " << move_rec.as_string() << '\n';
-    #endif
+    #endif // ALLOCATE_CONSOLE
 
     board.set_last_move({ *motion_input.get_in_hand(), motion_input.get_input(), turn, move_rec.ms, move_rec.promotion_choice });
     turn.to_next();
