@@ -1,5 +1,12 @@
-#include "_Stuff.h"
+#include "Stuff.h"
 
+/// <summary>
+/// Делит строку на подстроки
+/// по разделителю
+/// </summary>
+/// <param name="str">Строка</param>
+/// <param name="delimiter">Разделитель</param>
+/// <returns>Вектор подстрок</returns>
 auto split(std::string str, const std::string&& delimiter) {
     size_t token_end{};
     std::vector<std::string> tokens{};

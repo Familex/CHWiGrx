@@ -1,9 +1,12 @@
-#include "_FigureBoard.h"
+#include "FigureBoard.h"
 
 FigureBoard::FigureBoard(BoardRepr board_repr) {
     reset(board_repr);
 }
 
+/// <summary>
+/// Заполение словарей moves и eats
+/// </summary>
 void FigureBoard::init_figures_moves() {
     std::vector<pos>temp_left_up;
     std::vector<pos>temp_left_down;
@@ -49,6 +52,10 @@ void FigureBoard::init_figures_moves() {
     eats[EFigureType::Queen] = moves[EFigureType::Queen];
 }
 
+/// <summary>
+/// 
+/// </summary>
+/// <param name="map">Репрезентация новой доски</param>
 void FigureBoard::reset(const BoardRepr& map) {
     move_logger.reset();
     curr_id = 0;
@@ -60,6 +67,10 @@ void FigureBoard::reset(const BoardRepr& map) {
     reset_castling();
 }
 
+/// <summary>
+/// Инициализация полей с помощью новой доски
+/// </summary>
+/// <param name="board_repr">Репрезентация новой доски</param>
 void FigureBoard::apply_map(const BoardRepr& board_repr) {
     idw = board_repr.get_idw();
     move_logger.set_past(board_repr.get_past());
@@ -69,7 +80,11 @@ void FigureBoard::apply_map(const BoardRepr& board_repr) {
         figures.push_back(fig);
 }
 
-// Вроде, работает, хоть и написано не очень
+/// <summary>
+/// Возвращает репрезенрацию доски
+/// </summary>
+/// <param name="save_all_moves">нужно сохранять все ходы из истории или только последний</param>
+/// <returns>Репрезентация новой доски</returns>
 BoardRepr FigureBoard::get_repr(bool save_all_moves) {
     std::string map = "";
     std::vector<MoveRec> past{};
@@ -105,6 +120,9 @@ BoardRepr FigureBoard::get_repr(bool save_all_moves) {
     return map;
 }
 
+/// <summary>
+/// Возвращает рокировку всем ладьям
+/// </summary>
 void FigureBoard::reset_castling() {
     for (const EColor& col : { EColor::Black, EColor::White }) {
         castling[col].clear();
@@ -116,6 +134,11 @@ void FigureBoard::reset_castling() {
     }
 }
 
+/// <summary>
+/// Возвращает фигуру по позиции
+/// </summary>
+/// <param name="position">Позиция фигуры</param>
+/// <returns>Итератор на фигуру</returns>
 std::list<Figure>::iterator FigureBoard::get_fig(pos position) {
     for (auto it{ ++figures.begin() }; it != figures.end(); ++it) {
         if (it->position == position) {
@@ -123,9 +146,13 @@ std::list<Figure>::iterator FigureBoard::get_fig(pos position) {
         }
     }
     return figures.begin();
-    // throw std::invalid_argument("pos: " + std::to_string(position.x) + " " + std::to_string(position.y));
 }
 
+/// <summary>
+/// Возвращает фигуру по идентификатору
+/// </summary>
+/// <param name="id">Идентификатор фигуры</param>
+/// <returns>Итератор на фигуру</returns>
 std::list<Figure>::iterator FigureBoard::get_fig(Id id) {
     for (auto it{ ++figures.begin() }; it != figures.end(); ++it) {
         if (it->id == id) {
@@ -135,14 +162,25 @@ std::list<Figure>::iterator FigureBoard::get_fig(Id id) {
     return figures.begin();
 }
 
+/// <summary>
+/// Показывает содержит ли клетка фигуру
+/// </summary>
 bool FigureBoard::cont_fig(pos position) {
     return get_fig(position)->id != ERR_ID;
 }
 
+/// <summary>
+/// Показывает не содержит ли клетка фигуру
+/// </summary>
 bool FigureBoard::is_empty(pos position) {
     return get_fig(position)->id == ERR_ID;
 }
 
+/// <summary>
+/// Убирает фигуру с доски и добавляет её к съеденным
+/// </summary>
+/// <param name="it">Итератор на фигуру</param>
+/// <returns>Получилось ли съесть</returns>
 bool FigureBoard::capture_figure(std::list<Figure>::iterator it) {
     if (it->id == ERR_ID) {
         return false;
@@ -152,6 +190,11 @@ bool FigureBoard::capture_figure(std::list<Figure>::iterator it) {
     return true;
 }
 
+/// <summary>
+/// Убирает фигуру с доски и добавляет её к съеденным
+/// </summary>
+/// <param name="it">Идентификатор фигуры</param>
+/// <returns>Получилось ли съесть</returns>
 bool FigureBoard::capture_figure(const Id& id) {
     if (id == ERR_ID) { return false; }
     std::list<Figure>::iterator it = get_fig(id);
@@ -166,6 +209,8 @@ bool is_valid_coords(pos position) {
         (y >= 0) && (y < WIDTH));
 }
 
+/// <param name="col">Цвет фигур</param>
+/// <returns>Все фигуры определённого цвета</returns>
 std::vector<Figure> FigureBoard::get_figures_of(Color col) {
     std::vector<Figure> acc{};
     for (auto it{ ++figures.begin() }; it != figures.end(); ++it) {
@@ -177,9 +222,6 @@ std::vector<Figure> FigureBoard::get_figures_of(Color col) {
 }
 
 std::list<Figure>::iterator FigureBoard::find_king(Color col) {
-    /* тут можно замемоизировать королей
-        Хотя лучше это делать сразу в конструкторе
-            И вообще их не искать перебором */
     return std::find_if(
         figures.begin(),
         figures.end(),
@@ -188,7 +230,15 @@ std::list<Figure>::iterator FigureBoard::find_king(Color col) {
     );
 }
 
-// Вроде, нормально работает... не нормально...
+/// <summary>
+/// Используя швабру ходов искомой фигуры, возвращает
+/// доступные ей ходы
+/// </summary>
+/// <param name="in_hand">Фигура, которая ходит</param>
+/// <param name="to_ignore">Фигуры, которые нужно игнорировать</param>
+/// <param name="ours">Фигуры, в которые врезаемся, но не можем съесть</param>
+/// <param name="enemies">Фигуры, в которые врезаемся и можем съесть</param>
+/// <returns>Серия из пар ест ли фигура и куда попадает</returns>
 std::vector<std::pair<bool, pos>> FigureBoard::expand_broom(const Figure& in_hand, const std::vector<pos>& to_ignore, const std::vector<pos>& ours, const std::vector<pos>& enemies) {
     std::vector<std::pair<bool, pos>> possible_moves{}; // list { pair{ is_eat, targ }, ... }
     auto in_hand_pos = in_hand.position;
@@ -230,6 +280,15 @@ std::vector<std::pair<bool, pos>> FigureBoard::expand_broom(const Figure& in_han
     return possible_moves;
 }
 
+/// <summary>
+/// Возвращает доступные фигуре ходы, подключая к
+/// её швабре ещё и особые случаи
+/// </summary>
+/// <param name="in_hand">Фигура, которая ходит</param>
+/// <param name="to_ignore">Фигуры, которые нужно игнорировать</param>
+/// <param name="ours">Фигуры, в которые врезаемся, но не можем съесть</param>
+/// <param name="enemies">Фигуры, в которые врезаемся и можем съесть</param>
+/// <returns>Серия из пар ест ли фигура и куда попадает</returns>
 std::vector<std::pair<bool, pos>> FigureBoard::get_all_possible_moves(const Figure& in_hand, const std::vector<pos>& to_ignore, const std::vector<pos>& ours, const std::vector<pos>&enemies) {
     std::vector<std::pair<bool, pos>> all_possible_moves{ expand_broom(in_hand, to_ignore, ours, enemies) };
     pos in_hand_pos = in_hand.position;
@@ -302,7 +361,15 @@ std::vector<std::pair<bool, pos>> FigureBoard::get_all_possible_moves(const Figu
     return all_possible_moves;
 }
 
-// Мастер функция
+/// <summary>
+/// Проверяет доску на шах
+/// </summary>
+/// <param name="col">Цвет, для которого шах проверяется</param>
+/// <param name="to_ignore">Фигуры, которые нужно игнорировать</param>
+/// <param name="to_defend">Позиция короля или фигуры, для которой проверяется шах</param>
+/// <param name="ours">Фигуры, которые предотвращают шах</param>
+/// <param name="enemies">Фигуры, которые шах могут поставить</param>
+/// <returns>Наличие шаха</returns>
 bool FigureBoard::check_for_when(Color col, const std::vector<pos>& to_ignore, pos to_defend, const std::vector<Figure>& ours, const std::vector<Figure>& enemies) {
     auto king_it = find_king(col);
     if (to_defend == pos()) {
@@ -327,6 +394,13 @@ bool FigureBoard::check_for_when(Color col, const std::vector<pos>& to_ignore, p
     return false; // Никто не атакует
 }
 
+/// <summary>
+/// Проверка доски на пат
+/// </summary>
+/// <param name="col">Цвет, для которого пат проверяется</param>
+/// <param name="to_ignore">Фигуры, которые нужно игнорировать</param>
+/// <param name="to_defend">Позиция короля или фигуры, которой можно поставить шах</param>
+/// <returns>Наличие пата</returns>
 bool FigureBoard::stalemate_for(Color col, const std::vector<pos>& to_ignore, pos to_defend) {
     auto king_it = find_king(col);
     if (king_it == figures.end()) return true; // Нет короля
@@ -350,6 +424,13 @@ bool FigureBoard::stalemate_for(Color col, const std::vector<pos>& to_ignore, po
     return true;
 }
 
+/// <summary>
+/// Проверка доски на мат
+/// </summary>
+/// <param name="col">Цвет, для которого мат проверяется</param>
+/// <param name="to_ignore">Фигуры, которые нужно игнорировать</param>
+/// <param name="to_defend">Позиция короля или фигуры, которой можно поставить шах (мат)</param>
+/// <returns>Наличие мата</returns>
 bool FigureBoard::checkmate_for(Color col, const std::vector<pos>& to_ignore, pos to_defend /*тут, возможно, не король*/) {
     auto king_it = find_king(col);
     if (to_defend == pos()) {
@@ -378,17 +459,24 @@ bool FigureBoard::checkmate_for(Color col, const std::vector<pos>& to_ignore, po
     return true;
 }
 
+/// <summary>
+/// <para>Проверка валидности рокировки</para>
+/// <para>Рокировка как в 960 (ширина обязательно 8)</para>
+/// <para>Условия:</para>
+/// <para>1. Король и рокируемая ладья не ходили ранее</para>
+/// <para>2. Поля между начальной и конечной позицией короля и ладьи соответственно пусты</para>
+/// <para>3. Король не проходит через битое поле, не находится под шахом и не встаёт под него</para>
+/// <para><i>Ладья может быть под шахом</i></para>
+/// <para><i>Король мог быть под шахом до этого</i></para>
+/// <para><i>Рокировка сбрасывает все рокировки</i></para>
+/// </summary>
+/// <param name="move_message">Сообщение хода для модификации</param>
+/// <param name="in_hand">Фигура, которой собираются сходить</param>
+/// <param name="input">Ввод для проверки</param>
+/// <param name="king_end_col">Целевой столбец для короля</param>
+/// <param name="rook_end_col">Целевой столбец для ладьи</param>
+/// <returns>Валидна ли рокировка</returns>
 std::tuple<bool, MoveMessage, std::list<Figure>::iterator, std::list<Figure>::iterator> FigureBoard::castling_check(MoveMessage move_message, std::list<Figure>::iterator in_hand, const Input& input, int king_end_col, int rook_end_col) {
-    /* Рокировка как в 960 (пока что ширина обязательно 8)
-        Условия:
-    * Король и рокируемая ладья не ходили ранее;
-    * Поля между начальной и конечной позицией короля и ладьи соответственно пусты;
-    * Король не проходит через битое поле, не находится под шахом и не встаёт под него;
-      Ладья может быть под шахом
-      Король мог быть под шахом до этого
-
-    Рокировка сбрасывает все рокировки
-    */
     // Рокировка на g-фланг
     bool castling_can_be_done = true;
     Id must_be_empty = ERR_ID;
@@ -437,6 +525,15 @@ std::tuple<bool, MoveMessage, std::list<Figure>::iterator, std::list<Figure>::it
     return { false, move_message, get_default_fig(), get_default_fig() };
 }
 
+/// <summary>
+/// <para>Проверка на недостаточный материал для мата</para>
+/// <para>Варианты:</para>
+/// <para>Король против короля</para>
+/// <para>Король против короля и коня</para>
+/// <para>Король против короля и слона</para>
+/// <para>Король и слон против короля и слонов, где все слоны на одном цвете</para>
+/// </summary>
+/// <returns>Не хватает ли материала для мата</returns>
 bool FigureBoard::insufficient_material() {
     /*
     k vs. k
@@ -475,6 +572,14 @@ bool FigureBoard::game_end(Color col) {
         insufficient_material();
 }
 
+/// <summary>
+/// Проверка хода на валидность
+/// и составление сообщения хода
+/// </summary>
+/// <exception cref="std::invalid_argument">Ход нельзя совершить</exception>
+/// <param name="in_hand">Фигура, которой собираются ходить</param>
+/// <param name="input">Ввод</param>
+/// <returns>Сообщение хода</returns>
 MoveMessage FigureBoard::move_check(std::list<Figure>::iterator in_hand, Input input) {
     MoveMessage move_message{ MainEvent::E, {} };
     std::list<Figure>::iterator targ{ get_fig(input.target) };
@@ -646,6 +751,12 @@ MoveMessage FigureBoard::move_check(std::list<Figure>::iterator in_hand, Input i
     throw std::invalid_argument("Unforeseen move");
 }
 
+/// <summary>
+/// Берет ход из истории ходов
+/// и воспроизводит его в обратном
+/// порядке
+/// </summary>
+/// <returns>Удалось ли отменить ход</returns>
 bool FigureBoard::undo_move() {
     if (move_logger.prev_empty()) return false;
     auto last = move_logger.move_last_to_future();
@@ -700,6 +811,11 @@ bool FigureBoard::undo_move() {
     return true;
 }
 
+/// <summary>
+/// Производит ход
+/// </summary>
+/// <param name="move_rec">Ход</param>
+/// <returns>Удалось ли совершить ход</returns>
 bool FigureBoard::provide_move(const MoveRec& move_rec) {
     const auto& choice = move_rec.promotion_choice;
     const auto& in_hand_fig = move_rec.who_went;
@@ -756,6 +872,10 @@ bool FigureBoard::provide_move(const MoveRec& move_rec) {
     return true;
 }
 
+/// <summary>
+/// Совершает отменённый ход
+/// </summary>
+/// <returns>Удалось ли совершить ход</returns>
 bool FigureBoard::restore_move() {
     if (move_logger.future_empty()) return false;
     auto future = move_logger.pop_future_move();
@@ -764,6 +884,14 @@ bool FigureBoard::restore_move() {
     return true;
 }
 
+/// <summary>
+/// Возвращает съеденную фигуру
+/// на доску
+/// </summary>
+/// <exception cref="std::invalid_argument">
+/// Фигуры с полученным идендификатором не было в съеденных
+/// </exception>
+/// <param name="id">Идентификатор фигуры</param>
 void FigureBoard::uncapture_figure(const Id& id) {
     if (id == ERR_ID) return;
     std::list<Figure>::iterator to_resurrect = std::find_if(

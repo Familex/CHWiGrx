@@ -2,7 +2,7 @@
 #pragma comment(lib, "Msimg32.lib")
 #include "resource.h"
 #include "framework.h"
-#include "_FigureBoard.h"
+#include "FigureBoard.h"
 
 #ifdef ALLOCATE_CONSOLE
 #include <stdio.h>
@@ -41,7 +41,7 @@ inline char chose{ 'Q' };
 inline std::map<char, std::map<char, HBITMAP>> pieces_bitmaps;
 inline bool save_all_moves = true;
 
-/* misc functions (defined in CHWiGrx_funcs.cpp) */
+/* misc functions (defined in funcs.cpp) */
 ATOM               register_main_window_class(HINSTANCE hInstance, LPTSTR, LPTSTR);
 bool               init_instance(HINSTANCE, LPTSTR, LPTSTR, int);
 INT_PTR CALLBACK   about_proc(HWND, UINT, WPARAM, LPARAM);
@@ -57,7 +57,7 @@ void               set_menu_checkbox(HWND, UINT, bool);
 void               update_check_title(HWND);
 inline void        Rectangle(HDC hdc, RECT rect) { Rectangle(hdc, rect.left, rect.top, rect.right, rect.bottom); }
 
-/* Main window WinProc func (defined in CHWiGrx_winproc.cpp) */
+/* Main window WinProc func (defined in winproc.cpp) */
 LRESULT CALLBACK   main_proc(HWND, UINT, WPARAM, LPARAM);
 
 class WindowStats {
@@ -89,6 +89,14 @@ public:
     inline void set_window_pos(int x, int y) { window_pos.x = x; window_pos.y = y; }
     inline int get_window_pos_x() { return window_pos.x; }
     inline int get_window_pos_y() { return window_pos.y; }
+    inline bool is_mouse_moved_enough(pos mouse) {
+        /* не используется */
+        pos shift = { abs(mouse.x - prev_lbutton_click.x),
+                      abs(mouse.y - prev_lbutton_click.y)
+        };
+        return shift.x >= UNITS_TO_MOVE_ENOUGH &&
+               shift.y >= UNITS_TO_MOVE_ENOUGH;
+    }
     inline pos divide_by_cell_size(int x, int y) {
         return {x / cell_size.x, y / cell_size.y};
     }
@@ -102,6 +110,7 @@ public:
     }
     inline RECT get_cell(int i, int j) { return get_cell({ i, j }); }
 private:
+    const int UNITS_TO_MOVE_ENOUGH = { 2 };
     const pos EXTRA_WINDOW_SIZE = { 59, 16 };
     pos window_pos{ 300, 300 };
     pos prev_lbutton_click{};

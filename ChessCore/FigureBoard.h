@@ -1,5 +1,5 @@
 #pragma once
-#include "_Stuff.h"
+#include "Stuff.h"
 
 class FigureBoard {
 public:

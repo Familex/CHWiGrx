@@ -151,15 +151,15 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="CHWiGrx_declarations.hpp" />
+    <ClInclude Include="declarations.hpp" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="CHWiGrx.cpp" />
-    <ClCompile Include="CHWiGrx_funcs.cpp" />
-    <ClCompile Include="CHWiGrx_winproc.cpp" />
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="funcs.cpp" />
+    <ClCompile Include="winproc.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="CHWiGrx.rc" />

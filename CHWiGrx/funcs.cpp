@@ -1,5 +1,12 @@
-#include "CHWiGrx_declarations.hpp"
+#include "declarations.hpp"
 
+/// <summary>
+/// Регистрация окна
+/// </summary>
+/// <param name="hInstance">Экземпляр окна</param>
+/// <param name="szTitle">Заголовок окна</param>
+/// <param name="szWindowClass">Класс окна</param>
+/// <returns>Атом класса</returns>
 ATOM register_main_window_class(HINSTANCE hInstance, LPTSTR szTitle, LPTSTR szWindowClass) {
     WNDCLASSEXW wcex;
 
@@ -20,6 +27,7 @@ ATOM register_main_window_class(HINSTANCE hInstance, LPTSTR szTitle, LPTSTR szWi
     return RegisterClassExW(&wcex);
 }
 
+// Инициализация окна
 bool init_instance(HINSTANCE hInstance, LPTSTR szTitle, LPTSTR szWindowClass, int nCmdShow)
 {
     hInst = hInstance; // Сохранить маркер экземпляра в глобальной переменной
@@ -60,6 +68,14 @@ INT_PTR CALLBACK about_proc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPara
     return static_cast<INT_PTR>(FALSE);
 }
 
+/// <summary>
+/// Рисует фигуру на контекст изображения
+/// </summary>
+/// <param name="hdc">Контекст отображения</param>
+/// <param name="figure">Фигура для отрисовки</param>
+/// <param name="w_beg">Левая координата</param>
+/// <param name="h_beg">Верхняя координата</param>
+/// <param name="is_transpanent">Сделать ли фон прозрачным</param>
 void draw_figure(HDC hdc, const Figure& figure, int w_beg, int h_beg, bool is_transpanent) {
     if (h_beg == -1) h_beg = figure.position.x * window_stats.get_cell_height();
     if (w_beg == -1) w_beg = figure.position.y * window_stats.get_cell_width();
@@ -86,6 +102,10 @@ void draw_figure(HDC hdc, const Figure& figure, int w_beg, int h_beg, bool is_tr
     DeleteDC(hdcMem);
 }
 
+/// <summary>
+/// Совершает ход
+/// </summary>
+/// <param name="hWnd">Дескриптор окна</param>
 void make_move(HWND hWnd) {
     if (!motion_input.is_current_turn(turn)) {
         motion_input.clear();
@@ -129,6 +149,7 @@ void restart() {
     turn = start_board_repr.get_turn();
 }
 
+// Копирует строку в буффер обмена
 void cpy_str_to_clip(const std::string& buff)
 {
     size_t len = buff.length() + 1;
@@ -145,6 +166,7 @@ void cpy_str_to_clip(const std::string& buff)
     }
 }
 
+// Возвращает строку из буффера обмена
 std::string take_str_from_clip() {
     if (!OpenClipboard(nullptr)) return "";
     HANDLE hData = GetClipboardData(CF_TEXT);
@@ -157,7 +179,18 @@ std::string take_str_from_clip() {
     return text;
 }
 
-HWND create_curr_choice_window(HWND parent, Figure in_hand, POINT pos, int w, int h, const WNDPROC callback, LPCWSTR class_name) {
+/// <summary>
+/// Создаёт экземпляр окна для выбранной фигуры
+/// </summary>
+/// <param name="parent">Основное окно</param>
+/// <param name="in_hand">Выбранная фигура</param>
+/// <param name="mouse">Позиция мыши</param>
+/// <param name="w">Ширина фигуры</param>
+/// <param name="h">Высота фигуры</param>
+/// <param name="callback">Функция окна</param>
+/// <param name="class_name">Имя класса окна</param>
+/// <returns>Дескриптор окна</returns>
+HWND create_curr_choice_window(HWND parent, Figure in_hand, POINT mouse, int w, int h, const WNDPROC callback, LPCWSTR class_name) {
     UnregisterClass(class_name, GetModuleHandle(nullptr));
     WNDCLASSEX wc{ sizeof(WNDCLASSEX) };
     HWND hWindow{};
@@ -171,9 +204,9 @@ HWND create_curr_choice_window(HWND parent, Figure in_hand, POINT pos, int w, in
     wc.lpfnWndProc = callback;
     wc.lpszClassName = class_name;
     wc.style = CS_VREDRAW | CS_HREDRAW;
-    const auto create_window = [&hWindow, &parent, &pos, &w, &h, for_storage, &class_name]() -> HWND {
+    const auto create_window = [&hWindow, &parent, &mouse, &w, &h, for_storage, &class_name]() -> HWND {
         if (hWindow = CreateWindow(class_name, L"", WS_POPUP | WS_EX_TRANSPARENT | WS_EX_LAYERED,
-            pos.x - w / 2, pos.y - h / 2, w, h, parent, nullptr, nullptr, nullptr), !hWindow)
+            mouse.x - w / 2, mouse.y - h / 2, w, h, parent, nullptr, nullptr, nullptr), !hWindow)
             return nullptr
         ;
         SetWindowPos(hWindow, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
@@ -191,6 +224,13 @@ HWND create_curr_choice_window(HWND parent, Figure in_hand, POINT pos, int w, in
     return create_window();
 }
 
+/// <summary>
+/// Функция обрабатывающая WM_LBUTTONUP
+/// </summary>
+/// <param name="hWnd">Дескриптор окна</param>
+/// <param name="wParam"></param>
+/// <param name="lParam"></param>
+/// <param name="where_fig">Позиция фигуры</param>
 void on_lbutton_up(HWND hWnd, WPARAM wParam, LPARAM lParam, pos where_fig) {
     motion_input.reset_lbutton_down();
     motion_input.reset_single();
@@ -243,13 +283,28 @@ void set_menu_checkbox(HWND hWnd, UINT menu_item, bool state) {
     SetMenuItemInfoW(hMenu, menu_item, FALSE, &item_info);
 }
 
+// Создаёт окно в выбранной фигурой и привязывает к мыши
 void MotionInput::init_curr_choice_window(HWND hWnd) {
     is_curr_choice_moving = true;
-    POINT cur_pos{};
-    GetCursorPos(&cur_pos);
-    curr_chose_window = create_curr_choice_window(hWnd, *in_hand, cur_pos, window_stats.get_cell_width(), window_stats.get_cell_height(),
+    POINT mouse{};
+    GetCursorPos(&mouse);
+    curr_chose_window = create_curr_choice_window(hWnd, *in_hand, mouse, window_stats.get_cell_width(), window_stats.get_cell_height(),
         [](HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
+            static const int TO_DESTROY_TIMER_ID{ 99 }; // не могу захватить из вне
+            static const int TO_DESTROY_ELAPSE{ 5 };    // да и не надо так-то
             switch (uMsg) {
+            case WM_CREATE:
+                SetTimer(hWnd, TO_DESTROY_TIMER_ID, TO_DESTROY_ELAPSE, NULL);
+                break;
+            case WM_TIMER:
+                if (wParam == TO_DESTROY_TIMER_ID) {
+                    KillTimer(hWnd, TO_DESTROY_TIMER_ID);
+                    SendMessage(hWnd, WM_EXITSIZEMOVE, NULL, NULL);
+                }
+                break;
+            case WM_ENTERSIZEMOVE:
+                KillTimer(hWnd, TO_DESTROY_TIMER_ID);
+                break;
             case WM_EXITSIZEMOVE: // Фигуру отпустил
             {
                 HWND parent = GetParent(hWnd);
@@ -285,9 +340,10 @@ void MotionInput::init_curr_choice_window(HWND hWnd) {
             return static_cast<LRESULT>(0);
         });
     InvalidateRect(hWnd, NULL, NULL);
-    SendMessage(curr_chose_window, WM_NCLBUTTONDOWN, HTCAPTION, MAKELPARAM(cur_pos.x, cur_pos.y));
+    SendMessage(curr_chose_window, WM_NCLBUTTONDOWN, HTCAPTION, MAKELPARAM(mouse.x, mouse.y));
 }
 
+// Заполняет поле возможных ходов для текущей фигуры
 void MotionInput::calculate_possible_moves() {
     all_possible_moves.clear();
     for (const auto& [is_eat, move_pos] : board->get_all_possible_moves(*in_hand)) {

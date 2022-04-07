@@ -15,18 +15,18 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="_FigureBoard.cpp">
+    <ClCompile Include="FigureBoard.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
-    <ClCompile Include="_Stuff.cpp">
+    <ClCompile Include="Stuff.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="_FigureBoard.h">
+    <ClInclude Include="FigureBoard.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
-    <ClInclude Include="_Stuff.h">
+    <ClInclude Include="Stuff.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
   </ItemGroup>

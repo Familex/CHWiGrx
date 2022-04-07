@@ -153,12 +153,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="_FigureBoard.cpp" />
-    <ClCompile Include="_Stuff.cpp" />
+    <ClCompile Include="FigureBoard.cpp" />
+    <ClCompile Include="Stuff.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="_FigureBoard.h" />
-    <ClInclude Include="_Stuff.h" />
+    <ClInclude Include="FigureBoard.h" />
+    <ClInclude Include="Stuff.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -1,4 +1,4 @@
-#include "CHWiGrx_declarations.hpp"
+#include "declarations.hpp"
 
 LRESULT CALLBACK main_proc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) {
     static PAINTSTRUCT ps;
