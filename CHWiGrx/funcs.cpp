@@ -134,8 +134,13 @@ void make_move(HWND hWnd) {
     InvalidateRect(hWnd, NULL, NULL);
 
     if (board.game_end(turn)) {
-        TCHAR tmp2[] = { (TCHAR)turn.what_next(), ' ', 'w', 'i', 'n', 's', '!', '\0' };
-        MessageBox(hWnd, tmp2, L"GAME END", NULL);
+        if (not board.insufficient_material()) {
+            TCHAR tmp2[] = { (TCHAR)turn.what_next(), ' ', 'w', 'i', 'n', 's', '!', '\0' };
+            MessageBox(hWnd, tmp2, L"GAME END", NULL);
+        }
+        else {
+            MessageBox(hWnd, L"Insufficient material", L"GAME END", NULL);
+        }
         restart();
         InvalidateRect(hWnd, NULL, NULL);
     }
