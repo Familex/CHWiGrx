@@ -256,7 +256,7 @@ std::vector<std::pair<bool, pos>> FigureBoard::expand_broom(const Figure& in_han
             else if (cont_fig(curr) && not curr.in(to_ignore)) {
                 if (get_fig(curr)->color != in_hand.color) {
                     possible_moves.push_back({ true, curr });
-                    break; // И тут, конечно, врезались!
+                    break; // Врезались
                 }
                 else {
                     break; // Врезались
@@ -535,12 +535,6 @@ std::tuple<bool, MoveMessage, std::list<Figure>::iterator, std::list<Figure>::it
 /// </summary>
 /// <returns>Не хватает ли материала для мата</returns>
 bool FigureBoard::insufficient_material() {
-    /*
-    k vs. k
-    k vs. kn
-    k vs. kb
-    kb vs. kb where any number of bishops are all on the same color
-    */
     size_t size = cnt_of_figures();
     if (size <= 2) return true;
     if (size == 3 &&
@@ -548,8 +542,8 @@ bool FigureBoard::insufficient_material() {
             figures.begin(),
             figures.end(),
             [](const auto& it)
-            { return it.type == EFigureType::Knight || it.type == EFigureType::Bishop; })
-        != figures.end()
+            { return it.type == EFigureType::Knight || it.type == EFigureType::Bishop; }
+        ) != figures.end()
         ) return true;
     size_t b_cell_bishops_cnt{};
     size_t w_cell_bishops_cnt{};
@@ -562,8 +556,7 @@ bool FigureBoard::insufficient_material() {
         else if (fig.type != EFigureType::King)
             return false; // при модификации функции не забыть тут поставить хотя бы goto
     }
-    if (not (b_cell_bishops_cnt && w_cell_bishops_cnt)) return true;
-    return false;
+    return not (b_cell_bishops_cnt && w_cell_bishops_cnt);
 }
 
 bool FigureBoard::game_end(Color col) {
@@ -573,8 +566,7 @@ bool FigureBoard::game_end(Color col) {
 }
 
 /// <summary>
-/// Проверка хода на валидность
-/// и составление сообщения хода
+/// Проверка хода на валидность и составление сообщения хода
 /// </summary>
 /// <exception cref="std::invalid_argument">Ход нельзя совершить</exception>
 /// <param name="in_hand">Фигура, которой собираются ходить</param>
@@ -885,8 +877,7 @@ bool FigureBoard::restore_move() {
 }
 
 /// <summary>
-/// Возвращает съеденную фигуру
-/// на доску
+/// Возвращает съеденную фигуру на доску
 /// </summary>
 /// <exception cref="std::invalid_argument">
 /// Фигуры с полученным идендификатором не было в съеденных

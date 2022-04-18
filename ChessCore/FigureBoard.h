@@ -57,6 +57,15 @@ private:
     const int MAX_FIGURES_AMOUNT{ HEIGHT * WIDTH };
 };
 
+/// <summary>
+/// Производит ход
+/// </summary>
+/// <typeparam name="Func">Тип функции, возвращающей тип фигуры</typeparam>
+/// <param name="in_hand">Текущая фигура</param>
+/// <param name="input">Ввод</param>
+/// <param name="turn">Текущий ход</param>
+/// <param name="get_choise">Функция, возвращающая тип фигуры для превращения</param>
+/// <returns></returns>
 template <typename Func>
 std::pair<bool, MoveRec> FigureBoard::provide_move(std::list<Figure>::iterator in_hand, const Input& input, Color turn, const Func& get_choise) {
     char choice = get_choise();
