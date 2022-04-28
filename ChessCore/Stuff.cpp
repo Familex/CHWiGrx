@@ -24,6 +24,11 @@ auto split(std::string str, const std::string&& delimiter) {
     return tokens;
 }
 
+/// <summary>
+/// Конструктор типа фигуры из буквы
+/// </summary>
+/// <exception cref="std::invatid_argument">Непредвиденный символ</exception>
+/// <param name="ch">Тип фигуры</param>
 FigureType::FigureType(char ch) {
     switch (ch)
     {
@@ -39,6 +44,11 @@ FigureType::FigureType(char ch) {
     }
 }
 
+/// <summary>
+/// Коструктор цвета из буквы
+/// </summary>
+/// <exception cref="std::invatid_argument">Непредвиденный символ</exception>
+/// <param name="ch">Цвет</param>
 Color::Color(char ch) {
     switch (ch) {
     case 'w': case 'W': data = EColor::White; break;
@@ -49,22 +59,25 @@ Color::Color(char ch) {
     }
 }
 
+// Возвращает цвет игрока на следующем ходу
 Color Color::what_next() const {
     switch (data) {
     case EColor::Black:
         return EColor::White;
     case EColor::White:
-        return EColor::Black;;
+        return EColor::Black;
     default:
         throw std::invalid_argument("unaccepted color");
     }
 }
 
+// Меняет цвет на следующий
 Color Color::to_next() {
     data = what_next();
     return *this;
 }
 
+// Перевод в символ
 FigureType::operator char() {
     switch (data) {
     case EFigureType::Pawn: return 'P';
@@ -79,6 +92,7 @@ FigureType::operator char() {
     }
 }
 
+// Перевод в символ
 Color::operator char() {
     switch (data) {
     case EColor::Black: return 'B';
@@ -106,6 +120,7 @@ bool operator<  (const pos& left, const pos& right) {
     }
 }
 
+// Оставить от вектора фигур только вектор их позиций
 std::vector<pos> to_pos_vector(const std::vector<Figure>& lst) {
     std::vector<pos> acc{};
     for (const auto& fig : lst) {
@@ -114,6 +129,7 @@ std::vector<pos> to_pos_vector(const std::vector<Figure>& lst) {
     return acc;
 }
 
+// Конструктор ввода
 Input::Input(std::string str) {
     /* "from.first from.second target.first target.second" */
     str += " ";
@@ -136,22 +152,26 @@ Input::Input(std::string str) {
     target.y = acc[3];
 }
 
+// Возвращает последний сделанный ход
 MoveRec MoveLogger::get_last_move() {
     if (prev_moves.empty())
         return {};
     return prev_moves.back();
 }
 
+// Добавляет в лог ход
 void MoveLogger::add(const MoveRec& move_rec) {
     prev_moves.push_back(move_rec);
     future_moves.clear();
 }
 
+// Обнуляет лог
 void MoveLogger::reset() {
     prev_moves.clear();
     future_moves.clear();
 }
 
+// Достает из будущих ходов следующий
 MoveRec MoveLogger::pop_future_move() {
     if (future_moves.empty()) return {};
     auto future = future_moves.back();
@@ -159,6 +179,7 @@ MoveRec MoveLogger::pop_future_move() {
     return future;
 }
 
+// Добавляет последний ход в следующие и возвращает его
 MoveRec MoveLogger::move_last_to_future() {
     if (prev_moves.empty()) return {};
     auto last = get_last_move();
@@ -167,6 +188,7 @@ MoveRec MoveLogger::move_last_to_future() {
     return last;
 }
 
+// Конструктор репрезентации доски
 BoardRepr::BoardRepr(std::string board_repr) {
     const size_t npos = std::string::npos;
     size_t meta_start = board_repr.find('[');
@@ -234,6 +256,7 @@ BoardRepr::BoardRepr(std::string board_repr) {
     }
 }
 
+// Преобразование в строку
 std::string MoveRec::as_string() {
     std::string result{ "" };
     result += std::format("{}.{}.{}.{}.{}.{}.{}.{{",
@@ -267,6 +290,7 @@ std::string MoveRec::as_string() {
     return result;
 }
 
+// Коструктор из строки
 MoveRec::MoveRec(std::string map) {
     if (map.empty()) throw std::invalid_argument("Empty map");
     std::string data[16]; // last always empty
@@ -350,6 +374,7 @@ MoveRec::MoveRec(std::string map) {
     }
 }
 
+// Преобразование в строку
 std::string BoardRepr::as_string() {
     std::string result{ "" };
     for (auto& fig : figures) {
@@ -374,6 +399,7 @@ std::string BoardRepr::as_string() {
     return result;
 }
 
+// Преобразование в строку
 std::string to_string(SideEvent side_event) {
     switch (side_event)
     {
@@ -390,6 +416,7 @@ std::string to_string(SideEvent side_event) {
     }
 }
 
+// Преобразование в строку
 std::string to_string(MainEvent main_event) {
     switch (main_event)
     {

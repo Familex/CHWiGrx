@@ -2,7 +2,7 @@
 #pragma comment(lib, "Msimg32.lib")
 #include "resource.h"
 #include "framework.h"
-#include "FigureBoard.h"
+#include "../ChessCore/FigureBoard.h"
 
 #ifdef ALLOCATE_CONSOLE
 #include <stdio.h>
