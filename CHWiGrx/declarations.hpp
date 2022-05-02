@@ -45,12 +45,12 @@ inline bool save_all_moves = true;
 ATOM               register_main_window_class(HINSTANCE hInstance, LPTSTR, LPTSTR);
 bool               init_instance(HINSTANCE, LPTSTR, LPTSTR, int);
 INT_PTR CALLBACK   about_proc(HWND, UINT, WPARAM, LPARAM);
-void               draw_figure(HDC, const Figure&, int = -1, int = -1, bool = true);
+void               draw_figure(HDC, const Figure*, int = -1, int = -1, bool = true);
 void               make_move(HWND);
 void               restart();
 void               cpy_str_to_clip(const std::string&);
 std::string        take_str_from_clip();
-HWND               create_curr_choice_window(HWND, Figure, POINT, int, int, const WNDPROC, LPCWSTR = L"Chosen figure");
+HWND               create_curr_choice_window(HWND, Figure*, POINT, int, int, const WNDPROC, LPCWSTR = L"Chosen figure");
 void               on_lbutton_up(HWND, WPARAM, LPARAM, pos where_fig);
 bool               is_legal_board_repr(const std::string&);
 void               set_menu_checkbox(HWND, UINT, bool);
@@ -140,7 +140,7 @@ public:
     inline void reset_lbutton_down() { is_lbutton_down = false; }
     inline void set_lbutton_down() { is_lbutton_down = true; }
     inline bool is_pair() { return input_order_by_two; }
-    inline bool is_current_turn(Color turn) { return in_hand->color == turn; }
+    inline bool is_current_turn(Color turn) { return in_hand->is_col(turn); }
     inline auto get_in_hand() { return in_hand; }
     inline auto get_input() { return input; }
     inline void shift_from(pos shift, int max_x, int max_y) { input.from.loop_add(shift, max_x, max_y); }
@@ -151,9 +151,9 @@ public:
     inline void set_target_x(int val) { input.target.x = val; }
     inline void set_target_y(int val) { input.target.y = val; }
     inline auto get_single_state() { return input_order_by_one; }
-    inline bool is_drags() { return !is_curr_choice_moving && is_lbutton_down && in_hand->id != ERR_ID; }
+    inline bool is_drags() { return !is_curr_choice_moving && is_lbutton_down && not in_hand->empty(); }
     inline auto get_possible_moves() { return all_possible_moves; }
-    inline bool is_figure_dragged(Id id) { return in_hand->id == id && is_curr_choice_moving && !input_order_by_two; }
+    inline bool is_figure_dragged(Id id) { return in_hand->is(id) && is_curr_choice_moving && !input_order_by_two; }
     inline void reset_input_order() {
         input_order_by_one = 0;
         input_order_by_two = false;
@@ -167,7 +167,7 @@ private:
     bool is_lbutton_down{ false };
     HWND curr_chose_window{};
     bool is_curr_choice_moving{ false };
-    std::list<Figure>::iterator in_hand = board->get_default_fig();
+    Figure* in_hand = board->get_default_fig();
     std::list<std::pair<bool, pos>> all_possible_moves{};
 };
 

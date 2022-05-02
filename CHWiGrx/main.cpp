@@ -31,6 +31,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     pieces_bitmaps['W']['B'] = LoadBitmap(hInstance, MAKEINTRESOURCE(IDB_WHITE_BISHOP ));
     pieces_bitmaps['W']['H'] = LoadBitmap(hInstance, MAKEINTRESOURCE(IDB_WHITE_KNIGHT ));
 
+    board.get_fig({ 1, 1 })->submit_on({ 5, 5 });
 
     #ifdef ALLOCATE_CONSOLE
     if (AllocConsole()) {

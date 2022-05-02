@@ -121,10 +121,10 @@ bool operator<  (const pos& left, const pos& right) {
 }
 
 // Оставить от вектора фигур только вектор их позиций
-std::vector<pos> to_pos_vector(const std::vector<Figure>& lst) {
+std::vector<pos> to_pos_vector(const std::vector<Figure*>& lst) {
     std::vector<pos> acc{};
     for (const auto& fig : lst) {
-        acc.push_back(fig.position);
+        acc.push_back(fig->get_pos());
     }
     return acc;
 }
@@ -234,11 +234,14 @@ BoardRepr::BoardRepr(std::string board_repr) {
         tmp.push_back(fig_piece);
     }
     for (size_t i{}; i < tmp.size(); i += 5) {
-        captured_figures.push_back({ std::stoi(tmp[i]),
-                                    {std::stoi(tmp[i + 1]), std::stoi(tmp[i + 2])},
-                                    tmp[i + 3][0],
-                                    tmp[i + 4][0]
-            });
+        Id new_id =             std::stoi(tmp[i]);
+        pos new_pos =         { std::stoi(tmp[i + 1]), std::stoi(tmp[i + 2]) };
+        Color new_col =       { tmp[i + 3][0] };
+        FigureType new_type = { tmp[i + 4][0] };
+        Figure* new_fig = FigureFabric::instance()->create(
+            new_pos, new_col, new_type, new_id
+        );
+        captured_figures.push_back(new_fig);
     }
     board_repr.erase(board_repr.begin() + deleted_start, board_repr.end());
 
@@ -248,11 +251,14 @@ BoardRepr::BoardRepr(std::string board_repr) {
             tmp.push_back(fig_piece);
     }
     for (size_t i{}; i < tmp.size(); i += 5) {
-        figures.push_back({ std::stoi(tmp[i]),
-                                    {std::stoi(tmp[i + 1]), std::stoi(tmp[i + 2])},
-                                    tmp[i + 3][0],
-                                    tmp[i + 4][0]
-            });
+        Id new_id = std::stoi(tmp[i]);
+        pos new_pos = { std::stoi(tmp[i + 1]), std::stoi(tmp[i + 2]) };
+        Color new_col = { tmp[i + 3][0] };
+        FigureType new_type = { tmp[i + 4][0] };
+        Figure* new_fig = FigureFabric::instance()->create(
+            new_pos, new_col, new_type, new_id
+        );
+        figures.push_back(new_fig);
     }
 }
 
@@ -260,7 +266,7 @@ BoardRepr::BoardRepr(std::string board_repr) {
 std::string MoveRec::as_string() {
     std::string result{ "" };
     result += std::format("{}.{}.{}.{}.{}.{}.{}.{{",
-        who_went.as_string(),
+        who_went->as_string(),
         input.from.x,
         input.from.y,
         input.target.x,
@@ -299,12 +305,16 @@ MoveRec::MoveRec(std::string map) {
         data[i++] = curr;
     }
 
-    who_went.id = std::stoi(data[0]);
-    who_went.position.x = std::stoi(data[1]);
-    who_went.position.y = std::stoi(data[2]);
-    who_went.color = data[3][0];
-    turn = who_went.color;
-    who_went.type = data[4][0];
+    if (who_went)
+        delete who_went;
+    Id new_id = std::stoi(data[0]);
+    Color new_col = data[3][0];
+    pos new_pos = { std::stoi(data[1]), std::stoi(data[2]) };
+    FigureType new_type = data[4][0];
+    who_went = FigureFabric::instance()->create(
+        new_pos, new_col, new_type, new_id
+    );
+    turn = who_went->get_col();
     input.from.x   = std::stoi(data[5]);
     input.from.y   = std::stoi(data[6]);
     input.target.x = std::stoi(data[7]);
@@ -379,7 +389,7 @@ std::string BoardRepr::as_string() {
     std::string result{ "" };
     for (auto& fig : figures) {
         result += std::format("{};{};{};{};{};",
-            fig.id, fig.position.x, fig.position.y, (char)fig.color, (char)fig.type
+            fig->get_id(), fig->get_pos().x, fig->get_pos().y, (char)fig->get_col(), (char)fig->get_type()
         );
     }
     result += std::format("[{}{}]<", get_idw_char(), get_turn_char());
@@ -393,7 +403,7 @@ std::string BoardRepr::as_string() {
     result += ">~";
     for (auto& fig : captured_figures) {
         result += std::format("{},{},{},{},{},",
-            fig.id, fig.position.x, fig.position.y, (char)fig.color, (char)fig.type
+            fig->get_id(), fig->get_pos().x, fig->get_pos().y, (char)fig->get_col(), (char)fig->get_type()
         );
     }
     return result;
@@ -434,5 +444,47 @@ std::string to_string(MainEvent main_event) {
         return "P";
     default:
         return "N";
+    }
+}
+
+Figure* FigureFabric::create(pos position, Color color, EFigureType type, Id id) {
+    switch (type) {
+        case EFigureType::Pawn:
+            return new Pawn(id, position, color);
+        case EFigureType::Knight:
+            return new Knight(id, position, color);
+        case EFigureType::Rook:
+            return new Rook(id, position, color);
+        case EFigureType::Bishop:
+            return new Bishop(id, position, color);
+        case EFigureType::Queen:
+            return new Queen(id, position, color);
+        case EFigureType::King:
+            return new King(id, position, color);
+        case EFigureType::None:
+            return new Figure(id, position);
+        default:
+            return new Figure(ERR_ID, position);
+        }
+}
+
+Figure* FigureFabric::create(pos position, Color color, EFigureType type) {
+    switch (type) {
+    case EFigureType::Pawn:
+        return new Pawn(this->id++, position, color);
+    case EFigureType::Knight:
+        return new Knight(this->id++, position, color);
+    case EFigureType::Rook:
+        return new Rook(this->id++, position, color);
+    case EFigureType::Bishop:
+        return new Bishop(this->id++, position, color);
+    case EFigureType::Queen:
+        return new Queen(this->id++, position, color);
+    case EFigureType::King:
+        return new King(this->id++, position, color);
+    case EFigureType::None:
+        return new Figure(this->id++, position);
+    default:
+        return new Figure(ERR_ID, position);
     }
 }

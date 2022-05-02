@@ -281,7 +281,7 @@ LRESULT CALLBACK main_proc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam
         {
             /* ‘игуры на поле */
             for (const auto& figure : board.all_figures()) {
-                if (!motion_input.is_figure_dragged(figure.id)) {
+                if (!motion_input.is_figure_dragged(figure->get_id())) {
                     draw_figure(hdcMem, figure);
                 }
             }

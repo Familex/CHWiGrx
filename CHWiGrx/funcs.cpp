@@ -76,13 +76,13 @@ INT_PTR CALLBACK about_proc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPara
 /// <param name="w_beg">Левая координата</param>
 /// <param name="h_beg">Верхняя координата</param>
 /// <param name="is_transpanent">Сделать ли фон прозрачным</param>
-void draw_figure(HDC hdc, const Figure& figure, int w_beg, int h_beg, bool is_transpanent) {
-    if (h_beg == -1) h_beg = figure.position.x * window_stats.get_cell_height();
-    if (w_beg == -1) w_beg = figure.position.y * window_stats.get_cell_width();
+void draw_figure(HDC hdc, const Figure* figure, int w_beg, int h_beg, bool is_transpanent) {
+    if (h_beg == -1) h_beg = figure->get_pos().x * window_stats.get_cell_height();
+    if (w_beg == -1) w_beg = figure->get_pos().y * window_stats.get_cell_width();
     int h_end = h_beg + window_stats.get_cell_height();
     int w_end = w_beg + window_stats.get_cell_width();
-    Color col = figure.color;
-    FigureType type = figure.type;
+    Color col = figure->get_col();
+    FigureType type = figure->get_type();
     HBITMAP hBitmap = pieces_bitmaps[col][type];
     BITMAP bm;
     GetObject(hBitmap, sizeof(BITMAP), &bm);
@@ -128,7 +128,7 @@ void make_move(HWND hWnd) {
         std::cout << "Curr move was: " << move_rec.as_string() << '\n';
     #endif // ALLOCATE_CONSOLE
 
-    board.set_last_move({ *motion_input.get_in_hand(), motion_input.get_input(), turn, move_rec.ms, move_rec.promotion_choice });
+    board.set_last_move({ motion_input.get_in_hand(), motion_input.get_input(), turn, move_rec.ms, move_rec.promotion_choice });
     turn.to_next();
     motion_input.clear();
     InvalidateRect(hWnd, NULL, NULL);
@@ -195,11 +195,11 @@ std::string take_str_from_clip() {
 /// <param name="callback">Функция окна</param>
 /// <param name="class_name">Имя класса окна</param>
 /// <returns>Дескриптор окна</returns>
-HWND create_curr_choice_window(HWND parent, Figure in_hand, POINT mouse, int w, int h, const WNDPROC callback, LPCWSTR class_name) {
+HWND create_curr_choice_window(HWND parent, Figure* in_hand, POINT mouse, int w, int h, const WNDPROC callback, LPCWSTR class_name) {
     UnregisterClass(class_name, GetModuleHandle(nullptr));
     WNDCLASSEX wc{ sizeof(WNDCLASSEX) };
     HWND hWindow{};
-    Figure* for_storage = new Figure(in_hand);
+    Figure* for_storage = in_hand;  // Возможно нужно копировать TODO
     wc.cbClsExtra = 0;
     wc.cbWndExtra = sizeof(in_hand);
     wc.hbrBackground = NULL;
@@ -293,7 +293,7 @@ void MotionInput::init_curr_choice_window(HWND hWnd) {
     is_curr_choice_moving = true;
     POINT mouse{};
     GetCursorPos(&mouse);
-    curr_chose_window = create_curr_choice_window(hWnd, *in_hand, mouse, window_stats.get_cell_width(), window_stats.get_cell_height(),
+    curr_chose_window = create_curr_choice_window(hWnd, in_hand, mouse, window_stats.get_cell_width(), window_stats.get_cell_height(),
         [](HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
             static const int TO_DESTROY_TIMER_ID{ 99 }; // не могу захватить из вне
             static const int TO_DESTROY_ELAPSE{ 5 };    // да и не надо так-то
@@ -334,7 +334,7 @@ void MotionInput::init_curr_choice_window(HWND hWnd) {
                 HDC hdc = BeginPaint(hWnd, &ps);
                 Figure* in_hand = (Figure*)GetWindowLongPtr(hWnd, GWLP_USERDATA);
                 if (in_hand) {
-                    draw_figure(hdc, *in_hand, 0, 0, false);
+                    draw_figure(hdc, in_hand, 0, 0, false);
                 }
                 EndPaint(hWnd, &ps);
             }
@@ -351,15 +351,15 @@ void MotionInput::init_curr_choice_window(HWND hWnd) {
 // Заполняет поле возможных ходов для текущей фигуры
 void MotionInput::calculate_possible_moves() {
     all_possible_moves.clear();
-    for (const auto& [is_eat, move_pos] : board->get_all_possible_moves(*in_hand)) {
-        if (in_hand->type == EFigureType::King
+    for (const auto& [is_eat, move_pos] : board->get_all_possible_moves(in_hand)) {
+        if (in_hand->get_type() == EFigureType::King
             ? (is_eat
-                ? not board->check_for_when(in_hand->color, { in_hand->position, move_pos }, move_pos)
-                : not board->check_for_when(in_hand->color, { in_hand->position }, move_pos)
+                ? not board->check_for_when(in_hand->get_col(), {in_hand->get_pos(), move_pos}, move_pos)
+                : not board->check_for_when(in_hand->get_col(), {in_hand->get_pos()}, move_pos)
                 )
             : (is_eat
-                ? not board->check_for_when(in_hand->color, { in_hand->position, move_pos }, {}, { in_hand->submit_on(move_pos) })
-                : not board->check_for_when(in_hand->color, { in_hand->position }, {}, { in_hand->submit_on(move_pos) })
+                ? not board->check_for_when(in_hand->get_col(), {in_hand->get_pos(), move_pos}, {}, {in_hand->submit_on(move_pos)})
+                : not board->check_for_when(in_hand->get_col(), {in_hand->get_pos()}, {}, {in_hand->submit_on(move_pos)})
                 )
             ) {
             all_possible_moves.push_back({ is_eat, move_pos });
@@ -380,7 +380,7 @@ void MotionInput::clear() {
 void MotionInput::prepare(Color turn) {
     in_hand = board->get_fig(input.from);
     input.target = input.from;
-    if (in_hand->color == turn && in_hand->id != ERR_ID) {
+    if (in_hand->get_col() == turn && not in_hand->empty()) {
         calculate_possible_moves();
     }
 }
