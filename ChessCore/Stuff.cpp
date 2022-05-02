@@ -7,7 +7,7 @@
 /// <param name="str">Строка</param>
 /// <param name="delimiter">Разделитель</param>
 /// <returns>Вектор подстрок</returns>
-auto split(std::string str, const std::string&& delimiter) {
+std::vector<std::string> split(std::string str, const std::string&& delimiter) {
     size_t token_end{};
     std::vector<std::string> tokens{};
     while ((token_end = str.find(delimiter)) != str.npos) {
@@ -266,7 +266,7 @@ BoardRepr::BoardRepr(std::string board_repr) {
 std::string MoveRec::as_string() {
     std::string result{ "" };
     result += std::format("{}.{}.{}.{}.{}.{}.{}.{{",
-        who_went->as_string(),
+        who_went,
         input.from.x,
         input.from.y,
         input.target.x,
@@ -305,16 +305,16 @@ MoveRec::MoveRec(std::string map) {
         data[i++] = curr;
     }
 
-    if (who_went)
-        delete who_went;
     Id new_id = std::stoi(data[0]);
     Color new_col = data[3][0];
     pos new_pos = { std::stoi(data[1]), std::stoi(data[2]) };
     FigureType new_type = data[4][0];
-    who_went = FigureFabric::instance()->create(
+    Figure* who_went_tmp = FigureFabric::instance()->create(
         new_pos, new_col, new_type, new_id
     );
-    turn = who_went->get_col();
+    who_went = who_went_tmp->as_string();
+    delete who_went_tmp;
+    turn = new_col;
     input.from.x   = std::stoi(data[5]);
     input.from.y   = std::stoi(data[6]);
     input.target.x = std::stoi(data[7]);
@@ -487,4 +487,18 @@ Figure* FigureFabric::create(pos position, Color color, EFigureType type) {
     default:
         return new Figure(ERR_ID, position);
     }
+}
+
+Figure* FigureFabric::get_default_fig() {
+    return DEFAULT;
+}
+
+Figure* FigureFabric::create(Figure* to_copy) {
+    if (to_copy->empty()) return DEFAULT;
+    return create(
+        to_copy->get_pos(),
+        to_copy->get_col(),
+        to_copy->get_type(),
+        to_copy->get_id()
+    );
 }

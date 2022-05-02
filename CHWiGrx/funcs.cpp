@@ -352,17 +352,23 @@ void MotionInput::init_curr_choice_window(HWND hWnd) {
 void MotionInput::calculate_possible_moves() {
     all_possible_moves.clear();
     for (const auto& [is_eat, move_pos] : board->get_all_possible_moves(in_hand)) {
-        if (in_hand->get_type() == EFigureType::King
-            ? (is_eat
-                ? not board->check_for_when(in_hand->get_col(), {in_hand->get_pos(), move_pos}, move_pos)
-                : not board->check_for_when(in_hand->get_col(), {in_hand->get_pos()}, move_pos)
-                )
-            : (is_eat
-                ? not board->check_for_when(in_hand->get_col(), {in_hand->get_pos(), move_pos}, {}, {in_hand->submit_on(move_pos)})
-                : not board->check_for_when(in_hand->get_col(), {in_hand->get_pos()}, {}, {in_hand->submit_on(move_pos)})
-                )
-            ) {
-            all_possible_moves.push_back({ is_eat, move_pos });
+        if (in_hand->get_type() == EFigureType::King) {
+            if (is_eat
+                ? not board->check_for_when(in_hand->get_col(), { in_hand->get_pos(), move_pos }, move_pos)
+                : not board->check_for_when(in_hand->get_col(), { in_hand->get_pos() }, move_pos)
+                ) {
+                all_possible_moves.push_back({ is_eat, move_pos });
+            }
+        }
+        else {
+            Figure* in_hand_in_tmp = FigureFabric::instance()->submit_on(in_hand, move_pos);
+            bool check = (is_eat
+                ? board->check_for_when(in_hand->get_col(), { in_hand->get_pos(), move_pos }, {}, { in_hand_in_tmp })
+                : board->check_for_when(in_hand->get_col(), { in_hand->get_pos() }, {}, { in_hand_in_tmp })
+                );
+            if (not check) {
+                all_possible_moves.push_back({ is_eat, move_pos });
+            }
         }
     }
 }

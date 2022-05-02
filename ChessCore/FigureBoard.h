@@ -23,13 +23,22 @@ public:
     MoveMessage move_check(Figure*, Input);
     std::tuple<bool, MoveMessage, Figure*, Figure*> castling_check(MoveMessage, Figure*, const Input&, int, int);
     void reset_castling();
-    Figure* get_default_fig() { return {}; }
+    Figure* get_default_fig() { return FigureFabric::instance()->get_default_fig(); }
     std::list<Figure*> all_figures() {
         std::list<Figure*> tmp;
         for (const auto [_, fig] : figures) {
             tmp.push_back(fig);
         }
         return tmp;
+    }
+    void move_fig(Figure* fig, pos to) {
+        Figure* maybe_eat = get_fig(to);
+        if (not maybe_eat->empty()) {
+            capture_figure(maybe_eat);
+        }
+        figures.erase(fig->get_pos());
+        fig->move_to(to);
+        figures[fig->get_pos()] = fig;
     }
     bool has_castling(Color col, Id id) { return castling[col][id]; }
     void off_castling(Color col, Id id) { castling[col][id] = false; }
@@ -44,6 +53,7 @@ public:
     void place_figure(Figure*& fig) { figures[fig->get_pos()] = fig; }
     void init_figures_moves();
     bool game_end(Color);
+    void promotion_fig(Figure*, FigureType);
     size_t cnt_of_figures() const { return figures.size() - 1; }
     bool insufficient_material();
     BoardRepr get_repr(bool);
