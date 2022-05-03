@@ -5,7 +5,7 @@ FigureBoard::FigureBoard(BoardRepr board_repr) {
 }
 
 /// <summary>
-/// Заполение словарей moves и eats
+/// Р—Р°РїРѕР»РµРЅРёРµ СЃР»РѕРІР°СЂРµР№ moves Рё eats
 /// </summary>
 void FigureBoard::init_figures_moves() {
     std::vector<pos>temp_left_up;
@@ -28,7 +28,7 @@ void FigureBoard::init_figures_moves() {
         temp_down.push_back({ ij, 0 });
     }
 
-    // Задаётся относительно белых через idw
+    // Р—Р°РґР°С‘С‚СЃСЏ РѕС‚РЅРѕСЃРёС‚РµР»СЊРЅРѕ Р±РµР»С‹С… С‡РµСЂРµР· idw
     moves[EFigureType::Pawn] = { {{ (idw ? -1 : 1), 0}} };
     eats[EFigureType::Pawn] = { {{ (idw ? -1 : 1), -1}}, {{ (idw ? -1 : 1), 1}} };
 
@@ -55,12 +55,12 @@ void FigureBoard::init_figures_moves() {
 /// <summary>
 /// 
 /// </summary>
-/// <param name="map">Репрезентация новой доски</param>
+/// <param name="map">Р РµРїСЂРµР·РµРЅС‚Р°С†РёСЏ РЅРѕРІРѕР№ РґРѕСЃРєРё</param>
 void FigureBoard::reset(const BoardRepr& map) {
     move_logger.reset();
     curr_id = 0;
     figures.clear();
-    figures.push_back({}); // Заглушка
+    figures.push_back({}); // Р—Р°РіР»СѓС€РєР°
     captured_figures.clear();
     apply_map(map);
     init_figures_moves();
@@ -68,9 +68,9 @@ void FigureBoard::reset(const BoardRepr& map) {
 }
 
 /// <summary>
-/// Инициализация полей с помощью новой доски
+/// РРЅРёС†РёР°Р»РёР·Р°С†РёСЏ РїРѕР»РµР№ СЃ РїРѕРјРѕС‰СЊСЋ РЅРѕРІРѕР№ РґРѕСЃРєРё
 /// </summary>
-/// <param name="board_repr">Репрезентация новой доски</param>
+/// <param name="board_repr">Р РµРїСЂРµР·РµРЅС‚Р°С†РёСЏ РЅРѕРІРѕР№ РґРѕСЃРєРё</param>
 void FigureBoard::apply_map(const BoardRepr& board_repr) {
     idw = board_repr.get_idw();
     move_logger.set_past(board_repr.get_past());
@@ -81,10 +81,10 @@ void FigureBoard::apply_map(const BoardRepr& board_repr) {
 }
 
 /// <summary>
-/// Возвращает репрезенрацию доски
+/// Р’РѕР·РІСЂР°С‰Р°РµС‚ СЂРµРїСЂРµР·РµРЅСЂР°С†РёСЋ РґРѕСЃРєРё
 /// </summary>
-/// <param name="save_all_moves">нужно сохранять все ходы из истории или только последний</param>
-/// <returns>Репрезентация новой доски</returns>
+/// <param name="save_all_moves">РЅСѓР¶РЅРѕ СЃРѕС…СЂР°РЅСЏС‚СЊ РІСЃРµ С…РѕРґС‹ РёР· РёСЃС‚РѕСЂРёРё РёР»Рё С‚РѕР»СЊРєРѕ РїРѕСЃР»РµРґРЅРёР№</param>
+/// <returns>Р РµРїСЂРµР·РµРЅС‚Р°С†РёСЏ РЅРѕРІРѕР№ РґРѕСЃРєРё</returns>
 BoardRepr FigureBoard::get_repr(bool save_all_moves) {
     std::string map = "";
     std::vector<MoveRec> past{};
@@ -107,7 +107,7 @@ BoardRepr FigureBoard::get_repr(bool save_all_moves) {
     for (MoveRec& mr : past)
         map += std::format("{}$", mr.as_string());
     map += ">";
-    
+
     map += "<";
     for (MoveRec& mr : future)
         map += std::format("{}$", mr.as_string());
@@ -121,7 +121,7 @@ BoardRepr FigureBoard::get_repr(bool save_all_moves) {
 }
 
 /// <summary>
-/// Возвращает рокировку всем ладьям
+/// Р’РѕР·РІСЂР°С‰Р°РµС‚ СЂРѕРєРёСЂРѕРІРєСѓ РІСЃРµРј Р»Р°РґСЊСЏРј
 /// </summary>
 void FigureBoard::reset_castling() {
     for (const EColor& col : { EColor::Black, EColor::White }) {
@@ -135,10 +135,10 @@ void FigureBoard::reset_castling() {
 }
 
 /// <summary>
-/// Возвращает фигуру по позиции
+/// Р’РѕР·РІСЂР°С‰Р°РµС‚ С„РёРіСѓСЂСѓ РїРѕ РїРѕР·РёС†РёРё
 /// </summary>
-/// <param name="position">Позиция фигуры</param>
-/// <returns>Итератор на фигуру</returns>
+/// <param name="position">РџРѕР·РёС†РёСЏ С„РёРіСѓСЂС‹</param>
+/// <returns>РС‚РµСЂР°С‚РѕСЂ РЅР° С„РёРіСѓСЂСѓ</returns>
 std::list<Figure>::iterator FigureBoard::get_fig(pos position) {
     for (auto it{ ++figures.begin() }; it != figures.end(); ++it) {
         if (it->position == position) {
@@ -149,10 +149,10 @@ std::list<Figure>::iterator FigureBoard::get_fig(pos position) {
 }
 
 /// <summary>
-/// Возвращает фигуру по идентификатору
+/// Р’РѕР·РІСЂР°С‰Р°РµС‚ С„РёРіСѓСЂСѓ РїРѕ РёРґРµРЅС‚РёС„РёРєР°С‚РѕСЂСѓ
 /// </summary>
-/// <param name="id">Идентификатор фигуры</param>
-/// <returns>Итератор на фигуру</returns>
+/// <param name="id">РРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ С„РёРіСѓСЂС‹</param>
+/// <returns>РС‚РµСЂР°С‚РѕСЂ РЅР° С„РёРіСѓСЂСѓ</returns>
 std::list<Figure>::iterator FigureBoard::get_fig(Id id) {
     for (auto it{ ++figures.begin() }; it != figures.end(); ++it) {
         if (it->id == id) {
@@ -163,24 +163,24 @@ std::list<Figure>::iterator FigureBoard::get_fig(Id id) {
 }
 
 /// <summary>
-/// Показывает содержит ли клетка фигуру
+/// РџРѕРєР°Р·С‹РІР°РµС‚ СЃРѕРґРµСЂР¶РёС‚ Р»Рё РєР»РµС‚РєР° С„РёРіСѓСЂСѓ
 /// </summary>
 bool FigureBoard::cont_fig(pos position) {
     return get_fig(position)->id != ERR_ID;
 }
 
 /// <summary>
-/// Показывает не содержит ли клетка фигуру
+/// РџРѕРєР°Р·С‹РІР°РµС‚ РЅРµ СЃРѕРґРµСЂР¶РёС‚ Р»Рё РєР»РµС‚РєР° С„РёРіСѓСЂСѓ
 /// </summary>
 bool FigureBoard::is_empty(pos position) {
     return get_fig(position)->id == ERR_ID;
 }
 
 /// <summary>
-/// Убирает фигуру с доски и добавляет её к съеденным
+/// РЈР±РёСЂР°РµС‚ С„РёРіСѓСЂСѓ СЃ РґРѕСЃРєРё Рё РґРѕР±Р°РІР»СЏРµС‚ РµС‘ Рє СЃСЉРµРґРµРЅРЅС‹Рј
 /// </summary>
-/// <param name="it">Итератор на фигуру</param>
-/// <returns>Получилось ли съесть</returns>
+/// <param name="it">РС‚РµСЂР°С‚РѕСЂ РЅР° С„РёРіСѓСЂСѓ</param>
+/// <returns>РџРѕР»СѓС‡РёР»РѕСЃСЊ Р»Рё СЃСЉРµСЃС‚СЊ</returns>
 bool FigureBoard::capture_figure(std::list<Figure>::iterator it) {
     if (it->id == ERR_ID) {
         return false;
@@ -191,10 +191,10 @@ bool FigureBoard::capture_figure(std::list<Figure>::iterator it) {
 }
 
 /// <summary>
-/// Убирает фигуру с доски и добавляет её к съеденным
+/// РЈР±РёСЂР°РµС‚ С„РёРіСѓСЂСѓ СЃ РґРѕСЃРєРё Рё РґРѕР±Р°РІР»СЏРµС‚ РµС‘ Рє СЃСЉРµРґРµРЅРЅС‹Рј
 /// </summary>
-/// <param name="it">Идентификатор фигуры</param>
-/// <returns>Получилось ли съесть</returns>
+/// <param name="it">РРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ С„РёРіСѓСЂС‹</param>
+/// <returns>РџРѕР»СѓС‡РёР»РѕСЃСЊ Р»Рё СЃСЉРµСЃС‚СЊ</returns>
 bool FigureBoard::capture_figure(const Id& id) {
     if (id == ERR_ID) { return false; }
     std::list<Figure>::iterator it = get_fig(id);
@@ -209,8 +209,8 @@ bool is_valid_coords(pos position) {
         (y >= 0) && (y < WIDTH));
 }
 
-/// <param name="col">Цвет фигур</param>
-/// <returns>Все фигуры определённого цвета</returns>
+/// <param name="col">Р¦РІРµС‚ С„РёРіСѓСЂ</param>
+/// <returns>Р’СЃРµ С„РёРіСѓСЂС‹ РѕРїСЂРµРґРµР»С‘РЅРЅРѕРіРѕ С†РІРµС‚Р°</returns>
 std::vector<Figure> FigureBoard::get_figures_of(Color col) {
     std::vector<Figure> acc{};
     for (auto it{ ++figures.begin() }; it != figures.end(); ++it) {
@@ -231,14 +231,14 @@ std::list<Figure>::iterator FigureBoard::find_king(Color col) {
 }
 
 /// <summary>
-/// Используя швабру ходов искомой фигуры, возвращает
-/// доступные ей ходы
+/// РСЃРїРѕР»СЊР·СѓСЏ С€РІР°Р±СЂСѓ С…РѕРґРѕРІ РёСЃРєРѕРјРѕР№ С„РёРіСѓСЂС‹, РІРѕР·РІСЂР°С‰Р°РµС‚
+/// РґРѕСЃС‚СѓРїРЅС‹Рµ РµР№ С…РѕРґС‹
 /// </summary>
-/// <param name="in_hand">Фигура, которая ходит</param>
-/// <param name="to_ignore">Фигуры, которые нужно игнорировать</param>
-/// <param name="ours">Фигуры, в которые врезаемся, но не можем съесть</param>
-/// <param name="enemies">Фигуры, в которые врезаемся и можем съесть</param>
-/// <returns>Серия из пар ест ли фигура и куда попадает</returns>
+/// <param name="in_hand">Р¤РёРіСѓСЂР°, РєРѕС‚РѕСЂР°СЏ С…РѕРґРёС‚</param>
+/// <param name="to_ignore">Р¤РёРіСѓСЂС‹, РєРѕС‚РѕСЂС‹Рµ РЅСѓР¶РЅРѕ РёРіРЅРѕСЂРёСЂРѕРІР°С‚СЊ</param>
+/// <param name="ours">Р¤РёРіСѓСЂС‹, РІ РєРѕС‚РѕСЂС‹Рµ РІСЂРµР·Р°РµРјСЃСЏ, РЅРѕ РЅРµ РјРѕР¶РµРј СЃСЉРµСЃС‚СЊ</param>
+/// <param name="enemies">Р¤РёРіСѓСЂС‹, РІ РєРѕС‚РѕСЂС‹Рµ РІСЂРµР·Р°РµРјСЃСЏ Рё РјРѕР¶РµРј СЃСЉРµСЃС‚СЊ</param>
+/// <returns>РЎРµСЂРёСЏ РёР· РїР°СЂ РµСЃС‚ Р»Рё С„РёРіСѓСЂР° Рё РєСѓРґР° РїРѕРїР°РґР°РµС‚</returns>
 std::vector<std::pair<bool, pos>> FigureBoard::expand_broom(const Figure& in_hand, const std::vector<pos>& to_ignore, const std::vector<pos>& ours, const std::vector<pos>& enemies) {
     std::vector<std::pair<bool, pos>> possible_moves{}; // list { pair{ is_eat, targ }, ... }
     auto in_hand_pos = in_hand.position;
@@ -247,19 +247,19 @@ std::vector<std::pair<bool, pos>> FigureBoard::expand_broom(const Figure& in_han
             pos curr{ in_hand_pos + (in_hand.color == EColor::White ? eat : eat.mul_x(-1)) };
             if (not is_valid_coords(curr)) continue;
             if (curr.in(ours)) {
-                break; // Врезались в союзника
+                break; // Р’СЂРµР·Р°Р»РёСЃСЊ РІ СЃРѕСЋР·РЅРёРєР°
             }
             else if (curr.in(enemies)) {
-                possible_moves.push_back({ true, curr }); // Съели противника
-                break; // И врезались...
+                possible_moves.push_back({ true, curr }); // РЎСЉРµР»Рё РїСЂРѕС‚РёРІРЅРёРєР°
+                break; // Р РІСЂРµР·Р°Р»РёСЃСЊ...
             }
             else if (cont_fig(curr) && not curr.in(to_ignore)) {
                 if (get_fig(curr)->color != in_hand.color) {
                     possible_moves.push_back({ true, curr });
-                    break; // Врезались
+                    break; // Р’СЂРµР·Р°Р»РёСЃСЊ
                 }
                 else {
-                    break; // Врезались
+                    break; // Р’СЂРµР·Р°Р»РёСЃСЊ
                 }
             }
         }
@@ -272,7 +272,7 @@ std::vector<std::pair<bool, pos>> FigureBoard::expand_broom(const Figure& in_han
                 possible_moves.push_back({ false, curr });
             }
             else {
-                break; // Врезались
+                break; // Р’СЂРµР·Р°Р»РёСЃСЊ
             }
         }
     }
@@ -281,20 +281,20 @@ std::vector<std::pair<bool, pos>> FigureBoard::expand_broom(const Figure& in_han
 }
 
 /// <summary>
-/// Возвращает доступные фигуре ходы, подключая к
-/// её швабре ещё и особые случаи
+/// Р’РѕР·РІСЂР°С‰Р°РµС‚ РґРѕСЃС‚СѓРїРЅС‹Рµ С„РёРіСѓСЂРµ С…РѕРґС‹, РїРѕРґРєР»СЋС‡Р°СЏ Рє
+/// РµС‘ С€РІР°Р±СЂРµ РµС‰С‘ Рё РѕСЃРѕР±С‹Рµ СЃР»СѓС‡Р°Рё
 /// </summary>
-/// <param name="in_hand">Фигура, которая ходит</param>
-/// <param name="to_ignore">Фигуры, которые нужно игнорировать</param>
-/// <param name="ours">Фигуры, в которые врезаемся, но не можем съесть</param>
-/// <param name="enemies">Фигуры, в которые врезаемся и можем съесть</param>
-/// <returns>Серия из пар ест ли фигура и куда попадает</returns>
+/// <param name="in_hand">Р¤РёРіСѓСЂР°, РєРѕС‚РѕСЂР°СЏ С…РѕРґРёС‚</param>
+/// <param name="to_ignore">Р¤РёРіСѓСЂС‹, РєРѕС‚РѕСЂС‹Рµ РЅСѓР¶РЅРѕ РёРіРЅРѕСЂРёСЂРѕРІР°С‚СЊ</param>
+/// <param name="ours">Р¤РёРіСѓСЂС‹, РІ РєРѕС‚РѕСЂС‹Рµ РІСЂРµР·Р°РµРјСЃСЏ, РЅРѕ РЅРµ РјРѕР¶РµРј СЃСЉРµСЃС‚СЊ</param>
+/// <param name="enemies">Р¤РёРіСѓСЂС‹, РІ РєРѕС‚РѕСЂС‹Рµ РІСЂРµР·Р°РµРјСЃСЏ Рё РјРѕР¶РµРј СЃСЉРµСЃС‚СЊ</param>
+/// <returns>РЎРµСЂРёСЏ РёР· РїР°СЂ РµСЃС‚ Р»Рё С„РёРіСѓСЂР° Рё РєСѓРґР° РїРѕРїР°РґР°РµС‚</returns>
 std::vector<std::pair<bool, pos>> FigureBoard::get_all_possible_moves(const Figure& in_hand, const std::vector<pos>& to_ignore, const std::vector<pos>& ours, const std::vector<pos>&enemies) {
     std::vector<std::pair<bool, pos>> all_possible_moves{ expand_broom(in_hand, to_ignore, ours, enemies) };
     pos in_hand_pos = in_hand.position;
     std::list<Figure>::iterator in_hand_it{ get_fig(in_hand_pos) };
     if (in_hand.type == EFigureType::Pawn) {
-        // Ход пешки на 2 (смотрю свои фигуры на 2 линии)
+        // РҐРѕРґ РїРµС€РєРё РЅР° 2 (СЃРјРѕС‚СЂСЋ СЃРІРѕРё С„РёРіСѓСЂС‹ РЅР° 2 Р»РёРЅРёРё)
         if (in_hand.color == EColor::White) {
             if (in_hand_pos.x == (HEIGHT - 2) && idw && is_empty(in_hand_pos + pos(-1, 0)) &&
                 is_empty(in_hand_pos + pos(-2, 0))) {
@@ -316,7 +316,7 @@ std::vector<std::pair<bool, pos>> FigureBoard::get_all_possible_moves(const Figu
             }
         }
 
-        // Взятие на проходе
+        // Р’Р·СЏС‚РёРµ РЅР° РїСЂРѕС…РѕРґРµ
         const MoveRec& last_move = move_logger.get_last_move();
         if (last_move.ms.main_ev == MainEvent::LMOVE && std::abs(last_move.who_went.position.y - in_hand_pos.y) == 1) {
             int shift_y = last_move.who_went.position.y - in_hand_pos.y;
@@ -362,19 +362,19 @@ std::vector<std::pair<bool, pos>> FigureBoard::get_all_possible_moves(const Figu
 }
 
 /// <summary>
-/// Проверяет доску на шах
+/// РџСЂРѕРІРµСЂСЏРµС‚ РґРѕСЃРєСѓ РЅР° С€Р°С…
 /// </summary>
-/// <param name="col">Цвет, для которого шах проверяется</param>
-/// <param name="to_ignore">Фигуры, которые нужно игнорировать</param>
-/// <param name="to_defend">Позиция короля или фигуры, для которой проверяется шах</param>
-/// <param name="ours">Фигуры, которые предотвращают шах</param>
-/// <param name="enemies">Фигуры, которые шах могут поставить</param>
-/// <returns>Наличие шаха</returns>
+/// <param name="col">Р¦РІРµС‚, РґР»СЏ РєРѕС‚РѕСЂРѕРіРѕ С€Р°С… РїСЂРѕРІРµСЂСЏРµС‚СЃСЏ</param>
+/// <param name="to_ignore">Р¤РёРіСѓСЂС‹, РєРѕС‚РѕСЂС‹Рµ РЅСѓР¶РЅРѕ РёРіРЅРѕСЂРёСЂРѕРІР°С‚СЊ</param>
+/// <param name="to_defend">РџРѕР·РёС†РёСЏ РєРѕСЂРѕР»СЏ РёР»Рё С„РёРіСѓСЂС‹, РґР»СЏ РєРѕС‚РѕСЂРѕР№ РїСЂРѕРІРµСЂСЏРµС‚СЃСЏ С€Р°С…</param>
+/// <param name="ours">Р¤РёРіСѓСЂС‹, РєРѕС‚РѕСЂС‹Рµ РїСЂРµРґРѕС‚РІСЂР°С‰Р°СЋС‚ С€Р°С…</param>
+/// <param name="enemies">Р¤РёРіСѓСЂС‹, РєРѕС‚РѕСЂС‹Рµ С€Р°С… РјРѕРіСѓС‚ РїРѕСЃС‚Р°РІРёС‚СЊ</param>
+/// <returns>РќР°Р»РёС‡РёРµ С€Р°С…Р°</returns>
 bool FigureBoard::check_for_when(Color col, const std::vector<pos>& to_ignore, pos to_defend, const std::vector<Figure>& ours, const std::vector<Figure>& enemies) {
     auto king_it = find_king(col);
     if (to_defend == pos()) {
         if (king_it == figures.end()) {
-            return true; // Нечего защищать
+            return true; // РќРµС‡РµРіРѕ Р·Р°С‰РёС‰Р°С‚СЊ
         }
         else {
             to_defend = king_it->position;
@@ -382,7 +382,7 @@ bool FigureBoard::check_for_when(Color col, const std::vector<pos>& to_ignore, p
     }
     for (const auto& enemy : get_figures_of(col.what_next()) + enemies) {
         if (std::find(to_ignore.begin(), to_ignore.end(), enemy.position) != to_ignore.end()) {
-            if (std::find(enemies.begin(), enemies.end(), enemy) == enemies.end()) // Пока не нужно, но должно быть тут на всякий
+            if (std::find(enemies.begin(), enemies.end(), enemy) == enemies.end()) // РџРѕРєР° РЅРµ РЅСѓР¶РЅРѕ, РЅРѕ РґРѕР»Р¶РЅРѕ Р±С‹С‚СЊ С‚СѓС‚ РЅР° РІСЃСЏРєРёР№
                 continue;
         }
         for (const auto& [is_eat, curr] : expand_broom(enemy, to_ignore, to_pos_vector(enemies), to_pos_vector(ours) + to_defend)) {
@@ -391,19 +391,19 @@ bool FigureBoard::check_for_when(Color col, const std::vector<pos>& to_ignore, p
             }
         }
     }
-    return false; // Никто не атакует
+    return false; // РќРёРєС‚Рѕ РЅРµ Р°С‚Р°РєСѓРµС‚
 }
 
 /// <summary>
-/// Проверка доски на пат
+/// РџСЂРѕРІРµСЂРєР° РґРѕСЃРєРё РЅР° РїР°С‚
 /// </summary>
-/// <param name="col">Цвет, для которого пат проверяется</param>
-/// <param name="to_ignore">Фигуры, которые нужно игнорировать</param>
-/// <param name="to_defend">Позиция короля или фигуры, которой можно поставить шах</param>
-/// <returns>Наличие пата</returns>
+/// <param name="col">Р¦РІРµС‚, РґР»СЏ РєРѕС‚РѕСЂРѕРіРѕ РїР°С‚ РїСЂРѕРІРµСЂСЏРµС‚СЃСЏ</param>
+/// <param name="to_ignore">Р¤РёРіСѓСЂС‹, РєРѕС‚РѕСЂС‹Рµ РЅСѓР¶РЅРѕ РёРіРЅРѕСЂРёСЂРѕРІР°С‚СЊ</param>
+/// <param name="to_defend">РџРѕР·РёС†РёСЏ РєРѕСЂРѕР»СЏ РёР»Рё С„РёРіСѓСЂС‹, РєРѕС‚РѕСЂРѕР№ РјРѕР¶РЅРѕ РїРѕСЃС‚Р°РІРёС‚СЊ С€Р°С…</param>
+/// <returns>РќР°Р»РёС‡РёРµ РїР°С‚Р°</returns>
 bool FigureBoard::stalemate_for(Color col, const std::vector<pos>& to_ignore, pos to_defend) {
     auto king_it = find_king(col);
-    if (king_it == figures.end()) return true; // Нет короля
+    if (king_it == figures.end()) return true; // РќРµС‚ РєРѕСЂРѕР»СЏ
     if (to_defend == pos()) to_defend = king_it->position;
     for (auto& aspt : get_figures_of(col)) {
         for (const auto& [is_eat, curr] : expand_broom(aspt)) {
@@ -425,17 +425,17 @@ bool FigureBoard::stalemate_for(Color col, const std::vector<pos>& to_ignore, po
 }
 
 /// <summary>
-/// Проверка доски на мат
+/// РџСЂРѕРІРµСЂРєР° РґРѕСЃРєРё РЅР° РјР°С‚
 /// </summary>
-/// <param name="col">Цвет, для которого мат проверяется</param>
-/// <param name="to_ignore">Фигуры, которые нужно игнорировать</param>
-/// <param name="to_defend">Позиция короля или фигуры, которой можно поставить шах (мат)</param>
-/// <returns>Наличие мата</returns>
-bool FigureBoard::checkmate_for(Color col, const std::vector<pos>& to_ignore, pos to_defend /*тут, возможно, не король*/) {
+/// <param name="col">Р¦РІРµС‚, РґР»СЏ РєРѕС‚РѕСЂРѕРіРѕ РјР°С‚ РїСЂРѕРІРµСЂСЏРµС‚СЃСЏ</param>
+/// <param name="to_ignore">Р¤РёРіСѓСЂС‹, РєРѕС‚РѕСЂС‹Рµ РЅСѓР¶РЅРѕ РёРіРЅРѕСЂРёСЂРѕРІР°С‚СЊ</param>
+/// <param name="to_defend">РџРѕР·РёС†РёСЏ РєРѕСЂРѕР»СЏ РёР»Рё С„РёРіСѓСЂС‹, РєРѕС‚РѕСЂРѕР№ РјРѕР¶РЅРѕ РїРѕСЃС‚Р°РІРёС‚СЊ С€Р°С… (РјР°С‚)</param>
+/// <returns>РќР°Р»РёС‡РёРµ РјР°С‚Р°</returns>
+bool FigureBoard::checkmate_for(Color col, const std::vector<pos>& to_ignore, pos to_defend /*С‚СѓС‚, РІРѕР·РјРѕР¶РЅРѕ, РЅРµ РєРѕСЂРѕР»СЊ*/) {
     auto king_it = find_king(col);
     if (to_defend == pos()) {
         if (king_it == figures.end()) {
-            return false; // Нечего защищать
+            return false; // РќРµС‡РµРіРѕ Р·Р°С‰РёС‰Р°С‚СЊ
         }
         else {
             to_defend = king_it->position;
@@ -460,24 +460,24 @@ bool FigureBoard::checkmate_for(Color col, const std::vector<pos>& to_ignore, po
 }
 
 /// <summary>
-/// <para>Проверка валидности рокировки</para>
-/// <para>Рокировка как в 960 (ширина обязательно 8)</para>
-/// <para>Условия:</para>
-/// <para>1. Король и рокируемая ладья не ходили ранее</para>
-/// <para>2. Поля между начальной и конечной позицией короля и ладьи соответственно пусты</para>
-/// <para>3. Король не проходит через битое поле, не находится под шахом и не встаёт под него</para>
-/// <para><i>Ладья может быть под шахом</i></para>
-/// <para><i>Король мог быть под шахом до этого</i></para>
-/// <para><i>Рокировка сбрасывает все рокировки</i></para>
+/// <para>РџСЂРѕРІРµСЂРєР° РІР°Р»РёРґРЅРѕСЃС‚Рё СЂРѕРєРёСЂРѕРІРєРё</para>
+/// <para>Р РѕРєРёСЂРѕРІРєР° РєР°Рє РІ 960 (С€РёСЂРёРЅР° РѕР±СЏР·Р°С‚РµР»СЊРЅРѕ 8)</para>
+/// <para>РЈСЃР»РѕРІРёСЏ:</para>
+/// <para>1. РљРѕСЂРѕР»СЊ Рё СЂРѕРєРёСЂСѓРµРјР°СЏ Р»Р°РґСЊСЏ РЅРµ С…РѕРґРёР»Рё СЂР°РЅРµРµ</para>
+/// <para>2. РџРѕР»СЏ РјРµР¶РґСѓ РЅР°С‡Р°Р»СЊРЅРѕР№ Рё РєРѕРЅРµС‡РЅРѕР№ РїРѕР·РёС†РёРµР№ РєРѕСЂРѕР»СЏ Рё Р»Р°РґСЊРё СЃРѕРѕС‚РІРµС‚СЃС‚РІРµРЅРЅРѕ РїСѓСЃС‚С‹</para>
+/// <para>3. РљРѕСЂРѕР»СЊ РЅРµ РїСЂРѕС…РѕРґРёС‚ С‡РµСЂРµР· Р±РёС‚РѕРµ РїРѕР»Рµ, РЅРµ РЅР°С…РѕРґРёС‚СЃСЏ РїРѕРґ С€Р°С…РѕРј Рё РЅРµ РІСЃС‚Р°С‘С‚ РїРѕРґ РЅРµРіРѕ</para>
+/// <para><i>Р›Р°РґСЊСЏ РјРѕР¶РµС‚ Р±С‹С‚СЊ РїРѕРґ С€Р°С…РѕРј</i></para>
+/// <para><i>РљРѕСЂРѕР»СЊ РјРѕРі Р±С‹С‚СЊ РїРѕРґ С€Р°С…РѕРј РґРѕ СЌС‚РѕРіРѕ</i></para>
+/// <para><i>Р РѕРєРёСЂРѕРІРєР° СЃР±СЂР°СЃС‹РІР°РµС‚ РІСЃРµ СЂРѕРєРёСЂРѕРІРєРё</i></para>
 /// </summary>
-/// <param name="move_message">Сообщение хода для модификации</param>
-/// <param name="in_hand">Фигура, которой собираются сходить</param>
-/// <param name="input">Ввод для проверки</param>
-/// <param name="king_end_col">Целевой столбец для короля</param>
-/// <param name="rook_end_col">Целевой столбец для ладьи</param>
-/// <returns>Валидна ли рокировка</returns>
+/// <param name="move_message">РЎРѕРѕР±С‰РµРЅРёРµ С…РѕРґР° РґР»СЏ РјРѕРґРёС„РёРєР°С†РёРё</param>
+/// <param name="in_hand">Р¤РёРіСѓСЂР°, РєРѕС‚РѕСЂРѕР№ СЃРѕР±РёСЂР°СЋС‚СЃСЏ СЃС…РѕРґРёС‚СЊ</param>
+/// <param name="input">Р’РІРѕРґ РґР»СЏ РїСЂРѕРІРµСЂРєРё</param>
+/// <param name="king_end_col">Р¦РµР»РµРІРѕР№ СЃС‚РѕР»Р±РµС† РґР»СЏ РєРѕСЂРѕР»СЏ</param>
+/// <param name="rook_end_col">Р¦РµР»РµРІРѕР№ СЃС‚РѕР»Р±РµС† РґР»СЏ Р»Р°РґСЊРё</param>
+/// <returns>Р’Р°Р»РёРґРЅР° Р»Рё СЂРѕРєРёСЂРѕРІРєР°</returns>
 std::tuple<bool, MoveMessage, std::list<Figure>::iterator, std::list<Figure>::iterator> FigureBoard::castling_check(MoveMessage move_message, std::list<Figure>::iterator in_hand, const Input& input, int king_end_col, int rook_end_col) {
-    // Рокировка на g-фланг
+    // Р РѕРєРёСЂРѕРІРєР° РЅР° g-С„Р»Р°РЅРі
     bool castling_can_be_done = true;
     Id must_be_empty = ERR_ID;
     auto king = in_hand->type == EFigureType::King ? in_hand : find_king(in_hand->color);
@@ -485,8 +485,8 @@ std::tuple<bool, MoveMessage, std::list<Figure>::iterator, std::list<Figure>::it
     pos king_pos = king->position;
     if (in_hand->type == EFigureType::King && input.target.y == king_end_col && in_hand->position.y != king_end_col ||
         king_pos.y == king_end_col && in_hand->type == EFigureType::Rook && input.target.y == rook_end_col && in_hand->position.y != rook_end_col) {
-        // input правильный (король уже мог быть на g вертикали, так что доступна возможность рокировки от ладьи)
-        // Нужно проверить, что все промежуточные позиции (где идёт король) не под шахом
+        // input РїСЂР°РІРёР»СЊРЅС‹Р№ (РєРѕСЂРѕР»СЊ СѓР¶Рµ РјРѕРі Р±С‹С‚СЊ РЅР° g РІРµСЂС‚РёРєР°Р»Рё, С‚Р°Рє С‡С‚Рѕ РґРѕСЃС‚СѓРїРЅР° РІРѕР·РјРѕР¶РЅРѕСЃС‚СЊ СЂРѕРєРёСЂРѕРІРєРё РѕС‚ Р»Р°РґСЊРё)
+        // РќСѓР¶РЅРѕ РїСЂРѕРІРµСЂРёС‚СЊ, С‡С‚Рѕ РІСЃРµ РїСЂРѕРјРµР¶СѓС‚РѕС‡РЅС‹Рµ РїРѕР·РёС†РёРё (РіРґРµ РёРґС‘С‚ РєРѕСЂРѕР»СЊ) РЅРµ РїРѕРґ С€Р°С…РѕРј
         std::list<Figure>::iterator rook{ figures.begin() };
         int step{ king_end_col - king_pos.y > 0 ? 1 : -1 };
         for (pos rook_aspt_pos{ king_pos };
@@ -526,14 +526,14 @@ std::tuple<bool, MoveMessage, std::list<Figure>::iterator, std::list<Figure>::it
 }
 
 /// <summary>
-/// <para>Проверка на недостаточный материал для мата</para>
-/// <para>Варианты:</para>
-/// <para>Король против короля</para>
-/// <para>Король против короля и коня</para>
-/// <para>Король против короля и слона</para>
-/// <para>Король и слон против короля и слонов, где все слоны на одном цвете</para>
+/// <para>РџСЂРѕРІРµСЂРєР° РЅР° РЅРµРґРѕСЃС‚Р°С‚РѕС‡РЅС‹Р№ РјР°С‚РµСЂРёР°Р» РґР»СЏ РјР°С‚Р°</para>
+/// <para>Р’Р°СЂРёР°РЅС‚С‹:</para>
+/// <para>РљРѕСЂРѕР»СЊ РїСЂРѕС‚РёРІ РєРѕСЂРѕР»СЏ</para>
+/// <para>РљРѕСЂРѕР»СЊ РїСЂРѕС‚РёРІ РєРѕСЂРѕР»СЏ Рё РєРѕРЅСЏ</para>
+/// <para>РљРѕСЂРѕР»СЊ РїСЂРѕС‚РёРІ РєРѕСЂРѕР»СЏ Рё СЃР»РѕРЅР°</para>
+/// <para>РљРѕСЂРѕР»СЊ Рё СЃР»РѕРЅ РїСЂРѕС‚РёРІ РєРѕСЂРѕР»СЏ Рё СЃР»РѕРЅРѕРІ, РіРґРµ РІСЃРµ СЃР»РѕРЅС‹ РЅР° РѕРґРЅРѕРј С†РІРµС‚Рµ</para>
 /// </summary>
-/// <returns>Не хватает ли материала для мата</returns>
+/// <returns>РќРµ С…РІР°С‚Р°РµС‚ Р»Рё РјР°С‚РµСЂРёР°Р»Р° РґР»СЏ РјР°С‚Р°</returns>
 bool FigureBoard::insufficient_material() {
     size_t size = cnt_of_figures();
     if (size <= 2) return true;
@@ -554,7 +554,7 @@ bool FigureBoard::insufficient_material() {
             else
                 ++w_cell_bishops_cnt;
         else if (fig.type != EFigureType::King)
-            return false; // при модификации функции не забыть тут поставить хотя бы goto
+            return false; // РїСЂРё РјРѕРґРёС„РёРєР°С†РёРё С„СѓРЅРєС†РёРё РЅРµ Р·Р°Р±С‹С‚СЊ С‚СѓС‚ РїРѕСЃС‚Р°РІРёС‚СЊ С…РѕС‚СЏ Р±С‹ goto
     }
     return not (b_cell_bishops_cnt && w_cell_bishops_cnt);
 }
@@ -566,12 +566,12 @@ bool FigureBoard::game_end(Color col) {
 }
 
 /// <summary>
-/// Проверка хода на валидность и составление сообщения хода
+/// РџСЂРѕРІРµСЂРєР° С…РѕРґР° РЅР° РІР°Р»РёРґРЅРѕСЃС‚СЊ Рё СЃРѕСЃС‚Р°РІР»РµРЅРёРµ СЃРѕРѕР±С‰РµРЅРёСЏ С…РѕРґР°
 /// </summary>
-/// <exception cref="std::invalid_argument">Ход нельзя совершить</exception>
-/// <param name="in_hand">Фигура, которой собираются ходить</param>
-/// <param name="input">Ввод</param>
-/// <returns>Сообщение хода</returns>
+/// <exception cref="std::invalid_argument">РҐРѕРґ РЅРµР»СЊР·СЏ СЃРѕРІРµСЂС€РёС‚СЊ</exception>
+/// <param name="in_hand">Р¤РёРіСѓСЂР°, РєРѕС‚РѕСЂРѕР№ СЃРѕР±РёСЂР°СЋС‚СЃСЏ С…РѕРґРёС‚СЊ</param>
+/// <param name="input">Р’РІРѕРґ</param>
+/// <returns>РЎРѕРѕР±С‰РµРЅРёРµ С…РѕРґР°</returns>
 MoveMessage FigureBoard::move_check(std::list<Figure>::iterator in_hand, Input input) {
     MoveMessage move_message{ MainEvent::E, {} };
     std::list<Figure>::iterator targ{ get_fig(input.target) };
@@ -593,7 +593,7 @@ MoveMessage FigureBoard::move_check(std::list<Figure>::iterator in_hand, Input i
         move_message.side_evs.push_back(SideEvent::CASTLING_BREAK);
         for (const auto& fig : get_figures_of(in_hand->color)) {
             if (fig.type == EFigureType::Rook) {
-                // Заполняется в любом случае, но MainEvent::BREAK это отменит, если что
+                // Р—Р°РїРѕР»РЅСЏРµС‚СЃСЏ РІ Р»СЋР±РѕРј СЃР»СѓС‡Р°Рµ, РЅРѕ MainEvent::BREAK СЌС‚Рѕ РѕС‚РјРµРЅРёС‚, РµСЃР»Рё С‡С‚Рѕ
                 move_message.what_castling_breaks.push_back(fig.id);
             }
         }
@@ -630,7 +630,7 @@ MoveMessage FigureBoard::move_check(std::list<Figure>::iterator in_hand, Input i
 
     if (in_hand->type == EFigureType::Pawn) {
         pos shift{ input.target - input.from };
-        // Ход пешки на 2 (смотрю свои фигуры на 2 линии)
+        // РҐРѕРґ РїРµС€РєРё РЅР° 2 (СЃРјРѕС‚СЂСЋ СЃРІРѕРё С„РёРіСѓСЂС‹ РЅР° 2 Р»РёРЅРёРё)
         if (shift.y == 0 && is_empty(input.target) && (
             in_hand->color == EColor::White && (
                 input.from.x == (HEIGHT - 2) && idw && shift.x == -2 && is_empty(input.from + pos(-1, 0)) ||
@@ -658,8 +658,8 @@ MoveMessage FigureBoard::move_check(std::list<Figure>::iterator in_hand, Input i
             return move_message;
         }
 
-        // Взятие на проходе (смотрю чужие фигуры на 4 линии)
-        // А ещё проверяю прошлый ход
+        // Р’Р·СЏС‚РёРµ РЅР° РїСЂРѕС…РѕРґРµ (СЃРјРѕС‚СЂСЋ С‡СѓР¶РёРµ С„РёРіСѓСЂС‹ РЅР° 4 Р»РёРЅРёРё)
+        // Рђ РµС‰С‘ РїСЂРѕРІРµСЂСЏСЋ РїСЂРѕС€Р»С‹Р№ С…РѕРґ
         const MoveRec& last_move = move_logger.get_last_move();
         if (std::abs(shift.y) == 1 && is_empty(input.target) &&
            last_move.ms.main_ev == MainEvent::LMOVE && last_move.who_went.position.y == input.target.y &&
@@ -677,13 +677,13 @@ MoveMessage FigureBoard::move_check(std::list<Figure>::iterator in_hand, Input i
                 move_message.side_evs.push_back(SideEvent::CHECK);
             }
             if (in_hand->type == EFigureType::King) {
-                // Фигура на которой сейчас стоим всё ещё учитывается!
+                // Р¤РёРіСѓСЂР° РЅР° РєРѕС‚РѕСЂРѕР№ СЃРµР№С‡Р°СЃ СЃС‚РѕРёРј РІСЃС‘ РµС‰С‘ СѓС‡РёС‚С‹РІР°РµС‚СЃСЏ!
                 if (check_for_when(in_hand->color, { input.from, { input.from.x, input.target.y }, targ->position }, input.target)) {
                     throw std::invalid_argument("Check in that tile");
                 }
             }
             else {
-                // Фигура на которой сейчас стоим всё ещё учитывается!
+                // Р¤РёРіСѓСЂР° РЅР° РєРѕС‚РѕСЂРѕР№ СЃРµР№С‡Р°СЃ СЃС‚РѕРёРј РІСЃС‘ РµС‰С‘ СѓС‡РёС‚С‹РІР°РµС‚СЃСЏ!
                 if (check_for_when(in_hand->color, { input.from, { input.from.x, input.target.y }, targ->position }, {}, { in_hand->submit_on(input.target) }, {})) {
                     throw std::invalid_argument("Under check");
                 }
@@ -699,18 +699,18 @@ MoveMessage FigureBoard::move_check(std::list<Figure>::iterator in_hand, Input i
         if (curr != input.target) continue;
         if (is_eat) {
             if (targ->id != ERR_ID) {
-                // Фигура на которой сейчас стоим всё ещё учитывается!
+                // Р¤РёРіСѓСЂР° РЅР° РєРѕС‚РѕСЂРѕР№ СЃРµР№С‡Р°СЃ СЃС‚РѕРёРј РІСЃС‘ РµС‰С‘ СѓС‡РёС‚С‹РІР°РµС‚СЃСЏ!
                 if (check_for_when(in_hand->color.what_next(), { input.from, input.target }, {}, {}, { in_hand->submit_on(curr) })) {
                     move_message.side_evs.push_back(SideEvent::CHECK);
                 }
                 if (in_hand->type == EFigureType::King) {
-                    // Фигура на которой сейчас стоим всё ещё учитывается!
+                    // Р¤РёРіСѓСЂР° РЅР° РєРѕС‚РѕСЂРѕР№ СЃРµР№С‡Р°СЃ СЃС‚РѕРёРј РІСЃС‘ РµС‰С‘ СѓС‡РёС‚С‹РІР°РµС‚СЃСЏ!
                     if (check_for_when(in_hand->color, { input.from, input.target }, curr)) {
                         throw std::invalid_argument("Check in that tile");
                     }
                 }
                 else {
-                    // Фигура на которой сейчас стоим всё ещё учитывается!
+                    // Р¤РёРіСѓСЂР° РЅР° РєРѕС‚РѕСЂРѕР№ СЃРµР№С‡Р°СЃ СЃС‚РѕРёРј РІСЃС‘ РµС‰С‘ СѓС‡РёС‚С‹РІР°РµС‚СЃСЏ!
                     if (check_for_when(in_hand->color, { input.from, input.target }, {}, { in_hand->submit_on(curr) }, {})) {
                         throw std::invalid_argument("Under check");
                     }
@@ -744,11 +744,11 @@ MoveMessage FigureBoard::move_check(std::list<Figure>::iterator in_hand, Input i
 }
 
 /// <summary>
-/// Берет ход из истории ходов
-/// и воспроизводит его в обратном
-/// порядке
+/// Р‘РµСЂРµС‚ С…РѕРґ РёР· РёСЃС‚РѕСЂРёРё С…РѕРґРѕРІ
+/// Рё РІРѕСЃРїСЂРѕРёР·РІРѕРґРёС‚ РµРіРѕ РІ РѕР±СЂР°С‚РЅРѕРј
+/// РїРѕСЂСЏРґРєРµ
 /// </summary>
-/// <returns>Удалось ли отменить ход</returns>
+/// <returns>РЈРґР°Р»РѕСЃСЊ Р»Рё РѕС‚РјРµРЅРёС‚СЊ С…РѕРґ</returns>
 bool FigureBoard::undo_move() {
     if (move_logger.prev_empty()) return false;
     auto last = move_logger.move_last_to_future();
@@ -804,10 +804,10 @@ bool FigureBoard::undo_move() {
 }
 
 /// <summary>
-/// Производит ход
+/// РџСЂРѕРёР·РІРѕРґРёС‚ С…РѕРґ
 /// </summary>
-/// <param name="move_rec">Ход</param>
-/// <returns>Удалось ли совершить ход</returns>
+/// <param name="move_rec">РҐРѕРґ</param>
+/// <returns>РЈРґР°Р»РѕСЃСЊ Р»Рё СЃРѕРІРµСЂС€РёС‚СЊ С…РѕРґ</returns>
 bool FigureBoard::provide_move(const MoveRec& move_rec) {
     const auto& choice = move_rec.promotion_choice;
     const auto& in_hand_fig = move_rec.who_went;
@@ -865,9 +865,9 @@ bool FigureBoard::provide_move(const MoveRec& move_rec) {
 }
 
 /// <summary>
-/// Совершает отменённый ход
+/// РЎРѕРІРµСЂС€Р°РµС‚ РѕС‚РјРµРЅС‘РЅРЅС‹Р№ С…РѕРґ
 /// </summary>
-/// <returns>Удалось ли совершить ход</returns>
+/// <returns>РЈРґР°Р»РѕСЃСЊ Р»Рё СЃРѕРІРµСЂС€РёС‚СЊ С…РѕРґ</returns>
 bool FigureBoard::restore_move() {
     if (move_logger.future_empty()) return false;
     auto future = move_logger.pop_future_move();
@@ -877,17 +877,17 @@ bool FigureBoard::restore_move() {
 }
 
 /// <summary>
-/// Возвращает съеденную фигуру на доску
+/// Р’РѕР·РІСЂР°С‰Р°РµС‚ СЃСЉРµРґРµРЅРЅСѓСЋ С„РёРіСѓСЂСѓ РЅР° РґРѕСЃРєСѓ
 /// </summary>
 /// <exception cref="std::invalid_argument">
-/// Фигуры с полученным идендификатором не было в съеденных
+/// Р¤РёРіСѓСЂС‹ СЃ РїРѕР»СѓС‡РµРЅРЅС‹Рј РёРґРµРЅРґРёС„РёРєР°С‚РѕСЂРѕРј РЅРµ Р±С‹Р»Рѕ РІ СЃСЉРµРґРµРЅРЅС‹С…
 /// </exception>
-/// <param name="id">Идентификатор фигуры</param>
+/// <param name="id">РРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ С„РёРіСѓСЂС‹</param>
 void FigureBoard::uncapture_figure(const Id& id) {
     if (id == ERR_ID) return;
     std::list<Figure>::iterator to_resurrect = std::find_if(
         captured_figures.begin(), captured_figures.end(),
-        [&id] (auto&& val) { return id == val.id; }
+        [&id](auto&& val) { return id == val.id; }
     );
     if (to_resurrect == captured_figures.end())
         throw std::invalid_argument(std::format("Fig with id->{} can't be resurrected", id));
