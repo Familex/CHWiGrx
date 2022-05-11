@@ -266,7 +266,7 @@ BoardRepr::BoardRepr(std::string board_repr) {
 std::string MoveRec::as_string() {
     std::string result{ "" };
     result += std::format("{}.{}.{}.{}.{}.{}.{}.{{",
-        who_went,
+        who_went.as_string(),
         input.from.x,
         input.from.y,
         input.target.x,
@@ -299,11 +299,7 @@ std::string MoveRec::as_string() {
 // Коструктор из строки
 MoveRec::MoveRec(std::string map) {
     if (map.empty()) throw std::invalid_argument("Empty map");
-    std::string data[16]; // last always empty
-    int i{ 0 };
-    for (const std::string& curr : split(map, ".")) {
-        data[i++] = curr;
-    }
+    auto data = split(map, ".");
 
     Id new_id = std::stoi(data[0]);
     Color new_col = data[3][0];
@@ -312,7 +308,7 @@ MoveRec::MoveRec(std::string map) {
     Figure* who_went_tmp = FigureFabric::instance()->create(
         new_pos, new_col, new_type, new_id
     );
-    who_went = who_went_tmp->as_string();
+    who_went = *who_went_tmp;
     delete who_went_tmp;
     turn = new_col;
     input.from.x   = std::stoi(data[5]);
@@ -447,24 +443,24 @@ std::string to_string(MainEvent main_event) {
     }
 }
 
-Figure* FigureFabric::create(pos position, Color color, EFigureType type, Id id) {
+Figure* FigureFabric::create(pos position, Color color, EFigureType type, Id id, Figure* placement) {
     switch (type) {
         case EFigureType::Pawn:
-            return new Pawn(id, position, color);
+            return placement ? new (placement) Pawn(id, position, color) : new Pawn(id, position, color);
         case EFigureType::Knight:
-            return new Knight(id, position, color);
+            return placement ? new (placement) Knight(id, position, color) : new Knight(id, position, color);
         case EFigureType::Rook:
-            return new Rook(id, position, color);
+            return placement ? new (placement) Rook(id, position, color) : new Rook(id, position, color);
         case EFigureType::Bishop:
-            return new Bishop(id, position, color);
+            return placement ? new (placement) Bishop(id, position, color) : new Bishop(id, position, color);
         case EFigureType::Queen:
-            return new Queen(id, position, color);
+            return placement ? new (placement) Queen(id, position, color) : new Queen(id, position, color);
         case EFigureType::King:
-            return new King(id, position, color);
+            return placement ? new (placement) King(id, position, color) : new King(id, position, color);
         case EFigureType::None:
             return new Figure(id, position);
         default:
-            return new Figure(ERR_ID, position);
+            return get_default_fig();
         }
 }
 
@@ -485,7 +481,7 @@ Figure* FigureFabric::create(pos position, Color color, EFigureType type) {
     case EFigureType::None:
         return new Figure(this->id++, position);
     default:
-        return new Figure(ERR_ID, position);
+        return get_default_fig();
     }
 }
 

@@ -938,8 +938,5 @@ void FigureBoard::promotion_fig(Figure* to_promote, FigureType new_type) {
     Id id = to_promote->get_id();
     Color color = to_promote->get_col();
     pos position = to_promote->get_pos();
-    delete to_promote;
-    figures.erase(position);
-    Figure* new_fig = FigureFabric::instance()->create(position, color, new_type, id);
-    figures[position] = new_fig;
+    FigureFabric::instance()->create(position, color, new_type, id, to_promote);
 }

@@ -1,4 +1,5 @@
 #pragma once
+#include <new>
 #include <map>
 #include <list>
 #include <tuple>
@@ -193,7 +194,7 @@ public:
     void operator=(FigureFabric const&) = delete;
 
     Figure* create(pos, Color, EFigureType);
-    Figure* create(pos, Color, EFigureType, Id);
+    Figure* create(pos, Color, EFigureType, Id, Figure* =nullptr);
     Figure* create(Figure*);
     Figure* get_default_fig();
     // Ќе забывать удал€ть временную фигуру
@@ -219,7 +220,7 @@ struct MoveMessage {
 
 struct MoveRec {
     MoveRec(Figure* who_went, Input input, Color turn, MoveMessage ms, char p)
-        : who_went(who_went->as_string())
+        : who_went(*who_went)
         , input(input)
         , turn(turn)
         , ms(ms)
@@ -232,28 +233,19 @@ struct MoveRec {
         , promotion_choice('N') {};
     Figure* get_who_went() const {
         if (who_went.empty()) return FigureFabric::instance()->get_default_fig();
-        std::vector<std::string> data;
-        for (const std::string& curr : split(who_went, ".")) {
-            data.push_back(curr);
-        }
-        Id new_id = std::stoi(data[0]);
-        Color new_col = data[3][0];
-        pos new_pos = { std::stoi(data[1]), std::stoi(data[2]) };
-        FigureType new_type = data[4][0];
         return FigureFabric::instance()->create(
-            new_pos, new_col, new_type, new_id
+            who_went.get_pos(),
+            who_went.get_col(),
+            who_went.get_type(),
+            who_went.get_id()
         );
     }
     pos get_who_went_pos() const {
         if (who_went.empty()) return { -1, -1 };
-        std::vector<std::string> data;
-        for (const std::string& curr : split(who_went, ".")) {
-            data.push_back(curr);
-        }
-        return { std::stoi(data[1]), std::stoi(data[2]) };
+        return who_went.get_pos();
     }
     MoveRec(std::string);
-    std::string who_went{ "" };
+    Figure who_went{};
     Input input;
     Color turn;
     MoveMessage ms;
