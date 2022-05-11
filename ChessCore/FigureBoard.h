@@ -71,13 +71,13 @@ private:
 };
 
 /// <summary>
-/// Производит ход
+/// РџСЂРѕРёР·РІРѕРґРёС‚ С…РѕРґ
 /// </summary>
-/// <typeparam name="Func">Тип функции, возвращающей тип фигуры</typeparam>
-/// <param name="in_hand">Текущая фигура</param>
-/// <param name="input">Ввод</param>
-/// <param name="turn">Текущий ход</param>
-/// <param name="get_choise">Функция, возвращающая тип фигуры для превращения</param>
+/// <typeparam name="Func">РўРёРї С„СѓРЅРєС†РёРё, РІРѕР·РІСЂР°С‰Р°СЋС‰РµР№ С‚РёРї С„РёРіСѓСЂС‹</typeparam>
+/// <param name="in_hand">РўРµРєСѓС‰Р°СЏ С„РёРіСѓСЂР°</param>
+/// <param name="input">Р’РІРѕРґ</param>
+/// <param name="turn">РўРµРєСѓС‰РёР№ С…РѕРґ</param>
+/// <param name="get_choise">Р¤СѓРЅРєС†РёСЏ, РІРѕР·РІСЂР°С‰Р°СЋС‰Р°СЏ С‚РёРї С„РёРіСѓСЂС‹ РґР»СЏ РїСЂРµРІСЂР°С‰РµРЅРёСЏ</param>
 /// <returns></returns>
 template <typename Func>
 std::pair<bool, MoveRec> FigureBoard::provide_move(Figure* in_hand, const Input& input, Color turn, const Func& get_choise) {

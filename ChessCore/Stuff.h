@@ -197,7 +197,7 @@ public:
     Figure* create(pos, Color, EFigureType, Id, Figure* =nullptr);
     Figure* create(Figure*);
     Figure* get_default_fig();
-    // Íå çàáûâàòü óäàëÿòü âðåìåííóþ ôèãóðó
+    // ÐŒÐµ Ð·Ð°Ð±Ñ‹Ð²Ð°Ñ‚ÑŒ ÑƒÐ´Ð°Ð»Â¤Ñ‚ÑŒ Ð²Ñ€ÐµÐ¼ÐµÐ½Ð½ÑƒÑŽ Ñ„Ð¸Ð³ÑƒÑ€Ñƒ
     Figure* submit_on(Figure* who, pos on) {
         Figure* tmp = FigureFabric::instance()->create(who);
         tmp->move_to(on);

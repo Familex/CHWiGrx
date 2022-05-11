@@ -1,12 +1,12 @@
 #include "declarations.hpp"
 
 /// <summary>
-/// Регистрация окна
+/// Р РµРіРёСЃС‚СЂР°С†РёСЏ РѕРєРЅР°
 /// </summary>
-/// <param name="hInstance">Экземпляр окна</param>
-/// <param name="szTitle">Заголовок окна</param>
-/// <param name="szWindowClass">Класс окна</param>
-/// <returns>Атом класса</returns>
+/// <param name="hInstance">Р­РєР·РµРјРїР»СЏСЂ РѕРєРЅР°</param>
+/// <param name="szTitle">Р—Р°РіРѕР»РѕРІРѕРє РѕРєРЅР°</param>
+/// <param name="szWindowClass">РљР»Р°СЃСЃ РѕРєРЅР°</param>
+/// <returns>РђС‚РѕРј РєР»Р°СЃСЃР°</returns>
 ATOM register_main_window_class(HINSTANCE hInstance, LPTSTR szTitle, LPTSTR szWindowClass) {
     WNDCLASSEXW wcex;
 
@@ -27,10 +27,10 @@ ATOM register_main_window_class(HINSTANCE hInstance, LPTSTR szTitle, LPTSTR szWi
     return RegisterClassExW(&wcex);
 }
 
-// Инициализация окна
+// РРЅРёС†РёР°Р»РёР·Р°С†РёСЏ РѕРєРЅР°
 bool init_instance(HINSTANCE hInstance, LPTSTR szTitle, LPTSTR szWindowClass, int nCmdShow)
 {
-    hInst = hInstance; // Сохранить маркер экземпляра в глобальной переменной
+    hInst = hInstance; // РЎРѕС…СЂР°РЅРёС‚СЊ РјР°СЂРєРµСЂ СЌРєР·РµРјРїР»СЏСЂР° РІ РіР»РѕР±Р°Р»СЊРЅРѕР№ РїРµСЂРµРјРµРЅРЅРѕР№
 
     HWND hWnd = CreateWindowW(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW,
         window_stats.get_window_pos_x(), window_stats.get_window_pos_y(),
@@ -48,7 +48,7 @@ bool init_instance(HINSTANCE hInstance, LPTSTR szTitle, LPTSTR szWindowClass, in
     return true;
 }
 
-// Обработчик сообщений для окна "О программе".
+// РћР±СЂР°Р±РѕС‚С‡РёРє СЃРѕРѕР±С‰РµРЅРёР№ РґР»СЏ РѕРєРЅР° "Рћ РїСЂРѕРіСЂР°РјРјРµ".
 INT_PTR CALLBACK about_proc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
     UNREFERENCED_PARAMETER(lParam);
@@ -69,13 +69,13 @@ INT_PTR CALLBACK about_proc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPara
 }
 
 /// <summary>
-/// Рисует фигуру на контекст изображения
+/// Р РёСЃСѓРµС‚ С„РёРіСѓСЂСѓ РЅР° РєРѕРЅС‚РµРєСЃС‚ РёР·РѕР±СЂР°Р¶РµРЅРёСЏ
 /// </summary>
-/// <param name="hdc">Контекст отображения</param>
-/// <param name="figure">Фигура для отрисовки</param>
-/// <param name="w_beg">Левая координата</param>
-/// <param name="h_beg">Верхняя координата</param>
-/// <param name="is_transpanent">Сделать ли фон прозрачным</param>
+/// <param name="hdc">РљРѕРЅС‚РµРєСЃС‚ РѕС‚РѕР±СЂР°Р¶РµРЅРёСЏ</param>
+/// <param name="figure">Р¤РёРіСѓСЂР° РґР»СЏ РѕС‚СЂРёСЃРѕРІРєРё</param>
+/// <param name="w_beg">Р›РµРІР°СЏ РєРѕРѕСЂРґРёРЅР°С‚Р°</param>
+/// <param name="h_beg">Р’РµСЂС…РЅСЏСЏ РєРѕРѕСЂРґРёРЅР°С‚Р°</param>
+/// <param name="is_transpanent">РЎРґРµР»Р°С‚СЊ Р»Рё С„РѕРЅ РїСЂРѕР·СЂР°С‡РЅС‹Рј</param>
 void draw_figure(HDC hdc, const Figure* figure, int w_beg, int h_beg, bool is_transpanent) {
     if (h_beg == -1) h_beg = figure->get_pos().x * window_stats.get_cell_height();
     if (w_beg == -1) w_beg = figure->get_pos().y * window_stats.get_cell_width();
@@ -103,9 +103,9 @@ void draw_figure(HDC hdc, const Figure* figure, int w_beg, int h_beg, bool is_tr
 }
 
 /// <summary>
-/// Совершает ход
+/// РЎРѕРІРµСЂС€Р°РµС‚ С…РѕРґ
 /// </summary>
-/// <param name="hWnd">Дескриптор окна</param>
+/// <param name="hWnd">Р”РµСЃРєСЂРёРїС‚РѕСЂ РѕРєРЅР°</param>
 void make_move(HWND hWnd) {
     if (!motion_input.is_current_turn(turn)) {
         motion_input.clear();
@@ -154,7 +154,7 @@ void restart() {
     turn = start_board_repr.get_turn();
 }
 
-// Копирует строку в буффер обмена
+// РљРѕРїРёСЂСѓРµС‚ СЃС‚СЂРѕРєСѓ РІ Р±СѓС„С„РµСЂ РѕР±РјРµРЅР°
 void cpy_str_to_clip(const std::string& buff)
 {
     size_t len = buff.length() + 1;
@@ -171,7 +171,7 @@ void cpy_str_to_clip(const std::string& buff)
     }
 }
 
-// Возвращает строку из буффера обмена
+// Р’РѕР·РІСЂР°С‰Р°РµС‚ СЃС‚СЂРѕРєСѓ РёР· Р±СѓС„С„РµСЂР° РѕР±РјРµРЅР°
 std::string take_str_from_clip() {
     if (!OpenClipboard(nullptr)) return "";
     HANDLE hData = GetClipboardData(CF_TEXT);
@@ -185,21 +185,21 @@ std::string take_str_from_clip() {
 }
 
 /// <summary>
-/// Создаёт экземпляр окна для выбранной фигуры
+/// РЎРѕР·РґР°С‘С‚ СЌРєР·РµРјРїР»СЏСЂ РѕРєРЅР° РґР»СЏ РІС‹Р±СЂР°РЅРЅРѕР№ С„РёРіСѓСЂС‹
 /// </summary>
-/// <param name="parent">Основное окно</param>
-/// <param name="in_hand">Выбранная фигура</param>
-/// <param name="mouse">Позиция мыши</param>
-/// <param name="w">Ширина фигуры</param>
-/// <param name="h">Высота фигуры</param>
-/// <param name="callback">Функция окна</param>
-/// <param name="class_name">Имя класса окна</param>
-/// <returns>Дескриптор окна</returns>
+/// <param name="parent">РћСЃРЅРѕРІРЅРѕРµ РѕРєРЅРѕ</param>
+/// <param name="in_hand">Р’С‹Р±СЂР°РЅРЅР°СЏ С„РёРіСѓСЂР°</param>
+/// <param name="mouse">РџРѕР·РёС†РёСЏ РјС‹С€Рё</param>
+/// <param name="w">РЁРёСЂРёРЅР° С„РёРіСѓСЂС‹</param>
+/// <param name="h">Р’С‹СЃРѕС‚Р° С„РёРіСѓСЂС‹</param>
+/// <param name="callback">Р¤СѓРЅРєС†РёСЏ РѕРєРЅР°</param>
+/// <param name="class_name">РРјСЏ РєР»Р°СЃСЃР° РѕРєРЅР°</param>
+/// <returns>Р”РµСЃРєСЂРёРїС‚РѕСЂ РѕРєРЅР°</returns>
 HWND create_curr_choice_window(HWND parent, Figure* in_hand, POINT mouse, int w, int h, const WNDPROC callback, LPCWSTR class_name) {
     UnregisterClass(class_name, GetModuleHandle(nullptr));
     WNDCLASSEX wc{ sizeof(WNDCLASSEX) };
     HWND hWindow{};
-    Figure* for_storage = in_hand;  // Возможно нужно копировать TODO
+    Figure* for_storage = in_hand;  // Р’РѕР·РјРѕР¶РЅРѕ РЅСѓР¶РЅРѕ РєРѕРїРёСЂРѕРІР°С‚СЊ TODO
     wc.cbClsExtra = 0;
     wc.cbWndExtra = sizeof(in_hand);
     wc.hbrBackground = NULL;
@@ -230,12 +230,12 @@ HWND create_curr_choice_window(HWND parent, Figure* in_hand, POINT mouse, int w,
 }
 
 /// <summary>
-/// Функция обрабатывающая WM_LBUTTONUP
+/// Р¤СѓРЅРєС†РёСЏ РѕР±СЂР°Р±Р°С‚С‹РІР°СЋС‰Р°СЏ WM_LBUTTONUP
 /// </summary>
-/// <param name="hWnd">Дескриптор окна</param>
+/// <param name="hWnd">Р”РµСЃРєСЂРёРїС‚РѕСЂ РѕРєРЅР°</param>
 /// <param name="wParam"></param>
 /// <param name="lParam"></param>
-/// <param name="where_fig">Позиция фигуры</param>
+/// <param name="where_fig">РџРѕР·РёС†РёСЏ С„РёРіСѓСЂС‹</param>
 void on_lbutton_up(HWND hWnd, WPARAM wParam, LPARAM lParam, pos where_fig) {
     motion_input.reset_lbutton_down();
     motion_input.reset_single();
@@ -248,7 +248,7 @@ void on_lbutton_up(HWND hWnd, WPARAM wParam, LPARAM lParam, pos where_fig) {
     else {
         motion_input.set_target(where_fig.x, where_fig.y);
         if (motion_input.target_at_input()) {
-            if (window_stats.get_prev_lbutton_click() != pos(HIWORD(lParam), LOWORD(lParam))) { // Отпустили в пределах клетки, но в другом месте
+            if (window_stats.get_prev_lbutton_click() != pos(HIWORD(lParam), LOWORD(lParam))) { // РћС‚РїСѓСЃС‚РёР»Рё РІ РїСЂРµРґРµР»Р°С… РєР»РµС‚РєРё, РЅРѕ РІ РґСЂСѓРіРѕРј РјРµСЃС‚Рµ
                 motion_input.clear();
                 InvalidateRect(hWnd, NULL, NULL);
                 return;
@@ -267,7 +267,7 @@ bool is_legal_board_repr(const std::string& str) {
 #ifdef USE_REGEX_BOARD_REPR_CHECK
     const static std::regex valid_board_repr(R"(((-?\d+;){3}\w;\w;)+\[T?F?W?B?\](<(\d+\.\d+\.\d+\.\w\.\w\.\d+\.\d+\.\d+\.\d+\.\w\.\w\.\{(\w,)*\}\.\{(-?\d+,)*\}\.\{((-?\d+,){5})*\}\.\{(-?\d+,)*\}\$)*>){2}~((-?\d+,){3}\w,\w,)*)");
     const static std::regex valid_board_repr_light(R"((?:(?:-?\d+;){3}\w;\w;)+\[T?F?W?B?\](?:<(?:\d+\.\d+\.\d+\.\w\.\w\.\d+\.\d+\.\d+\.\d+\.\w\.\w\.\{(?:\w,)*\}\.\{(?:-?\d+,)*\}\.\{(?:(?:-?\d+,){5})*\}\.\{(?:-?\d+,)*\}\$)*>){2}~(?:(?:-?\d+,){3}\w,\w,)*)");
-    return std::regex_match(str, valid_board_repr_light); // Программа ложится под stackoverflow
+    return std::regex_match(str, valid_board_repr_light); // РџСЂРѕРіСЂР°РјРјР° Р»РѕР¶РёС‚СЃСЏ РїРѕРґ stackoverflow
 #endif // USE_REGEX_BOARD_REPR_CHECK
 
     return (str.find('<') != str.npos &&
@@ -288,15 +288,15 @@ void set_menu_checkbox(HWND hWnd, UINT menu_item, bool state) {
     SetMenuItemInfoW(hMenu, menu_item, FALSE, &item_info);
 }
 
-// Создаёт окно в выбранной фигурой и привязывает к мыши
+// РЎРѕР·РґР°С‘С‚ РѕРєРЅРѕ РІ РІС‹Р±СЂР°РЅРЅРѕР№ С„РёРіСѓСЂРѕР№ Рё РїСЂРёРІСЏР·С‹РІР°РµС‚ Рє РјС‹С€Рё
 void MotionInput::init_curr_choice_window(HWND hWnd) {
     is_curr_choice_moving = true;
     POINT mouse{};
     GetCursorPos(&mouse);
     curr_chose_window = create_curr_choice_window(hWnd, in_hand, mouse, window_stats.get_cell_width(), window_stats.get_cell_height(),
         [](HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
-            static const int TO_DESTROY_TIMER_ID{ 99 }; // не могу захватить из вне
-            static const int TO_DESTROY_ELAPSE{ 5 };    // да и не надо так-то
+            static const int TO_DESTROY_TIMER_ID{ 99 }; // РЅРµ РјРѕРіСѓ Р·Р°С…РІР°С‚РёС‚СЊ РёР· РІРЅРµ
+            static const int TO_DESTROY_ELAPSE{ 5 };    // РґР° Рё РЅРµ РЅР°РґРѕ С‚Р°Рє-С‚Рѕ
             switch (uMsg) {
             case WM_CREATE:
                 SetTimer(hWnd, TO_DESTROY_TIMER_ID, TO_DESTROY_ELAPSE, NULL);
@@ -310,7 +310,7 @@ void MotionInput::init_curr_choice_window(HWND hWnd) {
             case WM_ENTERSIZEMOVE:
                 KillTimer(hWnd, TO_DESTROY_TIMER_ID);
                 break;
-            case WM_EXITSIZEMOVE: // Фигуру отпустил
+            case WM_EXITSIZEMOVE: // Р¤РёРіСѓСЂСѓ РѕС‚РїСѓСЃС‚РёР»
             {
                 HWND parent = GetParent(hWnd);
                 POINT cur_pos{};
@@ -326,7 +326,7 @@ void MotionInput::init_curr_choice_window(HWND hWnd) {
                 DestroyWindow(hWnd);
             }
             break;
-            case WM_NCHITTEST:  // При перехвате нажатий мыши симулируем перетаскивание
+            case WM_NCHITTEST:  // РџСЂРё РїРµСЂРµС…РІР°С‚Рµ РЅР°Р¶Р°С‚РёР№ РјС‹С€Рё СЃРёРјСѓР»РёСЂСѓРµРј РїРµСЂРµС‚Р°СЃРєРёРІР°РЅРёРµ
                 return (LRESULT)HTCAPTION;
             case WM_PAINT:
             {
@@ -348,7 +348,7 @@ void MotionInput::init_curr_choice_window(HWND hWnd) {
     SendMessage(curr_chose_window, WM_NCLBUTTONDOWN, HTCAPTION, MAKELPARAM(mouse.x, mouse.y));
 }
 
-// Заполняет поле возможных ходов для текущей фигуры
+// Р—Р°РїРѕР»РЅСЏРµС‚ РїРѕР»Рµ РІРѕР·РјРѕР¶РЅС‹С… С…РѕРґРѕРІ РґР»СЏ С‚РµРєСѓС‰РµР№ С„РёРіСѓСЂС‹
 void MotionInput::calculate_possible_moves() {
     all_possible_moves.clear();
     for (const auto& [is_eat, move_pos] : board->get_all_possible_moves(in_hand)) {

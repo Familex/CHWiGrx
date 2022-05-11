@@ -1,12 +1,12 @@
 #include "Stuff.h"
 
 /// <summary>
-/// Делит строку на подстроки
-/// по разделителю
+/// Р”РµР»РёС‚ СЃС‚СЂРѕРєСѓ РЅР° РїРѕРґСЃС‚СЂРѕРєРё
+/// РїРѕ СЂР°Р·РґРµР»РёС‚РµР»СЋ
 /// </summary>
-/// <param name="str">Строка</param>
-/// <param name="delimiter">Разделитель</param>
-/// <returns>Вектор подстрок</returns>
+/// <param name="str">РЎС‚СЂРѕРєР°</param>
+/// <param name="delimiter">Р Р°Р·РґРµР»РёС‚РµР»СЊ</param>
+/// <returns>Р’РµРєС‚РѕСЂ РїРѕРґСЃС‚СЂРѕРє</returns>
 std::vector<std::string> split(std::string str, const std::string&& delimiter) {
     size_t token_end{};
     std::vector<std::string> tokens{};
@@ -25,10 +25,10 @@ std::vector<std::string> split(std::string str, const std::string&& delimiter) {
 }
 
 /// <summary>
-/// Конструктор типа фигуры из буквы
+/// РљРѕРЅСЃС‚СЂСѓРєС‚РѕСЂ С‚РёРїР° С„РёРіСѓСЂС‹ РёР· Р±СѓРєРІС‹
 /// </summary>
-/// <exception cref="std::invatid_argument">Непредвиденный символ</exception>
-/// <param name="ch">Тип фигуры</param>
+/// <exception cref="std::invatid_argument">РќРµРїСЂРµРґРІРёРґРµРЅРЅС‹Р№ СЃРёРјРІРѕР»</exception>
+/// <param name="ch">РўРёРї С„РёРіСѓСЂС‹</param>
 FigureType::FigureType(char ch) {
     switch (ch)
     {
@@ -45,10 +45,10 @@ FigureType::FigureType(char ch) {
 }
 
 /// <summary>
-/// Коструктор цвета из буквы
+/// РљРѕСЃС‚СЂСѓРєС‚РѕСЂ С†РІРµС‚Р° РёР· Р±СѓРєРІС‹
 /// </summary>
-/// <exception cref="std::invatid_argument">Непредвиденный символ</exception>
-/// <param name="ch">Цвет</param>
+/// <exception cref="std::invatid_argument">РќРµРїСЂРµРґРІРёРґРµРЅРЅС‹Р№ СЃРёРјРІРѕР»</exception>
+/// <param name="ch">Р¦РІРµС‚</param>
 Color::Color(char ch) {
     switch (ch) {
     case 'w': case 'W': data = EColor::White; break;
@@ -59,7 +59,7 @@ Color::Color(char ch) {
     }
 }
 
-// Возвращает цвет игрока на следующем ходу
+// Р’РѕР·РІСЂР°С‰Р°РµС‚ С†РІРµС‚ РёРіСЂРѕРєР° РЅР° СЃР»РµРґСѓСЋС‰РµРј С…РѕРґСѓ
 Color Color::what_next() const {
     switch (data) {
     case EColor::Black:
@@ -71,13 +71,13 @@ Color Color::what_next() const {
     }
 }
 
-// Меняет цвет на следующий
+// РњРµРЅСЏРµС‚ С†РІРµС‚ РЅР° СЃР»РµРґСѓСЋС‰РёР№
 Color Color::to_next() {
     data = what_next();
     return *this;
 }
 
-// Перевод в символ
+// РџРµСЂРµРІРѕРґ РІ СЃРёРјРІРѕР»
 FigureType::operator char() {
     switch (data) {
     case EFigureType::Pawn: return 'P';
@@ -92,7 +92,7 @@ FigureType::operator char() {
     }
 }
 
-// Перевод в символ
+// РџРµСЂРµРІРѕРґ РІ СЃРёРјРІРѕР»
 Color::operator char() {
     switch (data) {
     case EColor::Black: return 'B';
@@ -120,7 +120,7 @@ bool operator<  (const pos& left, const pos& right) {
     }
 }
 
-// Оставить от вектора фигур только вектор их позиций
+// РћСЃС‚Р°РІРёС‚СЊ РѕС‚ РІРµРєС‚РѕСЂР° С„РёРіСѓСЂ С‚РѕР»СЊРєРѕ РІРµРєС‚РѕСЂ РёС… РїРѕР·РёС†РёР№
 std::vector<pos> to_pos_vector(const std::vector<Figure*>& lst) {
     std::vector<pos> acc{};
     for (const auto& fig : lst) {
@@ -129,7 +129,7 @@ std::vector<pos> to_pos_vector(const std::vector<Figure*>& lst) {
     return acc;
 }
 
-// Конструктор ввода
+// РљРѕРЅСЃС‚СЂСѓРєС‚РѕСЂ РІРІРѕРґР°
 Input::Input(std::string str) {
     /* "from.first from.second target.first target.second" */
     str += " ";
@@ -152,26 +152,26 @@ Input::Input(std::string str) {
     target.y = acc[3];
 }
 
-// Возвращает последний сделанный ход
+// Р’РѕР·РІСЂР°С‰Р°РµС‚ РїРѕСЃР»РµРґРЅРёР№ СЃРґРµР»Р°РЅРЅС‹Р№ С…РѕРґ
 MoveRec MoveLogger::get_last_move() {
     if (prev_moves.empty())
         return {};
     return prev_moves.back();
 }
 
-// Добавляет в лог ход
+// Р”РѕР±Р°РІР»СЏРµС‚ РІ Р»РѕРі С…РѕРґ
 void MoveLogger::add(const MoveRec& move_rec) {
     prev_moves.push_back(move_rec);
     future_moves.clear();
 }
 
-// Обнуляет лог
+// РћР±РЅСѓР»СЏРµС‚ Р»РѕРі
 void MoveLogger::reset() {
     prev_moves.clear();
     future_moves.clear();
 }
 
-// Достает из будущих ходов следующий
+// Р”РѕСЃС‚Р°РµС‚ РёР· Р±СѓРґСѓС‰РёС… С…РѕРґРѕРІ СЃР»РµРґСѓСЋС‰РёР№
 MoveRec MoveLogger::pop_future_move() {
     if (future_moves.empty()) return {};
     auto future = future_moves.back();
@@ -179,7 +179,7 @@ MoveRec MoveLogger::pop_future_move() {
     return future;
 }
 
-// Добавляет последний ход в следующие и возвращает его
+// Р”РѕР±Р°РІР»СЏРµС‚ РїРѕСЃР»РµРґРЅРёР№ С…РѕРґ РІ СЃР»РµРґСѓСЋС‰РёРµ Рё РІРѕР·РІСЂР°С‰Р°РµС‚ РµРіРѕ
 MoveRec MoveLogger::move_last_to_future() {
     if (prev_moves.empty()) return {};
     auto last = get_last_move();
@@ -188,7 +188,7 @@ MoveRec MoveLogger::move_last_to_future() {
     return last;
 }
 
-// Конструктор репрезентации доски
+// РљРѕРЅСЃС‚СЂСѓРєС‚РѕСЂ СЂРµРїСЂРµР·РµРЅС‚Р°С†РёРё РґРѕСЃРєРё
 BoardRepr::BoardRepr(std::string board_repr) {
     const size_t npos = std::string::npos;
     size_t meta_start = board_repr.find('[');
@@ -262,7 +262,7 @@ BoardRepr::BoardRepr(std::string board_repr) {
     }
 }
 
-// Преобразование в строку
+// РџСЂРµРѕР±СЂР°Р·РѕРІР°РЅРёРµ РІ СЃС‚СЂРѕРєСѓ
 std::string MoveRec::as_string() {
     std::string result{ "" };
     result += std::format("{}.{}.{}.{}.{}.{}.{}.{{",
@@ -296,7 +296,7 @@ std::string MoveRec::as_string() {
     return result;
 }
 
-// Коструктор из строки
+// РљРѕСЃС‚СЂСѓРєС‚РѕСЂ РёР· СЃС‚СЂРѕРєРё
 MoveRec::MoveRec(std::string map) {
     if (map.empty()) throw std::invalid_argument("Empty map");
     auto data = split(map, ".");
@@ -380,7 +380,7 @@ MoveRec::MoveRec(std::string map) {
     }
 }
 
-// Преобразование в строку
+// РџСЂРµРѕР±СЂР°Р·РѕРІР°РЅРёРµ РІ СЃС‚СЂРѕРєСѓ
 std::string BoardRepr::as_string() {
     std::string result{ "" };
     for (auto& fig : figures) {
@@ -405,7 +405,7 @@ std::string BoardRepr::as_string() {
     return result;
 }
 
-// Преобразование в строку
+// РџСЂРµРѕР±СЂР°Р·РѕРІР°РЅРёРµ РІ СЃС‚СЂРѕРєСѓ
 std::string to_string(SideEvent side_event) {
     switch (side_event)
     {
@@ -422,7 +422,7 @@ std::string to_string(SideEvent side_event) {
     }
 }
 
-// Преобразование в строку
+// РџСЂРµРѕР±СЂР°Р·РѕРІР°РЅРёРµ РІ СЃС‚СЂРѕРєСѓ
 std::string to_string(MainEvent main_event) {
     switch (main_event)
     {
