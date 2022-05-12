@@ -300,7 +300,7 @@ std::string MoveRec::as_string() {
 MoveRec::MoveRec(std::string map) {
     if (map.empty()) throw std::invalid_argument("Empty map");
     auto data = split(map, ".");
-
+    // Возможно нижнюю конструкцию стоит вставить в фабрику
     Id new_id = std::stoi(data[0]);
     Color new_col = data[3][0];
     pos new_pos = { std::stoi(data[1]), std::stoi(data[2]) };
@@ -446,19 +446,31 @@ std::string to_string(MainEvent main_event) {
 Figure* FigureFabric::create(pos position, Color color, EFigureType type, Id id, Figure* placement) {
     switch (type) {
         case EFigureType::Pawn:
-            return placement ? new (placement) Pawn(id, position, color) : new Pawn(id, position, color);
+            return placement
+                   ? new (placement) Figure(id, position, color, EFigureType::Pawn)
+                   : new Figure(id, position, color, EFigureType::Pawn);
         case EFigureType::Knight:
-            return placement ? new (placement) Knight(id, position, color) : new Knight(id, position, color);
+            return placement
+                   ? new (placement) Figure(id, position, color, EFigureType::Knight)
+                   : new Figure(id, position, color, EFigureType::Knight);
         case EFigureType::Rook:
-            return placement ? new (placement) Rook(id, position, color) : new Rook(id, position, color);
+            return placement
+                   ? new (placement) Figure(id, position, color, EFigureType::Rook)
+                   : new Figure(id, position, color, EFigureType::Rook);
         case EFigureType::Bishop:
-            return placement ? new (placement) Bishop(id, position, color) : new Bishop(id, position, color);
+            return placement
+                   ? new (placement) Figure(id, position, color, EFigureType::Bishop)
+                   : new Figure(id, position, color, EFigureType::Bishop);
         case EFigureType::Queen:
-            return placement ? new (placement) Queen(id, position, color) : new Queen(id, position, color);
+            return placement
+                   ? new (placement) Figure(id, position, color, EFigureType::Queen)
+                   : new Figure(id, position, color, EFigureType::Queen);
         case EFigureType::King:
-            return placement ? new (placement) King(id, position, color) : new King(id, position, color);
+            return placement
+                   ? new (placement) Figure(id, position, color, EFigureType::King)
+                   : new Figure(id, position, color, EFigureType::King);
         case EFigureType::None:
-            return new Figure(id, position);
+            return new Figure(id, position, EColor::None, EFigureType::None);
         default:
             return get_default_fig();
         }
@@ -467,19 +479,19 @@ Figure* FigureFabric::create(pos position, Color color, EFigureType type, Id id,
 Figure* FigureFabric::create(pos position, Color color, EFigureType type) {
     switch (type) {
     case EFigureType::Pawn:
-        return new Pawn(this->id++, position, color);
+        return new Figure(this->id++, position, color, EFigureType::Pawn);
     case EFigureType::Knight:
-        return new Knight(this->id++, position, color);
+        return new Figure(this->id++, position, color, EFigureType::Knight);
     case EFigureType::Rook:
-        return new Rook(this->id++, position, color);
+        return new Figure(this->id++, position, color, EFigureType::Rook);
     case EFigureType::Bishop:
-        return new Bishop(this->id++, position, color);
+        return new Figure(this->id++, position, color, EFigureType::Bishop);
     case EFigureType::Queen:
-        return new Queen(this->id++, position, color);
+        return new Figure(this->id++, position, color, EFigureType::Queen);
     case EFigureType::King:
-        return new King(this->id++, position, color);
+        return new Figure(this->id++, position, color, EFigureType::King);
     case EFigureType::None:
-        return new Figure(this->id++, position);
+        return new Figure(this->id++, position, EColor::None, EFigureType::None);
     default:
         return get_default_fig();
     }

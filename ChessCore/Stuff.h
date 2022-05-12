@@ -87,8 +87,8 @@ private:
 class Figure {
 public:
     Figure() : id{ ERR_ID }, position() {};
-    Figure(Id id, pos position) :
-        id(id), position(position), color(), type() {};
+    Figure(Id id, pos position, Color color, FigureType type) :
+        id(id), position(position), color(color), type(type) {};
     void move_to(pos p) { position = p; }
     void move_to(int x, int y) { position.x = x; position.y = y; }
     bool operator ==(const Figure& r) const { return this->id == r.id; }
@@ -105,66 +105,11 @@ public:
     bool empty() const { return id == ERR_ID; }
     bool is(Id id) const { return this->id == id; }
     bool at(pos p) const { return position == p; }
-    virtual ~Figure() {};
-protected:
+private:
     Id id;
     pos position{};
     Color color{};
     FigureType type{};
-};
-
-class Pawn : public Figure {
-public:
-    Pawn(Id id, pos position, Color color)
-        : Figure(id, position) {
-        this->color = color;
-        this->type = EFigureType::Pawn;
-    }
-};
-
-class Bishop : public Figure {
-public:
-    Bishop(Id id, pos position, Color color)
-        : Figure(id, position) {
-        this->color = color;
-        this->type = EFigureType::Bishop;
-    }
-};
-
-class King : public Figure {
-public:
-    King(Id id, pos position, Color color)
-        : Figure(id, position) {
-        this->color = color;
-        this->type = EFigureType::King;
-    }
-};
-
-class Queen : public Figure {
-public:
-    Queen(Id id, pos position, Color color)
-        : Figure(id, position) {
-        this->color = color;
-        this->type = EFigureType::Queen;
-    }
-};
-
-class Knight : public Figure {
-public:
-    Knight(Id id, pos position, Color color)
-        : Figure(id, position) {
-        this->color = color;
-        this->type = EFigureType::Knight;
-    }
-};
-
-class Rook : public Figure {
-public:
-    Rook(Id id, pos position, Color color)
-        : Figure(id, position) {
-        this->color = color;
-        this->type = EFigureType::Rook;
-    }
 };
 
 std::vector<pos> to_pos_vector(const std::vector<Figure*>&);

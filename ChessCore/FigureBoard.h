@@ -57,6 +57,15 @@ public:
     size_t cnt_of_figures() const { return figures.size() - 1; }
     bool insufficient_material();
     BoardRepr get_repr(bool);
+    ~FigureBoard() {
+        for (auto& [_, fig] : figures) {
+            delete fig;
+        }
+        for (auto& fig : captured_figures) {
+            if (not fig->empty())
+                delete fig;
+        }
+    }
 private:
     bool idw{true};
     Id curr_id{};
