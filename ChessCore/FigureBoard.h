@@ -67,14 +67,7 @@ public:
         }
     }
 private:
-
-    using get_moves_func = std::vector<std::pair<bool, pos>>(FigureBoard::*)(Figure*, const std::vector<pos>&, const std::vector<pos>&, const std::vector<pos>&);
     using shift_broom = std::vector<std::vector<pos>>;
-
-    std::vector<std::pair<bool, pos>> _used_to_get_all_moves_of_rook_temporary_name(Figure*, const std::vector<pos>&, const std::vector<pos>&, const std::vector<pos>&);
-    std::vector<std::pair<bool, pos>> _used_to_get_all_moves_of_pawn_temporary_name(Figure*, const std::vector<pos>&, const std::vector<pos>&, const std::vector<pos>&);
-    std::vector<std::pair<bool, pos>> _used_to_get_all_moves_of_king_temporary_name(Figure*, const std::vector<pos>&, const std::vector<pos>&, const std::vector<pos>&);
-    std::vector<std::pair<bool, pos>> _used_to_expand_shift_broom_temporary_name(Figure*, const std::vector<pos>&, const std::vector<pos>&, const std::vector<pos>&);
 
     bool idw{true};
     Id curr_id{};
@@ -84,9 +77,6 @@ private:
     std::map<Color, std::map<Id, bool>> castling;
     std::map<FigureType, shift_broom> moves;
     std::map<FigureType, shift_broom> eats;
-    // pair { moves, eats }
-    std::map<EFigureType, std::pair<shift_broom, shift_broom>> _shift_brooms;
-    std::map<EFigureType, get_moves_func> used_to_get_all_moves_temporary_name;
 
 };
 
