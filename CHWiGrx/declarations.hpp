@@ -152,7 +152,7 @@ public:
     inline void set_target_y(int val) { input.target.y = val; }
     inline auto get_single_state() { return input_order_by_one; }
     inline bool is_drags() { return !is_curr_choice_moving && is_lbutton_down && not in_hand->empty(); }
-    inline auto get_possible_moves() { return all_possible_moves; }
+    inline auto get_possible_moves() { return all_moves; }
     inline bool is_figure_dragged(Id id) { return in_hand->is(id) && is_curr_choice_moving && !input_order_by_two; }
     inline void reset_input_order() {
         input_order_by_one = 0;
@@ -168,7 +168,7 @@ private:
     HWND curr_chose_window{};
     bool is_curr_choice_moving{ false };
     Figure* in_hand = board->get_default_fig();
-    std::list<std::pair<bool, pos>> all_possible_moves{};
+    std::list<std::pair<bool, pos>> all_moves{};
 };
 
 inline MotionInput motion_input{&board};

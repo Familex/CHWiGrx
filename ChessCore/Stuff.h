@@ -6,7 +6,17 @@
 #include <format>
 #include <vector>
 #include <stdexcept>
-#include <Windows.h>
+#include <functional>
+
+template <class T0, class... Ts>
+auto make_vector(T0&& first, Ts&&... args)
+{
+    using first_type = std::decay_t<T0>;
+    return std::vector<first_type>{
+        std::forward<T0>(first),
+            std::forward<Ts>(args)...
+    };
+}
 
 template <class T>
 std::vector<T> operator +(std::vector<T> vec, T val) {
