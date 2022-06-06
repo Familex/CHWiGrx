@@ -1012,7 +1012,10 @@ bool FigureBoard::provide_move(const MoveRec& move_rec) {
         break;
     case MainEvent::EN_PASSANT: case MainEvent::EAT:
         move_fig(in_hand, input.target);
-        for (const Id& it : ms.to_eat) capture_figure(it);
+        for (const Id& it : ms.to_eat) {
+            if (it != ERR_ID && get_fig(it)->get_pos() != input.target)
+                capture_figure(it);
+        }
         break;
     case MainEvent::CASTLING:
         if (has_castling(turn, ms.to_move.back().first)) {
