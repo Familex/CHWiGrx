@@ -60,7 +60,13 @@ void FigureBoard::init_figures_moves() {
 void FigureBoard::reset(const BoardRepr& map) {
     move_logger.reset();
     curr_id = 0;
+    for (auto& [_, fig] : figures) {
+        delete fig;
+    }
     figures.clear();
+    for (auto& fig : captured_figures) {
+        delete fig;
+    }
     captured_figures.clear();
     apply_map(map);
     init_figures_moves();
@@ -229,7 +235,12 @@ Figure* FigureBoard::find_king(Color col) {
         [col](const auto& it)
         { return it.second->is_col(col) && it.second->get_type() == EFigureType::King; }
     );
-    return (*map_ptr).second;
+    if (map_ptr == figures.end()) {
+        return get_default_fig();
+    }
+    else {
+        return (*map_ptr).second;
+    }
 }
 
 /// <summary>
@@ -577,10 +588,13 @@ bool FigureBoard::insufficient_material() {
     return not (b_cell_bishops_cnt && w_cell_bishops_cnt);
 }
 
-bool FigureBoard::game_end(Color col) {
-    return stalemate_for(col) ||
-        checkmate_for(col) ||
-        insufficient_material();
+GameEndType FigureBoard::game_end(Color col) {
+    if (stalemate_for(col)) return GameEndType::Stalemate;
+    if (checkmate_for(col)) return GameEndType::Checkmate;
+    if (insufficient_material()) return GameEndType::InsufficientMaterial;
+    if (move_logger.is_fifty_move_rule_was_triggered()) return GameEndType::FiftyRule;
+    if (move_logger.is_moves_repeat_rule_was_triggered()) return GameEndType::MoveRepeat;
+    return GameEndType::NotGameEnd;
 }
 
 /// <summary>

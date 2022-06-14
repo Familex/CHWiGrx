@@ -40,6 +40,8 @@ inline const std::string ALL_PROMOTION_FIGURES{ "HRBQ" };
 inline const std::string NOT_FIGURES{ "E" };
 inline const std::string COLOR_CHARS{ "NBW" };
 
+enum class GameEndType {Checkmate, FiftyRule, Stalemate, InsufficientMaterial, MoveRepeat, NotGameEnd};
+
 typedef int Id;
 const Id ERR_ID{ -1 };
 const int HEIGHT{ 8 };
@@ -222,6 +224,8 @@ public:
     std::vector<MoveRec> get_future() { return future_moves; }
     void   set_past(const std::vector<MoveRec>& past)   { prev_moves = past; }
     void set_future(const std::vector<MoveRec>& future) { future_moves = future; }
+    bool is_fifty_move_rule_was_triggered();
+    bool is_moves_repeat_rule_was_triggered();
 private:
     std::vector<MoveRec> prev_moves;
     std::vector<MoveRec> future_moves;

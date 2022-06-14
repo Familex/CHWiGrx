@@ -133,13 +133,27 @@ void make_move(HWND hWnd) {
     motion_input.clear();
     InvalidateRect(hWnd, NULL, NULL);
 
-    if (board.game_end(turn)) {
-        if (not board.insufficient_material()) {
-            TCHAR tmp2[] = { (TCHAR)turn.what_next(), ' ', 'w', 'i', 'n', 's', '!', '\0' };
-            MessageBox(hWnd, tmp2, L"GAME END", NULL);
-        }
-        else {
-            MessageBox(hWnd, L"Insufficient material", L"GAME END", NULL);
+    GameEndType curr_game_end_state = board.game_end(turn);
+
+    if (curr_game_end_state != GameEndType::NotGameEnd) {
+        switch (curr_game_end_state) {
+            case GameEndType::Checkmate: case GameEndType::Stalemate: {
+                TCHAR tmp2[] = { (TCHAR)turn.what_next(), ' ', 'w', 'i', 'n', 's', '!', '\0' };
+                MessageBox(hWnd, tmp2, L"GAME END", NULL);
+            }
+                break;
+            case GameEndType::FiftyRule:
+                MessageBox(hWnd, L"Fifty rule", L"GAME END", NULL);
+                break;
+            case GameEndType::InsufficientMaterial:
+                MessageBox(hWnd, L"Insufficient material", L"GAME END", NULL);
+                break;
+            case GameEndType::MoveRepeat:
+                MessageBox(hWnd, L"move repeat", L"GAME END", NULL);
+                break;
+            default:
+                throw std::runtime_error("unexpected game end");
+                break;
         }
         restart();
         InvalidateRect(hWnd, NULL, NULL);
@@ -149,9 +163,10 @@ void make_move(HWND hWnd) {
 }
 
 void restart() {
-    board.reset(start_board_repr);
+    BoardRepr tmp_board_repr{ start_board_repr };
+    board.reset(tmp_board_repr);
     motion_input.clear();
-    turn = start_board_repr.get_turn();
+    turn = tmp_board_repr.get_turn();
 }
 
 // Копирует строку в буффер обмена

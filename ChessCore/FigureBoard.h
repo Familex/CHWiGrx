@@ -52,7 +52,7 @@ public:
     void apply_map(const BoardRepr&);
     void place_figure(Figure*& fig) { figures[fig->get_pos()] = fig; }
     void init_figures_moves();
-    bool game_end(Color);
+    GameEndType game_end(Color);
     void promotion_fig(Figure*, FigureType);
     size_t cnt_of_figures() const { return figures.size() - 1; }
     bool insufficient_material();
@@ -62,8 +62,7 @@ public:
             delete fig;
         }
         for (auto& fig : captured_figures) {
-            if (not fig->empty())
-                delete fig;
+            delete fig;
         }
     }
 private:

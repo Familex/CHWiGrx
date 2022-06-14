@@ -188,6 +188,23 @@ MoveRec MoveLogger::move_last_to_future() {
     return last;
 }
 
+bool MoveLogger::is_fifty_move_rule_was_triggered() {
+    size_t without_eat_and_pawnmoves = 0;
+    for (auto move{ prev_moves.rbegin() }; move != prev_moves.rend(); ++move) {
+        if (move->get_who_went()->get_type() == EFigureType::Pawn || move->ms.main_ev == MainEvent::EAT) {
+            break;
+        }
+        else {
+            ++without_eat_and_pawnmoves;
+        }
+    }
+    return without_eat_and_pawnmoves >= 50;
+}
+
+bool MoveLogger::is_moves_repeat_rule_was_triggered() {
+    return false;
+}
+
 // Конструктор репрезентации доски
 BoardRepr::BoardRepr(std::string board_repr) {
     const size_t npos = std::string::npos;
