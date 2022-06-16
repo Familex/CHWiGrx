@@ -32,6 +32,8 @@ std::vector<T> operator +(std::vector<T> l, std::vector<T> r) {
 
 std::vector<std::string> split(std::string, const std::string&&);
 
+void remove_first_occurrence(std::string& str, char c);
+
 constexpr int EN_PASSANT_INDENT = 4;
 enum class EFigureType { Pawn, Knight, Rook, Bishop, Queen, King, None };
 enum class EColor { Black, White, None };
@@ -160,6 +162,9 @@ public:
         tmp->move_to(on);
         return tmp;
     }
+    ~FigureFabric() {
+        delete DEFAULT;
+    }
 private:
     FigureFabric() {};
     Figure* DEFAULT = new Figure();
@@ -238,6 +243,7 @@ public:
     char get_idw_char() const { return idw ? 'T' : 'F'; }
     bool get_idw() const { return idw; }
     char get_turn_char() const { return turn == EColor::White ? 'W' : 'B'; }
+    std::vector<Id> get_who_can_castle() const { return can_castle; }
     Color get_turn() const { return turn; }
     bool empty() const { return figures.empty(); }
     void set_figures(std::list<Figure*>&& figs) { figures = figs; }
@@ -257,4 +263,5 @@ private:
     std::vector<MoveRec> past;
     std::vector<MoveRec> future;
     std::list<Figure*> captured_figures;
+    std::vector<Id> can_castle;
 };

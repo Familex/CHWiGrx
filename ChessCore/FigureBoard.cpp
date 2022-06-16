@@ -61,16 +61,18 @@ void FigureBoard::reset(const BoardRepr& map) {
     move_logger.reset();
     curr_id = 0;
     for (auto& [_, fig] : figures) {
-        delete fig;
+        if (not fig->empty())
+            delete fig;
     }
     figures.clear();
     for (auto& fig : captured_figures) {
-        delete fig;
+        if (not fig->empty())
+            delete fig;
     }
     captured_figures.clear();
     apply_map(map);
     init_figures_moves();
-    reset_castling();
+    reset_castling(map);
 }
 
 /// <summary>
@@ -126,17 +128,21 @@ BoardRepr FigureBoard::get_repr(bool save_all_moves) {
     return map;
 }
 
-/// <summary>
-/// Возвращает рокировку всем ладьям
-/// </summary>
-void FigureBoard::reset_castling() {
+void FigureBoard::reset_castling(bool castle_state) {
+    castling.clear();
     for (const EColor& col : { EColor::Black, EColor::White }) {
-        castling[col].clear();
         for (const auto& aspt_to_rook : get_figures_of(col)) {
             if (aspt_to_rook->get_type() == EFigureType::Rook) {
-                castling[col][aspt_to_rook->get_id()] = true;
+                castling[aspt_to_rook->get_id()] = castle_state;
             }
         }
+    }
+}
+
+void FigureBoard::reset_castling(const BoardRepr& board_repr) {
+    reset_castling(false);
+    for (Id& castle_id : board_repr.get_who_can_castle()) {
+        castling[castle_id] = true;
     }
 }
 
@@ -354,19 +360,19 @@ std::vector<std::pair<bool, pos>> FigureBoard::get_all_possible_moves(const Figu
     if (in_hand->get_type() == EFigureType::King) {
         bool is_castling; MoveMessage mm; Figure* king; Figure* rook;
         std::tie(is_castling, mm, king, rook) = castling_check({}, in_hand_it, { in_hand_pos, {in_hand_pos.x, 6} }, 6, 5);
-        if (is_castling && has_castling(in_hand->get_col(), rook->get_id()))
+        if (is_castling && has_castling(rook->get_id()))
             all_moves.push_back({ false, {in_hand_pos.x, 6} });
         std::tie(is_castling, mm, king, rook) = castling_check({}, in_hand_it, { in_hand_pos, {in_hand_pos.x, 2} }, 2, 3);
-        if (is_castling && has_castling(in_hand->get_col(), rook->get_id()))
+        if (is_castling && has_castling(rook->get_id()))
             all_moves.push_back({ false, {in_hand_pos.x, 2} });
     }
     if (in_hand->get_type() == EFigureType::Rook) {
         bool is_castling; MoveMessage mm; Figure* king; Figure* rook;
         std::tie(is_castling, mm, king, rook) = castling_check({}, in_hand_it, { in_hand_pos, {in_hand_pos.x, 5} }, 6, 5);
-        if (is_castling && has_castling(in_hand->get_col(), rook->get_id()))
+        if (is_castling && has_castling(rook->get_id()))
             all_moves.push_back({ false, {in_hand_pos.x, 5} });
         std::tie(is_castling, mm, king, rook) = castling_check({}, in_hand_it, { in_hand_pos, {in_hand_pos.x, 3} }, 2, 3);
-        if (is_castling && has_castling(in_hand->get_col(), rook->get_id()))
+        if (is_castling && has_castling(rook->get_id()))
             all_moves.push_back({ false, {in_hand_pos.x, 3} });
     }
 
@@ -631,7 +637,7 @@ MoveMessage FigureBoard::move_check(Figure* in_hand, Input input) {
         }
         bool is_castling; MoveMessage mm; Figure* king; Figure* rook;
         std::tie(is_castling, mm, king, rook) = castling_check(move_message, in_hand, input, 6, 5);
-        if (is_castling && has_castling(in_hand->get_col(), rook->get_id())) {
+        if (is_castling && has_castling(rook->get_id())) {
             Figure* king_tmp = FigureFabric::instance()->submit_on(king, { in_hand->get_pos().x, 6 });
             Figure* rook_tmp = FigureFabric::instance()->submit_on(rook, { rook->get_pos().x, 5 });
             if (check_for_when(in_hand->get_col().what_next(),
@@ -644,7 +650,7 @@ MoveMessage FigureBoard::move_check(Figure* in_hand, Input input) {
             return mm;
         }
         std::tie(is_castling, mm, king, rook) = castling_check(move_message, in_hand, input, 2, 3);
-        if (is_castling && has_castling(in_hand->get_col(), rook->get_id())) {
+        if (is_castling && has_castling(rook->get_id())) {
             Figure* king_tmp = FigureFabric::instance()->submit_on(king, { king->get_pos().x, 2 });
             Figure* rook_tmp = FigureFabric::instance()->submit_on(rook, { rook->get_pos().x, 3 });
             if (check_for_when(in_hand->get_col().what_next(),
@@ -834,10 +840,10 @@ bool FigureBoard::undo_move() {
         {
         case SideEvent::CASTLING_BREAK:
             if (not ms.what_castling_breaks.empty() &&
-                !has_castling(turn, ms.what_castling_breaks.back())
+                !has_castling(ms.what_castling_breaks.back())
                 ) {
                 for (const Id& id : ms.what_castling_breaks) {
-                    on_castling(turn, id);
+                    on_castling(id);
                 }
             }
             break;
@@ -878,7 +884,7 @@ bool FigureBoard::provide_move(const MoveRec& move_rec) {
         }
         break;
     case MainEvent::CASTLING:
-        if (has_castling(turn, ms.to_move.back().first)) {
+        if (has_castling(ms.to_move.back().first)) {
             move_fig(in_hand, input.target);
             for (const auto& [who, frominto] : ms.to_move) {
                 auto who_it = get_fig(who);
@@ -897,10 +903,10 @@ bool FigureBoard::provide_move(const MoveRec& move_rec) {
         {
         case SideEvent::CASTLING_BREAK:
             if (not ms.what_castling_breaks.empty() &&
-                has_castling(turn, ms.what_castling_breaks.back())
+                has_castling(ms.what_castling_breaks.back())
                 ) {
                 for (const Id& id : ms.what_castling_breaks) {
-                    off_castling(turn, id);
+                    off_castling(id);
                 }
             }
             break;

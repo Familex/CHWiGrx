@@ -24,6 +24,13 @@ std::vector<std::string> split(std::string str, const std::string&& delimiter) {
     return tokens;
 }
 
+void remove_first_occurrence(std::string& str, char c) {
+    auto p = str.find(c);
+    if (p != std::string::npos) {
+        str.erase(p, p + 1);
+    }
+}
+
 /// <summary>
 /// Конструктор типа фигуры из буквы
 /// </summary>
@@ -205,7 +212,7 @@ bool MoveLogger::is_moves_repeat_rule_was_triggered() {
     return false;
 }
 
-// Конструктор репрезентации доски
+// Сведения о рокировке привязаны к id соответствующих ладей (заключены в квадратные скобки)
 BoardRepr::BoardRepr(std::string board_repr) {
     const size_t npos = std::string::npos;
     size_t meta_start = board_repr.find('[');
@@ -222,6 +229,14 @@ BoardRepr::BoardRepr(std::string board_repr) {
     }
     else if (meta.find('b') != npos || meta.find('B') != npos) {
         turn = EColor::Black;
+    }
+    for (const char& c : { 't', 'T', 'f', 'F', 'w', 'W', 'b', 'B' }) {
+        remove_first_occurrence(meta, c);
+    }
+    // здесь значение meta содержит только информацию о возможных рокировках
+    for (auto& castle_id : split(meta, ";")) {
+        if (!castle_id.empty())
+            can_castle.push_back(stoi(castle_id));
     }
     board_repr.erase(board_repr.begin() + meta_start, board_repr.begin() + meta_end + 1);
     size_t past_start = board_repr.find('<');
@@ -405,7 +420,11 @@ std::string BoardRepr::as_string() {
             fig->get_id(), fig->get_pos().x, fig->get_pos().y, (char)fig->get_col(), (char)fig->get_type()
         );
     }
-    result += std::format("[{}{}]<", get_idw_char(), get_turn_char());
+    result += std::format("[{}{}", get_idw_char(), get_turn_char());
+    for (Id& castle_id : can_castle) {
+        result += std::format("{};", castle_id);
+    }
+    result += "]<";
     for (auto& mr : past) {
         result += mr.as_string() + "$";
     }
@@ -515,6 +534,7 @@ Figure* FigureFabric::create(pos position, Color color, EFigureType type) {
 }
 
 Figure* FigureFabric::get_default_fig() {
+    if (not DEFAULT->empty()) throw std::logic_error("default figure was deleted *.*"); // на время разработки - очень часто вылезает эта ошибка
     return DEFAULT;
 }
 

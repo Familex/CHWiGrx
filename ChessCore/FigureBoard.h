@@ -22,7 +22,8 @@ public:
     bool check_for_when(Color, const std::vector<pos>& = {}, pos = {}, const std::vector<Figure*>& = {}, const std::vector<Figure*>& = {});
     MoveMessage move_check(Figure*, Input);
     std::tuple<bool, MoveMessage, Figure*, Figure*> castling_check(MoveMessage, Figure*, const Input&, int, int);
-    void reset_castling();
+    void reset_castling(bool=true);
+    void reset_castling(const BoardRepr&);
     Figure* get_default_fig() { return FigureFabric::instance()->get_default_fig(); }
     std::list<Figure*> all_figures() {
         std::list<Figure*> tmp;
@@ -40,9 +41,9 @@ public:
         fig->move_to(to);
         figures[fig->get_pos()] = fig;
     }
-    bool has_castling(Color col, Id id) { return castling[col][id]; }
-    void off_castling(Color col, Id id) { castling[col][id] = false; }
-    void on_castling(Color col, Id id)  { castling[col][id] = true; }
+    bool has_castling(Id id) { return castling[id]; }
+    void off_castling(Id id) { castling[id] = false; }
+    void on_castling(Id id)  { castling[id] = true; }
     MoveRec get_last_move() { return move_logger.get_last_move(); }
     void set_last_move(const MoveRec& move_rec) { this->move_logger.add(move_rec); }
     template <typename Func> std::pair<bool, MoveRec> provide_move(Figure*, const Input&, Color turn, const Func&);
@@ -59,10 +60,12 @@ public:
     BoardRepr get_repr(bool);
     ~FigureBoard() {
         for (auto& [_, fig] : figures) {
-            delete fig;
+            if (not fig->empty())
+                delete fig;
         }
         for (auto& fig : captured_figures) {
-            delete fig;
+            if (not fig->empty())
+                delete fig;
         }
     }
 private:
@@ -73,7 +76,7 @@ private:
     MoveLogger move_logger{};
     std::map<pos, Figure*> figures;
     std::list<Figure*> captured_figures;
-    std::map<Color, std::map<Id, bool>> castling;
+    std::map<Id, bool> castling;
     std::map<FigureType, shift_broom> moves;
     std::map<FigureType, shift_broom> eats;
 
