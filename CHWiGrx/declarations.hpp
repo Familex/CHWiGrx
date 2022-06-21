@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #pragma comment(lib, "Msimg32.lib")
 #include "resource.h"
 #include "framework.h"
@@ -25,15 +25,15 @@ using namespace std::string_literals;
 
 /* constants */
 inline HINSTANCE hInst;
-inline const char* DEFAULT_CHESS_BOARD_IDW =  "1;0;0;B;R;2;0;1;B;H;3;0;2;B;B;4;0;3;B;Q;5;0;4;B;K;6;0;5;B;B;7;0;6;B;H;8;0;7;B;R;9;1;0;B;P;10;1;1;B;P;11;1;2;B;P;12;1;3;B;P;13;1;4;B;P;14;1;5;B;P;15;1;6;B;P;16;1;7;B;P;17;6;0;W;P;18;6;1;W;P;19;6;2;W;P;20;6;3;W;P;21;6;4;W;P;22;6;5;W;P;23;6;6;W;P;24;6;7;W;P;25;7;0;W;R;26;7;1;W;H;27;7;2;W;B;28;7;3;W;Q;29;7;4;W;K;30;7;5;W;B;31;7;6;W;H;32;7;7;W;R;[TW]<><>~";
-inline const char* DEFAULT_CHESS_BOARD_NIDW = "1;0;0;W;R;2;0;1;W;H;3;0;2;W;B;4;0;3;W;Q;5;0;4;W;K;6;0;5;W;B;7;0;6;W;H;8;0;7;W;R;9;1;0;W;P;10;1;1;W;P;11;1;2;W;P;12;1;3;W;P;13;1;4;W;P;14;1;5;W;P;15;1;6;W;P;16;1;7;W;P;17;6;0;B;P;18;6;1;B;P;19;6;2;B;P;20;6;3;B;P;21;6;4;B;P;22;6;5;B;P;23;6;6;B;P;24;6;7;B;P;25;7;0;B;R;26;7;1;B;H;27;7;2;B;B;28;7;3;B;Q;29;7;4;B;K;30;7;5;B;B;31;7;6;B;H;32;7;7;B;R;[FW]<><>~";
+inline const char* DEFAULT_CHESS_BOARD_IDW =  "1;0;0;B;R;2;0;1;B;H;3;0;2;B;B;4;0;3;B;Q;5;0;4;B;K;6;0;5;B;B;7;0;6;B;H;8;0;7;B;R;9;1;0;B;P;10;1;1;B;P;11;1;2;B;P;12;1;3;B;P;13;1;4;B;P;14;1;5;B;P;15;1;6;B;P;16;1;7;B;P;17;6;0;W;P;18;6;1;W;P;19;6;2;W;P;20;6;3;W;P;21;6;4;W;P;22;6;5;W;P;23;6;6;W;P;24;6;7;W;P;25;7;0;W;R;26;7;1;W;H;27;7;2;W;B;28;7;3;W;Q;29;7;4;W;K;30;7;5;W;B;31;7;6;W;H;32;7;7;W;R;[TW1;8;25;32;]<><>~";
+inline const char* DEFAULT_CHESS_BOARD_NIDW = "1;0;0;W;R;2;0;1;W;H;3;0;2;W;B;4;0;3;W;Q;5;0;4;W;K;6;0;5;W;B;7;0;6;W;H;8;0;7;W;R;9;1;0;W;P;10;1;1;W;P;11;1;2;W;P;12;1;3;W;P;13;1;4;W;P;14;1;5;W;P;15;1;6;W;P;16;1;7;W;P;17;6;0;B;P;18;6;1;B;P;19;6;2;B;P;20;6;3;B;P;21;6;4;B;P;22;6;5;B;P;23;6;6;B;P;24;6;7;B;P;25;7;0;B;R;26;7;1;B;H;27;7;2;B;B;28;7;3;B;Q;29;7;4;B;K;30;7;5;B;B;31;7;6;B;H;32;7;7;B;R;[FW1;8;25;32;]<><>~";
 const int HEADER_HEIGHT = GetSystemMetrics(SM_CXPADDEDBORDER) +
                           GetSystemMetrics(SM_CYMENUSIZE)     +
                           GetSystemMetrics(SM_CYCAPTION)      +
                           GetSystemMetrics(SM_CYFRAME);
 
 /* single mutable globals */
-inline BoardRepr start_board_repr{ DEFAULT_CHESS_BOARD_IDW };
+inline std::string start_board_repr{ DEFAULT_CHESS_BOARD_IDW };
 inline FigureBoard board{ start_board_repr };
 inline Color turn{ EColor::White };
 inline bool idw{ true };
@@ -45,17 +45,18 @@ inline bool save_all_moves = true;
 ATOM               register_main_window_class(HINSTANCE hInstance, LPTSTR, LPTSTR);
 bool               init_instance(HINSTANCE, LPTSTR, LPTSTR, int);
 INT_PTR CALLBACK   about_proc(HWND, UINT, WPARAM, LPARAM);
-void               draw_figure(HDC, const Figure&, int = -1, int = -1, bool = true);
+void               draw_figure(HDC, const Figure*, int = -1, int = -1, bool = true);
 void               make_move(HWND);
 void               restart();
 void               cpy_str_to_clip(const std::string&);
 std::string        take_str_from_clip();
-HWND               create_curr_choice_window(HWND, Figure, POINT, int, int, const WNDPROC, LPCWSTR = L"Chosen figure");
+HWND               create_curr_choice_window(HWND, Figure*, POINT, int, int, const WNDPROC, LPCWSTR = L"Chosen figure");
 void               on_lbutton_up(HWND, WPARAM, LPARAM, pos where_fig);
 bool               is_legal_board_repr(const std::string&);
 void               set_menu_checkbox(HWND, UINT, bool);
 void               update_check_title(HWND);
 inline void        Rectangle(HDC hdc, RECT rect) { Rectangle(hdc, rect.left, rect.top, rect.right, rect.bottom); }
+void               copy_repr_to_clip();
 
 /* Main window WinProc func (defined in winproc.cpp) */
 LRESULT CALLBACK   main_proc(HWND, UINT, WPARAM, LPARAM);
@@ -140,7 +141,7 @@ public:
     inline void reset_lbutton_down() { is_lbutton_down = false; }
     inline void set_lbutton_down() { is_lbutton_down = true; }
     inline bool is_pair() { return input_order_by_two; }
-    inline bool is_current_turn(Color turn) { return in_hand->color == turn; }
+    inline bool is_current_turn(Color turn) { return in_hand->is_col(turn); }
     inline auto get_in_hand() { return in_hand; }
     inline auto get_input() { return input; }
     inline void shift_from(pos shift, int max_x, int max_y) { input.from.loop_add(shift, max_x, max_y); }
@@ -151,9 +152,9 @@ public:
     inline void set_target_x(int val) { input.target.x = val; }
     inline void set_target_y(int val) { input.target.y = val; }
     inline auto get_single_state() { return input_order_by_one; }
-    inline bool is_drags() { return !is_curr_choice_moving && is_lbutton_down && in_hand->id != ERR_ID; }
-    inline auto get_possible_moves() { return all_possible_moves; }
-    inline bool is_figure_dragged(Id id) { return in_hand->id == id && is_curr_choice_moving && !input_order_by_two; }
+    inline bool is_drags() { return !is_curr_choice_moving && is_lbutton_down && not in_hand->empty(); }
+    inline auto get_possible_moves() { return all_moves; }
+    inline bool is_figure_dragged(Id id) { return in_hand->is(id) && is_curr_choice_moving && !input_order_by_two; }
     inline void reset_input_order() {
         input_order_by_one = 0;
         input_order_by_two = false;
@@ -167,8 +168,8 @@ private:
     bool is_lbutton_down{ false };
     HWND curr_chose_window{};
     bool is_curr_choice_moving{ false };
-    std::list<Figure>::iterator in_hand = board->get_default_fig();
-    std::list<std::pair<bool, pos>> all_possible_moves{};
+    Figure* in_hand = board->get_default_fig();
+    std::list<std::pair<bool, pos>> all_moves{};
 };
 
 inline MotionInput motion_input{&board};

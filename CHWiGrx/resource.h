@@ -1,6 +1,6 @@
-﻿//{{NO_DEPENDENCIES}}
-// Включаемый файл, созданный в Microsoft Visual C++.
-// Используется CHWiGrx.rc
+//{{NO_DEPENDENCIES}}
+// ¬ключаемый файл, созданный в Microsoft Visual C++.
+// »спользуетс¤ CHWiGrx.rc
 //
 #define IDC_MYICON                      2
 #define IDD_CHWIGRX_DIALOG              102
@@ -60,10 +60,9 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NO_MFC                     1
-#define _APS_NEXT_RESOURCE_VALUE        131
-#define _APS_NEXT_COMMAND_VALUE         32798
+#define _APS_NEXT_RESOURCE_VALUE        101
+#define _APS_NEXT_COMMAND_VALUE         40003
 #define _APS_NEXT_CONTROL_VALUE         1000
-#define _APS_NEXT_SYMED_VALUE           110
+#define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

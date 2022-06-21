@@ -1,11 +1,22 @@
 #pragma once
+#include <new>
 #include <map>
 #include <list>
 #include <tuple>
 #include <format>
 #include <vector>
 #include <stdexcept>
-#include <Windows.h>
+#include <functional>
+
+template <class T0, class... Ts>
+auto make_vector(T0&& first, Ts&&... args)
+{
+    using first_type = std::decay_t<T0>;
+    return std::vector<first_type>{
+        std::forward<T0>(first),
+            std::forward<Ts>(args)...
+    };
+}
 
 template <class T>
 std::vector<T> operator +(std::vector<T> vec, T val) {
@@ -19,6 +30,10 @@ std::vector<T> operator +(std::vector<T> l, std::vector<T> r) {
     return l;
 }
 
+std::vector<std::string> split(std::string, const std::string&&);
+
+void remove_first_occurrence(std::string& str, char c);
+
 constexpr int EN_PASSANT_INDENT = 4;
 enum class EFigureType { Pawn, Knight, Rook, Bishop, Queen, King, None };
 enum class EColor { Black, White, None };
@@ -26,6 +41,8 @@ inline const std::string ALL_FIGURES{ "PHRBQK" };
 inline const std::string ALL_PROMOTION_FIGURES{ "HRBQ" };
 inline const std::string NOT_FIGURES{ "E" };
 inline const std::string COLOR_CHARS{ "NBW" };
+
+enum class GameEndType {Checkmate, FiftyRule, Stalemate, InsufficientMaterial, MoveRepeat, NotGameEnd};
 
 typedef int Id;
 const Id ERR_ID{ -1 };
@@ -81,28 +98,35 @@ private:
     EFigureType data;
 };
 
-struct Figure {
-    Figure() : id{ ERR_ID }, position(), color(), type() {};
+class Figure {
+public:
+    Figure() : id{ ERR_ID }, position() {};
     Figure(Id id, pos position, Color color, FigureType type) :
         id(id), position(position), color(color), type(type) {};
     void move_to(pos p) { position = p; }
     void move_to(int x, int y) { position.x = x; position.y = y; }
-    Figure submit_on(pos p) const {
-        Figure tmp{ *this };
-        tmp.move_to(p);
-        return tmp;
-    }
     bool operator ==(const Figure& r) const { return this->id == r.id; }
-    std::string as_string() { return std::format("{}.{}.{}.{}.{}",
-        id, position.x, position.y, (char)color, (char)type);
+    std::string as_string() {
+        return std::format("{}.{}.{}.{}.{}",
+            id, position.x, position.y, (char)color, (char)type);
     }
+    Id get_id() const { return id; }
+    pos get_pos() const { return position; }
+    Color get_col() const { return color; }
+    FigureType get_type() const { return type; }
+    bool is_col(Color col) const { return color == col; }
+    bool is_col(Figure* fig) const { return color == fig->get_col(); }
+    bool empty() const { return id == ERR_ID; }
+    bool is(Id id) const { return this->id == id; }
+    bool at(pos p) const { return position == p; }
+private:
     Id id;
-    pos position;
-    Color color;
-    FigureType type;
+    pos position{};
+    Color color{};
+    FigureType type{};
 };
 
-std::vector<pos> to_pos_vector(const std::vector<Figure>&);
+std::vector<pos> to_pos_vector(const std::vector<Figure*>&);
 
 struct Input {
     pos from;
@@ -118,6 +142,36 @@ enum class SideEvent { E, CHECK, PROMOTION, CASTLING_BREAK };
 std::string to_string(SideEvent side_event);
 std::string to_string(MainEvent main_event);
 
+
+class FigureFabric {
+public:
+    static FigureFabric* instance() {
+        static FigureFabric INSTANCE;
+        return &INSTANCE;
+    }
+    FigureFabric(FigureFabric const&) = delete;
+    void operator=(FigureFabric const&) = delete;
+
+    Figure* create(pos, Color, EFigureType);
+    Figure* create(pos, Color, EFigureType, Id, Figure* =nullptr);
+    Figure* create(Figure*);
+    Figure* get_default_fig();
+    // Ќе забывать удал¤ть временную фигуру
+    Figure* submit_on(Figure* who, pos on) {
+        Figure* tmp = FigureFabric::instance()->create(who);
+        tmp->move_to(on);
+        return tmp;
+    }
+    ~FigureFabric() {
+        delete DEFAULT;
+    }
+private:
+    FigureFabric() {};
+    Figure* DEFAULT = new Figure();
+    Id id{ 1 };
+};
+
+
 struct MoveMessage {
     MainEvent main_ev{ MainEvent::E };
     std::list<SideEvent> side_evs;
@@ -127,8 +181,8 @@ struct MoveMessage {
 };
 
 struct MoveRec {
-    MoveRec(Figure who_went, Input input, Color turn, MoveMessage ms, char p)
-        : who_went(who_went)
+    MoveRec(Figure* who_went, Input input, Color turn, MoveMessage ms, char p)
+        : who_went(*who_went)
         , input(input)
         , turn(turn)
         , ms(ms)
@@ -139,8 +193,21 @@ struct MoveRec {
         , turn()
         , ms()
         , promotion_choice('N') {};
+    Figure* get_who_went() const {
+        if (who_went.empty()) return FigureFabric::instance()->get_default_fig();
+        return FigureFabric::instance()->create(
+            who_went.get_pos(),
+            who_went.get_col(),
+            who_went.get_type(),
+            who_went.get_id()
+        );
+    }
+    pos get_who_went_pos() const {
+        if (who_went.empty()) return { -1, -1 };
+        return who_went.get_pos();
+    }
     MoveRec(std::string);
-    Figure who_went;
+    Figure who_went{};
     Input input;
     Color turn;
     MoveMessage ms;
@@ -162,6 +229,8 @@ public:
     std::vector<MoveRec> get_future() { return future_moves; }
     void   set_past(const std::vector<MoveRec>& past)   { prev_moves = past; }
     void set_future(const std::vector<MoveRec>& future) { future_moves = future; }
+    bool is_fifty_move_rule_was_triggered();
+    bool is_moves_repeat_rule_was_triggered();
 private:
     std::vector<MoveRec> prev_moves;
     std::vector<MoveRec> future_moves;
@@ -174,23 +243,25 @@ public:
     char get_idw_char() const { return idw ? 'T' : 'F'; }
     bool get_idw() const { return idw; }
     char get_turn_char() const { return turn == EColor::White ? 'W' : 'B'; }
+    std::vector<Id> get_who_can_castle() const { return can_castle; }
     Color get_turn() const { return turn; }
     bool empty() const { return figures.empty(); }
-    void set_figures(std::list<Figure>&& figs) { figures = figs; }
+    void set_figures(std::list<Figure*>&& figs) { figures = figs; }
     void set_turn(Color t) { turn = t; }
     void set_idw(bool idw) { this->idw = idw; }
-    std::list<Figure> get_figures() const { return figures; }
-    std::list<Figure> get_figures() { return figures; }
+    std::list<Figure*> get_figures() const { return figures; }
+    std::list<Figure*> get_figures() { return figures; }
     void set_past(const std::vector<MoveRec>& past) { this->past = past; }
     void set_future(const std::vector<MoveRec>& future) { this->future = future; }
     std::vector<MoveRec> get_past()   const { return past; }
     std::vector<MoveRec> get_future() const { return future; }
-    std::list<Figure> get_captured_figures() const { return captured_figures; }
+    std::list<Figure*> get_captured_figures() const { return captured_figures; }
 private:
-    std::list<Figure> figures;
+    std::list<Figure*> figures;
     Color turn{ EColor::White };
     bool idw{ true };
     std::vector<MoveRec> past;
     std::vector<MoveRec> future;
-    std::list<Figure> captured_figures;
+    std::list<Figure*> captured_figures;
+    std::vector<Id> can_castle;
 };

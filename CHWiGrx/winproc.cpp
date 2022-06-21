@@ -10,7 +10,7 @@ LRESULT CALLBACK main_proc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam
     case WM_COMMAND:
         {
             int wmId = LOWORD(wParam);
-            // Разобрать выбор в меню:
+            // Р Р°Р·РѕР±СЂР°С‚СЊ РІС‹Р±РѕСЂ РІ РјРµРЅСЋ:
             switch (wmId)
             {
             case IDM_UNDO:
@@ -26,19 +26,8 @@ LRESULT CALLBACK main_proc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam
                 }
                 break;
             case IDM_COPY_MAP:
-            {
-                BoardRepr board_repr = board.get_repr(save_all_moves);
-                board_repr.set_turn(turn);
-                std::string board_repr_str = board_repr.as_string();
-                #ifdef ALLOCATE_CONSOLE
-                    if (!is_legal_board_repr(board_repr_str))
-                        MessageBox(hWnd, L"Copied error board repr", L"", NULL);
-                #endif // ALLOCATE_CONSOLE
-                cpy_str_to_clip(
-                    board_repr_str
-                );
-            }
-            break;
+                copy_repr_to_clip();
+                break;
             case IDM_PASTE_MAP:
                 do {
                     std::string board_repr_str = take_str_from_clip();
@@ -114,7 +103,7 @@ LRESULT CALLBACK main_proc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam
                 return DefWindowProc(hWnd, message, wParam, lParam);
             }
         }
-        update_check_title(hWnd);   // Для надёжности обновлю на все исходы
+        update_check_title(hWnd);   // Р”Р»СЏ РЅР°РґС‘Р¶РЅРѕСЃС‚Рё РѕР±РЅРѕРІР»СЋ РЅР° РІСЃРµ РёСЃС…РѕРґС‹
         InvalidateRect(hWnd, NULL, NULL);
         break;
     case WM_KEYDOWN:
@@ -237,7 +226,7 @@ LRESULT CALLBACK main_proc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam
         hOld = SelectObject(hdcMem, hbmMem);
 
         {
-            /* Фоновый рисунок */
+            /* Р¤РѕРЅРѕРІС‹Р№ СЂРёСЃСѓРЅРѕРє */
             for (int i{}; i < HEIGHT; ++i) {
                 for (int j{}; j < WIDTH; ++j) {
                     static const HBRUSH CHECKERBOARDBRIGHT{ CreateSolidBrush(RGB(50, 50, 50)) };
@@ -254,7 +243,7 @@ LRESULT CALLBACK main_proc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam
         }
 
         {
-            /* Возможные ходы текущей фигуры */
+            /* Р’РѕР·РјРѕР¶РЅС‹Рµ С…РѕРґС‹ С‚РµРєСѓС‰РµР№ С„РёРіСѓСЂС‹ */
             for (const auto& [is_eat, move_pos] : motion_input.get_possible_moves()) {
                 static const HBRUSH GREEN{ CreateSolidBrush(RGB(0, 255, 0)) };
                 static const HBRUSH DARK_GREEN{ CreateSolidBrush(RGB(0, 150, 0)) };
@@ -269,7 +258,7 @@ LRESULT CALLBACK main_proc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam
         }
 
         {
-            /* Положение курсора и выделенной клетки */
+            /* РџРѕР»РѕР¶РµРЅРёРµ РєСѓСЂСЃРѕСЂР° Рё РІС‹РґРµР»РµРЅРЅРѕР№ РєР»РµС‚РєРё */
             static const HBRUSH RED{ CreateSolidBrush(RGB(255, 0, 0)) };
             static const HBRUSH BLUE{ CreateSolidBrush(RGB(0, 0, 255)) };
             const RECT from_cell = window_stats.get_cell(input.from);
@@ -279,15 +268,15 @@ LRESULT CALLBACK main_proc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam
         }
 
         {
-            /* Фигуры на поле */
+            /* Р¤РёРіСѓСЂС‹ РЅР° РїРѕР»Рµ */
             for (const auto& figure : board.all_figures()) {
-                if (!motion_input.is_figure_dragged(figure.id)) {
+                if (!motion_input.is_figure_dragged(figure->get_id())) {
                     draw_figure(hdcMem, figure);
                 }
             }
         }
 
-        /* Копирование временного буфера в основной */
+        /* РљРѕРїРёСЂРѕРІР°РЅРёРµ РІСЂРµРјРµРЅРЅРѕРіРѕ Р±СѓС„РµСЂР° РІ РѕСЃРЅРѕРІРЅРѕР№ */
         BitBlt(hdc, 0, 0,
             window_stats.get_window_width(),
             window_stats.get_window_height(),

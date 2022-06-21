@@ -1,4 +1,4 @@
-﻿#include "declarations.hpp"
+#include "declarations.hpp"
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
                      _In_opt_ HINSTANCE hPrevInstance,
@@ -31,6 +31,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     pieces_bitmaps['W']['B'] = LoadBitmap(hInstance, MAKEINTRESOURCE(IDB_WHITE_BISHOP ));
     pieces_bitmaps['W']['H'] = LoadBitmap(hInstance, MAKEINTRESOURCE(IDB_WHITE_KNIGHT ));
 
+    delete FigureFabric::instance()->submit_on(board.get_fig({1, 1}), {5, 5});
 
     #ifdef ALLOCATE_CONSOLE
     if (AllocConsole()) {
