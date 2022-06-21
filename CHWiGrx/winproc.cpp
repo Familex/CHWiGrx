@@ -26,19 +26,8 @@ LRESULT CALLBACK main_proc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam
                 }
                 break;
             case IDM_COPY_MAP:
-            {
-                BoardRepr board_repr = board.get_repr(save_all_moves);
-                board_repr.set_turn(turn);
-                std::string board_repr_str = board_repr.as_string();
-                #ifdef ALLOCATE_CONSOLE
-                    if (!is_legal_board_repr(board_repr_str))
-                        MessageBox(hWnd, L"Copied error board repr", L"", NULL);
-                #endif // ALLOCATE_CONSOLE
-                cpy_str_to_clip(
-                    board_repr_str
-                );
-            }
-            break;
+                copy_repr_to_clip();
+                break;
             case IDM_PASTE_MAP:
                 do {
                     std::string board_repr_str = take_str_from_clip();

@@ -133,27 +133,35 @@ void make_move(HWND hWnd) {
     motion_input.clear();
     InvalidateRect(hWnd, NULL, NULL);
 
-    GameEndType curr_game_end_state = board.game_end(turn);
+    GameEndType curr_game_end_state = board.game_end_check(turn);
 
     if (curr_game_end_state != GameEndType::NotGameEnd) {
+        std::wstring body = L"";
+        std::wstring head = L"Game end";
         switch (curr_game_end_state) {
-            case GameEndType::Checkmate: case GameEndType::Stalemate: {
-                TCHAR tmp2[] = { (TCHAR)turn.what_next(), ' ', 'w', 'i', 'n', 's', '!', '\0' };
-                MessageBox(hWnd, tmp2, L"GAME END", NULL);
-            }
-                break;
+        case GameEndType::Checkmate: case GameEndType::Stalemate: {
+            auto who_next = turn.what_next();
+            body = who_next == EColor::White ? L"White wins!" :
+                who_next == EColor::Black ? L"Black wins!" :
+                L"None wins!";
+            break;
+        }
             case GameEndType::FiftyRule:
-                MessageBox(hWnd, L"Fifty rule", L"GAME END", NULL);
+                body = L"Fifty rule";
                 break;
             case GameEndType::InsufficientMaterial:
-                MessageBox(hWnd, L"Insufficient material", L"GAME END", NULL);
+                body = L"Insufficient material";
                 break;
             case GameEndType::MoveRepeat:
-                MessageBox(hWnd, L"move repeat", L"GAME END", NULL);
+                body = L"Move repeat rule";
                 break;
             default:
                 throw std::runtime_error("unexpected game end");
                 break;
+        }
+        auto result = MessageBox(hWnd, (body + L"\nCopy board to clip?").c_str(), head.c_str(), MB_YESNO);
+        if (result == IDYES) {
+            copy_repr_to_clip();
         }
         restart();
         InvalidateRect(hWnd, NULL, NULL);
@@ -409,10 +417,26 @@ void MotionInput::prepare(Color turn) {
 
 void update_check_title(HWND hWnd) {
     std::wstring curr_text = L"CHWiGrx";
-    if (board.check_for_when(turn)) {
+    if (board.is_empty()) {
+        curr_text += L" [Empty board]";
+    }
+    else if (board.check_for_when(turn)) {
         curr_text += L" [Check to ";
-        curr_text += turn == EColor::White ? L"White" : L"Black";
-        curr_text += L"]!";
+        curr_text += turn == EColor::White ? L"White" : turn == EColor::Black ? L"Black" : L"None";
+        curr_text += L"]";
     }
     SetWindowText(hWnd, curr_text.c_str());
+}
+
+void copy_repr_to_clip() {
+    BoardRepr board_repr = board.get_repr(save_all_moves);
+    board_repr.set_turn(turn);
+    std::string board_repr_str = board_repr.as_string();
+    #ifdef ALLOCATE_CONSOLE
+    if (!is_legal_board_repr(board_repr_str))
+        MessageBox(hWnd, L"Copied error board repr", L"", NULL);
+    #endif // ALLOCATE_CONSOLE
+    cpy_str_to_clip(
+        board_repr_str
+    );
 }

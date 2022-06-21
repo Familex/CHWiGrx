@@ -152,13 +152,12 @@ void FigureBoard::reset_castling(const BoardRepr& board_repr) {
 /// <param name="position">Позиция фигуры</param>
 /// <returns>Итератор на фигуру</returns>
 Figure* FigureBoard::get_fig(pos position) {
-    /* можно брать по ключу */
-    for (const auto& [_, fig] : figures) {
-        if (fig->at(position)) {
-            return fig;
-        }
+    if (figures.find(position) != figures.end()) {
+        return figures[position];
     }
-    return get_default_fig();
+    else {
+        return get_default_fig();
+    }
 }
 
 /// <summary>
@@ -594,7 +593,7 @@ bool FigureBoard::insufficient_material() {
     return not (b_cell_bishops_cnt && w_cell_bishops_cnt);
 }
 
-GameEndType FigureBoard::game_end(Color col) {
+GameEndType FigureBoard::game_end_check(Color col) {
     if (stalemate_for(col)) return GameEndType::Stalemate;
     if (checkmate_for(col)) return GameEndType::Checkmate;
     if (insufficient_material()) return GameEndType::InsufficientMaterial;

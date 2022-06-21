@@ -56,6 +56,7 @@ bool               is_legal_board_repr(const std::string&);
 void               set_menu_checkbox(HWND, UINT, bool);
 void               update_check_title(HWND);
 inline void        Rectangle(HDC hdc, RECT rect) { Rectangle(hdc, rect.left, rect.top, rect.right, rect.bottom); }
+void               copy_repr_to_clip();
 
 /* Main window WinProc func (defined in winproc.cpp) */
 LRESULT CALLBACK   main_proc(HWND, UINT, WPARAM, LPARAM);

@@ -53,9 +53,9 @@ public:
     void apply_map(const BoardRepr&);
     void place_figure(Figure*& fig) { figures[fig->get_pos()] = fig; }
     void init_figures_moves();
-    GameEndType game_end(Color);
+    GameEndType game_end_check(Color);
     void promotion_fig(Figure*, FigureType);
-    size_t cnt_of_figures() const { return figures.size() - 1; }
+    size_t cnt_of_figures() const { return figures.size(); }
     bool insufficient_material();
     BoardRepr get_repr(bool);
     ~FigureBoard() {
