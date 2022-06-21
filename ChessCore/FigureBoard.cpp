@@ -115,7 +115,7 @@ BoardRepr FigureBoard::get_repr(bool save_all_moves) {
     for (MoveRec& mr : past)
         map += std::format("{}$", mr.as_string());
     map += ">";
-    
+
     map += "<";
     for (MoveRec& mr : future)
         map += std::format("{}$", mr.as_string());

@@ -72,6 +72,7 @@ private:
     using shift_broom = std::vector<std::vector<pos>>;
 
     bool idw{true};
+
     Id curr_id{};
     MoveLogger move_logger{};
     std::map<pos, Figure*> figures;
