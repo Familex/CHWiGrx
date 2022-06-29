@@ -1,12 +1,12 @@
 #include "declarations.hpp"
 
 /// <summary>
-/// Регистрация окна
+/// Р РµРіРёСЃС‚СЂР°С†РёСЏ РѕРєРЅР°
 /// </summary>
-/// <param name="hInstance">Экземпляр окна</param>
-/// <param name="szTitle">Заголовок окна</param>
-/// <param name="szWindowClass">Класс окна</param>
-/// <returns>Атом класса</returns>
+/// <param name="hInstance">Р­РєР·РµРјРїР»СЏСЂ РѕРєРЅР°</param>
+/// <param name="szTitle">Р—Р°РіРѕР»РѕРІРѕРє РѕРєРЅР°</param>
+/// <param name="szWindowClass">РљР»Р°СЃСЃ РѕРєРЅР°</param>
+/// <returns>РђС‚РѕРј РєР»Р°СЃСЃР°</returns>
 ATOM register_main_window_class(HINSTANCE hInstance, LPTSTR szTitle, LPTSTR szWindowClass) {
     WNDCLASSEXW wcex;
 
@@ -27,10 +27,10 @@ ATOM register_main_window_class(HINSTANCE hInstance, LPTSTR szTitle, LPTSTR szWi
     return RegisterClassExW(&wcex);
 }
 
-// Инициализация окна
+// РРЅРёС†РёР°Р»РёР·Р°С†РёСЏ РѕРєРЅР°
 bool init_instance(HINSTANCE hInstance, LPTSTR szTitle, LPTSTR szWindowClass, int nCmdShow)
 {
-    hInst = hInstance; // Сохранить маркер экземпляра в глобальной переменной
+    hInst = hInstance; // РЎРѕС…СЂР°РЅРёС‚СЊ РјР°СЂРєРµСЂ СЌРєР·РµРјРїР»СЏСЂР° РІ РіР»РѕР±Р°Р»СЊРЅРѕР№ РїРµСЂРµРјРµРЅРЅРѕР№
 
     HWND hWnd = CreateWindowW(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW,
         window_stats.get_window_pos_x(), window_stats.get_window_pos_y(),
@@ -48,7 +48,7 @@ bool init_instance(HINSTANCE hInstance, LPTSTR szTitle, LPTSTR szWindowClass, in
     return true;
 }
 
-// Обработчик сообщений для окна "О программе".
+// РћР±СЂР°Р±РѕС‚С‡РёРє СЃРѕРѕР±С‰РµРЅРёР№ РґР»СЏ РѕРєРЅР° "Рћ РїСЂРѕРіСЂР°РјРјРµ".
 INT_PTR CALLBACK about_proc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
     UNREFERENCED_PARAMETER(lParam);
@@ -69,20 +69,20 @@ INT_PTR CALLBACK about_proc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPara
 }
 
 /// <summary>
-/// Рисует фигуру на контекст изображения
+/// Р РёСЃСѓРµС‚ С„РёРіСѓСЂСѓ РЅР° РєРѕРЅС‚РµРєСЃС‚ РёР·РѕР±СЂР°Р¶РµРЅРёСЏ
 /// </summary>
-/// <param name="hdc">Контекст отображения</param>
-/// <param name="figure">Фигура для отрисовки</param>
-/// <param name="w_beg">Левая координата</param>
-/// <param name="h_beg">Верхняя координата</param>
-/// <param name="is_transpanent">Сделать ли фон прозрачным</param>
-void draw_figure(HDC hdc, const Figure& figure, int w_beg, int h_beg, bool is_transpanent) {
-    if (h_beg == -1) h_beg = figure.position.x * window_stats.get_cell_height();
-    if (w_beg == -1) w_beg = figure.position.y * window_stats.get_cell_width();
+/// <param name="hdc">РљРѕРЅС‚РµРєСЃС‚ РѕС‚РѕР±СЂР°Р¶РµРЅРёСЏ</param>
+/// <param name="figure">Р¤РёРіСѓСЂР° РґР»СЏ РѕС‚СЂРёСЃРѕРІРєРё</param>
+/// <param name="w_beg">Р›РµРІР°СЏ РєРѕРѕСЂРґРёРЅР°С‚Р°</param>
+/// <param name="h_beg">Р’РµСЂС…РЅСЏСЏ РєРѕРѕСЂРґРёРЅР°С‚Р°</param>
+/// <param name="is_transpanent">РЎРґРµР»Р°С‚СЊ Р»Рё С„РѕРЅ РїСЂРѕР·СЂР°С‡РЅС‹Рј</param>
+void draw_figure(HDC hdc, const Figure* figure, int w_beg, int h_beg, bool is_transpanent) {
+    if (h_beg == -1) h_beg = figure->get_pos().x * window_stats.get_cell_height();
+    if (w_beg == -1) w_beg = figure->get_pos().y * window_stats.get_cell_width();
     int h_end = h_beg + window_stats.get_cell_height();
     int w_end = w_beg + window_stats.get_cell_width();
-    Color col = figure.color;
-    FigureType type = figure.type;
+    Color col = figure->get_col();
+    FigureType type = figure->get_type();
     HBITMAP hBitmap = pieces_bitmaps[col][type];
     BITMAP bm;
     GetObject(hBitmap, sizeof(BITMAP), &bm);
@@ -103,9 +103,9 @@ void draw_figure(HDC hdc, const Figure& figure, int w_beg, int h_beg, bool is_tr
 }
 
 /// <summary>
-/// Совершает ход
+/// РЎРѕРІРµСЂС€Р°РµС‚ С…РѕРґ
 /// </summary>
-/// <param name="hWnd">Дескриптор окна</param>
+/// <param name="hWnd">Р”РµСЃРєСЂРёРїС‚РѕСЂ РѕРєРЅР°</param>
 void make_move(HWND hWnd) {
     if (!motion_input.is_current_turn(turn)) {
         motion_input.clear();
@@ -128,18 +128,40 @@ void make_move(HWND hWnd) {
         std::cout << "Curr move was: " << move_rec.as_string() << '\n';
     #endif // ALLOCATE_CONSOLE
 
-    board.set_last_move({ *motion_input.get_in_hand(), motion_input.get_input(), turn, move_rec.ms, move_rec.promotion_choice });
+    board.set_last_move({ motion_input.get_in_hand(), motion_input.get_input(), turn, move_rec.ms, move_rec.promotion_choice });
     turn.to_next();
     motion_input.clear();
     InvalidateRect(hWnd, NULL, NULL);
 
-    if (board.game_end(turn)) {
-        if (not board.insufficient_material()) {
-            TCHAR tmp2[] = { (TCHAR)turn.what_next(), ' ', 'w', 'i', 'n', 's', '!', '\0' };
-            MessageBox(hWnd, tmp2, L"GAME END", NULL);
+    GameEndType curr_game_end_state = board.game_end_check(turn);
+
+    if (curr_game_end_state != GameEndType::NotGameEnd) {
+        std::wstring body = L"";
+        std::wstring head = L"Game end";
+        switch (curr_game_end_state) {
+        case GameEndType::Checkmate: case GameEndType::Stalemate: {
+            auto who_next = turn.what_next();
+            body = who_next == EColor::White ? L"White wins!" :
+                who_next == EColor::Black ? L"Black wins!" :
+                L"None wins!";
+            break;
         }
-        else {
-            MessageBox(hWnd, L"Insufficient material", L"GAME END", NULL);
+            case GameEndType::FiftyRule:
+                body = L"Fifty rule";
+                break;
+            case GameEndType::InsufficientMaterial:
+                body = L"Insufficient material";
+                break;
+            case GameEndType::MoveRepeat:
+                body = L"Move repeat rule";
+                break;
+            default:
+                throw std::runtime_error("unexpected game end");
+                break;
+        }
+        auto result = MessageBox(hWnd, (body + L"\nCopy board to clip?").c_str(), head.c_str(), MB_YESNO);
+        if (result == IDYES) {
+            copy_repr_to_clip();
         }
         restart();
         InvalidateRect(hWnd, NULL, NULL);
@@ -149,12 +171,13 @@ void make_move(HWND hWnd) {
 }
 
 void restart() {
-    board.reset(start_board_repr);
+    BoardRepr tmp_board_repr{ start_board_repr };
+    board.reset(tmp_board_repr);
     motion_input.clear();
-    turn = start_board_repr.get_turn();
+    turn = tmp_board_repr.get_turn();
 }
 
-// Копирует строку в буффер обмена
+// РљРѕРїРёСЂСѓРµС‚ СЃС‚СЂРѕРєСѓ РІ Р±СѓС„С„РµСЂ РѕР±РјРµРЅР°
 void cpy_str_to_clip(const std::string& buff)
 {
     size_t len = buff.length() + 1;
@@ -171,7 +194,7 @@ void cpy_str_to_clip(const std::string& buff)
     }
 }
 
-// Возвращает строку из буффера обмена
+// Р’РѕР·РІСЂР°С‰Р°РµС‚ СЃС‚СЂРѕРєСѓ РёР· Р±СѓС„С„РµСЂР° РѕР±РјРµРЅР°
 std::string take_str_from_clip() {
     if (!OpenClipboard(nullptr)) return "";
     HANDLE hData = GetClipboardData(CF_TEXT);
@@ -185,21 +208,21 @@ std::string take_str_from_clip() {
 }
 
 /// <summary>
-/// Создаёт экземпляр окна для выбранной фигуры
+/// РЎРѕР·РґР°С‘С‚ СЌРєР·РµРјРїР»СЏСЂ РѕРєРЅР° РґР»СЏ РІС‹Р±СЂР°РЅРЅРѕР№ С„РёРіСѓСЂС‹
 /// </summary>
-/// <param name="parent">Основное окно</param>
-/// <param name="in_hand">Выбранная фигура</param>
-/// <param name="mouse">Позиция мыши</param>
-/// <param name="w">Ширина фигуры</param>
-/// <param name="h">Высота фигуры</param>
-/// <param name="callback">Функция окна</param>
-/// <param name="class_name">Имя класса окна</param>
-/// <returns>Дескриптор окна</returns>
-HWND create_curr_choice_window(HWND parent, Figure in_hand, POINT mouse, int w, int h, const WNDPROC callback, LPCWSTR class_name) {
+/// <param name="parent">РћСЃРЅРѕРІРЅРѕРµ РѕРєРЅРѕ</param>
+/// <param name="in_hand">Р’С‹Р±СЂР°РЅРЅР°СЏ С„РёРіСѓСЂР°</param>
+/// <param name="mouse">РџРѕР·РёС†РёСЏ РјС‹С€Рё</param>
+/// <param name="w">РЁРёСЂРёРЅР° С„РёРіСѓСЂС‹</param>
+/// <param name="h">Р’С‹СЃРѕС‚Р° С„РёРіСѓСЂС‹</param>
+/// <param name="callback">Р¤СѓРЅРєС†РёСЏ РѕРєРЅР°</param>
+/// <param name="class_name">РРјСЏ РєР»Р°СЃСЃР° РѕРєРЅР°</param>
+/// <returns>Р”РµСЃРєСЂРёРїС‚РѕСЂ РѕРєРЅР°</returns>
+HWND create_curr_choice_window(HWND parent, Figure* in_hand, POINT mouse, int w, int h, const WNDPROC callback, LPCWSTR class_name) {
     UnregisterClass(class_name, GetModuleHandle(nullptr));
     WNDCLASSEX wc{ sizeof(WNDCLASSEX) };
     HWND hWindow{};
-    Figure* for_storage = new Figure(in_hand);
+    Figure* for_storage = in_hand;  // Р’РѕР·РјРѕР¶РЅРѕ РЅСѓР¶РЅРѕ РєРѕРїРёСЂРѕРІР°С‚СЊ TODO
     wc.cbClsExtra = 0;
     wc.cbWndExtra = sizeof(in_hand);
     wc.hbrBackground = NULL;
@@ -230,12 +253,12 @@ HWND create_curr_choice_window(HWND parent, Figure in_hand, POINT mouse, int w, 
 }
 
 /// <summary>
-/// Функция обрабатывающая WM_LBUTTONUP
+/// Р¤СѓРЅРєС†РёСЏ РѕР±СЂР°Р±Р°С‚С‹РІР°СЋС‰Р°СЏ WM_LBUTTONUP
 /// </summary>
-/// <param name="hWnd">Дескриптор окна</param>
+/// <param name="hWnd">Р”РµСЃРєСЂРёРїС‚РѕСЂ РѕРєРЅР°</param>
 /// <param name="wParam"></param>
 /// <param name="lParam"></param>
-/// <param name="where_fig">Позиция фигуры</param>
+/// <param name="where_fig">РџРѕР·РёС†РёСЏ С„РёРіСѓСЂС‹</param>
 void on_lbutton_up(HWND hWnd, WPARAM wParam, LPARAM lParam, pos where_fig) {
     motion_input.reset_lbutton_down();
     motion_input.reset_single();
@@ -248,7 +271,7 @@ void on_lbutton_up(HWND hWnd, WPARAM wParam, LPARAM lParam, pos where_fig) {
     else {
         motion_input.set_target(where_fig.x, where_fig.y);
         if (motion_input.target_at_input()) {
-            if (window_stats.get_prev_lbutton_click() != pos(HIWORD(lParam), LOWORD(lParam))) { // Отпустили в пределах клетки, но в другом месте
+            if (window_stats.get_prev_lbutton_click() != pos(HIWORD(lParam), LOWORD(lParam))) { // РћС‚РїСѓСЃС‚РёР»Рё РІ РїСЂРµРґРµР»Р°С… РєР»РµС‚РєРё, РЅРѕ РІ РґСЂСѓРіРѕРј РјРµСЃС‚Рµ
                 motion_input.clear();
                 InvalidateRect(hWnd, NULL, NULL);
                 return;
@@ -265,9 +288,10 @@ void on_lbutton_up(HWND hWnd, WPARAM wParam, LPARAM lParam, pos where_fig) {
 
 bool is_legal_board_repr(const std::string& str) {
 #ifdef USE_REGEX_BOARD_REPR_CHECK
+    // regex РЅРµ Р°РєС‚СѓР°Р»РµРЅ, РєР°Рє РјРёРЅРёРјСѓРј РІ РјРµС‚Сѓ Р±С‹Р»Рё РґРѕР±Р°РІР»РµРЅС‹ СЂРѕРєРёСЂРѕРІРєРё
     const static std::regex valid_board_repr(R"(((-?\d+;){3}\w;\w;)+\[T?F?W?B?\](<(\d+\.\d+\.\d+\.\w\.\w\.\d+\.\d+\.\d+\.\d+\.\w\.\w\.\{(\w,)*\}\.\{(-?\d+,)*\}\.\{((-?\d+,){5})*\}\.\{(-?\d+,)*\}\$)*>){2}~((-?\d+,){3}\w,\w,)*)");
     const static std::regex valid_board_repr_light(R"((?:(?:-?\d+;){3}\w;\w;)+\[T?F?W?B?\](?:<(?:\d+\.\d+\.\d+\.\w\.\w\.\d+\.\d+\.\d+\.\d+\.\w\.\w\.\{(?:\w,)*\}\.\{(?:-?\d+,)*\}\.\{(?:(?:-?\d+,){5})*\}\.\{(?:-?\d+,)*\}\$)*>){2}~(?:(?:-?\d+,){3}\w,\w,)*)");
-    return std::regex_match(str, valid_board_repr_light); // Программа ложится под stackoverflow
+    return std::regex_match(str, valid_board_repr_light); // РџСЂРѕРіСЂР°РјРјР° Р»РѕР¶РёС‚СЃСЏ РїРѕРґ stackoverflow
 #endif // USE_REGEX_BOARD_REPR_CHECK
 
     return (str.find('<') != str.npos &&
@@ -288,15 +312,15 @@ void set_menu_checkbox(HWND hWnd, UINT menu_item, bool state) {
     SetMenuItemInfoW(hMenu, menu_item, FALSE, &item_info);
 }
 
-// Создаёт окно в выбранной фигурой и привязывает к мыши
+// РЎРѕР·РґР°С‘С‚ РѕРєРЅРѕ РІ РІС‹Р±СЂР°РЅРЅРѕР№ С„РёРіСѓСЂРѕР№ Рё РїСЂРёРІСЏР·С‹РІР°РµС‚ Рє РјС‹С€Рё
 void MotionInput::init_curr_choice_window(HWND hWnd) {
     is_curr_choice_moving = true;
     POINT mouse{};
     GetCursorPos(&mouse);
-    curr_chose_window = create_curr_choice_window(hWnd, *in_hand, mouse, window_stats.get_cell_width(), window_stats.get_cell_height(),
+    curr_chose_window = create_curr_choice_window(hWnd, in_hand, mouse, window_stats.get_cell_width(), window_stats.get_cell_height(),
         [](HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
-            static const int TO_DESTROY_TIMER_ID{ 99 }; // не могу захватить из вне
-            static const int TO_DESTROY_ELAPSE{ 5 };    // да и не надо так-то
+            static const int TO_DESTROY_TIMER_ID{ 99 }; // РЅРµ РјРѕРіСѓ Р·Р°С…РІР°С‚РёС‚СЊ РёР· РІРЅРµ
+            static const int TO_DESTROY_ELAPSE{ 5 };    // РґР° Рё РЅРµ РЅР°РґРѕ С‚Р°Рє-С‚Рѕ
             switch (uMsg) {
             case WM_CREATE:
                 SetTimer(hWnd, TO_DESTROY_TIMER_ID, TO_DESTROY_ELAPSE, NULL);
@@ -310,7 +334,7 @@ void MotionInput::init_curr_choice_window(HWND hWnd) {
             case WM_ENTERSIZEMOVE:
                 KillTimer(hWnd, TO_DESTROY_TIMER_ID);
                 break;
-            case WM_EXITSIZEMOVE: // Фигуру отпустил
+            case WM_EXITSIZEMOVE: // Р¤РёРіСѓСЂСѓ РѕС‚РїСѓСЃС‚РёР»
             {
                 HWND parent = GetParent(hWnd);
                 POINT cur_pos{};
@@ -326,7 +350,7 @@ void MotionInput::init_curr_choice_window(HWND hWnd) {
                 DestroyWindow(hWnd);
             }
             break;
-            case WM_NCHITTEST:  // При перехвате нажатий мыши симулируем перетаскивание
+            case WM_NCHITTEST:  // РџСЂРё РїРµСЂРµС…РІР°С‚Рµ РЅР°Р¶Р°С‚РёР№ РјС‹С€Рё СЃРёРјСѓР»РёСЂСѓРµРј РїРµСЂРµС‚Р°СЃРєРёРІР°РЅРёРµ
                 return (LRESULT)HTCAPTION;
             case WM_PAINT:
             {
@@ -334,7 +358,7 @@ void MotionInput::init_curr_choice_window(HWND hWnd) {
                 HDC hdc = BeginPaint(hWnd, &ps);
                 Figure* in_hand = (Figure*)GetWindowLongPtr(hWnd, GWLP_USERDATA);
                 if (in_hand) {
-                    draw_figure(hdc, *in_hand, 0, 0, false);
+                    draw_figure(hdc, in_hand, 0, 0, false);
                 }
                 EndPaint(hWnd, &ps);
             }
@@ -348,21 +372,27 @@ void MotionInput::init_curr_choice_window(HWND hWnd) {
     SendMessage(curr_chose_window, WM_NCLBUTTONDOWN, HTCAPTION, MAKELPARAM(mouse.x, mouse.y));
 }
 
-// Заполняет поле возможных ходов для текущей фигуры
+// Р—Р°РїРѕР»РЅСЏРµС‚ РїРѕР»Рµ РІРѕР·РјРѕР¶РЅС‹С… С…РѕРґРѕРІ РґР»СЏ С‚РµРєСѓС‰РµР№ С„РёРіСѓСЂС‹
 void MotionInput::calculate_possible_moves() {
-    all_possible_moves.clear();
-    for (const auto& [is_eat, move_pos] : board->get_all_possible_moves(*in_hand)) {
-        if (in_hand->type == EFigureType::King
-            ? (is_eat
-                ? not board->check_for_when(in_hand->color, { in_hand->position, move_pos }, move_pos)
-                : not board->check_for_when(in_hand->color, { in_hand->position }, move_pos)
-                )
-            : (is_eat
-                ? not board->check_for_when(in_hand->color, { in_hand->position, move_pos }, {}, { in_hand->submit_on(move_pos) })
-                : not board->check_for_when(in_hand->color, { in_hand->position }, {}, { in_hand->submit_on(move_pos) })
-                )
-            ) {
-            all_possible_moves.push_back({ is_eat, move_pos });
+    all_moves.clear();
+    for (const auto& [is_eat, move_pos] : board->get_all_possible_moves(in_hand)) {
+        if (in_hand->get_type() == EFigureType::King) {
+            if (is_eat
+                ? not board->check_for_when(in_hand->get_col(), { in_hand->get_pos(), move_pos }, move_pos)
+                : not board->check_for_when(in_hand->get_col(), { in_hand->get_pos() }, move_pos)
+                ) {
+                all_moves.push_back({ is_eat, move_pos });
+            }
+        }
+        else {
+            Figure* in_hand_in_tmp = FigureFabric::instance()->submit_on(in_hand, move_pos);
+            bool check = (is_eat
+                ? board->check_for_when(in_hand->get_col(), { in_hand->get_pos(), move_pos }, {}, { in_hand_in_tmp })
+                : board->check_for_when(in_hand->get_col(), { in_hand->get_pos() }, {}, { in_hand_in_tmp })
+                );
+            if (not check) {
+                all_moves.push_back({ is_eat, move_pos });
+            }
         }
     }
 }
@@ -374,23 +404,39 @@ void MotionInput::clear() {
     reset_input_order();
     in_hand = board->get_default_fig();
     input = { {0, -1}, {-1, -1} };
-    all_possible_moves.clear();
+    all_moves.clear();
 }
 
 void MotionInput::prepare(Color turn) {
     in_hand = board->get_fig(input.from);
     input.target = input.from;
-    if (in_hand->color == turn && in_hand->id != ERR_ID) {
+    if (in_hand->get_col() == turn && not in_hand->empty()) {
         calculate_possible_moves();
     }
 }
 
 void update_check_title(HWND hWnd) {
     std::wstring curr_text = L"CHWiGrx";
-    if (board.check_for_when(turn)) {
+    if (board.is_empty()) {
+        curr_text += L" [Empty board]";
+    }
+    else if (board.check_for_when(turn)) {
         curr_text += L" [Check to ";
-        curr_text += turn == EColor::White ? L"White" : L"Black";
-        curr_text += L"]!";
+        curr_text += turn == EColor::White ? L"White" : turn == EColor::Black ? L"Black" : L"None";
+        curr_text += L"]";
     }
     SetWindowText(hWnd, curr_text.c_str());
+}
+
+void copy_repr_to_clip() {
+    BoardRepr board_repr = board.get_repr(save_all_moves);
+    board_repr.set_turn(turn);
+    std::string board_repr_str = board_repr.as_string();
+    #ifdef ALLOCATE_CONSOLE
+    if (!is_legal_board_repr(board_repr_str))
+        MessageBox(hWnd, L"Copied error board repr", L"", NULL);
+    #endif // ALLOCATE_CONSOLE
+    cpy_str_to_clip(
+        board_repr_str
+    );
 }

@@ -10,7 +10,7 @@ LRESULT CALLBACK main_proc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam
     case WM_COMMAND:
         {
             int wmId = LOWORD(wParam);
-            // Разобрать выбор в меню:
+            // Р Р°Р·РѕР±СЂР°С‚СЊ РІС‹Р±РѕСЂ РІ РјРµРЅСЋ:
             switch (wmId)
             {
             case IDM_UNDO:
@@ -26,19 +26,8 @@ LRESULT CALLBACK main_proc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam
                 }
                 break;
             case IDM_COPY_MAP:
-            {
-                BoardRepr board_repr = board.get_repr(save_all_moves);
-                board_repr.set_turn(turn);
-                std::string board_repr_str = board_repr.as_string();
-                #ifdef ALLOCATE_CONSOLE
-                    if (!is_legal_board_repr(board_repr_str))
-                        MessageBox(hWnd, L"Copied error board repr", L"", NULL);
-                #endif // ALLOCATE_CONSOLE
-                cpy_str_to_clip(
-                    board_repr_str
-                );
-            }
-            break;
+                copy_repr_to_clip();
+                break;
             case IDM_PASTE_MAP:
                 do {
                     std::string board_repr_str = take_str_from_clip();
@@ -114,73 +103,73 @@ LRESULT CALLBACK main_proc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam
                 return DefWindowProc(hWnd, message, wParam, lParam);
             }
         }
-        update_check_title(hWnd);   // Для надёжности обновлю на все исходы
+        update_check_title(hWnd);   // Р”Р»СЏ РЅР°РґС‘Р¶РЅРѕСЃС‚Рё РѕР±РЅРѕРІР»СЋ РЅР° РІСЃРµ РёСЃС…РѕРґС‹
         InvalidateRect(hWnd, NULL, NULL);
         break;
     case WM_KEYDOWN:
     {
         int cord{ -1 };
         switch (wParam) {
-        case VK_0: case VK_NUMPAD0: cord = 0; break;
-        case VK_1: case VK_NUMPAD1: cord = 1; break;
-        case VK_2: case VK_NUMPAD2: cord = 2; break;
-        case VK_3: case VK_NUMPAD3: cord = 3; break;
-        case VK_4: case VK_NUMPAD4: cord = 4; break;
-        case VK_5: case VK_NUMPAD5: cord = 5; break;
-        case VK_6: case VK_NUMPAD6: cord = 6; break;
-        case VK_7: case VK_NUMPAD7: cord = 7; break;
-        case VK_8: case VK_NUMPAD8: cord = 8; break;
-        case VK_9: case VK_NUMPAD9: cord = 9; break;
-        case VK_ESCAPE:
-            motion_input.clear();
-            InvalidateRect(hWnd, NULL, NULL);
-            return 0;
-        case VK_LEFT: case VK_RIGHT: case VK_UP: case VK_DOWN:
-        {
-            pos shift{ wParam == VK_LEFT ? pos(0, -1) : (wParam == VK_RIGHT ? pos(0, 1) : (wParam == VK_UP ? pos(-1, 0) : pos(1, 0))) };
-            if (!motion_input.is_pair())
-                motion_input.shift_from(shift, HEIGHT, WIDTH);
-            else
-                motion_input.shift_target(shift, HEIGHT, WIDTH);
-            InvalidateRect(hWnd, NULL, NULL);
-            return 0;
-        }
-        case VK_RETURN:
-            if (motion_input.is_pair()) {
-                make_move(hWnd);
+            case VK_0: case VK_NUMPAD0: cord = 0; break;
+            case VK_1: case VK_NUMPAD1: cord = 1; break;
+            case VK_2: case VK_NUMPAD2: cord = 2; break;
+            case VK_3: case VK_NUMPAD3: cord = 3; break;
+            case VK_4: case VK_NUMPAD4: cord = 4; break;
+            case VK_5: case VK_NUMPAD5: cord = 5; break;
+            case VK_6: case VK_NUMPAD6: cord = 6; break;
+            case VK_7: case VK_NUMPAD7: cord = 7; break;
+            case VK_8: case VK_NUMPAD8: cord = 8; break;
+            case VK_9: case VK_NUMPAD9: cord = 9; break;
+            case VK_ESCAPE:
                 motion_input.clear();
                 InvalidateRect(hWnd, NULL, NULL);
                 return 0;
+            case VK_LEFT: case VK_RIGHT: case VK_UP: case VK_DOWN:
+            {
+                pos shift{ wParam == VK_LEFT ? pos(0, -1) : (wParam == VK_RIGHT ? pos(0, 1) : (wParam == VK_UP ? pos(-1, 0) : pos(1, 0))) };
+                if (!motion_input.is_pair())
+                    motion_input.shift_from(shift, HEIGHT, WIDTH);
+                else
+                    motion_input.shift_target(shift, HEIGHT, WIDTH);
+                InvalidateRect(hWnd, NULL, NULL);
+                return 0;
             }
-            else {
-                motion_input.prepare(turn);
-            }
-            motion_input.toggle_pair_input();
-            InvalidateRect(hWnd, NULL, NULL);
-            return 0;
-        default:
-            return 0;
+            case VK_RETURN:
+                if (motion_input.is_pair()) {
+                    make_move(hWnd);
+                    motion_input.clear();
+                    InvalidateRect(hWnd, NULL, NULL);
+                    return 0;
+                }
+                else {
+                    motion_input.prepare(turn);
+                }
+                motion_input.toggle_pair_input();
+                InvalidateRect(hWnd, NULL, NULL);
+                return 0;
+            default:
+                return 0;
         }
         switch (motion_input.get_single_state()) {
-        case 0:
-            motion_input.set_from_x(cord);
-            motion_input.next_single();
-            break;
-        case 1:
-            motion_input.set_from_y(cord);
-            motion_input.prepare(turn);
-            motion_input.activate_pair();
-            motion_input.next_single();
-            break;
-        case 2:
-            motion_input.set_target_x(cord);
-            motion_input.next_single();
-            break;
-        case 3:
-            motion_input.set_target_y(cord);
-            make_move(hWnd);
-            motion_input.reset_input_order();
-            break;
+            case 0:
+                motion_input.set_from_x(cord);
+                motion_input.next_single();
+                break;
+            case 1:
+                motion_input.set_from_y(cord);
+                motion_input.prepare(turn);
+                motion_input.activate_pair();
+                motion_input.next_single();
+                break;
+            case 2:
+                motion_input.set_target_x(cord);
+                motion_input.next_single();
+                break;
+            case 3:
+                motion_input.set_target_y(cord);
+                make_move(hWnd);
+                motion_input.reset_input_order();
+                break;
         }
         InvalidateRect(hWnd, NULL, NULL);
         break;
@@ -237,7 +226,7 @@ LRESULT CALLBACK main_proc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam
         hOld = SelectObject(hdcMem, hbmMem);
 
         {
-            /* Фоновый рисунок */
+            /* Р¤РѕРЅРѕРІС‹Р№ СЂРёСЃСѓРЅРѕРє */
             for (int i{}; i < HEIGHT; ++i) {
                 for (int j{}; j < WIDTH; ++j) {
                     static const HBRUSH CHECKERBOARDBRIGHT{ CreateSolidBrush(RGB(50, 50, 50)) };
@@ -254,7 +243,7 @@ LRESULT CALLBACK main_proc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam
         }
 
         {
-            /* Возможные ходы текущей фигуры */
+            /* Р’РѕР·РјРѕР¶РЅС‹Рµ С…РѕРґС‹ С‚РµРєСѓС‰РµР№ С„РёРіСѓСЂС‹ */
             for (const auto& [is_eat, move_pos] : motion_input.get_possible_moves()) {
                 static const HBRUSH GREEN{ CreateSolidBrush(RGB(0, 255, 0)) };
                 static const HBRUSH DARK_GREEN{ CreateSolidBrush(RGB(0, 150, 0)) };
@@ -269,7 +258,7 @@ LRESULT CALLBACK main_proc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam
         }
 
         {
-            /* Положение курсора и выделенной клетки */
+            /* РџРѕР»РѕР¶РµРЅРёРµ РєСѓСЂСЃРѕСЂР° Рё РІС‹РґРµР»РµРЅРЅРѕР№ РєР»РµС‚РєРё */
             static const HBRUSH RED{ CreateSolidBrush(RGB(255, 0, 0)) };
             static const HBRUSH BLUE{ CreateSolidBrush(RGB(0, 0, 255)) };
             const RECT from_cell = window_stats.get_cell(input.from);
@@ -279,15 +268,15 @@ LRESULT CALLBACK main_proc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam
         }
 
         {
-            /* Фигуры на поле */
+            /* Р¤РёРіСѓСЂС‹ РЅР° РїРѕР»Рµ */
             for (const auto& figure : board.all_figures()) {
-                if (!motion_input.is_figure_dragged(figure.id)) {
+                if (!motion_input.is_figure_dragged(figure->get_id())) {
                     draw_figure(hdcMem, figure);
                 }
             }
         }
 
-        /* Копирование временного буфера в основной */
+        /* РљРѕРїРёСЂРѕРІР°РЅРёРµ РІСЂРµРјРµРЅРЅРѕРіРѕ Р±СѓС„РµСЂР° РІ РѕСЃРЅРѕРІРЅРѕР№ */
         BitBlt(hdc, 0, 0,
             window_stats.get_window_width(),
             window_stats.get_window_height(),

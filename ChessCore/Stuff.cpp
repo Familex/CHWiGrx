@@ -7,7 +7,7 @@
 /// <param name="str">Строка</param>
 /// <param name="delimiter">Разделитель</param>
 /// <returns>Вектор подстрок</returns>
-auto split(std::string str, const std::string&& delimiter) {
+std::vector<std::string> split(std::string str, const std::string&& delimiter) {
     size_t token_end{};
     std::vector<std::string> tokens{};
     while ((token_end = str.find(delimiter)) != str.npos) {
@@ -22,6 +22,13 @@ auto split(std::string str, const std::string&& delimiter) {
     if (!str.empty())
         tokens.push_back(str);
     return tokens;
+}
+
+void remove_first_occurrence(std::string& str, char c) {
+    auto p = str.find(c);
+    if (p != std::string::npos) {
+        str.erase(p, p + 1);
+    }
 }
 
 /// <summary>
@@ -121,10 +128,10 @@ bool operator<  (const pos& left, const pos& right) {
 }
 
 // Оставить от вектора фигур только вектор их позиций
-std::vector<pos> to_pos_vector(const std::vector<Figure>& lst) {
+std::vector<pos> to_pos_vector(const std::vector<Figure*>& lst) {
     std::vector<pos> acc{};
     for (const auto& fig : lst) {
-        acc.push_back(fig.position);
+        acc.push_back(fig->get_pos());
     }
     return acc;
 }
@@ -188,7 +195,24 @@ MoveRec MoveLogger::move_last_to_future() {
     return last;
 }
 
-// Конструктор репрезентации доски
+bool MoveLogger::is_fifty_move_rule_was_triggered() {
+    size_t without_eat_and_pawnmoves = 0;
+    for (auto move{ prev_moves.rbegin() }; move != prev_moves.rend(); ++move) {
+        if (move->get_who_went()->get_type() == EFigureType::Pawn || move->ms.main_ev == MainEvent::EAT) {
+            break;
+        }
+        else {
+            ++without_eat_and_pawnmoves;
+        }
+    }
+    return without_eat_and_pawnmoves >= 50;
+}
+
+bool MoveLogger::is_moves_repeat_rule_was_triggered() {
+    return false;
+}
+
+// Сведения о рокировке привязаны к id соответствующих ладей (заключены в квадратные скобки)
 BoardRepr::BoardRepr(std::string board_repr) {
     const size_t npos = std::string::npos;
     size_t meta_start = board_repr.find('[');
@@ -205,6 +229,14 @@ BoardRepr::BoardRepr(std::string board_repr) {
     }
     else if (meta.find('b') != npos || meta.find('B') != npos) {
         turn = EColor::Black;
+    }
+    for (const char& c : { 't', 'T', 'f', 'F', 'w', 'W', 'b', 'B' }) {
+        remove_first_occurrence(meta, c);
+    }
+    // здесь значение meta содержит только информацию о возможных рокировках
+    for (auto& castle_id : split(meta, ";")) {
+        if (!castle_id.empty())
+            can_castle.push_back(stoi(castle_id));
     }
     board_repr.erase(board_repr.begin() + meta_start, board_repr.begin() + meta_end + 1);
     size_t past_start = board_repr.find('<');
@@ -234,11 +266,14 @@ BoardRepr::BoardRepr(std::string board_repr) {
         tmp.push_back(fig_piece);
     }
     for (size_t i{}; i < tmp.size(); i += 5) {
-        captured_figures.push_back({ std::stoi(tmp[i]),
-                                    {std::stoi(tmp[i + 1]), std::stoi(tmp[i + 2])},
-                                    tmp[i + 3][0],
-                                    tmp[i + 4][0]
-            });
+        Id new_id =             std::stoi(tmp[i]);
+        pos new_pos =         { std::stoi(tmp[i + 1]), std::stoi(tmp[i + 2]) };
+        Color new_col =       { tmp[i + 3][0] };
+        FigureType new_type = { tmp[i + 4][0] };
+        Figure* new_fig = FigureFabric::instance()->create(
+            new_pos, new_col, new_type, new_id
+        );
+        captured_figures.push_back(new_fig);
     }
     board_repr.erase(board_repr.begin() + deleted_start, board_repr.end());
 
@@ -248,11 +283,14 @@ BoardRepr::BoardRepr(std::string board_repr) {
             tmp.push_back(fig_piece);
     }
     for (size_t i{}; i < tmp.size(); i += 5) {
-        figures.push_back({ std::stoi(tmp[i]),
-                                    {std::stoi(tmp[i + 1]), std::stoi(tmp[i + 2])},
-                                    tmp[i + 3][0],
-                                    tmp[i + 4][0]
-            });
+        Id new_id = std::stoi(tmp[i]);
+        pos new_pos = { std::stoi(tmp[i + 1]), std::stoi(tmp[i + 2]) };
+        Color new_col = { tmp[i + 3][0] };
+        FigureType new_type = { tmp[i + 4][0] };
+        Figure* new_fig = FigureFabric::instance()->create(
+            new_pos, new_col, new_type, new_id
+        );
+        figures.push_back(new_fig);
     }
 }
 
@@ -293,18 +331,18 @@ std::string MoveRec::as_string() {
 // Коструктор из строки
 MoveRec::MoveRec(std::string map) {
     if (map.empty()) throw std::invalid_argument("Empty map");
-    std::string data[16]; // last always empty
-    int i{ 0 };
-    for (const std::string& curr : split(map, ".")) {
-        data[i++] = curr;
-    }
-
-    who_went.id = std::stoi(data[0]);
-    who_went.position.x = std::stoi(data[1]);
-    who_went.position.y = std::stoi(data[2]);
-    who_went.color = data[3][0];
-    turn = who_went.color;
-    who_went.type = data[4][0];
+    auto data = split(map, ".");
+    // Возможно нижнюю конструкцию стоит вставить в фабрику
+    Id new_id = std::stoi(data[0]);
+    Color new_col = data[3][0];
+    pos new_pos = { std::stoi(data[1]), std::stoi(data[2]) };
+    FigureType new_type = data[4][0];
+    Figure* who_went_tmp = FigureFabric::instance()->create(
+        new_pos, new_col, new_type, new_id
+    );
+    who_went = *who_went_tmp;
+    delete who_went_tmp;
+    turn = new_col;
     input.from.x   = std::stoi(data[5]);
     input.from.y   = std::stoi(data[6]);
     input.target.x = std::stoi(data[7]);
@@ -379,10 +417,14 @@ std::string BoardRepr::as_string() {
     std::string result{ "" };
     for (auto& fig : figures) {
         result += std::format("{};{};{};{};{};",
-            fig.id, fig.position.x, fig.position.y, (char)fig.color, (char)fig.type
+            fig->get_id(), fig->get_pos().x, fig->get_pos().y, (char)fig->get_col(), (char)fig->get_type()
         );
     }
-    result += std::format("[{}{}]<", get_idw_char(), get_turn_char());
+    result += std::format("[{}{}", get_idw_char(), get_turn_char());
+    for (Id& castle_id : can_castle) {
+        result += std::format("{};", castle_id);
+    }
+    result += "]<";
     for (auto& mr : past) {
         result += mr.as_string() + "$";
     }
@@ -393,7 +435,7 @@ std::string BoardRepr::as_string() {
     result += ">~";
     for (auto& fig : captured_figures) {
         result += std::format("{},{},{},{},{},",
-            fig.id, fig.position.x, fig.position.y, (char)fig.color, (char)fig.type
+            fig->get_id(), fig->get_pos().x, fig->get_pos().y, (char)fig->get_col(), (char)fig->get_type()
         );
     }
     return result;
@@ -435,4 +477,73 @@ std::string to_string(MainEvent main_event) {
     default:
         return "N";
     }
+}
+
+Figure* FigureFabric::create(pos position, Color color, EFigureType type, Id id, Figure* placement) {
+    switch (type) {
+        case EFigureType::Pawn:
+            return placement
+                   ? new (placement) Figure(id, position, color, EFigureType::Pawn)
+                   : new Figure(id, position, color, EFigureType::Pawn);
+        case EFigureType::Knight:
+            return placement
+                   ? new (placement) Figure(id, position, color, EFigureType::Knight)
+                   : new Figure(id, position, color, EFigureType::Knight);
+        case EFigureType::Rook:
+            return placement
+                   ? new (placement) Figure(id, position, color, EFigureType::Rook)
+                   : new Figure(id, position, color, EFigureType::Rook);
+        case EFigureType::Bishop:
+            return placement
+                   ? new (placement) Figure(id, position, color, EFigureType::Bishop)
+                   : new Figure(id, position, color, EFigureType::Bishop);
+        case EFigureType::Queen:
+            return placement
+                   ? new (placement) Figure(id, position, color, EFigureType::Queen)
+                   : new Figure(id, position, color, EFigureType::Queen);
+        case EFigureType::King:
+            return placement
+                   ? new (placement) Figure(id, position, color, EFigureType::King)
+                   : new Figure(id, position, color, EFigureType::King);
+        case EFigureType::None:
+            return new Figure(id, position, EColor::None, EFigureType::None);
+        default:
+            return get_default_fig();
+        }
+}
+
+Figure* FigureFabric::create(pos position, Color color, EFigureType type) {
+    switch (type) {
+    case EFigureType::Pawn:
+        return new Figure(this->id++, position, color, EFigureType::Pawn);
+    case EFigureType::Knight:
+        return new Figure(this->id++, position, color, EFigureType::Knight);
+    case EFigureType::Rook:
+        return new Figure(this->id++, position, color, EFigureType::Rook);
+    case EFigureType::Bishop:
+        return new Figure(this->id++, position, color, EFigureType::Bishop);
+    case EFigureType::Queen:
+        return new Figure(this->id++, position, color, EFigureType::Queen);
+    case EFigureType::King:
+        return new Figure(this->id++, position, color, EFigureType::King);
+    case EFigureType::None:
+        return new Figure(this->id++, position, EColor::None, EFigureType::None);
+    default:
+        return get_default_fig();
+    }
+}
+
+Figure* FigureFabric::get_default_fig() {
+    if (not DEFAULT->empty()) throw std::logic_error("default figure was deleted *.*"); // на время разработки - очень часто вылезает эта ошибка
+    return DEFAULT;
+}
+
+Figure* FigureFabric::create(Figure* to_copy) {
+    if (to_copy->empty()) return DEFAULT;
+    return create(
+        to_copy->get_pos(),
+        to_copy->get_col(),
+        to_copy->get_type(),
+        to_copy->get_id()
+    );
 }
