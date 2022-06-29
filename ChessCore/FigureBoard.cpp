@@ -609,7 +609,7 @@ GameEndType FigureBoard::game_end_check(Color col) {
 /// <param name="in_hand">Фигура, которой собираются ходить</param>
 /// <param name="input">Ввод</param>
 /// <returns>Сообщение хода</returns>
-MoveMessage FigureBoard::move_check(Figure* in_hand, Input input) {
+std::variant<ErrorEvent, MoveMessage> FigureBoard::move_check(Figure* in_hand, Input input) {
     MoveMessage move_message{ MainEvent::E, {} };
     Figure* targ{ get_fig(input.target) };
 
@@ -617,7 +617,7 @@ MoveMessage FigureBoard::move_check(Figure* in_hand, Input input) {
         input.from == input.target ||
         not cont_fig(input.from) ||
         get_fig(input.target)->is_col(in_hand->get_col())) {
-        throw std::invalid_argument("Invalid input");
+        return ErrorEvent::INVALID_MOVE;
     }
 
     if (in_hand->get_type() == EFigureType::Rook) {
@@ -690,12 +690,12 @@ MoveMessage FigureBoard::move_check(Figure* in_hand, Input input) {
             }
             if (in_hand->get_type() == EFigureType::King) {
                 if (check_for_when(in_hand->get_col(), { input.from }, input.target)) {
-                    throw std::invalid_argument("Check in that tile");
+                    return ErrorEvent::CHECK_IN_THAT_TILE;
                 }
             }
             else {
                 if (check_for_when(in_hand->get_col(), { input.from }, {}, { in_hand_in_targ_tmp }, {})) {
-                    throw std::invalid_argument("Under check");
+                    return ErrorEvent::UNDER_CHECK;
                 }
             }
             move_message.main_ev = MainEvent::LMOVE;
@@ -725,13 +725,13 @@ MoveMessage FigureBoard::move_check(Figure* in_hand, Input input) {
             if (in_hand->get_type() == EFigureType::King) {
                 // Фигура на которой сейчас стоим всё ещё учитывается!
                 if (check_for_when(in_hand->get_col(), { input.from, {input.from.x, input.target.y}, targ->get_pos() }, input.target)) {
-                    throw std::invalid_argument("Check in that tile");
+                    return ErrorEvent::CHECK_IN_THAT_TILE;
                 }
             }
             else {
                 // Фигура на которой сейчас стоим всё ещё учитывается!
                 if (check_for_when(in_hand->get_col(), { input.from, {input.from.x, input.target.y}, targ->get_pos() }, {}, { in_hand_in_targ_tmp }, {})) {
-                    throw std::invalid_argument("Under check");
+                    return ErrorEvent::UNDER_CHECK;
                 }
             }
             move_message.main_ev = MainEvent::EN_PASSANT;
@@ -755,14 +755,14 @@ MoveMessage FigureBoard::move_check(Figure* in_hand, Input input) {
                     // Фигура на которой сейчас стоим всё ещё учитывается!
                     if (check_for_when(in_hand->get_col(), {input.from, input.target}, curr)) {
                         delete in_hand_in_curr_tmp;
-                        throw std::invalid_argument("Check in that tile");
+                        return ErrorEvent::CHECK_IN_THAT_TILE;
                     }
                 }
                 else {
                     // Фигура на которой сейчас стоим всё ещё учитывается!
                     if (check_for_when(in_hand->get_col(), {input.from, input.target}, {}, { in_hand_in_curr_tmp }, {})) {
                         delete in_hand_in_curr_tmp;
-                        throw std::invalid_argument("Under check");
+                        return ErrorEvent::UNDER_CHECK;
                     }
                 }
                 move_message.main_ev = MainEvent::EAT;
@@ -780,13 +780,13 @@ MoveMessage FigureBoard::move_check(Figure* in_hand, Input input) {
                 if (in_hand->get_type() == EFigureType::King) {
                     if (check_for_when(in_hand->get_col(), {input.from}, curr)) {
                         delete in_hand_in_curr_tmp;
-                        throw std::invalid_argument("Check in that tile");
+                        return ErrorEvent::CHECK_IN_THAT_TILE;
                     }
                 }
                 else {
                     if (check_for_when(in_hand->get_col(), {input.from}, {}, { in_hand_in_curr_tmp }, {})) {
                         delete in_hand_in_curr_tmp;
-                        throw std::invalid_argument("Under check");
+                        return ErrorEvent::UNDER_CHECK;
                     }
                 }
                 move_message.main_ev = MainEvent::MOVE;
@@ -795,7 +795,7 @@ MoveMessage FigureBoard::move_check(Figure* in_hand, Input input) {
             }
         }
     }
-    throw std::invalid_argument("Unforeseen move");
+    return ErrorEvent::UNFORESEEN;
 }
 
 /// <summary>

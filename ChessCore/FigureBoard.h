@@ -1,5 +1,6 @@
 #pragma once
 #include "Stuff.h"
+#include <variant>
 
 class FigureBoard {
 public:
@@ -20,7 +21,7 @@ public:
     bool checkmate_for(Color, const std::vector<pos>& = {}, pos = {});
     bool stalemate_for(Color, const std::vector<pos>& = {}, pos = {});
     bool check_for_when(Color, const std::vector<pos>& = {}, pos = {}, const std::vector<Figure*>& = {}, const std::vector<Figure*>& = {});
-    MoveMessage move_check(Figure*, Input);
+    std::variant<ErrorEvent, MoveMessage> move_check(Figure*, Input);
     std::tuple<bool, MoveMessage, Figure*, Figure*> castling_check(MoveMessage, Figure*, const Input&, int, int);
     void reset_castling(bool=true);
     void reset_castling(const BoardRepr&);
@@ -95,15 +96,12 @@ private:
 template <typename Func>
 std::pair<bool, MoveRec> FigureBoard::provide_move(Figure* in_hand, const Input& input, Color turn, const Func& get_choise) {
     char choice = get_choise();
-    MoveMessage ms{};
-    try {
-        ms = move_check(in_hand, input);
-    }
-    catch (std::invalid_argument&) {
+    auto ms = move_check(in_hand, input);
+    if (std::holds_alternative<ErrorEvent>(ms)) {
         return { false, {} };
     }
 
-    MoveRec curr_move{ in_hand, input, turn, ms, choice };
+    MoveRec curr_move{ in_hand, input, turn, std::get<1>(ms), choice };
 
     if (!provide_move(curr_move)) {
         return { false, {} };
