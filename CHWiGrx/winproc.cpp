@@ -110,66 +110,66 @@ LRESULT CALLBACK main_proc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam
     {
         int cord{ -1 };
         switch (wParam) {
-        case VK_0: case VK_NUMPAD0: cord = 0; break;
-        case VK_1: case VK_NUMPAD1: cord = 1; break;
-        case VK_2: case VK_NUMPAD2: cord = 2; break;
-        case VK_3: case VK_NUMPAD3: cord = 3; break;
-        case VK_4: case VK_NUMPAD4: cord = 4; break;
-        case VK_5: case VK_NUMPAD5: cord = 5; break;
-        case VK_6: case VK_NUMPAD6: cord = 6; break;
-        case VK_7: case VK_NUMPAD7: cord = 7; break;
-        case VK_8: case VK_NUMPAD8: cord = 8; break;
-        case VK_9: case VK_NUMPAD9: cord = 9; break;
-        case VK_ESCAPE:
-            motion_input.clear();
-            InvalidateRect(hWnd, NULL, NULL);
-            return 0;
-        case VK_LEFT: case VK_RIGHT: case VK_UP: case VK_DOWN:
-        {
-            pos shift{ wParam == VK_LEFT ? pos(0, -1) : (wParam == VK_RIGHT ? pos(0, 1) : (wParam == VK_UP ? pos(-1, 0) : pos(1, 0))) };
-            if (!motion_input.is_pair())
-                motion_input.shift_from(shift, HEIGHT, WIDTH);
-            else
-                motion_input.shift_target(shift, HEIGHT, WIDTH);
-            InvalidateRect(hWnd, NULL, NULL);
-            return 0;
-        }
-        case VK_RETURN:
-            if (motion_input.is_pair()) {
-                make_move(hWnd);
+            case VK_0: case VK_NUMPAD0: cord = 0; break;
+            case VK_1: case VK_NUMPAD1: cord = 1; break;
+            case VK_2: case VK_NUMPAD2: cord = 2; break;
+            case VK_3: case VK_NUMPAD3: cord = 3; break;
+            case VK_4: case VK_NUMPAD4: cord = 4; break;
+            case VK_5: case VK_NUMPAD5: cord = 5; break;
+            case VK_6: case VK_NUMPAD6: cord = 6; break;
+            case VK_7: case VK_NUMPAD7: cord = 7; break;
+            case VK_8: case VK_NUMPAD8: cord = 8; break;
+            case VK_9: case VK_NUMPAD9: cord = 9; break;
+            case VK_ESCAPE:
                 motion_input.clear();
                 InvalidateRect(hWnd, NULL, NULL);
                 return 0;
+            case VK_LEFT: case VK_RIGHT: case VK_UP: case VK_DOWN:
+            {
+                pos shift{ wParam == VK_LEFT ? pos(0, -1) : (wParam == VK_RIGHT ? pos(0, 1) : (wParam == VK_UP ? pos(-1, 0) : pos(1, 0))) };
+                if (!motion_input.is_pair())
+                    motion_input.shift_from(shift, HEIGHT, WIDTH);
+                else
+                    motion_input.shift_target(shift, HEIGHT, WIDTH);
+                InvalidateRect(hWnd, NULL, NULL);
+                return 0;
             }
-            else {
-                motion_input.prepare(turn);
-            }
-            motion_input.toggle_pair_input();
-            InvalidateRect(hWnd, NULL, NULL);
-            return 0;
-        default:
-            return 0;
+            case VK_RETURN:
+                if (motion_input.is_pair()) {
+                    make_move(hWnd);
+                    motion_input.clear();
+                    InvalidateRect(hWnd, NULL, NULL);
+                    return 0;
+                }
+                else {
+                    motion_input.prepare(turn);
+                }
+                motion_input.toggle_pair_input();
+                InvalidateRect(hWnd, NULL, NULL);
+                return 0;
+            default:
+                return 0;
         }
         switch (motion_input.get_single_state()) {
-        case 0:
-            motion_input.set_from_x(cord);
-            motion_input.next_single();
-            break;
-        case 1:
-            motion_input.set_from_y(cord);
-            motion_input.prepare(turn);
-            motion_input.activate_pair();
-            motion_input.next_single();
-            break;
-        case 2:
-            motion_input.set_target_x(cord);
-            motion_input.next_single();
-            break;
-        case 3:
-            motion_input.set_target_y(cord);
-            make_move(hWnd);
-            motion_input.reset_input_order();
-            break;
+            case 0:
+                motion_input.set_from_x(cord);
+                motion_input.next_single();
+                break;
+            case 1:
+                motion_input.set_from_y(cord);
+                motion_input.prepare(turn);
+                motion_input.activate_pair();
+                motion_input.next_single();
+                break;
+            case 2:
+                motion_input.set_target_x(cord);
+                motion_input.next_single();
+                break;
+            case 3:
+                motion_input.set_target_y(cord);
+                make_move(hWnd);
+                motion_input.reset_input_order();
+                break;
         }
         InvalidateRect(hWnd, NULL, NULL);
         break;

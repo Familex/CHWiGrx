@@ -122,10 +122,9 @@ private:
 
 inline WindowStats window_stats{};
 
+/* Текущее состояние ввода */
 class MotionInput {
-    /* Состояние текущего состояния ввода */
 public:
-    /* переименовать тут всё */
     MotionInput(FigureBoard* board) : board(board) {};
     void clear();
     void prepare(Color turn);
