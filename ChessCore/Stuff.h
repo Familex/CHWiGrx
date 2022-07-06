@@ -25,8 +25,6 @@ std::vector<std::string> split(std::string, const std::string&&);
 void remove_first_occurrence(std::string& str, char c);
 
 constexpr int EN_PASSANT_INDENT = 4;
-enum class EFigureType { Pawn, Knight, Rook, Bishop, Queen, King, None };
-enum class EColor { Black, White, None };
 inline const std::string ALL_FIGURES{ "PHRBQK" };
 inline const std::string ALL_PROMOTION_FIGURES{ "HRBQ" };
 inline const std::string NOT_FIGURES{ "E" };
@@ -62,30 +60,32 @@ struct pos {
 
 class Color {
 public:
+    enum Type { Black, White, None };
     Color(char ch = 'N');
-    Color(EColor data) : data(data) {};
-    operator EColor() const { return data; }
+    Color(Type data) : data(data) {};
+    operator Type() const { return data; }
     operator char();
     Color to_next();
     Color what_next() const;
     friend bool operator!=(const Color& left, const Color& right);
     friend bool operator==(const Color& left, const Color& right);
-    friend bool operator==(const Color& left, const EColor& right);
-    friend bool operator==(const EColor& left, const Color& right);
+    friend bool operator==(const Color& left, const Color::Type& right);
+    friend bool operator==(const Color::Type& left, const Color& right);
 private:
-    EColor data;
+    Type data;
 };
 
 class FigureType {
 public:
+    enum Type { Pawn, Knight, Rook, Bishop, Queen, King, None };
     FigureType(char ch = 'N');
-    FigureType(EFigureType data) : data(data) {};
-    operator EFigureType() const { return data; }
+    FigureType(Type data) : data(data) {};
+    operator Type() const { return data; }
     operator char();
-    EFigureType get_data() const { return data; }
-    bool operator==(EFigureType l) { return data == l; }
+    Type get_data() const { return data; }
+    bool operator==(Type l) { return data == l; }
 private:
-    EFigureType data;
+    Type data;
 };
 
 class Figure {
@@ -143,8 +143,8 @@ public:
     FigureFabric(FigureFabric const&) = delete;
     void operator=(FigureFabric const&) = delete;
 
-    Figure* create(pos, Color, EFigureType);
-    Figure* create(pos, Color, EFigureType, Id, Figure* =nullptr);
+    Figure* create(pos, Color, FigureType::Type);
+    Figure* create(pos, Color, FigureType::Type, Id, Figure* =nullptr);
     Figure* create(Figure*);
     Figure* get_default_fig();
     // Ќе забывать удал¤ть временную фигуру
@@ -233,7 +233,7 @@ public:
     std::string as_string();
     char get_idw_char() const { return idw ? 'T' : 'F'; }
     bool get_idw() const { return idw; }
-    char get_turn_char() const { return turn == EColor::White ? 'W' : 'B'; }
+    char get_turn_char() const { return turn == Color::Type::White ? 'W' : 'B'; }
     std::vector<Id> get_who_can_castle() const { return can_castle; }
     Color get_turn() const { return turn; }
     bool empty() const { return figures.empty(); }
@@ -249,7 +249,7 @@ public:
     std::list<Figure*> get_captured_figures() const { return captured_figures; }
 private:
     std::list<Figure*> figures;
-    Color turn{ EColor::White };
+    Color turn{ Color::Type::White };
     bool idw{ true };
     std::vector<MoveRec> past;
     std::vector<MoveRec> future;

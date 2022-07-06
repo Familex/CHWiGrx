@@ -35,7 +35,7 @@ const int HEADER_HEIGHT = GetSystemMetrics(SM_CXPADDEDBORDER) +
 /* single mutable globals */
 inline std::string start_board_repr{ DEFAULT_CHESS_BOARD_IDW };
 inline FigureBoard board{ start_board_repr };
-inline Color turn{ EColor::White };
+inline Color turn{ Color::Type::White };
 inline bool idw{ true };
 inline char chose{ 'Q' };
 inline std::map<char, std::map<char, HBITMAP>> pieces_bitmaps;

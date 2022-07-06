@@ -141,8 +141,8 @@ void make_move(HWND hWnd) {
         switch (curr_game_end_state) {
         case GameEndType::Checkmate: case GameEndType::Stalemate: {
             auto who_next = turn.what_next();
-            body = who_next == EColor::White ? L"White wins!" :
-                who_next == EColor::Black ? L"Black wins!" :
+            body = who_next == Color::Type::White ? L"White wins!" :
+                who_next == Color::Type::Black ? L"Black wins!" :
                 L"None wins!";
             break;
         }
@@ -376,7 +376,7 @@ void MotionInput::init_curr_choice_window(HWND hWnd) {
 void MotionInput::calculate_possible_moves() {
     all_moves.clear();
     for (const auto& [is_eat, move_pos] : board->get_all_possible_moves(in_hand)) {
-        if (in_hand->get_type() == EFigureType::King) {
+        if (in_hand->get_type() == FigureType::Type::King) {
             if (is_eat
                 ? not board->check_for_when(in_hand->get_col(), { in_hand->get_pos(), move_pos }, move_pos)
                 : not board->check_for_when(in_hand->get_col(), { in_hand->get_pos() }, move_pos)
@@ -422,7 +422,7 @@ void update_check_title(HWND hWnd) {
     }
     else if (board.check_for_when(turn)) {
         curr_text += L" [Check to ";
-        curr_text += turn == EColor::White ? L"White" : turn == EColor::Black ? L"Black" : L"None";
+        curr_text += turn == Color::Type::White ? L"White" : turn == Color::Type::Black ? L"Black" : L"None";
         curr_text += L"]";
     }
     SetWindowText(hWnd, curr_text.c_str());
