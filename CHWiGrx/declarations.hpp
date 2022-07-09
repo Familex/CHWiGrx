@@ -42,21 +42,24 @@ inline std::map<char, std::map<char, HBITMAP>> pieces_bitmaps;
 inline bool save_all_moves = true;
 
 /* misc functions (defined in funcs.cpp) */
-ATOM               register_main_window_class(HINSTANCE hInstance, LPTSTR, LPTSTR);
-bool               init_instance(HINSTANCE, LPTSTR, LPTSTR, int);
-INT_PTR CALLBACK   about_proc(HWND, UINT, WPARAM, LPARAM);
-void               draw_figure(HDC, const Figure*, int = -1, int = -1, bool = true);
-void               make_move(HWND);
-void               restart();
-void               cpy_str_to_clip(const std::string&);
-std::string        take_str_from_clip();
-HWND               create_curr_choice_window(HWND, Figure*, POINT, int, int, const WNDPROC, LPCWSTR = L"Chosen figure");
-void               on_lbutton_up(HWND, WPARAM, LPARAM, pos where_fig);
-bool               is_legal_board_repr(const std::string&);
-void               set_menu_checkbox(HWND, UINT, bool);
-void               update_check_title(HWND);
-inline void        Rectangle(HDC hdc, RECT rect) { Rectangle(hdc, rect.left, rect.top, rect.right, rect.bottom); }
-void               copy_repr_to_clip();
+ATOM             register_main_window_class(HINSTANCE hInstance, LPTSTR, LPTSTR);
+bool             init_instance(HINSTANCE, LPTSTR, LPTSTR, int);
+INT_PTR CALLBACK about_proc(HWND, UINT, WPARAM, LPARAM);
+void             draw_figure(HDC, const Figure*, int = -1, int = -1, bool = true);
+void             make_move(HWND);
+void             restart();
+void             cpy_str_to_clip(const std::string&);
+std::string      take_str_from_clip();
+HWND             create_curr_choice_window(HWND, Figure*, POINT, int, int, const WNDPROC, LPCWSTR = L"Chosen figure");
+void             on_lbutton_up(HWND, WPARAM, LPARAM, pos where_fig);
+bool             is_legal_board_repr(const std::string&);
+void             set_menu_checkbox(HWND, UINT, bool);
+void             update_check_title(HWND);
+inline void      Rectangle(HDC hdc, RECT rect) { Rectangle(hdc, rect.left, rect.top, rect.right, rect.bottom); }
+void             copy_repr_to_clip();
+void             load_pieces_bitmaps(HINSTANCE);
+bool             prepare_main_window(HINSTANCE, int);
+int              main_window_loop(HINSTANCE);
 
 /* Main window WinProc func (defined in winproc.cpp) */
 LRESULT CALLBACK   main_proc(HWND, UINT, WPARAM, LPARAM);
