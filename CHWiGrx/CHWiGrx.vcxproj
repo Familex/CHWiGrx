@@ -154,6 +154,7 @@
     <ClInclude Include="declarations.hpp" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="Resource.h" />
+    <ClInclude Include="resource1.h" />
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
@@ -163,6 +164,7 @@
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="CHWiGrx.rc" />
+    <ResourceCompile Include="Redactor.rc" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="CHWiGrx.ico" />

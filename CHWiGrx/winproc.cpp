@@ -93,6 +93,9 @@ LRESULT CALLBACK main_proc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam
                     : 'N';
             }
             break;
+            case IDM_OPEN_EDITOR:
+                MessageBox(hWnd, L"", L"TODO", NULL);
+                break;
             case IDM_ABOUT:
                 DialogBox(hInst, MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, about_proc);
                 break;

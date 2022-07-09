@@ -1,6 +1,6 @@
 //{{NO_DEPENDENCIES}}
-// В¬РєР»СЋС‡Р°РµРјС‹Р№ С„Р°Р№Р», СЃРѕР·РґР°РЅРЅС‹Р№ РІ Microsoft Visual C++.
-// В»СЃРїРѕР»СЊР·СѓРµС‚СЃВ¤ CHWiGrx.rc
+// Включаемый файл, созданный в Microsoft Visual C++.
+// Используется CHWiGrx.rc
 //
 #define IDC_MYICON                      2
 #define IDD_CHWIGRX_DIALOG              102
@@ -38,6 +38,7 @@
 #define IDM_SET_CHOICE_TO_KNIGHT        256
 #define IDM_SET_CHOICE_TO_BISHOP        257
 #define IDM_SET_CHOICE_TO_ROOK          258
+#define IDM_OPEN_EDITOR                 300
 #define ID_32772                        32772
 #define ID_32773                        32773
 #define ID_32774                        32774
@@ -60,8 +61,8 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        101
-#define _APS_NEXT_COMMAND_VALUE         40003
+#define _APS_NEXT_RESOURCE_VALUE        102
+#define _APS_NEXT_COMMAND_VALUE         40004
 #define _APS_NEXT_CONTROL_VALUE         1000
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
