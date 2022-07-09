@@ -6,3 +6,4 @@
 Оформить readme
 Бот
 Переименовать FigureType
+Удалить suppress файл

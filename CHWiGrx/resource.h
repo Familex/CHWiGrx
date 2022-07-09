@@ -4,6 +4,7 @@
 //
 #define IDC_MYICON                      2
 #define IDD_CHWIGRX_DIALOG              102
+#define IDR_MENU1                       102
 #define IDS_APP_TITLE                   103
 #define IDD_ABOUTBOX                    103
 #define IDM_ABOUT                       104
@@ -55,14 +56,23 @@
 #define ID_32791                        32791
 #define ID_32792                        32792
 #define ID_ACCELERATOR32797             32797
+#define ID_40004                        40004
+#define ID_40005                        40005
+#define ID_40006                        40006
+#define ID_40007                        40007
+#define ID_40008                        40008
+#define IDM_TOGGLE_LIST_WINDOW          40009
+#define IDM_PASTE                       40010
+#define IDM_PASTE_FROM_EDIT             40011
+#define IDM_MOVE_TO_BOARD               40012
 #define IDC_STATIC                      -1
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        102
-#define _APS_NEXT_COMMAND_VALUE         40004
+#define _APS_NEXT_RESOURCE_VALUE        103
+#define _APS_NEXT_COMMAND_VALUE         40013
 #define _APS_NEXT_CONTROL_VALUE         1000
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
