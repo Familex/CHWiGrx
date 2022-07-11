@@ -11,7 +11,7 @@ bool prepare_window(HINSTANCE hInstance, int nCmdShow, UINT title_id, UINT windo
     LoadStringW(hInstance, window_class_id, szWindowClass, MAX_LOADSTRING);
 
     wcex.lpszClassName = szWindowClass;
-    wcex.lpszMenuName = MAKEINTRESOURCE(window_class_id);
+    wcex.lpszMenuName = MAKEINTRESOURCE(window_class_id);   // ... = szWindowClass не работает
 
     RegisterClassExW(&wcex);
 
@@ -458,10 +458,6 @@ void copy_repr_to_clip() {
     BoardRepr board_repr = board.get_repr(save_all_moves);
     board_repr.set_turn(turn);
     std::string board_repr_str = board_repr.as_string();
-    #ifdef ALLOCATE_CONSOLE
-    if (!is_legal_board_repr(board_repr_str))
-        MessageBox(hWnd, L"Copied error board repr", L"", NULL);
-    #endif // ALLOCATE_CONSOLE
     cpy_str_to_clip(
         board_repr_str
     );

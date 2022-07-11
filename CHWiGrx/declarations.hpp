@@ -4,6 +4,8 @@
 #include "framework.h"
 #include "../ChessCore/FigureBoard.h"
 
+// #define ALLOCATE_CONSOLE
+
 #ifdef ALLOCATE_CONSOLE
 #include <stdio.h>
 #include <iostream>
