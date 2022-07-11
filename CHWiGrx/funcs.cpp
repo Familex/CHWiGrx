@@ -1,44 +1,20 @@
 #include "declarations.hpp"
 
-/// <summary>
-/// Регистрация окна
-/// </summary>
-/// <param name="hInstance">Экземпляр окна</param>
-/// <param name="szTitle">Заголовок окна</param>
-/// <param name="szWindowClass">Класс окна</param>
-/// <returns>Атом класса</returns>
-ATOM register_main_window_class(HINSTANCE hInstance, LPTSTR szTitle, LPTSTR szWindowClass) {
-    WNDCLASSEXW wcex;
-
-    wcex.cbSize = sizeof(WNDCLASSEX);
-
-    wcex.style = CS_HREDRAW | CS_VREDRAW;
-    wcex.lpfnWndProc = main_proc;
-    wcex.cbClsExtra = 0;
-    wcex.cbWndExtra = 0;
-    wcex.hInstance = hInstance;
-    wcex.hIcon = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_CHWIGRX));
-    wcex.hCursor = LoadCursor(hInstance, MAKEINTRESOURCE(IDC_MINIMAL_CURSOR));
-    wcex.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
-    wcex.lpszMenuName = MAKEINTRESOURCEW(IDC_CHWIGRX);
-    wcex.lpszClassName = szWindowClass;
-    wcex.hIconSm = LoadIcon(wcex.hInstance, MAKEINTRESOURCE(IDI_SMALL));
-
-    return RegisterClassExW(&wcex);
-}
-
-bool prepare_main_window(HINSTANCE hInstance, int nCmdShow) {
-    constexpr auto MAX_LOADSTRING = 100;    // Похоже, от этого не избавиться
+bool prepare_window(HINSTANCE hInstance, int nCmdShow, UINT title_id, UINT window_class_id, WNDCLASSEX wcex) {
+    constexpr auto MAX_LOADSTRING = 100;
 
     WCHAR szTitle[MAX_LOADSTRING];
     WCHAR szWindowClass[MAX_LOADSTRING];
 
     // Инициализация глобальных строк
-    LoadStringW(hInstance, IDS_APP_TITLE, szTitle, MAX_LOADSTRING);
-    LoadStringW(hInstance, IDC_CHWIGRX, szWindowClass, MAX_LOADSTRING);
-    register_main_window_class(hInstance, szTitle, szWindowClass);
+    LoadStringW(hInstance, title_id, szTitle, MAX_LOADSTRING);
+    LoadStringW(hInstance, window_class_id, szWindowClass, MAX_LOADSTRING);
 
-    // Выполнить инициализацию приложения:
+    wcex.lpszClassName = szWindowClass;
+    wcex.lpszMenuName = MAKEINTRESOURCE(window_class_id);
+
+    RegisterClassExW(&wcex);
+
     if (!init_instance(hInstance, szTitle, szWindowClass, nCmdShow))
     {
         return false;
@@ -46,8 +22,8 @@ bool prepare_main_window(HINSTANCE hInstance, int nCmdShow) {
     return true;
 }
 
-int main_window_loop(HINSTANCE hInstance) {
-    // Цикл основного сообщения:
+// Цикл сообщений
+int window_loop(HINSTANCE hInstance) {
     MSG msg;
     HACCEL hAccel = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_CHWIGRX));
     BOOL bRet = 0;

@@ -19,9 +19,21 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     }
     #endif // ALLOCATE_CONSOLE
 
-    if (!prepare_main_window(hInstance, nCmdShow)) {
+    if (!prepare_window(hInstance, nCmdShow, IDS_APP_TITLE, IDC_CHWIGRX,
+        {
+            .cbSize = sizeof(WNDCLASSEX),
+            .style = CS_HREDRAW | CS_VREDRAW,
+            .lpfnWndProc = main_proc,
+            .cbClsExtra = 0,
+            .cbWndExtra = 0,
+            .hInstance = hInstance,
+            .hIcon = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_CHWIGRX)),
+            .hCursor = LoadCursor(hInstance, MAKEINTRESOURCE(IDC_MINIMAL_CURSOR)),
+            .hbrBackground = (HBRUSH)(COLOR_WINDOW + 1),
+            .hIconSm = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_SMALL))
+        })) {
         return FALSE;
     }
-    
-    return main_window_loop(hInstance);
+
+    return window_loop(hInstance);
 }
