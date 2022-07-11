@@ -23,13 +23,13 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
         {
             .cbSize = sizeof(WNDCLASSEX),
             .style = CS_HREDRAW | CS_VREDRAW,
-            .lpfnWndProc = main_proc,
+            .lpfnWndProc = main_window_proc,
             .cbClsExtra = 0,
             .cbWndExtra = 0,
             .hInstance = hInstance,
             .hIcon = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_CHWIGRX)),
             .hCursor = LoadCursor(hInstance, MAKEINTRESOURCE(IDC_MINIMAL_CURSOR)),
-            .hbrBackground = (HBRUSH)(COLOR_WINDOW + 1),
+            .hbrBackground = (HBRUSH)(COLOR_WINDOW),
             .hIconSm = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_SMALL))
         })) {
         return FALSE;

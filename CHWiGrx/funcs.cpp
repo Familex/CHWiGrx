@@ -462,3 +462,29 @@ void copy_repr_to_clip() {
         board_repr_str
     );
 }
+
+/* Отрисовать фоновую доску */
+void draw_board(HDC hdc) {
+    for (int i{}; i < HEIGHT; ++i) {
+        for (int j{}; j < WIDTH; ++j) {
+            static const HBRUSH CHECKERBOARDBRIGHT{ CreateSolidBrush(RGB(50, 50, 50)) };
+            static const HBRUSH CHECKERBOARDDARK{ CreateSolidBrush(RGB(128, 128, 128)) };
+            const RECT cell = window_stats.get_cell(i, j);
+            if ((i + j) % 2) {
+                FillRect(hdc, &cell, CHECKERBOARDBRIGHT);
+            }
+            else {
+                FillRect(hdc, &cell, CHECKERBOARDDARK);
+            }
+        }
+    }
+}
+
+/* Отрисовать фигуры на поле (та, что в руке, не рисуется) */
+void draw_figures_on_board(HDC hdc) {
+    for (const auto& figure : board.all_figures()) {
+        if (!motion_input.is_figure_dragged(figure->get_id())) {
+            draw_figure(hdc, figure);
+        }
+    }
+}

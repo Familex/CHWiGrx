@@ -5,6 +5,7 @@
 #include <tuple>
 #include <format>
 #include <vector>
+#include <cassert>
 #include <stdexcept>
 #include <functional>
 

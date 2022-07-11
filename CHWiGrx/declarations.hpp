@@ -25,6 +25,8 @@ using namespace std::string_literals;
 #define VK_8 56
 #define VK_9 57
 
+enum class WindowState { GAME, EDIT };
+
 /* constants */
 inline HINSTANCE hInst;
 inline const char* DEFAULT_CHESS_BOARD_IDW =  "1;0;0;B;R;2;0;1;B;H;3;0;2;B;B;4;0;3;B;Q;5;0;4;B;K;6;0;5;B;B;7;0;6;B;H;8;0;7;B;R;9;1;0;B;P;10;1;1;B;P;11;1;2;B;P;12;1;3;B;P;13;1;4;B;P;14;1;5;B;P;15;1;6;B;P;16;1;7;B;P;17;6;0;W;P;18;6;1;W;P;19;6;2;W;P;20;6;3;W;P;21;6;4;W;P;22;6;5;W;P;23;6;6;W;P;24;6;7;W;P;25;7;0;W;R;26;7;1;W;H;27;7;2;W;B;28;7;3;W;Q;29;7;4;W;K;30;7;5;W;B;31;7;6;W;H;32;7;7;W;R;[TW1;8;25;32;]<><>~";
@@ -35,6 +37,7 @@ const int HEADER_HEIGHT = GetSystemMetrics(SM_CXPADDEDBORDER) +
                           GetSystemMetrics(SM_CYFRAME);
 
 /* single mutable globals */
+inline WindowState window_state = WindowState::GAME;
 inline std::string start_board_repr{ DEFAULT_CHESS_BOARD_IDW };
 inline FigureBoard board{ start_board_repr };
 inline Color turn{ Color::Type::White };
@@ -46,7 +49,6 @@ inline bool save_all_moves = true;
 /* misc functions */
 bool init_instance(HINSTANCE, LPTSTR, LPTSTR, int);
 INT_PTR CALLBACK about_proc(HWND, UINT, WPARAM, LPARAM);
-void draw_figure(HDC, const Figure*, int = -1, int = -1, bool = true);
 void make_move(HWND);
 void restart();
 void cpy_str_to_clip(const std::string&);
@@ -61,10 +63,19 @@ void load_pieces_bitmaps(HINSTANCE);
 bool prepare_window(HINSTANCE, int, UINT, UINT, WNDCLASSEX);
 int window_loop(HINSTANCE);
 
+void draw_figure(HDC, const Figure*, int = -1, int = -1, bool = true);
+void draw_board(HDC);
+void draw_figures_on_board(HDC);
+
+namespace mainproc {
+    LRESULT game_switch(HWND, UINT, WPARAM, LPARAM, PAINTSTRUCT, HBITMAP, HGDIOBJ, HDC, HDC);
+    LRESULT edit_switch(HWND, UINT, WPARAM, LPARAM, PAINTSTRUCT, HBITMAP, HGDIOBJ, HDC, HDC);
+}
+
 inline void Rectangle(HDC hdc, RECT rect) { Rectangle(hdc, rect.left, rect.top, rect.right, rect.bottom); }
 
 /* WINPROC functions */
-LRESULT CALLBACK main_proc(HWND, UINT, WPARAM, LPARAM);
+LRESULT CALLBACK main_window_proc(HWND, UINT, WPARAM, LPARAM);
 LRESULT CALLBACK edit_proc(HWND, UINT, WPARAM, LPARAM);
 
 class WindowStats {

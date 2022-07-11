@@ -8,7 +8,10 @@
 #define IDS_APP_TITLE                   103
 #define IDD_ABOUTBOX                    103
 #define IDM_ABOUT                       104
+#define IDS_EDIT_TITLE                  104
 #define IDM_EXIT                        105
+#define IDS_STRING105                   105
+#define IDC_CHWIGRX_EDIT                105
 #define IDI_CHWIGRX                     107
 #define IDI_SMALL                       108
 #define IDC_CHWIGRX                     109
@@ -39,7 +42,7 @@
 #define IDM_SET_CHOICE_TO_KNIGHT        256
 #define IDM_SET_CHOICE_TO_BISHOP        257
 #define IDM_SET_CHOICE_TO_ROOK          258
-#define IDM_OPEN_EDITOR                 300
+#define IDM_SET_EDITOR_WINDOW_MODE                 300
 #define ID_32772                        32772
 #define ID_32773                        32773
 #define ID_32774                        32774
