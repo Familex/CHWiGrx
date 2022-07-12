@@ -211,7 +211,9 @@ void cpy_str_to_clip(const std::string& buff)
     size_t size = len * sizeof(symbol);
     HGLOBAL hMem = GlobalAlloc(GMEM_MOVEABLE, size);
     if (hMem == NULL) return;
-    memcpy(GlobalLock(hMem), buff.c_str(), len);
+    LPVOID hMemLock = GlobalLock(hMem);
+    if (hMemLock == NULL) return;
+    memcpy(hMemLock, buff.c_str(), len);
     GlobalUnlock(hMem);
     if (OpenClipboard(NULL)) {
         EmptyClipboard();
@@ -467,14 +469,12 @@ void copy_repr_to_clip() {
 void draw_board(HDC hdc) {
     for (int i{}; i < HEIGHT; ++i) {
         for (int j{}; j < WIDTH; ++j) {
-            static const HBRUSH CHECKERBOARDBRIGHT{ CreateSolidBrush(RGB(50, 50, 50)) };
-            static const HBRUSH CHECKERBOARDDARK{ CreateSolidBrush(RGB(128, 128, 128)) };
             const RECT cell = window_stats.get_cell(i, j);
             if ((i + j) % 2) {
-                FillRect(hdc, &cell, CHECKERBOARDBRIGHT);
+                FillRect(hdc, &cell, CHECKERBOARD_ONE);
             }
             else {
-                FillRect(hdc, &cell, CHECKERBOARDDARK);
+                FillRect(hdc, &cell, CHECKERBOARD_TWO);
             }
         }
     }
@@ -487,4 +487,33 @@ void draw_figures_on_board(HDC hdc) {
             draw_figure(hdc, figure);
         }
     }
+}
+
+void change_checkerboard_color_theme(HWND hWnd) {
+    if (window_state == WindowState::EDIT) {
+        std::swap(CHECKERBOARD_ONE, CHECKERBOARD_TWO);
+    }
+    else if (window_state == WindowState::GAME) {
+        std::swap(CHECKERBOARD_ONE, CHECKERBOARD_TWO);
+    }
+    else {
+        assert(false);
+    }
+    InvalidateRect(hWnd, NULL, NULL);
+}
+
+void update_edit_menu_variables(HWND hWnd) {
+    for (auto menu_id : { IDM_WHITE_START, IDM_BLACK_START, IDM_IDW_TRUE, IDM_IDW_FALSE }) {
+        set_menu_checkbox(hWnd, menu_id, false);
+    }
+
+    if (turn == Color::Type::White)
+        set_menu_checkbox(hWnd, IDM_WHITE_START, true);
+    else if (turn == Color::Type::Black)
+        set_menu_checkbox(hWnd, IDM_BLACK_START, true);
+
+    if (board.get_idw() == true)
+        set_menu_checkbox(hWnd, IDM_IDW_TRUE, true);
+    else
+        set_menu_checkbox(hWnd, IDM_IDW_FALSE, true);
 }

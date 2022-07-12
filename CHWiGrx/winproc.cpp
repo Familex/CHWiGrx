@@ -115,16 +115,8 @@ LRESULT mainproc::game_switch(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPa
             board.reset(empty_repr);
             turn = empty_repr.get_turn();
             motion_input.clear();
-
-            if (turn == Color::Type::White)
-                set_menu_checkbox(hWnd, IDM_WHITE_START, true);
-            else if (turn == Color::Type::Black)
-                set_menu_checkbox(hWnd, IDM_BLACK_START, true);
-
-            if (board.get_idw() == true)
-                set_menu_checkbox(hWnd, IDM_IDW_TRUE, true);
-            else
-                set_menu_checkbox(hWnd, IDM_IDW_FALSE, true);
+            update_edit_menu_variables(hWnd);
+            change_checkerboard_color_theme(hWnd);
         }
             break;
         case IDM_ABOUT:
@@ -320,12 +312,14 @@ LRESULT mainproc::edit_switch(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPa
             switch (wmId)
             {
                 case IDM_COPY_MAP:
-
+                    copy_repr_to_clip();
                     break;
-                case IDM_MOVE_TO_BOARD:
-
+                case IDM_SET_GAME_WINDOW_MODE:
+                    window_state = WindowState::GAME;
+                    SetMenu(hWnd, LoadMenu(hInst, MAKEINTRESOURCE(IDC_CHWIGRX)));
+                    change_checkerboard_color_theme(hWnd);
                     break;
-                case IDM_PASTE:
+                case IDM_PASTE_MAP:
                 {
                     std::string board_repr_str = take_str_from_clip();
                     if (!is_legal_board_repr(board_repr_str)) break;
@@ -338,16 +332,20 @@ LRESULT mainproc::edit_switch(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPa
 
                     break;
                 case IDM_WHITE_START:
-
+                    turn = Color::Type::White;
+                    update_edit_menu_variables(hWnd);
                     break;
                 case IDM_BLACK_START:
-
+                    turn = Color::Type::Black;
+                    update_edit_menu_variables(hWnd);
                     break;
                 case IDM_IDW_TRUE:
-
+                    board.set_idw(true);
+                    update_edit_menu_variables(hWnd);
                     break;
                 case IDM_IDW_FALSE:
-
+                    board.set_idw(false);
+                    update_edit_menu_variables(hWnd);
                     break;
 
                 default:
