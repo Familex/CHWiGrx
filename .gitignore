@@ -47,3 +47,5 @@
 /x64/Release
 /CHWiGrx/old.txt
 *.aps
+/TODO.txt
+*.user

@@ -42,14 +42,14 @@ LRESULT mainproc::game_switch(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPa
             copy_repr_to_clip();
             break;
         case IDM_PASTE_MAP:
-            do {
+            {
                 std::string board_repr_str = take_str_from_clip();
                 if (!is_legal_board_repr(board_repr_str)) break;
                 BoardRepr board_repr(board_repr_str);
                 turn = board_repr.get_turn();
                 board.reset(board_repr);
                 motion_input.clear();
-            } while (0);
+            }
             break;
         case IDM_PASTE_START_MAP:
         {
@@ -90,6 +90,7 @@ LRESULT mainproc::game_switch(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPa
         break;
         case IDM_SET_CHOICE_TO_ROOK: case IDM_SET_CHOICE_TO_KNIGHT: case IDM_SET_CHOICE_TO_QUEEN: case IDM_SET_CHOICE_TO_BISHOP:
         {
+            // можно просто всё занулять
             UINT item_menu_to_set_id = wmId;
             UINT curr_item_menu_state =
                 chose == 'Q' ? IDM_SET_CHOICE_TO_QUEEN
@@ -109,9 +110,23 @@ LRESULT mainproc::game_switch(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPa
         case IDM_SET_EDITOR_WINDOW_MODE:
         {
             window_state = WindowState::EDIT;
-            // TODO подменить меню
+            SetMenu(hWnd, LoadMenu(hInst, MAKEINTRESOURCE(IDR_CHWIGRX_EDIT_MENU)));
+            BoardRepr empty_repr = { EMPTY_BOARD };
+            board.reset(empty_repr);
+            turn = empty_repr.get_turn();
+            motion_input.clear();
+
+            if (turn == Color::Type::White)
+                set_menu_checkbox(hWnd, IDM_WHITE_START, true);
+            else if (turn == Color::Type::Black)
+                set_menu_checkbox(hWnd, IDM_BLACK_START, true);
+
+            if (board.get_idw() == true)
+                set_menu_checkbox(hWnd, IDM_IDW_TRUE, true);
+            else
+                set_menu_checkbox(hWnd, IDM_IDW_FALSE, true);
         }
-        break;
+            break;
         case IDM_ABOUT:
             DialogBox(hInst, MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, about_proc);
             break;
@@ -299,38 +314,79 @@ LRESULT mainproc::game_switch(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPa
 LRESULT mainproc::edit_switch(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam, PAINTSTRUCT ps, HBITMAP hbmMem, HGDIOBJ hOld, HDC hdcMem, HDC hdc) {
     switch (message)
     {
-    case WM_PAINT:
-    {
-        hdc = BeginPaint(hWnd, &ps);
-        hdcMem = CreateCompatibleDC(hdc);
-        hbmMem = CreateCompatibleBitmap(hdc,
-            window_stats.get_window_width(),
-            window_stats.get_window_height()
-        );
-        hOld = SelectObject(hdcMem, hbmMem);
+        case WM_COMMAND:
+        {
+            int wmId = LOWORD(wParam);
+            switch (wmId)
+            {
+                case IDM_COPY_MAP:
 
-        draw_board(hdcMem);
-        draw_figures_on_board(hdcMem);
+                    break;
+                case IDM_MOVE_TO_BOARD:
 
-        /* Копирование временного буфера в основной */
-        BitBlt(hdc, 0, 0,
-            window_stats.get_window_width(),
-            window_stats.get_window_height(),
-            hdcMem, 0, 0, SRCCOPY
-        );
+                    break;
+                case IDM_PASTE:
+                {
+                    std::string board_repr_str = take_str_from_clip();
+                    if (!is_legal_board_repr(board_repr_str)) break;
+                    BoardRepr board_repr(board_repr_str);
+                    turn = board_repr.get_turn();
+                    board.reset(board_repr);
+                }
+                    break;
+                case IDM_TOGGLE_LIST_WINDOW:
 
-        SelectObject(hdcMem, hOld);
-        DeleteObject(hbmMem);
-        DeleteDC(hdcMem);
+                    break;
+                case IDM_WHITE_START:
 
-        EndPaint(hWnd, &ps);
-    }
-        break;
-    case WM_DESTROY:
-        PostQuitMessage(0);
-        break;
-    default:
-        return DefWindowProc(hWnd, message, wParam, lParam);
+                    break;
+                case IDM_BLACK_START:
+
+                    break;
+                case IDM_IDW_TRUE:
+
+                    break;
+                case IDM_IDW_FALSE:
+
+                    break;
+
+                default:
+                    return DefWindowProc(hWnd, message, wParam, lParam);
+            }
+        }
+            break;
+        case WM_PAINT:
+        {
+            hdc = BeginPaint(hWnd, &ps);
+            hdcMem = CreateCompatibleDC(hdc);
+            hbmMem = CreateCompatibleBitmap(hdc,
+                window_stats.get_window_width(),
+                window_stats.get_window_height()
+            );
+            hOld = SelectObject(hdcMem, hbmMem);
+
+            draw_board(hdcMem);
+            draw_figures_on_board(hdcMem);
+
+            /* Копирование временного буфера в основной */
+            BitBlt(hdc, 0, 0,
+                window_stats.get_window_width(),
+                window_stats.get_window_height(),
+                hdcMem, 0, 0, SRCCOPY
+            );
+
+            SelectObject(hdcMem, hOld);
+            DeleteObject(hbmMem);
+            DeleteDC(hdcMem);
+
+            EndPaint(hWnd, &ps);
+        }
+            break;
+        case WM_DESTROY:
+            PostQuitMessage(0);
+            break;
+        default:
+            return DefWindowProc(hWnd, message, wParam, lParam);
     }
     return static_cast<LRESULT>(0);
 }

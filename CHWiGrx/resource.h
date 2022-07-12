@@ -4,7 +4,7 @@
 //
 #define IDC_MYICON                      2
 #define IDD_CHWIGRX_DIALOG              102
-#define IDR_MENU1                       102
+#define IDR_CHWIGRX_EDIT_MENU           102
 #define IDS_APP_TITLE                   103
 #define IDD_ABOUTBOX                    103
 #define IDM_ABOUT                       104
@@ -42,7 +42,7 @@
 #define IDM_SET_CHOICE_TO_KNIGHT        256
 #define IDM_SET_CHOICE_TO_BISHOP        257
 #define IDM_SET_CHOICE_TO_ROOK          258
-#define IDM_SET_EDITOR_WINDOW_MODE                 300
+#define IDM_SET_EDITOR_WINDOW_MODE      300
 #define ID_32772                        32772
 #define ID_32773                        32773
 #define ID_32774                        32774
@@ -68,6 +68,18 @@
 #define IDM_PASTE                       40010
 #define IDM_PASTE_FROM_EDIT             40011
 #define IDM_MOVE_TO_BOARD               40012
+#define ID_40013                        40013
+#define ID_40014                        40014
+#define ID_40015                        40015
+#define ID_TOGGLE_WHITE_START           40016
+#define IDM_BLACK_START                 40017
+#define IDM_WHITE_START                 40018
+#define ID_40019                        40019
+#define ID_40020                        40020
+#define ID_40021                        40021
+#define IDM_IDW_TRUE                    40022
+#define IDM_IDW_FALSE                   40023
+#define ID_40024                        40024
 #define IDC_STATIC                      -1
 
 // Next default values for new objects
@@ -75,7 +87,7 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        103
-#define _APS_NEXT_COMMAND_VALUE         40013
+#define _APS_NEXT_COMMAND_VALUE         40025
 #define _APS_NEXT_CONTROL_VALUE         1000
 #define _APS_NEXT_SYMED_VALUE           101
 #endif

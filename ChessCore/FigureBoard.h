@@ -26,6 +26,7 @@ public:
     void reset_castling(bool=true);
     void reset_castling(const BoardRepr&);
     Figure* get_default_fig() { return FigureFabric::instance()->get_default_fig(); }
+    inline bool get_idw() const { return idw; }
     std::list<Figure*> all_figures() {
         std::list<Figure*> tmp;
         for (const auto [_, fig] : figures) {
