@@ -4,7 +4,7 @@
 #include "framework.h"
 #include "../ChessCore/FigureBoard.h"
 
-// #define ALLOCATE_CONSOLE
+#define ALLOCATE_CONSOLE
 // #define NDEBUG
 
 #ifdef ALLOCATE_CONSOLE
@@ -39,6 +39,10 @@ const int HEADER_HEIGHT = GetSystemMetrics(SM_CXPADDEDBORDER) +
                           GetSystemMetrics(SM_CYMENUSIZE)     +
                           GetSystemMetrics(SM_CYCAPTION)      +
                           GetSystemMetrics(SM_CYFRAME);
+inline LPCTSTR CHOICE_WINDOW_CLASS_NAME = L"CHWIGRX_CHOICE";
+inline LPCTSTR CHOICE_WINDOW_TITLE = L"Pieces list";
+inline const pos CHOICE_WINDOW_DEFAULT_POS = { 300, 300 };
+inline const pos CHOICE_WINDOW_DEFAULT_DIMENTIONS = { 200, 200 };
 
 /* single mutable globals */
 inline WindowState window_state = WindowState::GAME;
@@ -50,6 +54,7 @@ inline std::map<char, std::map<char, HBITMAP>> pieces_bitmaps;
 inline bool save_all_moves = true;
 inline HBRUSH CHECKERBOARD_ONE = CHECKERBOARD_BRIGHT;
 inline HBRUSH CHECKERBOARD_TWO = CHECKERBOARD_DARK;
+inline HWND choice_window = NULL;
 
 /* misc functions */
 bool init_instance(HINSTANCE, LPTSTR, LPTSTR, int);
@@ -69,6 +74,17 @@ bool prepare_window(HINSTANCE, int, UINT, UINT, WNDCLASSEX);
 int window_loop(HINSTANCE);
 void change_checkerboard_color_theme(HWND);
 void update_edit_menu_variables(HWND);
+HWND create_choice_window(HWND);
+inline HWND GetRealParent(HWND hWnd)
+{
+    HWND hParent;
+
+    hParent = GetAncestor(hWnd, GA_PARENT);
+    if (!hParent || hParent == GetDesktopWindow())
+        return NULL;
+
+    return hParent;
+}
 
 void draw_figure(HDC, const Figure*, int = -1, int = -1, bool = true);
 void draw_board(HDC);
@@ -83,7 +99,7 @@ inline void Rectangle(HDC hdc, RECT rect) { Rectangle(hdc, rect.left, rect.top, 
 
 /* WINPROC functions */
 LRESULT CALLBACK main_window_proc(HWND, UINT, WPARAM, LPARAM);
-LRESULT CALLBACK edit_proc(HWND, UINT, WPARAM, LPARAM);
+LRESULT CALLBACK choice_window_proc(HWND, UINT, WPARAM, LPARAM);
 
 class WindowStats {
     /* Габариты окна для отрисовки и захвата ввода */

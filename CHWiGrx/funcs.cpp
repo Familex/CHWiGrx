@@ -254,9 +254,9 @@ HWND create_curr_choice_window(HWND parent, Figure* in_hand, POINT mouse, int w,
     wc.cbClsExtra = 0;
     wc.cbWndExtra = sizeof(in_hand);
     wc.hbrBackground = NULL;
-    wc.hCursor = LoadCursor(nullptr, IDC_ARROW);
-    wc.hIcon = LoadIcon(nullptr, IDI_APPLICATION);
-    wc.hIconSm = LoadIcon(nullptr, IDI_APPLICATION);
+    wc.hCursor = LoadCursor(nullptr, MAKEINTRESOURCE(IDC_MINIMAL_CURSOR));
+    wc.hIcon = LoadIcon(nullptr, MAKEINTRESOURCE(IDI_CHWIGRX));
+    wc.hIconSm = LoadIcon(nullptr, MAKEINTRESOURCE(IDI_CHWIGRX));
     wc.lpfnWndProc = callback;
     wc.lpszClassName = class_name;
     wc.style = CS_VREDRAW | CS_HREDRAW;
@@ -516,4 +516,34 @@ void update_edit_menu_variables(HWND hWnd) {
         set_menu_checkbox(hWnd, IDM_IDW_TRUE, true);
     else
         set_menu_checkbox(hWnd, IDM_IDW_FALSE, true);
+}
+
+HWND create_choice_window(HWND parent) {
+    UnregisterClass(CHOICE_WINDOW_CLASS_NAME, GetModuleHandle(nullptr));
+    WNDCLASSEX wc{ sizeof(WNDCLASSEX) };
+    HWND hWindow{};
+    wc.cbClsExtra = 0;
+    wc.cbWndExtra = 0;
+    wc.hbrBackground = NULL;
+    wc.hCursor = LoadCursor(hInst, MAKEINTRESOURCE(IDC_MINIMAL_CURSOR));
+    wc.hIcon = LoadIcon(hInst, MAKEINTRESOURCE(IDI_CHWIGRX));
+    wc.hIconSm = LoadIcon(hInst, MAKEINTRESOURCE(IDI_CHWIGRX));
+    wc.lpfnWndProc = choice_window_proc;
+    wc.lpszClassName = CHOICE_WINDOW_CLASS_NAME;
+    wc.style = CS_VREDRAW | CS_HREDRAW;
+    const auto create_window = [&hWindow, &parent]() -> HWND {
+        if (hWindow = CreateWindow(CHOICE_WINDOW_CLASS_NAME, CHOICE_WINDOW_TITLE, WS_OVERLAPPEDWINDOW,
+            CHOICE_WINDOW_DEFAULT_POS.x, CHOICE_WINDOW_DEFAULT_POS.y,
+            CHOICE_WINDOW_DEFAULT_DIMENTIONS.x, CHOICE_WINDOW_DEFAULT_DIMENTIONS.y,
+            parent, nullptr, hInst, nullptr), !hWindow)
+            return nullptr;
+        ShowWindow(hWindow, SW_SHOWDEFAULT);
+        UpdateWindow(hWindow);
+        return hWindow;
+    };
+
+    if (!RegisterClassEx(&wc))
+        return create_window();
+
+    return create_window();
 }

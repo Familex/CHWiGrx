@@ -117,6 +117,7 @@ LRESULT mainproc::game_switch(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPa
             motion_input.clear();
             update_edit_menu_variables(hWnd);
             change_checkerboard_color_theme(hWnd);
+            choice_window = create_choice_window(hWnd);
         }
             break;
         case IDM_ABOUT:
@@ -329,7 +330,14 @@ LRESULT mainproc::edit_switch(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPa
                 }
                     break;
                 case IDM_TOGGLE_LIST_WINDOW:
-
+                    if (choice_window == NULL) {
+                        choice_window = create_choice_window(hWnd);
+                    }
+                    else {
+                        DestroyWindow(choice_window);
+                        choice_window = NULL;
+                    }
+                    set_menu_checkbox(hWnd, IDM_TOGGLE_LIST_WINDOW, choice_window != NULL);
                     break;
                 case IDM_WHITE_START:
                     turn = Color::Type::White;
@@ -352,6 +360,13 @@ LRESULT mainproc::edit_switch(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPa
                     return DefWindowProc(hWnd, message, wParam, lParam);
             }
         }
+            break;
+        case WM_MOVE:
+            window_stats.set_window_pos(LOWORD(lParam), HIWORD(lParam));
+            break;
+        case WM_SIZE:
+            window_stats.set_window_size(HIWORD(lParam), LOWORD(lParam));
+            InvalidateRect(hWnd, NULL, NULL);
             break;
         case WM_PAINT:
         {
@@ -386,5 +401,28 @@ LRESULT mainproc::edit_switch(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPa
         default:
             return DefWindowProc(hWnd, message, wParam, lParam);
     }
+    return static_cast<LRESULT>(0);
+}
+
+LRESULT CALLBACK choice_window_proc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) {
+    static PAINTSTRUCT ps;
+    static HBITMAP hbmMem;
+    static HGDIOBJ hOld;
+    static HDC hdcMem;
+    static HDC hdc;
+
+    switch (message) {
+        case WM_CREATE:
+            assert(GetParent(hWnd) != NULL);
+            break;
+        case WM_DESTROY:
+            choice_window = NULL;
+            SendMessage(GetParent(hWnd), IDM_TOGGLE_LIST_WINDOW, NULL, NULL);
+            break;
+
+        default:
+            return DefWindowProc(hWnd, message, wParam, lParam);
+    }
+
     return static_cast<LRESULT>(0);
 }
