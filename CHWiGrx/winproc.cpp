@@ -412,14 +412,13 @@ LRESULT CALLBACK choice_window_proc(HWND hWnd, UINT message, WPARAM wParam, LPAR
     static HDC hdc;
 
     switch (message) {
-        case WM_CREATE:
-            assert(GetParent(hWnd) != NULL);
-            break;
         case WM_DESTROY:
+        {
             choice_window = NULL;
-            SendMessage(GetParent(hWnd), IDM_TOGGLE_LIST_WINDOW, NULL, NULL);
+            HWND owner = GetWindow(hWnd, GW_OWNER); // это должен быть GetParent, но оный возвращает NULL
+            set_menu_checkbox(owner, IDM_TOGGLE_LIST_WINDOW, false);
+        }
             break;
-
         default:
             return DefWindowProc(hWnd, message, wParam, lParam);
     }
