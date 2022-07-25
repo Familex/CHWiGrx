@@ -1,7 +1,7 @@
 #pragma once
 #pragma comment(lib, "Msimg32.lib")
-#include "resource.h"
-#include "framework.h"
+#include "resource.hpp"
+#include "framework.hpp"
 #include "../ChessCore/FigureBoard.h"
 
 #define ALLOCATE_CONSOLE
