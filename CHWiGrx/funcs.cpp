@@ -102,13 +102,11 @@ void load_pieces_bitmaps(HINSTANCE hInstance) {
 /// <param name="w_beg">Левая координата</param>
 /// <param name="h_beg">Верхняя координата</param>
 /// <param name="is_transpanent">Сделать ли фон прозрачным</param>
-void draw_figure(HDC hdc, const Figure* figure, int w_beg, int h_beg, bool is_transpanent) {
-    if (h_beg == -1) h_beg = figure->get_pos().x * window_stats.get_cell_height();
-    if (w_beg == -1) w_beg = figure->get_pos().y * window_stats.get_cell_width();
-    int h_end = h_beg + window_stats.get_cell_height();
-    int w_end = w_beg + window_stats.get_cell_width();
-    Color col = figure->get_col();
-    FigureType type = figure->get_type();
+void draw_figure(HDC hdc, Color col, FigureType type, pos begin_paint, bool is_transpanent, int h, int w) {
+    const int h_beg = begin_paint.x * h;
+    const int w_beg = begin_paint.y * w;
+    int h_end = h_beg + h;
+    int w_end = w_beg + h;
     HBITMAP hBitmap = pieces_bitmaps[col][type];
     BITMAP bm;
     GetObject(hBitmap, sizeof(BITMAP), &bm);
@@ -117,15 +115,19 @@ void draw_figure(HDC hdc, const Figure* figure, int w_beg, int h_beg, bool is_tr
     SetStretchBltMode(hdc, STRETCH_DELETESCANS);
     if (is_transpanent) {
         TransparentBlt(hdc, w_beg, h_beg,
-            window_stats.get_cell_width(), window_stats.get_cell_height(),
+            w, h,
             hdcMem, 0, 0, bm.bmWidth, bm.bmHeight, RGB(255, 0, 0));
     }
     else {
         StretchBlt(hdc, w_beg, h_beg,
-            window_stats.get_cell_width(), window_stats.get_cell_height(),
+            w, h,
             hdcMem, 0, 0, bm.bmWidth, bm.bmHeight, SRCCOPY);
     }
     DeleteDC(hdcMem);
+}
+
+void draw_figure(HDC hdc, Color col, FigureType type, pos begin_paint, bool is_transpanent) {
+    draw_figure(hdc, col, type, begin_paint, is_transpanent, window_stats.get_cell_height(), window_stats.get_cell_width());
 }
 
 /// <summary>
@@ -386,7 +388,7 @@ void MotionInput::init_curr_choice_window(HWND hWnd) {
                 HDC hdc = BeginPaint(hWnd, &ps);
                 Figure* in_hand = (Figure*)GetWindowLongPtr(hWnd, GWLP_USERDATA);
                 if (in_hand) {
-                    draw_figure(hdc, in_hand, 0, 0, false);
+                    draw_figure(hdc, in_hand->get_col(), in_hand->get_type(), pos(0, 0), false);
                 }
                 EndPaint(hWnd, &ps);
             }
@@ -484,7 +486,7 @@ void draw_board(HDC hdc) {
 void draw_figures_on_board(HDC hdc) {
     for (const auto& figure : board.all_figures()) {
         if (!motion_input.is_figure_dragged(figure->get_id())) {
-            draw_figure(hdc, figure);
+            draw_figure(hdc, figure->get_col(), figure->get_type(), figure->get_pos());
         }
     }
 }
@@ -532,7 +534,7 @@ HWND create_choice_window(HWND parent) {
     wc.lpszClassName = CHOICE_WINDOW_CLASS_NAME;
     wc.style = CS_VREDRAW | CS_HREDRAW;
     const auto create_window = [&hWindow, &parent]() -> HWND {
-        if (hWindow = CreateWindow(CHOICE_WINDOW_CLASS_NAME, CHOICE_WINDOW_TITLE, WS_OVERLAPPEDWINDOW,
+        if (hWindow = CreateWindow(CHOICE_WINDOW_CLASS_NAME, CHOICE_WINDOW_TITLE, WS_OVERLAPPEDWINDOW | WS_VSCROLL | WS_HSCROLL,
             CHOICE_WINDOW_DEFAULT_POS.x, CHOICE_WINDOW_DEFAULT_POS.y,
             CHOICE_WINDOW_DEFAULT_DIMENTIONS.x, CHOICE_WINDOW_DEFAULT_DIMENTIONS.y,
             parent, nullptr, hInst, nullptr), !hWindow)

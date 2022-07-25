@@ -1,6 +1,6 @@
 //{{NO_DEPENDENCIES}}
-// Включаемый файл, созданный в Microsoft Visual C++.
-// Используется CHWiGrx.rc
+// Microsoft Visual C++ generated include file.
+// Used by CHWiGrx.rc
 //
 #define IDC_MYICON                      2
 #define IDD_CHWIGRX_DIALOG              102
@@ -81,6 +81,7 @@
 #define IDM_IDW_FALSE                   40023
 #define ID_40024                        40024
 #define IDM_SET_GAME_WINDOW_MODE        40025
+#define ID_40026                        40026
 #define IDC_STATIC                      -1
 
 // Next default values for new objects
@@ -88,7 +89,7 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        103
-#define _APS_NEXT_COMMAND_VALUE         40026
+#define _APS_NEXT_COMMAND_VALUE         40027
 #define _APS_NEXT_CONTROL_VALUE         1000
 #define _APS_NEXT_SYMED_VALUE           101
 #endif

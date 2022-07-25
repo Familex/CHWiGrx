@@ -317,6 +317,7 @@ LRESULT mainproc::edit_switch(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPa
                     break;
                 case IDM_SET_GAME_WINDOW_MODE:
                     window_state = WindowState::GAME;
+                    DestroyWindow(choice_window);
                     SetMenu(hWnd, LoadMenu(hInst, MAKEINTRESOURCE(IDC_CHWIGRX)));
                     change_checkerboard_color_theme(hWnd);
                     break;
@@ -405,15 +406,184 @@ LRESULT mainproc::edit_switch(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPa
 }
 
 LRESULT CALLBACK choice_window_proc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) {
+    
+    SCROLLINFO si{.cbSize=sizeof(SCROLLINFO)};
+
     static PAINTSTRUCT ps;
     static HBITMAP hbmMem;
     static HGDIOBJ hOld;
     static HDC hdcMem;
     static HDC hdc;
+    static std::vector<Figure*> unique_figures;
+    static size_t figures_cell_lenght = 30;
+    static size_t figures_in_row = 2;
+    static int curr_scroll = 0;
 
     switch (message) {
+
+        case WM_CREATE:
+        {
+            RECT rect;
+            GetClientRect(hWnd, &rect);
+
+            for (char type : ALL_FIGURES) {
+                unique_figures.push_back(
+                    FigureFabric::instance()->create({}, Color::Type::White, FigureType(type))
+                );
+            }
+
+            si.cbSize = sizeof(si);
+            si.fMask = SIF_POS | SIF_RANGE;
+            si.nPos = figures_in_row;
+            si.nMax = unique_figures.size();
+            si.nMin = 1;
+            SetScrollInfo(hWnd, SB_HORZ, &si, TRUE);
+
+            figures_cell_lenght = (rect.right - rect.left) / figures_in_row;
+            int rows_num = static_cast<int>(ceil(unique_figures.size() / static_cast<double>(figures_in_row)));
+            long total_height_of_all_figures = rows_num * figures_cell_lenght;
+
+            si.cbSize = sizeof(si);
+            si.fMask = SIF_POS | SIF_RANGE | SIF_PAGE;
+            si.nPos = 0;
+            si.nMax = std::max(total_height_of_all_figures, rect.bottom - rect.top);
+            si.nMin = 0;
+            si.nPage = rect.bottom - rect.top;
+            SetScrollInfo(hWnd, SB_VERT, &si, TRUE);
+        }
+            break;
+        case WM_HSCROLL:
+        {
+            RECT rect;
+            GetClientRect(hWnd, &rect);
+
+            switch (LOWORD(wParam))
+            {
+            case SB_PAGELEFT: case SB_LINELEFT:
+                if (figures_in_row > 1) {
+                    figures_in_row--;
+                    InvalidateRect(hWnd, NULL, NULL);
+                }
+                break;
+            case SB_PAGERIGHT: case SB_LINERIGHT:
+                if (figures_in_row < unique_figures.size()) {
+                    figures_in_row++;
+                    InvalidateRect(hWnd, NULL, NULL);
+                }
+                break;
+            }
+
+            si.cbSize = sizeof(si);
+            si.fMask = SIF_POS;
+            si.nPos = figures_in_row;
+            SetScrollInfo(hWnd, SB_HORZ, &si, TRUE);
+
+            figures_cell_lenght = (rect.right - rect.left) / figures_in_row;
+            int rows_num = static_cast<int>(ceil(unique_figures.size() / static_cast<double>(figures_in_row)));
+            long total_height_of_all_figures = rows_num * figures_cell_lenght;
+
+            si.cbSize = sizeof(si);
+            si.fMask = SIF_RANGE | SIF_PAGE;
+            si.nMin = 0;
+            si.nMax = std::max(total_height_of_all_figures, rect.bottom - rect.top);
+            si.nPage = rect.bottom - rect.top;
+            SetScrollInfo(hWnd, SB_VERT, &si, TRUE);
+
+        }
+            InvalidateRect(hWnd, NULL, NULL);
+            break;
+        case WM_VSCROLL:
+        {
+            int delta = 0;
+            switch (LOWORD(wParam))
+            {
+            case SB_PAGEUP:
+                delta = -50; break;
+            case SB_LINEUP:
+                delta = -10;
+                break;
+            case SB_PAGEDOWN:
+                delta = 50;
+                break;
+            case SB_LINEDOWN:
+                delta = 10;
+                break;
+            }
+            si.fMask = SIF_ALL;
+            GetScrollInfo(hWnd, SB_VERT, &si);
+            si.fMask = SIF_POS;
+            si.nPos = std::min(si.nMax, si.nPos + delta);
+            SetScrollInfo(hWnd, SB_VERT, &si, TRUE);
+        }            
+            InvalidateRect(hWnd, NULL, NULL);
+            break;
+        case WM_SIZE:
+        {
+            int height = HIWORD(lParam);
+            int width = LOWORD(lParam);
+            figures_cell_lenght = width / figures_in_row;
+            int rows_num = static_cast<int>(ceil(unique_figures.size() / static_cast<double>(figures_in_row)));
+            long total_height_of_all_figures = rows_num * figures_cell_lenght;
+            int max_scroll = std::max(0L, total_height_of_all_figures - height);
+            int curr_scroll = std::min(curr_scroll, max_scroll);
+            si.cbSize = sizeof(si);
+            si.fMask = SIF_RANGE | SIF_PAGE | SIF_POS;
+            si.nMax = total_height_of_all_figures;
+            si.nPage = height;
+            si.nPos = curr_scroll;
+            SetScrollInfo(hWnd, SB_VERT, &si, TRUE);
+            
+            /*
+            * Scroll bar dissapears...
+            si.cbSize = sizeof(si);
+            si.fMask = SIF_PAGE;
+            si.nPage = width;
+            SetScrollInfo(hWnd, SB_HORZ, &si, FALSE);
+            */
+        }
+            InvalidateRect(hWnd, NULL, NULL);
+            break;
+        case WM_PAINT:
+        {
+            RECT rect;
+            GetClientRect(hWnd, &rect);
+
+            size_t height = rect.bottom - rect.top;
+            size_t width = rect.right - rect.left;
+
+            hdc = BeginPaint(hWnd, &ps);
+            hdcMem = CreateCompatibleDC(hdc);
+            hbmMem = CreateCompatibleBitmap(hdc, width, height);
+            hOld = SelectObject(hdcMem, hbmMem);
+
+            /* фон */
+            FillRect(hdcMem, &rect, CHECKERBOARD_DARK);
+
+            /* рисовать фигуры (не забыть про отступ) */
+            for (int index = 0; index < unique_figures.size(); ++index) {
+                int x = index / figures_in_row;
+                int y = index % figures_in_row;
+                Figure* fig_to_draw = unique_figures[index];
+                int a = figures_cell_lenght;
+                draw_figure(hdcMem, fig_to_draw->get_col(), fig_to_draw->get_type(), { x, y }, true, a, a);
+            }
+             
+            /* Копирование временного буфера в основной */
+            BitBlt(hdc, 0, 0, width, height, hdcMem, 0, 0, SRCCOPY
+            );
+
+            SelectObject(hdcMem, hOld);
+            DeleteObject(hbmMem);
+            DeleteDC(hdcMem);
+            EndPaint(hWnd, &ps);
+        }
+            break;
         case WM_DESTROY:
         {
+            for (Figure* figure : unique_figures) {
+                delete figure;
+            }
+            unique_figures.clear();
             choice_window = NULL;
             HWND owner = GetWindow(hWnd, GW_OWNER); // это должен быть GetParent, но оный возвращает NULL
             set_menu_checkbox(owner, IDM_TOGGLE_LIST_WINDOW, false);

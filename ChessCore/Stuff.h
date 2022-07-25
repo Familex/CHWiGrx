@@ -65,7 +65,7 @@ public:
     Color(char ch = 'N');
     Color(Type data) : data(data) {};
     operator Type() const { return data; }
-    operator char();
+    operator char() const;
     Color to_next();
     Color what_next() const;
     friend bool operator!=(const Color& left, const Color& right);
@@ -82,7 +82,7 @@ public:
     FigureType(char ch = 'N');
     FigureType(Type data) : data(data) {};
     operator Type() const { return data; }
-    operator char();
+    operator char() const;
     Type get_data() const { return data; }
     bool operator==(Type l) { return data == l; }
 private:

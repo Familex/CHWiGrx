@@ -85,7 +85,7 @@ Color Color::to_next() {
 }
 
 // Перевод в символ
-FigureType::operator char() {
+FigureType::operator char() const {
     switch (data) {
     case FigureType::Type::Pawn: return 'P';
     case FigureType::Type::Rook: return 'R';
@@ -100,7 +100,7 @@ FigureType::operator char() {
 }
 
 // Перевод в символ
-Color::operator char() {
+Color::operator char() const {
     switch (data) {
     case Color::Type::Black: return 'B';
     case Color::Type::White: return 'W';
