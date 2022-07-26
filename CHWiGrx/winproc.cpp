@@ -356,7 +356,9 @@ LRESULT mainproc::edit_switch(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPa
                     board.set_idw(false);
                     update_edit_menu_variables(hWnd);
                     break;
-
+                case IDM_EXIT:
+                    DestroyWindow(hWnd);
+                    break;
                 default:
                     return DefWindowProc(hWnd, message, wParam, lParam);
             }
@@ -415,9 +417,13 @@ LRESULT CALLBACK choice_window_proc(HWND hWnd, UINT message, WPARAM wParam, LPAR
     static HDC hdcMem;
     static HDC hdc;
     static std::vector<Figure*> unique_figures;
-    static size_t figures_cell_lenght = 30;
+    static size_t figures_cell_lenght = 83;
     static size_t figures_in_row = 2;
     static int curr_scroll = 0;
+    static size_t max_scroll = 0;
+    static bool is_resizes = true;  // also to horizontal scrollbar
+    static bool is_scrolls = false;
+    static long total_height_of_all_figures = static_cast<long>(figures_cell_lenght);
 
     switch (message) {
 
@@ -434,26 +440,29 @@ LRESULT CALLBACK choice_window_proc(HWND hWnd, UINT message, WPARAM wParam, LPAR
 
             si.cbSize = sizeof(si);
             si.fMask = SIF_POS | SIF_RANGE;
-            si.nPos = figures_in_row;
-            si.nMax = unique_figures.size();
+            si.nPos = static_cast<int>(figures_in_row);
+            si.nMax = static_cast<int>(unique_figures.size());
             si.nMin = 1;
             SetScrollInfo(hWnd, SB_HORZ, &si, TRUE);
 
             figures_cell_lenght = (rect.right - rect.left) / figures_in_row;
             int rows_num = static_cast<int>(ceil(unique_figures.size() / static_cast<double>(figures_in_row)));
-            long total_height_of_all_figures = rows_num * figures_cell_lenght;
+            total_height_of_all_figures = static_cast<int>(rows_num * figures_cell_lenght);
+            max_scroll = std::max(total_height_of_all_figures, rect.bottom - rect.top);
 
             si.cbSize = sizeof(si);
             si.fMask = SIF_POS | SIF_RANGE | SIF_PAGE;
             si.nPos = 0;
-            si.nMax = std::max(total_height_of_all_figures, rect.bottom - rect.top);
+            si.nMax = static_cast<int>(max_scroll);
             si.nMin = 0;
             si.nPage = rect.bottom - rect.top;
             SetScrollInfo(hWnd, SB_VERT, &si, TRUE);
         }
+            UpdateWindow(hWnd);
             break;
         case WM_HSCROLL:
         {
+            is_resizes = true;
             RECT rect;
             GetClientRect(hWnd, &rect);
 
@@ -462,30 +471,29 @@ LRESULT CALLBACK choice_window_proc(HWND hWnd, UINT message, WPARAM wParam, LPAR
             case SB_PAGELEFT: case SB_LINELEFT:
                 if (figures_in_row > 1) {
                     figures_in_row--;
-                    InvalidateRect(hWnd, NULL, NULL);
                 }
                 break;
             case SB_PAGERIGHT: case SB_LINERIGHT:
                 if (figures_in_row < unique_figures.size()) {
                     figures_in_row++;
-                    InvalidateRect(hWnd, NULL, NULL);
                 }
                 break;
             }
 
             si.cbSize = sizeof(si);
             si.fMask = SIF_POS;
-            si.nPos = figures_in_row;
+            si.nPos = static_cast<int>(figures_in_row);
             SetScrollInfo(hWnd, SB_HORZ, &si, TRUE);
 
             figures_cell_lenght = (rect.right - rect.left) / figures_in_row;
             int rows_num = static_cast<int>(ceil(unique_figures.size() / static_cast<double>(figures_in_row)));
-            long total_height_of_all_figures = rows_num * figures_cell_lenght;
+            total_height_of_all_figures = static_cast<int>(rows_num * figures_cell_lenght);
+            max_scroll = total_height_of_all_figures;
 
             si.cbSize = sizeof(si);
             si.fMask = SIF_RANGE | SIF_PAGE;
             si.nMin = 0;
-            si.nMax = std::max(total_height_of_all_figures, rect.bottom - rect.top);
+            si.nMax = static_cast<int>(max_scroll);
             si.nPage = rect.bottom - rect.top;
             SetScrollInfo(hWnd, SB_VERT, &si, TRUE);
 
@@ -494,38 +502,55 @@ LRESULT CALLBACK choice_window_proc(HWND hWnd, UINT message, WPARAM wParam, LPAR
             break;
         case WM_VSCROLL:
         {
-            int delta = 0;
+            is_scrolls = true;
+            int new_scroll;
             switch (LOWORD(wParam))
             {
             case SB_PAGEUP:
-                delta = -50; break;
+                new_scroll = curr_scroll - 30; break;
             case SB_LINEUP:
-                delta = -10;
+                new_scroll = curr_scroll - 10;
                 break;
             case SB_PAGEDOWN:
-                delta = 50;
+                new_scroll = curr_scroll + 30;
                 break;
             case SB_LINEDOWN:
-                delta = 10;
+                new_scroll = curr_scroll + 10;
                 break;
+            case SB_THUMBPOSITION:
+                new_scroll = HIWORD(wParam);
+                break;
+            default:
+                new_scroll = curr_scroll;
             }
-            si.fMask = SIF_ALL;
-            GetScrollInfo(hWnd, SB_VERT, &si);
+            
+            new_scroll = std::min(static_cast<int>(max_scroll), std::max(0, new_scroll));
+            if (new_scroll == curr_scroll) break;
+            int delta = new_scroll - curr_scroll;
+            curr_scroll = new_scroll;
+
+            ScrollWindowEx(hWnd, 0, -delta, (CONST RECT*) NULL,
+                (CONST RECT*) NULL, (HRGN)NULL, (PRECT)NULL,
+                SW_INVALIDATE);
+            UpdateWindow(hWnd);
+
+            si.cbSize = sizeof(si);
             si.fMask = SIF_POS;
-            si.nPos = std::min(si.nMax, si.nPos + delta);
+            si.nPos = curr_scroll;
             SetScrollInfo(hWnd, SB_VERT, &si, TRUE);
         }            
             InvalidateRect(hWnd, NULL, NULL);
             break;
         case WM_SIZE:
         {
+            is_resizes = true;
             int height = HIWORD(lParam);
             int width = LOWORD(lParam);
             figures_cell_lenght = width / figures_in_row;
             int rows_num = static_cast<int>(ceil(unique_figures.size() / static_cast<double>(figures_in_row)));
-            long total_height_of_all_figures = rows_num * figures_cell_lenght;
-            int max_scroll = std::max(0L, total_height_of_all_figures - height);
-            int curr_scroll = std::min(curr_scroll, max_scroll);
+            total_height_of_all_figures = static_cast<int>(rows_num * figures_cell_lenght);
+            max_scroll = std::max(0L, total_height_of_all_figures - height);
+            curr_scroll = std::min(curr_scroll, static_cast<int>(max_scroll));
             si.cbSize = sizeof(si);
             si.fMask = SIF_RANGE | SIF_PAGE | SIF_POS;
             si.nMax = total_height_of_all_figures;
@@ -543,34 +568,62 @@ LRESULT CALLBACK choice_window_proc(HWND hWnd, UINT message, WPARAM wParam, LPAR
         }
             InvalidateRect(hWnd, NULL, NULL);
             break;
+        case WM_GETMINMAXINFO:
+        {
+            LPMINMAXINFO lpMMI = (LPMINMAXINFO)lParam;
+            lpMMI->ptMinTrackSize.y = static_cast<LONG>(figures_cell_lenght);
+            lpMMI->ptMaxTrackSize.y = total_height_of_all_figures + HEADER_HEIGHT;
+        }
+            break;
         case WM_PAINT:
         {
-            RECT rect;
-            GetClientRect(hWnd, &rect);
+            PRECT prect = &ps.rcPaint;
 
-            size_t height = rect.bottom - rect.top;
-            size_t width = rect.right - rect.left;
+            size_t height = prect->bottom - prect->top;
+            size_t width = prect->right - prect->left;
+            int rows_num = static_cast<int>(ceil(unique_figures.size() / static_cast<double>(figures_in_row)));
+            total_height_of_all_figures = static_cast<int>(rows_num * figures_cell_lenght);
 
             hdc = BeginPaint(hWnd, &ps);
             hdcMem = CreateCompatibleDC(hdc);
-            hbmMem = CreateCompatibleBitmap(hdc, width, height);
+            hbmMem = CreateCompatibleBitmap(hdc, static_cast<int>(width), static_cast<int>(total_height_of_all_figures));
             hOld = SelectObject(hdcMem, hbmMem);
 
             /* фон */
-            FillRect(hdcMem, &rect, CHECKERBOARD_DARK);
+            RECT full_rect = { .left = prect->left, .top = prect->top + curr_scroll,
+                .right = prect->right, .bottom = prect->bottom + curr_scroll};
+            FillRect(hdcMem, &full_rect, CHECKERBOARD_DARK);
 
-            /* рисовать фигуры (не забыть про отступ) */
+            /* Отрисовка фигур */
             for (int index = 0; index < unique_figures.size(); ++index) {
-                int x = index / figures_in_row;
-                int y = index % figures_in_row;
+                int x = static_cast<int>(index / figures_in_row);
+                int y = static_cast<int>(index % figures_in_row);
                 Figure* fig_to_draw = unique_figures[index];
-                int a = figures_cell_lenght;
-                draw_figure(hdcMem, fig_to_draw->get_col(), fig_to_draw->get_type(), { x, y }, true, a, a);
+                draw_figure(hdcMem, fig_to_draw->get_col(), fig_to_draw->get_type(), { x, y },
+                    true, static_cast<int>(figures_cell_lenght), static_cast<int>(figures_cell_lenght));
             }
-             
-            /* Копирование временного буфера в основной */
-            BitBlt(hdc, 0, 0, width, height, hdcMem, 0, 0, SRCCOPY
-            );
+
+            /* Копирование временного буфера в основной (взято из майкросовтовской документации) */
+            if (is_scrolls) {
+                BitBlt(ps.hdc,
+                    prect->left, prect->top,
+                    (prect->right - prect->left),
+                    (prect->bottom - prect->top),
+                    hdcMem,
+                    prect->left,
+                    prect->top + curr_scroll,
+                    SRCCOPY);
+                is_scrolls = false;
+            }
+            else if (is_resizes) {
+                BitBlt(ps.hdc,
+                    0, 0,
+                    prect->right - prect->left, static_cast<int>(total_height_of_all_figures),
+                    hdcMem,
+                    0, curr_scroll,
+                    SRCCOPY);
+                is_resizes = false;
+            }
 
             SelectObject(hdcMem, hOld);
             DeleteObject(hbmMem);

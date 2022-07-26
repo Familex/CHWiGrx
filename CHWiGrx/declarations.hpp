@@ -4,7 +4,7 @@
 #include "framework.hpp"
 #include "../ChessCore/FigureBoard.h"
 
-#define ALLOCATE_CONSOLE
+// #define ALLOCATE_CONSOLE
 // #define NDEBUG
 
 #ifdef ALLOCATE_CONSOLE
