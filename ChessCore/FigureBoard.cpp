@@ -29,27 +29,27 @@ void FigureBoard::init_figures_moves() {
     }
 
     // Задаётся относительно белых через idw
-    moves[FigureType::Type::Pawn] = { {{ (idw ? -1 : 1), 0}} };
-    eats[FigureType::Type::Pawn] = { {{ (idw ? -1 : 1), -1}}, {{ (idw ? -1 : 1), 1}} };
+    moves[FigureType::Pawn] = { {{ (idw ? -1 : 1), 0}} };
+    eats[FigureType::Pawn] = { {{ (idw ? -1 : 1), -1}}, {{ (idw ? -1 : 1), 1}} };
 
-    moves[FigureType::Type::Knight] = { {{-1, 2}}, {{-1, -2}},
+    moves[FigureType::Knight] = { {{-1, 2}}, {{-1, -2}},
         {{1, -2}}, {{1, 2}}, {{2, -1}}, {{-2, -1}},
         {{2, 1}}, {{-2, 1}}, };
-    eats[FigureType::Type::Knight] = moves[FigureType::Type::Knight];
+    eats[FigureType::Knight] = moves[FigureType::Knight];
 
-    moves[FigureType::Type::King] = { {{-1, -1}}, {{-1, 1}}, {{-1, 0}},
+    moves[FigureType::King] = { {{-1, -1}}, {{-1, 1}}, {{-1, 0}},
         {{0, -1}}, {{0, 1}}, {{1, 1}}, {{1, -1}},
         {{1, 0}} };
-    eats[FigureType::Type::King] = moves[FigureType::Type::King];
+    eats[FigureType::King] = moves[FigureType::King];
 
-    moves[FigureType::Type::Bishop] = { temp_left_up, temp_left_down, temp_right_up, temp_right_down };
-    eats[FigureType::Type::Bishop] = moves[FigureType::Type::Bishop];
+    moves[FigureType::Bishop] = { temp_left_up, temp_left_down, temp_right_up, temp_right_down };
+    eats[FigureType::Bishop] = moves[FigureType::Bishop];
 
-    moves[FigureType::Type::Rook] = { temp_left, temp_right, temp_up, temp_down };
-    eats[FigureType::Type::Rook] = moves[FigureType::Type::Rook];
+    moves[FigureType::Rook] = { temp_left, temp_right, temp_up, temp_down };
+    eats[FigureType::Rook] = moves[FigureType::Rook];
 
-    moves[FigureType::Type::Queen] = { temp_left_up, temp_left_down, temp_right_up, temp_right_down, temp_left, temp_right, temp_up, temp_down };
-    eats[FigureType::Type::Queen] = moves[FigureType::Type::Queen];
+    moves[FigureType::Queen] = { temp_left_up, temp_left_down, temp_right_up, temp_right_down, temp_left, temp_right, temp_up, temp_down };
+    eats[FigureType::Queen] = moves[FigureType::Queen];
 
 }
 
@@ -130,9 +130,9 @@ BoardRepr FigureBoard::get_repr(bool save_all_moves) {
 
 void FigureBoard::reset_castling(bool castle_state) {
     castling.clear();
-    for (const Color::Type& col : { Color::Type::Black, Color::Type::White }) {
+    for (const Color& col : { Color::Black, Color::White }) {
         for (const auto& aspt_to_rook : get_figures_of(col)) {
-            if (aspt_to_rook->get_type() == FigureType(FigureType::Rook)) {
+            if (aspt_to_rook->get_type() == FigureType::Rook) {
                 castling[aspt_to_rook->get_id()] = castle_state;
             }
         }
@@ -238,7 +238,7 @@ Figure* FigureBoard::find_king(Color col) {
         figures.begin(),
         figures.end(),
         [col](const auto& it)
-        { return it.second->is_col(col) && it.second->get_type() == FigureType(FigureType::King); }
+        { return it.second->is_col(col) && it.second->get_type() == FigureType::King; }
     );
     if (map_ptr == figures.end()) {
         return get_default_fig();
@@ -260,9 +260,9 @@ Figure* FigureBoard::find_king(Color col) {
 std::vector<std::pair<bool, Pos>> FigureBoard::expand_broom(const Figure* in_hand, const std::vector<Pos>& to_ignore, const std::vector<Pos>& ours, const std::vector<Pos>& enemies) {
     std::vector<std::pair<bool, Pos>> possible_moves{}; // list { pair{ is_eat, targ }, ... }
     auto in_hand_pos = in_hand->get_pos();
-    for (auto& eat_beams : eats[in_hand->get_type().get_data()]) {
+    for (auto& eat_beams : eats[in_hand->get_type()]) {
         for (auto& eat : eat_beams) {
-            Pos curr{ in_hand_pos + (in_hand->is_col(Color::Type::White) ? eat : eat.mul_x(-1)) };
+            Pos curr{ in_hand_pos + (in_hand->is_col(Color::White) ? eat : eat.mul_x(-1)) };
             if (not is_valid_coords(curr)) continue;
             if (curr.in(ours)) {
                 break; // Врезались в союзника
@@ -282,9 +282,9 @@ std::vector<std::pair<bool, Pos>> FigureBoard::expand_broom(const Figure* in_han
             }
         }
     }
-    for (auto& move_beams : moves[in_hand->get_type().get_data()]) {
+    for (auto& move_beams : moves[in_hand->get_type()]) {
         for (auto& move : move_beams) {
-            Pos curr{ in_hand_pos + (in_hand->is_col(Color::Type::White) ? move : move.mul_x(-1)) };
+            Pos curr{ in_hand_pos + (in_hand->is_col(Color::White) ? move : move.mul_x(-1)) };
             if (not is_valid_coords(curr)) continue;
             if (not ((not curr.in(to_ignore) && cont_fig(curr)) || curr.in(ours) || curr.in(enemies))) {
                 possible_moves.push_back({ false, curr });
@@ -311,9 +311,9 @@ std::vector<std::pair<bool, Pos>> FigureBoard::get_all_possible_moves(const Figu
     std::vector<std::pair<bool, Pos>> all_moves{ expand_broom(in_hand, to_ignore, ours, enemies) };
     Pos in_hand_pos = in_hand->get_pos();
     Figure* in_hand_it{ get_fig(in_hand_pos) };
-    if (in_hand->get_type() == FigureType(FigureType::Pawn)) {
+    if (in_hand->get_type() == FigureType::Pawn) {
         // Ход пешки на 2 (смотрю свои фигуры на 2 линии)
-        if (in_hand->is_col(Color::Type::White)) {
+        if (in_hand->is_col(Color::White)) {
             if (in_hand_pos.x == (HEIGHT - 2) && idw && is_empty(in_hand_pos + Pos(-1, 0)) &&
                 is_empty(in_hand_pos + Pos(-2, 0))) {
                 all_moves.push_back({ false, in_hand_pos + Pos(-2, 0) });
@@ -323,7 +323,7 @@ std::vector<std::pair<bool, Pos>> FigureBoard::get_all_possible_moves(const Figu
                 all_moves.push_back({ false, in_hand_pos + Pos(2, 0) });
             }
         }
-        if (in_hand->is_col(Color::Type::Black)) {
+        if (in_hand->is_col(Color::Black)) {
             if (in_hand_pos.x == 1 && idw && is_empty(in_hand_pos + Pos(1, 0)) &&
                 is_empty(in_hand_pos + Pos(2, 0))) {
                 all_moves.push_back({ false, in_hand_pos + Pos(2, 0) });
@@ -338,7 +338,7 @@ std::vector<std::pair<bool, Pos>> FigureBoard::get_all_possible_moves(const Figu
         const MoveRec& last_move = move_logger.get_last_move();
         if (last_move.ms.main_ev == MainEvent::LMOVE && std::abs(last_move.get_who_went_pos().y - in_hand_pos.y) == 1) {
             int shift_y = last_move.get_who_went_pos().y - in_hand_pos.y;
-            if (in_hand->is_col(Color::Type::White)) {
+            if (in_hand->is_col(Color::White)) {
                 if (in_hand_pos.x == 3 && idw && cont_fig(in_hand_pos + Pos(0, shift_y)) && is_empty(in_hand_pos + Pos(-1, shift_y))) {
                     all_moves.push_back({ true, in_hand_pos + Pos(-1, shift_y) });
                 }
@@ -346,7 +346,7 @@ std::vector<std::pair<bool, Pos>> FigureBoard::get_all_possible_moves(const Figu
                     all_moves.push_back({ true, in_hand_pos + Pos(1, shift_y) });
                 }
             }
-            if (in_hand->is_col(Color::Type::Black)) {
+            if (in_hand->is_col(Color::Black)) {
                 if (in_hand_pos.x == (HEIGHT - EN_PASSANT_INDENT) && idw && cont_fig(in_hand_pos + Pos(0, shift_y)) && is_empty(in_hand_pos + Pos(1, shift_y))) {
                     all_moves.push_back({ true, in_hand_pos + Pos(1, shift_y) });
                 }
@@ -356,7 +356,7 @@ std::vector<std::pair<bool, Pos>> FigureBoard::get_all_possible_moves(const Figu
             }
         }
     }
-    if (in_hand->get_type() == FigureType(FigureType::King)) {
+    if (in_hand->get_type() == FigureType::King) {
         bool is_castling; MoveMessage mm; Figure* king; Figure* rook;
         std::tie(is_castling, mm, king, rook) = castling_check({}, in_hand_it, { in_hand_pos, {in_hand_pos.x, 6} }, 6, 5);
         if (is_castling && has_castling(rook->get_id()))
@@ -365,7 +365,7 @@ std::vector<std::pair<bool, Pos>> FigureBoard::get_all_possible_moves(const Figu
         if (is_castling && has_castling(rook->get_id()))
             all_moves.push_back({ false, {in_hand_pos.x, 2} });
     }
-    if (in_hand->get_type() == FigureType(FigureType::Rook)) {
+    if (in_hand->get_type() == FigureType::Rook) {
         bool is_castling; MoveMessage mm; Figure* king; Figure* rook;
         std::tie(is_castling, mm, king, rook) = castling_check({}, in_hand_it, { in_hand_pos, {in_hand_pos.x, 5} }, 6, 5);
         if (is_castling && has_castling(rook->get_id()))
@@ -397,7 +397,7 @@ bool FigureBoard::check_for_when(Color col, const std::vector<Pos>& to_ignore, P
             to_defend = king_it->get_pos();
         }
     }
-    for (const auto& enemy : get_figures_of(col.what_next()) + enemies) {
+    for (const auto& enemy : get_figures_of(what_next(col)) + enemies) {
         if (std::find(to_ignore.begin(), to_ignore.end(), enemy->get_pos()) != to_ignore.end()) {
             if (std::find(enemies.begin(), enemies.end(), enemy) == enemies.end()) // Пока не нужно, но должно быть тут на всякий
                 continue;
@@ -425,7 +425,7 @@ bool FigureBoard::stalemate_for(Color col, const std::vector<Pos>& to_ignore, Po
     if (to_defend == Pos()) to_defend = king_it->get_pos();
     for (auto& aspt : get_figures_of(col)) {
         for (const auto& [is_eat, curr] : expand_broom(aspt)) {
-            if (aspt->get_type() == FigureType(FigureType::King)) {
+            if (aspt->get_type() == FigureType::King) {
                 if (is_eat
                     ? not check_for_when(col, to_ignore + curr + to_defend, curr)
                     : not check_for_when(col, to_ignore + to_defend, curr)
@@ -467,7 +467,7 @@ bool FigureBoard::checkmate_for(Color col, const std::vector<Pos>& to_ignore, Po
     }
     for (const auto& figure : get_figures_of(col)) {
         for (const auto& [is_eat, curr] : expand_broom(figure, to_ignore, { to_defend })) {
-            if (figure->get_type() == FigureType(FigureType::King)) {
+            if (figure->get_type() == FigureType::King) {
                 if (is_eat
                     ? not check_for_when(col, to_ignore + figure->get_pos() + curr + to_defend, curr)
                     : not check_for_when(col, to_ignore + figure->get_pos() + to_defend, curr)
@@ -511,12 +511,12 @@ std::tuple<bool, MoveMessage, Figure*, Figure*> FigureBoard::castling_check(Move
     // Рокировка на g-фланг
     bool castling_can_be_done = true;
     Id must_be_empty = ERR_ID;
-    auto king = in_hand->get_type() == FigureType(FigureType::King) ? in_hand : find_king(in_hand->get_col());
+    auto king = in_hand->get_type() == FigureType::King ? in_hand : find_king(in_hand->get_col());
     if (king->empty())
         return { false, move_message, get_default_fig(), get_default_fig() };
     Pos king_pos = king->get_pos();
-    if (in_hand->get_type() == FigureType(FigureType::King) && input.target.y == king_end_col && in_hand->get_pos().y != king_end_col ||
-        king_pos.y == king_end_col && in_hand->get_type() == FigureType(FigureType::Rook) && input.target.y == rook_end_col && in_hand->get_pos().y != rook_end_col) {
+    if (in_hand->get_type() == FigureType::King && input.target.y == king_end_col && in_hand->get_pos().y != king_end_col ||
+        king_pos.y == king_end_col && in_hand->get_type() == FigureType::Rook && input.target.y == rook_end_col && in_hand->get_pos().y != rook_end_col) {
         // input правильный (король уже мог быть на g вертикали, так что доступна возможность рокировки от ладьи)
         // Нужно проверить, что все промежуточные позиции (где идёт король) не под шахом
         auto [_, rook] = *figures.begin();
@@ -524,11 +524,11 @@ std::tuple<bool, MoveMessage, Figure*, Figure*> FigureBoard::castling_check(Move
         for (Pos rook_aspt_pos{ king_pos };
             is_valid_coords(rook_aspt_pos); rook_aspt_pos.y += step) {
             rook = get_fig(rook_aspt_pos);
-            if (rook->is_col(in_hand->get_col()) && rook->get_type() == FigureType(FigureType::Rook)) {
+            if (rook->is_col(in_hand->get_col()) && rook->get_type() == FigureType::Rook) {
                 break;
             }
         }
-        if (rook->empty() || rook->get_type() != FigureType(FigureType::Rook)) return {false, move_message, get_default_fig(), get_default_fig()};
+        if (rook->empty() || rook->get_type() != FigureType::Rook) return {false, move_message, get_default_fig(), get_default_fig()};
         if (king_pos.x != input.target.x && rook->get_pos().x != input.target.x) return { false, move_message, get_default_fig(), get_default_fig() };
         
         Pos rook_pos = rook->get_pos();
@@ -545,7 +545,7 @@ std::tuple<bool, MoveMessage, Figure*, Figure*> FigureBoard::castling_check(Move
         castling_can_be_done &= must_be_empty == ERR_ID || must_be_empty == king->get_id() || must_be_empty == rook->get_id();
         if (castling_can_be_done) {
             move_message.main_ev = MainEvent::CASTLING;
-            if (in_hand->get_type() == FigureType(FigureType::King)) {
+            if (in_hand->get_type() == FigureType::King) {
                 move_message.to_move.push_back({ rook->get_id(), {rook_pos, {rook_pos.x, rook_end_col}}});
             }
             else {
@@ -574,18 +574,18 @@ bool FigureBoard::insufficient_material() {
             figures.begin(),
             figures.end(),
             [](const auto& it)
-            { return it.second->get_type() == FigureType(FigureType::Knight) || it.second->get_type() == FigureType(FigureType::Bishop); }
+            { return it.second->get_type() == FigureType::Knight || it.second->get_type() == FigureType::Bishop; }
         ) != figures.end()
         ) return true;
     size_t b_cell_bishops_cnt{};
     size_t w_cell_bishops_cnt{};
     for (const auto& fig : all_figures()) {
-        if (fig->get_type() == FigureType(FigureType::Bishop))
+        if (fig->get_type() == FigureType::Bishop)
             if ((fig->get_pos().x + fig->get_pos().y) % 2)
                 ++b_cell_bishops_cnt;
             else
                 ++w_cell_bishops_cnt;
-        else if (fig->get_type() != FigureType(FigureType::King))
+        else if (fig->get_type() != FigureType::King)
             return false; // при модификации функции не забыть тут поставить хотя бы goto
     }
     return not (b_cell_bishops_cnt && w_cell_bishops_cnt);
@@ -618,16 +618,16 @@ std::variant<ErrorEvent, MoveMessage> FigureBoard::move_check(Figure* in_hand, I
         return ErrorEvent::INVALID_MOVE;
     }
 
-    if (in_hand->get_type() == FigureType(FigureType::Rook)) {
+    if (in_hand->get_type() == FigureType::Rook) {
         move_message.side_evs.push_back(SideEvent::CASTLING_BREAK);
         move_message.what_castling_breaks.push_back(in_hand->get_id());
     }
 
-    if ((in_hand->get_type() == FigureType(FigureType::King) || in_hand->get_type() == FigureType(FigureType::Rook)) &&
+    if ((in_hand->get_type() == FigureType::King || in_hand->get_type() == FigureType::Rook) &&
         WIDTH == 8) {
         move_message.side_evs.push_back(SideEvent::CASTLING_BREAK);
         for (const auto& fig : get_figures_of(in_hand->get_col())) {
-            if (fig->get_type() == FigureType(FigureType::Rook)) {
+            if (fig->get_type() == FigureType::Rook) {
                 // Заполняется в любом случае, но MainEvent::BREAK это отменит, если что
                 move_message.what_castling_breaks.push_back(fig->get_id());
             }
@@ -637,7 +637,7 @@ std::variant<ErrorEvent, MoveMessage> FigureBoard::move_check(Figure* in_hand, I
         if (is_castling && has_castling(rook->get_id())) {
             auto king_tmp = FigureFabric::instance()->submit_on(king, { in_hand->get_pos().x, 6 });
             auto rook_tmp = FigureFabric::instance()->submit_on(rook, { rook->get_pos().x, 5 });
-            if (check_for_when(in_hand->get_col().what_next(),
+            if (check_for_when(what_next(in_hand->get_col()),
                 { input.from, king->get_pos(), rook->get_pos() }, {}, {},
                 { king_tmp.get(), rook_tmp.get() })) {
                 move_message.side_evs.push_back(SideEvent::CHECK);
@@ -648,7 +648,7 @@ std::variant<ErrorEvent, MoveMessage> FigureBoard::move_check(Figure* in_hand, I
         if (is_castling && has_castling(rook->get_id())) {
             auto king_tmp = FigureFabric::instance()->submit_on(king, { king->get_pos().x, 2 });
             auto rook_tmp = FigureFabric::instance()->submit_on(rook, { rook->get_pos().x, 3 });
-            if (check_for_when(in_hand->get_col().what_next(),
+            if (check_for_when(what_next(in_hand->get_col()),
                 { input.from, king->get_pos(), rook->get_pos()}, {}, {},
                 { king_tmp.get(), rook_tmp.get() })) {
                 move_message.side_evs.push_back(SideEvent::CHECK);
@@ -657,10 +657,10 @@ std::variant<ErrorEvent, MoveMessage> FigureBoard::move_check(Figure* in_hand, I
         }
     }
 
-    if (in_hand->get_type() == FigureType(FigureType::Pawn)) {
-        if (in_hand->is_col(Color::Type::White) &&
+    if (in_hand->get_type() == FigureType::Pawn) {
+        if (in_hand->is_col(Color::White) &&
                 (idw && input.target.x == 0 || not idw && input.target.x == (HEIGHT - 1)) ||
-                in_hand->get_col() == Color(Color::Black) &&
+                in_hand->get_col() == Color::Black &&
                 (not idw && input.target.x == 0 || idw && input.target.x == (HEIGHT - 1))
                 ) {
             move_message.side_evs.push_back(SideEvent::PROMOTION);
@@ -669,20 +669,20 @@ std::variant<ErrorEvent, MoveMessage> FigureBoard::move_check(Figure* in_hand, I
         Pos shift{ input.target - input.from };
         // Ход пешки на 2 (смотрю свои фигуры на 2 линии)
         if (shift.y == 0 && is_empty(input.target) && (
-            in_hand->get_col() == Color(Color::White) && (
+            in_hand->get_col() == Color::White && (
                 input.from.x == (HEIGHT - 2) && idw && shift.x == -2 && is_empty(input.from + Pos(-1, 0)) ||
                 input.from.x == 1 && not idw && shift.x == 2 && is_empty(input.from + Pos(1, 0))
                 ) ||
-            in_hand->is_col(Color::Type::Black) && (
+            in_hand->is_col(Color::Black) && (
                 input.from.x == 1 && idw && shift.x == 2 && is_empty(input.from + Pos(1, 0)) ||
                 input.from.x == (HEIGHT - 2) && not idw && shift.x == -2 && is_empty(input.from + Pos(-1, 0))
                 )
             )) {
             auto in_hand_in_targ_tmp = FigureFabric::instance()->submit_on(in_hand, input.target);
-            if (check_for_when(in_hand->get_col().what_next(), { input.from }, {}, {}, { in_hand_in_targ_tmp.get()})) {
+            if (check_for_when(what_next(in_hand->get_col()), { input.from }, {}, {}, { in_hand_in_targ_tmp.get()})) {
                 move_message.side_evs.push_back(SideEvent::CHECK);
             }
-            if (in_hand->get_type() == FigureType(FigureType::King)) {
+            if (in_hand->get_type() == FigureType::King) {
                 if (check_for_when(in_hand->get_col(), { input.from }, input.target)) {
                     return ErrorEvent::CHECK_IN_THAT_TILE;
                 }
@@ -702,20 +702,20 @@ std::variant<ErrorEvent, MoveMessage> FigureBoard::move_check(Figure* in_hand, I
         if (std::abs(shift.y) == 1 && is_empty(input.target) &&
             last_move.ms.main_ev == MainEvent::LMOVE && last_move.get_who_went_pos().y == input.target.y &&
             (
-                in_hand->get_col() == Color(Color::White) && (
+                in_hand->get_col() == Color::White && (
                     input.from.x == 3 && idw && shift.x == -1 && cont_fig(input.from + Pos(0, shift.y)) ||
                     input.from.x == (HEIGHT - EN_PASSANT_INDENT) && not idw && shift.x == 1 && cont_fig(input.from + Pos(0, shift.y))
                     ) ||
-                in_hand->get_col() == Color(Color::Black) && (
+                in_hand->get_col() == Color::Black && (
                     input.from.x == (HEIGHT - EN_PASSANT_INDENT) && idw && shift.x == 1 && cont_fig(input.from + Pos(0, shift.y)) ||
                     input.from.x == 3 && not idw && shift.x == -1 && cont_fig(input.from + Pos(0, shift.y))
                     )
                 )) {
             auto in_hand_in_targ_tmp = FigureFabric::instance()->submit_on(in_hand, input.target);
-            if (check_for_when(in_hand->get_col().what_next(), { input.from, {input.from.x, input.target.y}, targ->get_pos() }, {}, {}, { in_hand_in_targ_tmp.get() })) {
+            if (check_for_when(what_next(in_hand->get_col()), { input.from, {input.from.x, input.target.y}, targ->get_pos() }, {}, {}, { in_hand_in_targ_tmp.get() })) {
                 move_message.side_evs.push_back(SideEvent::CHECK);
             }
-            if (in_hand->get_type() == FigureType(FigureType::King)) {
+            if (in_hand->get_type() == FigureType::King) {
                 // Фигура на которой сейчас стоим всё ещё учитывается!
                 if (check_for_when(in_hand->get_col(), { input.from, {input.from.x, input.target.y}, targ->get_pos() }, input.target)) {
                     return ErrorEvent::CHECK_IN_THAT_TILE;
@@ -740,10 +740,10 @@ std::variant<ErrorEvent, MoveMessage> FigureBoard::move_check(Figure* in_hand, I
             if (not targ->empty()) {
                 auto in_hand_in_curr_tmp = FigureFabric::instance()->submit_on(in_hand, curr);
                 // Фигура на которой сейчас стоим всё ещё учитывается!
-                if (check_for_when(in_hand->get_col().what_next(), {input.from, input.target}, {}, {}, { in_hand_in_curr_tmp.get() })) {
+                if (check_for_when(what_next(in_hand->get_col()), {input.from, input.target}, {}, {}, { in_hand_in_curr_tmp.get() })) {
                     move_message.side_evs.push_back(SideEvent::CHECK);
                 }
-                if (in_hand->get_type() == FigureType(FigureType::King)) {
+                if (in_hand->get_type() == FigureType::King) {
                     // Фигура на которой сейчас стоим всё ещё учитывается!
                     if (check_for_when(in_hand->get_col(), {input.from, input.target}, curr)) {
                         return ErrorEvent::CHECK_IN_THAT_TILE;
@@ -763,10 +763,10 @@ std::variant<ErrorEvent, MoveMessage> FigureBoard::move_check(Figure* in_hand, I
         else {
             if (targ->empty()) {
                 auto in_hand_in_curr_tmp = FigureFabric::instance()->submit_on(in_hand, curr);
-                if (check_for_when(in_hand->get_col().what_next(), {input.from}, {}, {}, { in_hand_in_curr_tmp.get() })) {
+                if (check_for_when(what_next(in_hand->get_col()), {input.from}, {}, {}, { in_hand_in_curr_tmp.get() })) {
                     move_message.side_evs.push_back(SideEvent::CHECK);
                 }
-                if (in_hand->get_type() == FigureType(FigureType::King)) {
+                if (in_hand->get_type() == FigureType::King) {
                     if (check_for_when(in_hand->get_col(), {input.from}, curr)) {
                         return ErrorEvent::CHECK_IN_THAT_TILE;
                     }
@@ -833,7 +833,7 @@ bool FigureBoard::undo_move() {
             }
             break;
         case SideEvent::PROMOTION:
-            promotion_fig(in_hand, FigureType::Type::Pawn);
+            promotion_fig(in_hand, FigureType::Pawn);
             break;
         case SideEvent::CHECK:
             break;
@@ -896,7 +896,7 @@ bool FigureBoard::provide_move(const MoveRec& move_rec) {
             }
             break;
         case SideEvent::PROMOTION:
-            promotion_fig(in_hand, choice);
+            promotion_fig(in_hand, char_to_figure_type(choice));
             break;
         case SideEvent::CHECK:
             break;

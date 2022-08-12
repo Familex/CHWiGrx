@@ -48,7 +48,7 @@ inline const Pos CHOICE_WINDOW_DEFAULT_DIMENTIONS = { 200, 200 };
 inline WindowState window_state = WindowState::GAME;
 inline std::string start_board_repr{ DEFAULT_CHESS_BOARD_IDW };
 inline FigureBoard board{ start_board_repr };
-inline Color turn{ Color::Type::White };
+inline Color turn{ Color::White };
 inline char chose{ 'Q' };
 inline std::map<char, std::map<char, HBITMAP>> pieces_bitmaps;
 inline bool save_all_moves = true;

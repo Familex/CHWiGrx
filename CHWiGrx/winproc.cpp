@@ -29,13 +29,13 @@ LRESULT mainproc::game_switch(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPa
         case IDM_UNDO:
             if (board.undo_move()) {
                 motion_input.clear();
-                turn.to_next();
+                turn = what_next(turn);
             }
             break;
         case IDM_RESTORE_MOVE:
             if (board.restore_move()) {
                 motion_input.clear();
-                turn.to_next();
+                turn = what_next(turn);
             }
             break;
         case IDM_COPY_MAP:
@@ -346,11 +346,11 @@ LRESULT mainproc::edit_switch(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPa
                     set_menu_checkbox(hWnd, IDM_TOGGLE_LIST_WINDOW, choice_window != NULL);
                     break;
                 case IDM_WHITE_START:
-                    turn = Color::Type::White;
+                    turn = Color::White;
                     update_edit_menu_variables(hWnd);
                     break;
                 case IDM_BLACK_START:
-                    turn = Color::Type::Black;
+                    turn = Color::Black;
                     update_edit_menu_variables(hWnd);
                     break;
                 case IDM_IDW_TRUE:
@@ -438,7 +438,7 @@ LRESULT CALLBACK choice_window_proc(HWND hWnd, UINT message, WPARAM wParam, LPAR
 
             for (char type : ALL_FIGURES) {
                 unique_figures.push_back(
-                    FigureFabric::instance()->create({}, Color::Type::White, FigureType(type))
+                    FigureFabric::instance()->create({}, Color::White, FigureType(type))
                 );
             }
 

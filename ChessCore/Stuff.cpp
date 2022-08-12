@@ -31,80 +31,61 @@ void remove_first_occurrence(std::string& str, char c) {
     }
 }
 
-/// <summary>
-/// Конструктор типа фигуры из буквы
-/// </summary>
-/// <exception cref="std::invatid_argument">Непредвиденный символ</exception>
-/// <param name="ch">Тип фигуры</param>
-FigureType::FigureType(char ch) {
+FigureType char_to_figure_type(char ch) {
     switch (ch)
     {
-    case 'K': case 'k': data = FigureType::Type::King;   break;
-    case 'H': case 'h': data = FigureType::Type::Knight; break;
-    case 'P': case 'p': data = FigureType::Type::Pawn;   break;
-    case 'B': case 'b': data = FigureType::Type::Bishop; break;
-    case 'Q': case 'q': data = FigureType::Type::Queen;  break;
-    case 'R': case 'r': data = FigureType::Type::Rook;   break;
-    case 'N': case 'n': data = FigureType::Type::None;   break;
+    case 'K': case 'k': return FigureType::King;  
+    case 'H': case 'h': return FigureType::Knight;
+    case 'P': case 'p': return FigureType::Pawn;  
+    case 'B': case 'b': return FigureType::Bishop;
+    case 'Q': case 'q': return FigureType::Queen; 
+    case 'R': case 'r': return FigureType::Rook;  
+    case 'N': case 'n': return FigureType::None;  
     default:
         throw std::invalid_argument("Can't parse '" + std::string(ch, 1) + "' - figure type");
     }
 }
 
-/// <summary>
-/// Коструктор цвета из буквы
-/// </summary>
-/// <exception cref="std::invatid_argument">Непредвиденный символ</exception>
-/// <param name="ch">Цвет</param>
-Color::Color(char ch) {
+Color char_to_col(char ch) {
     switch (ch) {
-    case 'w': case 'W': data = Color::Type::White; break;
-    case 'B': case 'b': data = Color::Type::Black; break;
-    case 'N': case 'n': data = Color::Type::None; break;
+    case 'w': case 'W': return Color::White;
+    case 'B': case 'b': return Color::Black;
+    case 'N': case 'n': return Color::None;
     default:
         throw std::invalid_argument("Can't parse '" + std::string(ch, 1) + "' - color");
     }
 }
 
-// Возвращает цвет игрока на следующем ходу
-Color Color::what_next() const {
-    switch (data) {
-    case Color::Type::Black:
-        return Color::Type::White;
-    case Color::Type::White:
-        return Color::Type::Black;
+Color what_next(Color col) {
+    switch (col) {
+    case Color::Black:
+        return Color::White;
+    case Color::White:
+        return Color::Black;
     default:
         throw std::invalid_argument("unaccepted color");
     }
 }
 
-// Меняет цвет на следующий
-Color Color::to_next() {
-    data = what_next();
-    return *this;
-}
-
-// Перевод в символ
-FigureType::operator char() const {
-    switch (data) {
-    case FigureType::Type::Pawn: return 'P';
-    case FigureType::Type::Rook: return 'R';
-    case FigureType::Type::Knight: return 'H';
-    case FigureType::Type::Bishop: return 'B';
-    case FigureType::Type::Queen: return 'Q';
-    case FigureType::Type::King: return 'K';
-    case FigureType::Type::None: return 'N';
+char figure_type_to_char(FigureType type) {
+    switch (type) {
+    case FigureType::Pawn: return 'P';
+    case FigureType::Rook: return 'R';
+    case FigureType::Knight: return 'H';
+    case FigureType::Bishop: return 'B';
+    case FigureType::Queen: return 'Q';
+    case FigureType::King: return 'K';
+    case FigureType::None: return 'N';
     default:
         return 'e';
     }
 }
 
-// Перевод в символ
-Color::operator char() const {
-    switch (data) {
-    case Color::Type::Black: return 'B';
-    case Color::Type::White: return 'W';
-    case Color::Type::None: return 'N';
+char col_to_char(Color col) {
+    switch (col) {
+    case Color::Black: return 'B';
+    case Color::White: return 'W';
+    case Color::None: return 'N';
     default:
         return 'e';
     }
@@ -181,7 +162,7 @@ MoveRec MoveLogger::move_last_to_future() {
 bool MoveLogger::is_fifty_move_rule_was_triggered() {
     size_t without_eat_and_pawnmoves = 0;
     for (auto move{ prev_moves.rbegin() }; move != prev_moves.rend(); ++move) {
-        if (move->get_who_went()->get_type() == FigureType(FigureType::Pawn) || move->ms.main_ev == MainEvent::EAT) {
+        if (move->get_who_went()->get_type() == FigureType::Pawn || move->ms.main_ev == MainEvent::EAT) {
             break;
         }
         else {
@@ -208,10 +189,10 @@ BoardRepr::BoardRepr(std::string board_repr) {
         idw = false;
     }
     if (meta.find('w') != npos || meta.find('W') != npos) {
-        turn = Color::Type::White;
+        turn = Color::White;
     }
     else if (meta.find('b') != npos || meta.find('B') != npos) {
-        turn = Color::Type::Black;
+        turn = Color::Black;
     }
     for (const char& c : { 't', 'T', 'f', 'F', 'w', 'W', 'b', 'B' }) {
         remove_first_occurrence(meta, c);
@@ -251,8 +232,8 @@ BoardRepr::BoardRepr(std::string board_repr) {
     for (size_t i{}; i < tmp.size(); i += 5) {
         Id new_id =             std::stoi(tmp[i]);
         Pos new_pos =         { std::stoi(tmp[i + 1]), std::stoi(tmp[i + 2]) };
-        Color new_col =       { tmp[i + 3][0] };
-        FigureType new_type = { tmp[i + 4][0] };
+        Color new_col =       char_to_col(tmp[i + 3][0]);
+        FigureType new_type = char_to_figure_type(tmp[i + 4][0]);
         Figure* new_fig = FigureFabric::instance()->create(
             new_pos, new_col, new_type, new_id
         );
@@ -268,8 +249,8 @@ BoardRepr::BoardRepr(std::string board_repr) {
     for (size_t i{}; i < tmp.size(); i += 5) {
         Id new_id = std::stoi(tmp[i]);
         Pos new_pos = { std::stoi(tmp[i + 1]), std::stoi(tmp[i + 2]) };
-        Color new_col = { tmp[i + 3][0] };
-        FigureType new_type = { tmp[i + 4][0] };
+        Color new_col = char_to_col(tmp[i + 3][0]);
+        FigureType new_type = char_to_figure_type(tmp[i + 4][0]);
         Figure* new_fig = FigureFabric::instance()->create(
             new_pos, new_col, new_type, new_id
         );
@@ -317,9 +298,9 @@ MoveRec::MoveRec(std::string map) {
     auto data = split(map, ".");
     // Возможно нижнюю конструкцию стоит вставить в фабрику
     Id new_id = std::stoi(data[0]);
-    Color new_col = data[3][0];
+    Color new_col = char_to_col(data[3][0]);
     Pos new_pos = { std::stoi(data[1]), std::stoi(data[2]) };
-    FigureType new_type = data[4][0];
+    FigureType new_type = char_to_figure_type(data[4][0]);
     Figure* who_went_tmp = FigureFabric::instance()->create(
         new_pos, new_col, new_type, new_id
     );
@@ -462,55 +443,55 @@ std::string to_string(MainEvent main_event) {
     }
 }
 
-Figure* FigureFabric::create(Pos position, Color color, FigureType::Type type, Id id, Figure* placement) {
+Figure* FigureFabric::create(Pos position, Color color, FigureType type, Id id, Figure* placement) {
     switch (type) {
-        case FigureType::Type::Pawn:
+        case FigureType::Pawn:
             return placement
-                   ? new (placement) Figure(id, position, color, FigureType::Type::Pawn)
-                   : new Figure(id, position, color, FigureType::Type::Pawn);
-        case FigureType::Type::Knight:
+                   ? new (placement) Figure(id, position, color, FigureType::Pawn)
+                   : new Figure(id, position, color, FigureType::Pawn);
+        case FigureType::Knight:
             return placement
-                   ? new (placement) Figure(id, position, color, FigureType::Type::Knight)
-                   : new Figure(id, position, color, FigureType::Type::Knight);
-        case FigureType::Type::Rook:
+                   ? new (placement) Figure(id, position, color, FigureType::Knight)
+                   : new Figure(id, position, color, FigureType::Knight);
+        case FigureType::Rook:
             return placement
-                   ? new (placement) Figure(id, position, color, FigureType::Type::Rook)
-                   : new Figure(id, position, color, FigureType::Type::Rook);
-        case FigureType::Type::Bishop:
+                   ? new (placement) Figure(id, position, color, FigureType::Rook)
+                   : new Figure(id, position, color, FigureType::Rook);
+        case FigureType::Bishop:
             return placement
-                   ? new (placement) Figure(id, position, color, FigureType::Type::Bishop)
-                   : new Figure(id, position, color, FigureType::Type::Bishop);
-        case FigureType::Type::Queen:
+                   ? new (placement) Figure(id, position, color, FigureType::Bishop)
+                   : new Figure(id, position, color, FigureType::Bishop);
+        case FigureType::Queen:
             return placement
-                   ? new (placement) Figure(id, position, color, FigureType::Type::Queen)
-                   : new Figure(id, position, color, FigureType::Type::Queen);
-        case FigureType::Type::King:
+                   ? new (placement) Figure(id, position, color, FigureType::Queen)
+                   : new Figure(id, position, color, FigureType::Queen);
+        case FigureType::King:
             return placement
-                   ? new (placement) Figure(id, position, color, FigureType::Type::King)
-                   : new Figure(id, position, color, FigureType::Type::King);
-        case FigureType::Type::None:
-            return new Figure(id, position, Color::Type::None, FigureType::Type::None);
+                   ? new (placement) Figure(id, position, color, FigureType::King)
+                   : new Figure(id, position, color, FigureType::King);
+        case FigureType::None:
+            return new Figure(id, position, Color::None, FigureType::None);
         default:
             return get_default_fig();
         }
 }
 
-Figure* FigureFabric::create(Pos position, Color color, FigureType::Type type) {
+Figure* FigureFabric::create(Pos position, Color color, FigureType type) {
     switch (type) {
-    case FigureType::Type::Pawn:
-        return new Figure(this->id++, position, color, FigureType::Type::Pawn);
-    case FigureType::Type::Knight:
-        return new Figure(this->id++, position, color, FigureType::Type::Knight);
-    case FigureType::Type::Rook:
-        return new Figure(this->id++, position, color, FigureType::Type::Rook);
-    case FigureType::Type::Bishop:
-        return new Figure(this->id++, position, color, FigureType::Type::Bishop);
-    case FigureType::Type::Queen:
-        return new Figure(this->id++, position, color, FigureType::Type::Queen);
-    case FigureType::Type::King:
-        return new Figure(this->id++, position, color, FigureType::Type::King);
-    case FigureType::Type::None:
-        return new Figure(this->id++, position, Color::Type::None, FigureType::Type::None);
+    case FigureType::Pawn:
+        return new Figure(this->id++, position, color, FigureType::Pawn);
+    case FigureType::Knight:
+        return new Figure(this->id++, position, color, FigureType::Knight);
+    case FigureType::Rook:
+        return new Figure(this->id++, position, color, FigureType::Rook);
+    case FigureType::Bishop:
+        return new Figure(this->id++, position, color, FigureType::Bishop);
+    case FigureType::Queen:
+        return new Figure(this->id++, position, color, FigureType::Queen);
+    case FigureType::King:
+        return new Figure(this->id++, position, color, FigureType::King);
+    case FigureType::None:
+        return new Figure(this->id++, position, Color::None, FigureType::None);
     default:
         return get_default_fig();
     }

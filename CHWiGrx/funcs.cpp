@@ -92,7 +92,7 @@ void draw_figure(HDC hdc, Color col, FigureType type, Pos begin_paint, bool is_t
     const int w_beg = begin_paint.y * w;
     int h_end = h_beg + h;
     int w_end = w_beg + h;
-    HBITMAP hBitmap = pieces_bitmaps[col][type];
+    HBITMAP hBitmap = pieces_bitmaps[col_to_char(col)][figure_type_to_char(type)];
     BITMAP bm;
     GetObject(hBitmap, sizeof(BITMAP), &bm);
     HDC hdcMem = CreateCompatibleDC(hdc);
@@ -142,7 +142,7 @@ void make_move(HWND hWnd) {
     #endif // ALLOCATE_CONSOLE
 
     board.set_last_move({ motion_input.get_in_hand(), motion_input.get_input(), turn, move_rec.ms, move_rec.promotion_choice });
-    turn.to_next();
+    turn = what_next(turn);
     motion_input.clear();
     InvalidateRect(hWnd, NULL, NULL);
 
@@ -153,9 +153,9 @@ void make_move(HWND hWnd) {
         std::wstring head = L"Game end";
         switch (curr_game_end_state) {
         case GameEndType::Checkmate: case GameEndType::Stalemate: {
-            auto who_next = turn.what_next();
-            body = who_next == Color(Color::White) ? L"White wins!" :
-                who_next == Color(Color::Black) ? L"Black wins!" :
+            auto who_next = what_next(turn);
+            body = who_next == Color::White ? L"White wins!" :
+                who_next == Color::Black ? L"Black wins!" :
                 L"None wins!";
             break;
         }
@@ -377,7 +377,7 @@ void MotionInput::init_curr_choice_window(HWND hWnd) {
 void MotionInput::calculate_possible_moves() {
     all_moves.clear();
     for (const auto& [is_eat, move_pos] : board->get_all_possible_moves(in_hand)) {
-        if (in_hand->get_type() == FigureType(FigureType::King)) {
+        if (in_hand->get_type() == FigureType::King) {
             if (is_eat
                 ? not board->check_for_when(in_hand->get_col(), { in_hand->get_pos(), move_pos }, move_pos)
                 : not board->check_for_when(in_hand->get_col(), { in_hand->get_pos() }, move_pos)
@@ -424,7 +424,7 @@ void update_check_title(HWND hWnd) {
     }
     else if (board.check_for_when(turn)) {
         curr_text += L" [Check to ";
-        curr_text += turn == Color(Color::White) ? L"White" : turn == Color(Color::Black) ? L"Black" : L"None";
+        curr_text += turn == Color::White ? L"White" : turn == Color::Black ? L"Black" : L"None";
         curr_text += L"]";
     }
     SetWindowText(hWnd, curr_text.c_str());
@@ -481,9 +481,9 @@ void update_edit_menu_variables(HWND hWnd) {
         set_menu_checkbox(hWnd, menu_id, false);
     }
 
-    if (turn == Color(Color::White))
+    if (turn == Color::White)
         set_menu_checkbox(hWnd, IDM_WHITE_START, true);
-    else if (turn == Color(Color::Black))
+    else if (turn == Color::Black)
         set_menu_checkbox(hWnd, IDM_BLACK_START, true);
 
     if (board.get_idw() == true)

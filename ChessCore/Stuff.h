@@ -58,36 +58,14 @@ struct Pos {
     bool in(std::vector<Pos> lst) { return std::find(lst.begin(), lst.end(), *this) != lst.end(); }
 };
 
-// Лишний класс, можно убрать
-class Color {
-public:
-    enum class Type { Black, White, None };
-    using enum Type;
-    Color(char ch = 'N');
-    Color(Type data) : data(data) {};
-    operator Type() const { return data; }
-    operator char() const;
-    Color to_next();
-    Color what_next() const;
-    auto operator <=> (const Color&) const = default;
-private:
-    Type data;
-};
+enum class Color { None, Black, White };
+Color char_to_col(char);
+char col_to_char(Color);
+Color what_next(Color);
 
-// Лишний класс, можно убрать
-class FigureType {
-public:
-    enum class Type { Pawn, Knight, Rook, Bishop, Queen, King, None };
-    using enum Type;
-    FigureType(char ch = 'N');
-    FigureType(Type data) : data(data) {};
-    operator Type() const { return data; }
-    operator char() const;
-    Type get_data() const { return data; }
-    auto operator<=>(const FigureType&) const = default;
-private:
-    Type data;
-};
+enum class FigureType { None, Pawn, Knight, Rook, Bishop, Queen, King };
+FigureType char_to_figure_type(char ch = 'N');
+char figure_type_to_char(FigureType);
 
 class Figure {
 public:
@@ -111,10 +89,10 @@ public:
     bool is(Id id) const { return this->id == id; }
     bool at(Pos p) const { return position == p; }
 private:
-    Id id;
+    Id id{ ERR_ID };
     Pos position{};
-    Color color{};
-    FigureType type{};
+    Color color{ Color::None };
+    FigureType type{ FigureType::None };
 };
 
 std::vector<Pos> to_pos_vector(const std::vector<Figure*>&);
@@ -144,8 +122,8 @@ public:
     FigureFabric(FigureFabric const&) = delete;
     void operator=(FigureFabric const&) = delete;
 
-    Figure* create(Pos, Color, FigureType::Type);
-    Figure* create(Pos, Color, FigureType::Type, Id, Figure* =nullptr);
+    Figure* create(Pos, Color, FigureType);
+    Figure* create(Pos, Color, FigureType, Id, Figure* =nullptr);
     Figure* create(Figure*);
     Figure* get_default_fig();
     std::unique_ptr<Figure> submit_on(Figure* who, Pos on) {
@@ -233,7 +211,7 @@ public:
     std::string as_string();
     char get_idw_char() const { return idw ? 'T' : 'F'; }
     bool get_idw() const { return idw; }
-    char get_turn_char() const { return turn == Color(Color::Type::White) ? 'W' : 'B'; }
+    char get_turn_char() const { return turn == Color::White ? 'W' : 'B'; }
     std::vector<Id> get_who_can_castle() const { return can_castle; }
     Color get_turn() const { return turn; }
     bool empty() const { return figures.empty(); }
@@ -249,7 +227,7 @@ public:
     std::list<Figure*> get_captured_figures() const { return captured_figures; }
 private:
     std::list<Figure*> figures;
-    Color turn{ Color::Type::White };
+    Color turn{ Color::White };
     bool idw{ true };
     std::vector<MoveRec> past;
     std::vector<MoveRec> future;
