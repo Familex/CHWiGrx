@@ -161,34 +161,30 @@ public:
     void prepare(Color turn);
     void calculate_possible_moves();
     void init_curr_choice_window(HWND hWnd);
-    inline void toggle_pair_input() { input_order_by_two = !input_order_by_two; }
-    inline void activate_pair() { input_order_by_two = true; }
-    inline void reset_single() { input_order_by_one = false; }
+    inline void activate_by_click() { input_order_by_two = true; }
+    inline void deactivate_by_click() { input_order_by_two = false; }
+    inline void deactivate_by_pos() { input_order_by_one = false; }
     inline void set_target(Pos target) { input.target = target; }
     inline void set_target(int x, int y) { input.target = {x, y}; }
     inline void set_from(Pos from) { input.from = from; }
-    inline bool target_at_input() { return input.from == input.target; }
-    inline void reset_lbutton_down() { is_lbutton_down = false; }
+    inline bool is_target_at_input() { return input.from == input.target; }
+    inline void set_lbutton_up() { is_lbutton_down = false; }
     inline void set_lbutton_down() { is_lbutton_down = true; }
-    inline bool is_pair() { return input_order_by_two; }
+    inline bool is_active_by_click() { return input_order_by_two; }
     inline bool is_current_turn(Color turn) { return in_hand->is_col(turn); }
     inline auto get_in_hand() { return in_hand; }
     inline auto get_input() { return input; }
     inline void shift_from(Pos shift, int max_x, int max_y) { input.from.loop_add(shift, max_x, max_y); }
     inline void shift_target(Pos shift, int max_x, int max_y) { input.target.loop_add(shift, max_x, max_y); }
-    inline void next_single() { ++input_order_by_one; }
+    inline void by_pos_to_next() { ++input_order_by_one; }
     inline void set_from_x(int val) { input.from.x = val; }
     inline void set_from_y(int val) { input.from.y = val; }
     inline void set_target_x(int val) { input.target.x = val; }
     inline void set_target_y(int val) { input.target.y = val; }
-    inline auto get_single_state() { return input_order_by_one; }
+    inline auto get_state_by_pos() { return input_order_by_one; }
     inline bool is_drags() { return !is_curr_choice_moving && is_lbutton_down && not in_hand->empty(); }
     inline auto get_possible_moves() { return all_moves; }
     inline bool is_figure_dragged(Id id) { return in_hand->is(id) && is_curr_choice_moving && !input_order_by_two; }
-    inline void reset_input_order() {
-        input_order_by_one = 0;
-        input_order_by_two = false;
-    }
 private:
     FigureBoard* board;
     const Pos DEFAULT_INPUT_FROM{ 0, -1 };

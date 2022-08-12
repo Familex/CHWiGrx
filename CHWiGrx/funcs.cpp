@@ -267,17 +267,10 @@ HWND create_curr_choice_window(HWND parent, Figure* in_hand, POINT mouse, int w,
     return create_window();
 }
 
-/// <summary>
-/// Функция обрабатывающая WM_LBUTTONUP
-/// </summary>
-/// <param name="hWnd">Дескриптор окна</param>
-/// <param name="wParam"></param>
-/// <param name="lParam"></param>
-/// <param name="where_fig">Позиция фигуры</param>
 void on_lbutton_up(HWND hWnd, WPARAM wParam, LPARAM lParam, Pos where_fig) {
-    motion_input.reset_lbutton_down();
-    motion_input.reset_single();
-    if (motion_input.is_pair()) {
+    motion_input.set_lbutton_up();
+    motion_input.deactivate_by_pos();
+    if (motion_input.is_active_by_click()) {
         make_move(hWnd);
         motion_input.clear();
         InvalidateRect(hWnd, NULL, NULL);
@@ -285,14 +278,14 @@ void on_lbutton_up(HWND hWnd, WPARAM wParam, LPARAM lParam, Pos where_fig) {
     }
     else {
         motion_input.set_target(where_fig.x, where_fig.y);
-        if (motion_input.target_at_input()) {
+        if (motion_input.is_target_at_input()) {
             if (window_stats.get_prev_lbutton_click() != Pos(HIWORD(lParam), LOWORD(lParam))) { // Отпустили в пределах клетки, но в другом месте
                 motion_input.clear();
                 InvalidateRect(hWnd, NULL, NULL);
                 return;
             }
             motion_input.prepare(turn);
-            motion_input.toggle_pair_input();
+            motion_input.activate_by_click();
             InvalidateRect(hWnd, NULL, NULL);
         }
         else {
@@ -302,13 +295,6 @@ void on_lbutton_up(HWND hWnd, WPARAM wParam, LPARAM lParam, Pos where_fig) {
 }
 
 bool is_legal_board_repr(const std::string& str) {
-#ifdef USE_REGEX_BOARD_REPR_CHECK
-    // regex не актуален, как минимум в мету были добавлены рокировки
-    const static std::regex valid_board_repr(R"(((-?\d+;){3}\w;\w;)+\[T?F?W?B?\](<(\d+\.\d+\.\d+\.\w\.\w\.\d+\.\d+\.\d+\.\d+\.\w\.\w\.\{(\w,)*\}\.\{(-?\d+,)*\}\.\{((-?\d+,){5})*\}\.\{(-?\d+,)*\}\$)*>){2}~((-?\d+,){3}\w,\w,)*)");
-    const static std::regex valid_board_repr_light(R"((?:(?:-?\d+;){3}\w;\w;)+\[T?F?W?B?\](?:<(?:\d+\.\d+\.\d+\.\w\.\w\.\d+\.\d+\.\d+\.\d+\.\w\.\w\.\{(?:\w,)*\}\.\{(?:-?\d+,)*\}\.\{(?:(?:-?\d+,){5})*\}\.\{(?:-?\d+,)*\}\$)*>){2}~(?:(?:-?\d+,){3}\w,\w,)*)");
-    return std::regex_match(str, valid_board_repr_light); // Программа ложится под stackoverflow
-#endif // USE_REGEX_BOARD_REPR_CHECK
-
     return (str.find('<') != str.npos &&
         str.find('>') != str.npos &&
         str.find('[') != str.npos &&
@@ -416,7 +402,8 @@ void MotionInput::clear() {
     is_lbutton_down = false;
     DestroyWindow(curr_chose_window);
     is_curr_choice_moving = false;
-    reset_input_order();
+    deactivate_by_click();
+    deactivate_by_pos();
     in_hand = board->get_default_fig();
     input = { {0, -1}, {-1, -1} };
     all_moves.clear();

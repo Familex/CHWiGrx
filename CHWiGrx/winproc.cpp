@@ -154,7 +154,7 @@ LRESULT mainproc::game_switch(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPa
         case VK_LEFT: case VK_RIGHT: case VK_UP: case VK_DOWN:
         {
             Pos shift{ wParam == VK_LEFT ? Pos(0, -1) : (wParam == VK_RIGHT ? Pos(0, 1) : (wParam == VK_UP ? Pos(-1, 0) : Pos(1, 0))) };
-            if (!motion_input.is_pair())
+            if (!motion_input.is_active_by_click())
                 motion_input.shift_from(shift, HEIGHT, WIDTH);
             else
                 motion_input.shift_target(shift, HEIGHT, WIDTH);
@@ -162,7 +162,7 @@ LRESULT mainproc::game_switch(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPa
             return 0;
         }
         case VK_RETURN:
-            if (motion_input.is_pair()) {
+            if (motion_input.is_active_by_click()) {
                 make_move(hWnd);
                 motion_input.clear();
                 InvalidateRect(hWnd, NULL, NULL);
@@ -170,32 +170,32 @@ LRESULT mainproc::game_switch(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPa
             }
             else {
                 motion_input.prepare(turn);
+                motion_input.activate_by_click();
             }
-            motion_input.toggle_pair_input();
             InvalidateRect(hWnd, NULL, NULL);
             return 0;
         default:
             return 0;
         }
-        switch (motion_input.get_single_state()) {
+        switch (motion_input.get_state_by_pos()) {
         case 0:
             motion_input.set_from_x(cord);
-            motion_input.next_single();
+            motion_input.by_pos_to_next();
             break;
         case 1:
             motion_input.set_from_y(cord);
             motion_input.prepare(turn);
-            motion_input.activate_pair();
-            motion_input.next_single();
+            motion_input.activate_by_click();
+            motion_input.by_pos_to_next();
             break;
         case 2:
             motion_input.set_target_x(cord);
-            motion_input.next_single();
+            motion_input.by_pos_to_next();
             break;
         case 3:
             motion_input.set_target_y(cord);
             make_move(hWnd);
-            motion_input.reset_input_order();
+            motion_input.clear();
             break;
         }
         InvalidateRect(hWnd, NULL, NULL);
@@ -212,8 +212,8 @@ LRESULT mainproc::game_switch(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPa
     {
         motion_input.set_lbutton_down();
         window_stats.set_prev_lbutton_click({ HIWORD(lParam), LOWORD(lParam) });
-        motion_input.reset_single();
-        if (motion_input.is_pair()) {
+        motion_input.deactivate_by_pos();
+        if (motion_input.is_active_by_click()) {
             motion_input.set_target(window_stats.divide_by_cell_size(HIWORD(lParam), LOWORD(lParam)));
             InvalidateRect(hWnd, NULL, NULL);
             return 0;
@@ -234,7 +234,12 @@ LRESULT mainproc::game_switch(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPa
         break;
     case WM_MOUSEMOVE:
         if (motion_input.is_drags()) {
-            motion_input.init_curr_choice_window(hWnd);
+            if (motion_input.is_active_by_click()) {
+                motion_input.clear();
+            }
+            else {
+                motion_input.init_curr_choice_window(hWnd);
+            }
         }
         break;
     case WM_SIZE:

@@ -58,6 +58,7 @@ struct Pos {
     bool in(std::vector<Pos> lst) { return std::find(lst.begin(), lst.end(), *this) != lst.end(); }
 };
 
+// Лишний класс, можно убрать
 class Color {
 public:
     enum class Type { Black, White, None };
@@ -73,6 +74,7 @@ private:
     Type data;
 };
 
+// Лишний класс, можно убрать
 class FigureType {
 public:
     enum class Type { Pawn, Knight, Rook, Bishop, Queen, King, None };
