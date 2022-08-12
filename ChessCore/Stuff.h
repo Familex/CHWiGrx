@@ -5,6 +5,7 @@
 #include <tuple>
 #include <format>
 #include <vector>
+#include <compare>
 #include <cassert>
 #include <stdexcept>
 #include <functional>
@@ -37,54 +38,51 @@ typedef int Id;
 const Id ERR_ID{ -1 };
 const int HEIGHT{ 8 };
 const int WIDTH{ 8 };
-struct pos {
+struct Pos {
     int x;
     int y;
-    pos() : x(-1), y(-1) {};
-    pos(int x, int y) : x(x), y(y) {};
-    friend bool operator==(const pos& left, const pos& right);
-    friend bool operator!=(const pos& left, const pos& right);
-    friend bool operator<(const pos& left, const pos& right);
-    friend pos operator-(const pos& left, const pos& right);
-    friend pos operator+(const pos& left, const pos& right);
-    pos& operator +=(const pos& r) { this->x += r.x; this->y += r.y; return *this; }
-    pos mul_x(int mx) { return { x * mx, y }; }
-    void loop_add(pos add, int max_x, int max_y) {
+    Pos() : x(-1), y(-1) {};
+    Pos(int x, int y) : x(x), y(y) {};
+    auto operator <=> (const Pos& other) const = default;
+    Pos operator-(const Pos& right) { return { (x - right.x), (y - right.y) }; }
+    Pos operator+(const Pos& right) { return { (x + right.x), (y + right.y) }; }
+    Pos& operator +=(const Pos& r) { this->x += r.x; this->y += r.y; return *this; }
+    Pos mul_x(int mx) { return { x * mx, y }; }
+    void loop_add(Pos add, int max_x, int max_y) {
         this->x += add.x; this->y += add.y;
         if (this->x >= max_x) this->x = 0;
         if (this->x < 0) this->x = max_x - 1;
         if (this->y >= max_y) this->y = 0;
         if (this->y < 0) this->y = max_y - 1;
     }
-    bool in(std::vector<pos> lst) { return std::find(lst.begin(), lst.end(), *this) != lst.end(); }
+    bool in(std::vector<Pos> lst) { return std::find(lst.begin(), lst.end(), *this) != lst.end(); }
 };
 
 class Color {
 public:
-    enum Type { Black, White, None };
+    enum class Type { Black, White, None };
+    using enum Type;
     Color(char ch = 'N');
     Color(Type data) : data(data) {};
     operator Type() const { return data; }
     operator char() const;
     Color to_next();
     Color what_next() const;
-    friend bool operator!=(const Color& left, const Color& right);
-    friend bool operator==(const Color& left, const Color& right);
-    friend bool operator==(const Color& left, const Color::Type& right);
-    friend bool operator==(const Color::Type& left, const Color& right);
+    auto operator <=> (const Color&) const = default;
 private:
     Type data;
 };
 
 class FigureType {
 public:
-    enum Type { Pawn, Knight, Rook, Bishop, Queen, King, None };
+    enum class Type { Pawn, Knight, Rook, Bishop, Queen, King, None };
+    using enum Type;
     FigureType(char ch = 'N');
     FigureType(Type data) : data(data) {};
     operator Type() const { return data; }
     operator char() const;
     Type get_data() const { return data; }
-    bool operator==(Type l) { return data == l; }
+    auto operator<=>(const FigureType&) const = default;
 private:
     Type data;
 };
@@ -92,9 +90,9 @@ private:
 class Figure {
 public:
     Figure() : id{ ERR_ID }, position() {};
-    Figure(Id id, pos position, Color color, FigureType type) :
+    Figure(Id id, Pos position, Color color, FigureType type) :
         id(id), position(position), color(color), type(type) {};
-    void move_to(pos p) { position = p; }
+    void move_to(Pos p) { position = p; }
     void move_to(int x, int y) { position.x = x; position.y = y; }
     bool operator ==(const Figure& r) const { return this->id == r.id; }
     std::string as_string() {
@@ -102,29 +100,29 @@ public:
             id, position.x, position.y, (char)color, (char)type);
     }
     Id get_id() const { return id; }
-    pos get_pos() const { return position; }
+    Pos get_pos() const { return position; }
     Color get_col() const { return color; }
     FigureType get_type() const { return type; }
     bool is_col(Color col) const { return color == col; }
     bool is_col(Figure* fig) const { return color == fig->get_col(); }
     bool empty() const { return id == ERR_ID; }
     bool is(Id id) const { return this->id == id; }
-    bool at(pos p) const { return position == p; }
+    bool at(Pos p) const { return position == p; }
 private:
     Id id;
-    pos position{};
+    Pos position{};
     Color color{};
     FigureType type{};
 };
 
-std::vector<pos> to_pos_vector(const std::vector<Figure*>&);
+std::vector<Pos> to_pos_vector(const std::vector<Figure*>&);
 
 struct Input {
-    pos from;
-    pos target;
+    Pos from;
+    Pos target;
     Input(std::string);
     Input() : from({ -1, -1 }), target({ -1, -1 }) {};
-    Input(pos from, pos target) : from(from), target(target) {};
+    Input(Pos from, Pos target) : from(from), target(target) {};
 };
 
 enum class ErrorEvent { INVALID_MOVE, UNDER_CHECK, CHECK_IN_THAT_TILE, UNFORESEEN};
@@ -144,13 +142,12 @@ public:
     FigureFabric(FigureFabric const&) = delete;
     void operator=(FigureFabric const&) = delete;
 
-    Figure* create(pos, Color, FigureType::Type);
-    Figure* create(pos, Color, FigureType::Type, Id, Figure* =nullptr);
+    Figure* create(Pos, Color, FigureType::Type);
+    Figure* create(Pos, Color, FigureType::Type, Id, Figure* =nullptr);
     Figure* create(Figure*);
     Figure* get_default_fig();
-    // Ќе забывать удал¤ть временную фигуру
-    Figure* submit_on(Figure* who, pos on) {
-        Figure* tmp = FigureFabric::instance()->create(who);
+    std::unique_ptr<Figure> submit_on(Figure* who, Pos on) {
+        std::unique_ptr<Figure> tmp(FigureFabric::instance()->create(who));
         tmp->move_to(on);
         return tmp;
     }
@@ -194,7 +191,7 @@ struct MoveRec {
             who_went.get_id()
         );
     }
-    pos get_who_went_pos() const {
+    Pos get_who_went_pos() const {
         if (who_went.empty()) return { -1, -1 };
         return who_went.get_pos();
     }
@@ -234,7 +231,7 @@ public:
     std::string as_string();
     char get_idw_char() const { return idw ? 'T' : 'F'; }
     bool get_idw() const { return idw; }
-    char get_turn_char() const { return turn == Color::Type::White ? 'W' : 'B'; }
+    char get_turn_char() const { return turn == Color(Color::Type::White) ? 'W' : 'B'; }
     std::vector<Id> get_who_can_castle() const { return can_castle; }
     Color get_turn() const { return turn; }
     bool empty() const { return figures.empty(); }

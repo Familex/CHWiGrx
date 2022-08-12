@@ -79,21 +79,6 @@ INT_PTR CALLBACK about_proc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPara
     return static_cast<INT_PTR>(FALSE);
 }
 
-void load_pieces_bitmaps(HINSTANCE hInstance) {
-    pieces_bitmaps['B']['P'] = LoadBitmap(hInstance, MAKEINTRESOURCE(IDB_BLACK_PAWN));
-    pieces_bitmaps['B']['R'] = LoadBitmap(hInstance, MAKEINTRESOURCE(IDB_BLACK_ROOK));
-    pieces_bitmaps['B']['K'] = LoadBitmap(hInstance, MAKEINTRESOURCE(IDB_BLACK_KING));
-    pieces_bitmaps['B']['Q'] = LoadBitmap(hInstance, MAKEINTRESOURCE(IDB_BLACK_QUEEN));
-    pieces_bitmaps['B']['B'] = LoadBitmap(hInstance, MAKEINTRESOURCE(IDB_BLACK_BISHOP));
-    pieces_bitmaps['B']['H'] = LoadBitmap(hInstance, MAKEINTRESOURCE(IDB_BLACK_KNIGHT));
-    pieces_bitmaps['W']['P'] = LoadBitmap(hInstance, MAKEINTRESOURCE(IDB_WHITE_PAWN));
-    pieces_bitmaps['W']['R'] = LoadBitmap(hInstance, MAKEINTRESOURCE(IDB_WHITE_ROOK));
-    pieces_bitmaps['W']['K'] = LoadBitmap(hInstance, MAKEINTRESOURCE(IDB_WHITE_KING));
-    pieces_bitmaps['W']['Q'] = LoadBitmap(hInstance, MAKEINTRESOURCE(IDB_WHITE_QUEEN));
-    pieces_bitmaps['W']['B'] = LoadBitmap(hInstance, MAKEINTRESOURCE(IDB_WHITE_BISHOP));
-    pieces_bitmaps['W']['H'] = LoadBitmap(hInstance, MAKEINTRESOURCE(IDB_WHITE_KNIGHT));
-}
-
 /// <summary>
 /// Рисует фигуру на контекст изображения
 /// </summary>
@@ -102,7 +87,7 @@ void load_pieces_bitmaps(HINSTANCE hInstance) {
 /// <param name="w_beg">Левая координата</param>
 /// <param name="h_beg">Верхняя координата</param>
 /// <param name="is_transpanent">Сделать ли фон прозрачным</param>
-void draw_figure(HDC hdc, Color col, FigureType type, pos begin_paint, bool is_transpanent, int h, int w) {
+void draw_figure(HDC hdc, Color col, FigureType type, Pos begin_paint, bool is_transpanent, int h, int w) {
     const int h_beg = begin_paint.x * h;
     const int w_beg = begin_paint.y * w;
     int h_end = h_beg + h;
@@ -126,7 +111,7 @@ void draw_figure(HDC hdc, Color col, FigureType type, pos begin_paint, bool is_t
     DeleteDC(hdcMem);
 }
 
-void draw_figure(HDC hdc, Color col, FigureType type, pos begin_paint, bool is_transpanent) {
+void draw_figure(HDC hdc, Color col, FigureType type, Pos begin_paint, bool is_transpanent) {
     draw_figure(hdc, col, type, begin_paint, is_transpanent, window_stats.get_cell_height(), window_stats.get_cell_width());
 }
 
@@ -169,8 +154,8 @@ void make_move(HWND hWnd) {
         switch (curr_game_end_state) {
         case GameEndType::Checkmate: case GameEndType::Stalemate: {
             auto who_next = turn.what_next();
-            body = who_next == Color::Type::White ? L"White wins!" :
-                who_next == Color::Type::Black ? L"Black wins!" :
+            body = who_next == Color(Color::White) ? L"White wins!" :
+                who_next == Color(Color::Black) ? L"Black wins!" :
                 L"None wins!";
             break;
         }
@@ -289,7 +274,7 @@ HWND create_curr_choice_window(HWND parent, Figure* in_hand, POINT mouse, int w,
 /// <param name="wParam"></param>
 /// <param name="lParam"></param>
 /// <param name="where_fig">Позиция фигуры</param>
-void on_lbutton_up(HWND hWnd, WPARAM wParam, LPARAM lParam, pos where_fig) {
+void on_lbutton_up(HWND hWnd, WPARAM wParam, LPARAM lParam, Pos where_fig) {
     motion_input.reset_lbutton_down();
     motion_input.reset_single();
     if (motion_input.is_pair()) {
@@ -301,7 +286,7 @@ void on_lbutton_up(HWND hWnd, WPARAM wParam, LPARAM lParam, pos where_fig) {
     else {
         motion_input.set_target(where_fig.x, where_fig.y);
         if (motion_input.target_at_input()) {
-            if (window_stats.get_prev_lbutton_click() != pos(HIWORD(lParam), LOWORD(lParam))) { // Отпустили в пределах клетки, но в другом месте
+            if (window_stats.get_prev_lbutton_click() != Pos(HIWORD(lParam), LOWORD(lParam))) { // Отпустили в пределах клетки, но в другом месте
                 motion_input.clear();
                 InvalidateRect(hWnd, NULL, NULL);
                 return;
@@ -371,7 +356,7 @@ void MotionInput::init_curr_choice_window(HWND hWnd) {
                 GetCursorPos(&cur_pos);
                 RECT parent_window;
                 GetWindowRect(parent, &parent_window);
-                pos where_fig = window_stats.divide_by_cell_size(
+                Pos where_fig = window_stats.divide_by_cell_size(
                     (cur_pos.y - parent_window.top - HEADER_HEIGHT),
                     (cur_pos.x - parent_window.left)
                 );
@@ -388,7 +373,7 @@ void MotionInput::init_curr_choice_window(HWND hWnd) {
                 HDC hdc = BeginPaint(hWnd, &ps);
                 Figure* in_hand = (Figure*)GetWindowLongPtr(hWnd, GWLP_USERDATA);
                 if (in_hand) {
-                    draw_figure(hdc, in_hand->get_col(), in_hand->get_type(), pos(0, 0), false);
+                    draw_figure(hdc, in_hand->get_col(), in_hand->get_type(), Pos(0, 0), false);
                 }
                 EndPaint(hWnd, &ps);
             }
@@ -406,7 +391,7 @@ void MotionInput::init_curr_choice_window(HWND hWnd) {
 void MotionInput::calculate_possible_moves() {
     all_moves.clear();
     for (const auto& [is_eat, move_pos] : board->get_all_possible_moves(in_hand)) {
-        if (in_hand->get_type() == FigureType::Type::King) {
+        if (in_hand->get_type() == FigureType(FigureType::King)) {
             if (is_eat
                 ? not board->check_for_when(in_hand->get_col(), { in_hand->get_pos(), move_pos }, move_pos)
                 : not board->check_for_when(in_hand->get_col(), { in_hand->get_pos() }, move_pos)
@@ -415,10 +400,10 @@ void MotionInput::calculate_possible_moves() {
             }
         }
         else {
-            Figure* in_hand_in_tmp = FigureFabric::instance()->submit_on(in_hand, move_pos);
+            auto in_hand_in_tmp = FigureFabric::instance()->submit_on(in_hand, move_pos);
             bool check = (is_eat
-                ? board->check_for_when(in_hand->get_col(), { in_hand->get_pos(), move_pos }, {}, { in_hand_in_tmp })
-                : board->check_for_when(in_hand->get_col(), { in_hand->get_pos() }, {}, { in_hand_in_tmp })
+                ? board->check_for_when(in_hand->get_col(), { in_hand->get_pos(), move_pos }, {}, { in_hand_in_tmp.get() })
+                : board->check_for_when(in_hand->get_col(), { in_hand->get_pos() }, {}, { in_hand_in_tmp.get() })
                 );
             if (not check) {
                 all_moves.push_back({ is_eat, move_pos });
@@ -452,7 +437,7 @@ void update_check_title(HWND hWnd) {
     }
     else if (board.check_for_when(turn)) {
         curr_text += L" [Check to ";
-        curr_text += turn == Color::Type::White ? L"White" : turn == Color::Type::Black ? L"Black" : L"None";
+        curr_text += turn == Color(Color::White) ? L"White" : turn == Color(Color::Black) ? L"Black" : L"None";
         curr_text += L"]";
     }
     SetWindowText(hWnd, curr_text.c_str());
@@ -509,9 +494,9 @@ void update_edit_menu_variables(HWND hWnd) {
         set_menu_checkbox(hWnd, menu_id, false);
     }
 
-    if (turn == Color::Type::White)
+    if (turn == Color(Color::White))
         set_menu_checkbox(hWnd, IDM_WHITE_START, true);
-    else if (turn == Color::Type::Black)
+    else if (turn == Color(Color::Black))
         set_menu_checkbox(hWnd, IDM_BLACK_START, true);
 
     if (board.get_idw() == true)

@@ -6,21 +6,21 @@ class FigureBoard {
 public:
     FigureBoard(BoardRepr);
     void reset(const BoardRepr&);
-    Figure* get_fig(pos);
+    Figure* get_fig(Pos);
     Figure* get_fig(Id);
-    bool cont_fig(pos);
-    bool is_empty(pos);
+    bool cont_fig(Pos);
+    bool is_empty(Pos);
     bool is_empty() { return figures.size() <= 1; }
     bool capture_figure(Figure*);
     bool capture_figure(const Id&);
     void uncapture_figure(const Id&);
     Figure* find_king(Color);
     std::vector<Figure*> get_figures_of(Color);
-    std::vector<std::pair<bool, pos>> expand_broom(const Figure*, const std::vector<pos>& = {}, const std::vector<pos>& = {}, const std::vector<pos>& = {});
-    std::vector<std::pair<bool, pos>> get_all_possible_moves(const Figure*, const std::vector<pos>& = {}, const std::vector<pos>& = {}, const std::vector<pos>& = {});
-    bool checkmate_for(Color, const std::vector<pos>& = {}, pos = {});
-    bool stalemate_for(Color, const std::vector<pos>& = {}, pos = {});
-    bool check_for_when(Color, const std::vector<pos>& = {}, pos = {}, const std::vector<Figure*>& = {}, const std::vector<Figure*>& = {});
+    std::vector<std::pair<bool, Pos>> expand_broom(const Figure*, const std::vector<Pos>& = {}, const std::vector<Pos>& = {}, const std::vector<Pos>& = {});
+    std::vector<std::pair<bool, Pos>> get_all_possible_moves(const Figure*, const std::vector<Pos>& = {}, const std::vector<Pos>& = {}, const std::vector<Pos>& = {});
+    bool checkmate_for(Color, const std::vector<Pos>& = {}, Pos = {});
+    bool stalemate_for(Color, const std::vector<Pos>& = {}, Pos = {});
+    bool check_for_when(Color, const std::vector<Pos>& = {}, Pos = {}, const std::vector<Figure*>& = {}, const std::vector<Figure*>& = {});
     std::variant<ErrorEvent, MoveMessage> move_check(Figure*, Input);
     std::tuple<bool, MoveMessage, Figure*, Figure*> castling_check(MoveMessage, Figure*, const Input&, int, int);
     void reset_castling(bool=true);
@@ -33,12 +33,12 @@ public:
     }
     std::list<Figure*> all_figures() {
         std::list<Figure*> tmp;
-        for (const auto [_, fig] : figures) {
+        for (const auto& [_, fig] : figures) {
             tmp.push_back(fig);
         }
         return tmp;
     }
-    void move_fig(Figure* fig, pos to) {
+    void move_fig(Figure* fig, Pos to) {
         Figure* maybe_eat = get_fig(to);
         if (not maybe_eat->empty()) {
             capture_figure(maybe_eat);
@@ -75,13 +75,13 @@ public:
         }
     }
 private:
-    using shift_broom = std::vector<std::vector<pos>>;
+    using shift_broom = std::vector<std::vector<Pos>>;
 
     bool idw{true};
 
     Id curr_id{};
     MoveLogger move_logger{};
-    std::map<pos, Figure*> figures;
+    std::map<Pos, Figure*> figures;
     std::list<Figure*> captured_figures;
     std::map<Id, bool> castling;
     std::map<FigureType, shift_broom> moves;

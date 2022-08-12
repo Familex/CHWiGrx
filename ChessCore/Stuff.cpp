@@ -110,26 +110,9 @@ Color::operator char() const {
     }
 }
 
-bool operator== (const pos& left, const pos& right) { return (left.x == right.x) and (left.y == right.y); }
-bool operator!= (const pos& left, const pos& right) { return (left.x != right.x) or (left.y != right.y); }
-pos operator-  (const pos& left, const pos& right) { return { (left.x - right.x), (left.y - right.y) }; }
-pos operator+  (const pos& left, const pos& right) { return { (left.x + right.x), (left.y + right.y) }; }
-bool operator!= (const Color& left, const Color& right) { return left.data != right.data; }
-bool operator== (const Color& left, const Color& right) { return left.data == right.data; }
-bool operator== (const Color& left, const Color::Type& right) { return left.data == right; }
-bool operator== (const Color::Type& left, const Color& right) { return left == right.data; }
-bool operator<  (const pos& left, const pos& right) {
-    if (left.x != right.x) {
-        return (left.x < right.x);
-    }
-    else {
-        return (left.y < right.y);
-    }
-}
-
 // Оставить от вектора фигур только вектор их позиций
-std::vector<pos> to_pos_vector(const std::vector<Figure*>& lst) {
-    std::vector<pos> acc{};
+std::vector<Pos> to_pos_vector(const std::vector<Figure*>& lst) {
+    std::vector<Pos> acc{};
     for (const auto& fig : lst) {
         acc.push_back(fig->get_pos());
     }
@@ -198,7 +181,7 @@ MoveRec MoveLogger::move_last_to_future() {
 bool MoveLogger::is_fifty_move_rule_was_triggered() {
     size_t without_eat_and_pawnmoves = 0;
     for (auto move{ prev_moves.rbegin() }; move != prev_moves.rend(); ++move) {
-        if (move->get_who_went()->get_type() == FigureType::Type::Pawn || move->ms.main_ev == MainEvent::EAT) {
+        if (move->get_who_went()->get_type() == FigureType(FigureType::Pawn) || move->ms.main_ev == MainEvent::EAT) {
             break;
         }
         else {
@@ -267,7 +250,7 @@ BoardRepr::BoardRepr(std::string board_repr) {
     }
     for (size_t i{}; i < tmp.size(); i += 5) {
         Id new_id =             std::stoi(tmp[i]);
-        pos new_pos =         { std::stoi(tmp[i + 1]), std::stoi(tmp[i + 2]) };
+        Pos new_pos =         { std::stoi(tmp[i + 1]), std::stoi(tmp[i + 2]) };
         Color new_col =       { tmp[i + 3][0] };
         FigureType new_type = { tmp[i + 4][0] };
         Figure* new_fig = FigureFabric::instance()->create(
@@ -284,7 +267,7 @@ BoardRepr::BoardRepr(std::string board_repr) {
     }
     for (size_t i{}; i < tmp.size(); i += 5) {
         Id new_id = std::stoi(tmp[i]);
-        pos new_pos = { std::stoi(tmp[i + 1]), std::stoi(tmp[i + 2]) };
+        Pos new_pos = { std::stoi(tmp[i + 1]), std::stoi(tmp[i + 2]) };
         Color new_col = { tmp[i + 3][0] };
         FigureType new_type = { tmp[i + 4][0] };
         Figure* new_fig = FigureFabric::instance()->create(
@@ -335,7 +318,7 @@ MoveRec::MoveRec(std::string map) {
     // Возможно нижнюю конструкцию стоит вставить в фабрику
     Id new_id = std::stoi(data[0]);
     Color new_col = data[3][0];
-    pos new_pos = { std::stoi(data[1]), std::stoi(data[2]) };
+    Pos new_pos = { std::stoi(data[1]), std::stoi(data[2]) };
     FigureType new_type = data[4][0];
     Figure* who_went_tmp = FigureFabric::instance()->create(
         new_pos, new_col, new_type, new_id
@@ -479,7 +462,7 @@ std::string to_string(MainEvent main_event) {
     }
 }
 
-Figure* FigureFabric::create(pos position, Color color, FigureType::Type type, Id id, Figure* placement) {
+Figure* FigureFabric::create(Pos position, Color color, FigureType::Type type, Id id, Figure* placement) {
     switch (type) {
         case FigureType::Type::Pawn:
             return placement
@@ -512,7 +495,7 @@ Figure* FigureFabric::create(pos position, Color color, FigureType::Type type, I
         }
 }
 
-Figure* FigureFabric::create(pos position, Color color, FigureType::Type type) {
+Figure* FigureFabric::create(Pos position, Color color, FigureType::Type type) {
     switch (type) {
     case FigureType::Type::Pawn:
         return new Figure(this->id++, position, color, FigureType::Type::Pawn);

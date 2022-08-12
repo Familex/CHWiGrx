@@ -41,8 +41,8 @@ const int HEADER_HEIGHT = GetSystemMetrics(SM_CXPADDEDBORDER) +
                           GetSystemMetrics(SM_CYFRAME);
 inline LPCTSTR CHOICE_WINDOW_CLASS_NAME = L"CHWIGRX_CHOICE";
 inline LPCTSTR CHOICE_WINDOW_TITLE = L"Pieces list";
-inline const pos CHOICE_WINDOW_DEFAULT_POS = { 300, 300 };
-inline const pos CHOICE_WINDOW_DEFAULT_DIMENTIONS = { 200, 200 };
+inline const Pos CHOICE_WINDOW_DEFAULT_POS = { 300, 300 };
+inline const Pos CHOICE_WINDOW_DEFAULT_DIMENTIONS = { 200, 200 };
 
 /* single mutable globals */
 inline WindowState window_state = WindowState::GAME;
@@ -70,15 +70,14 @@ void set_menu_checkbox(HWND, UINT, bool);
 
 std::string take_str_from_clip();
 void update_check_title(HWND);
-void on_lbutton_up(HWND, WPARAM, LPARAM, pos where_fig);
+void on_lbutton_up(HWND, WPARAM, LPARAM, Pos where_fig);
 void restart();
 void copy_repr_to_clip();
 void make_move(HWND);
-void load_pieces_bitmaps(HINSTANCE);
 bool is_legal_board_repr(const std::string&);
 
-void inline draw_figure(HDC, Color, FigureType, pos, bool = true);
-void draw_figure(HDC, Color, FigureType, pos, bool, int, int);
+void inline draw_figure(HDC, Color, FigureType, Pos, bool = true);
+void draw_figure(HDC, Color, FigureType, Pos, bool, int, int);
 void draw_board(HDC);
 void draw_figures_on_board(HDC);
 
@@ -101,7 +100,7 @@ public:
     void recalculate_cell_size() {
         cell_size = { window_size.x / WIDTH, window_size.y / HEIGHT };
     }
-    void set_window_size(pos window_size) {
+    void set_window_size(Pos window_size) {
         this->window_size = window_size;
         recalculate_cell_size();
     }
@@ -116,24 +115,24 @@ public:
     inline int get_real_width() { return window_size.y + EXTRA_WINDOW_SIZE.y; }
     inline int get_cell_height() { return cell_size.x; }
     inline int get_cell_width() { return cell_size.y; }
-    inline void set_prev_lbutton_click(pos plbc) { prev_lbutton_click = plbc; }
-    inline pos get_prev_lbutton_click() { return prev_lbutton_click; }
-    inline void set_window_pos(pos wp) { window_pos = wp; }
+    inline void set_prev_lbutton_click(Pos plbc) { prev_lbutton_click = plbc; }
+    inline Pos get_prev_lbutton_click() { return prev_lbutton_click; }
+    inline void set_window_pos(Pos wp) { window_pos = wp; }
     inline void set_window_pos(int x, int y) { window_pos.x = x; window_pos.y = y; }
     inline int get_window_pos_x() { return window_pos.x; }
     inline int get_window_pos_y() { return window_pos.y; }
-    inline bool is_mouse_moved_enough(pos mouse) {
+    inline bool is_mouse_moved_enough(Pos mouse) {
         /* не используется */
-        pos shift = { abs(mouse.x - prev_lbutton_click.x),
+        Pos shift = { abs(mouse.x - prev_lbutton_click.x),
                       abs(mouse.y - prev_lbutton_click.y)
         };
         return shift.x >= UNITS_TO_MOVE_ENOUGH &&
                shift.y >= UNITS_TO_MOVE_ENOUGH;
     }
-    inline pos divide_by_cell_size(int x, int y) {
+    inline Pos divide_by_cell_size(int x, int y) {
         return {x / cell_size.x, y / cell_size.y};
     }
-    inline RECT get_cell(pos start) {
+    inline RECT get_cell(Pos start) {
         return {
             start.y * cell_size.y + INDENTATION_FROM_EDGES,
             start.x * cell_size.x + INDENTATION_FROM_EDGES,
@@ -144,11 +143,11 @@ public:
     inline RECT get_cell(int i, int j) { return get_cell({ i, j }); }
 private:
     const int UNITS_TO_MOVE_ENOUGH = { 2 };
-    const pos EXTRA_WINDOW_SIZE = { 59, 16 };
-    pos window_pos{ 300, 300 };
-    pos prev_lbutton_click{};
-    pos window_size = { 498, 498 };
-    pos cell_size = { window_size.x / WIDTH, window_size.y / HEIGHT };
+    const Pos EXTRA_WINDOW_SIZE = { 59, 16 };
+    Pos window_pos{ 300, 300 };
+    Pos prev_lbutton_click{};
+    Pos window_size = { 498, 498 };
+    Pos cell_size = { window_size.x / WIDTH, window_size.y / HEIGHT };
     const int INDENTATION_FROM_EDGES{ 0 };
 };
 
@@ -165,9 +164,9 @@ public:
     inline void toggle_pair_input() { input_order_by_two = !input_order_by_two; }
     inline void activate_pair() { input_order_by_two = true; }
     inline void reset_single() { input_order_by_one = false; }
-    inline void set_target(pos target) { input.target = target; }
+    inline void set_target(Pos target) { input.target = target; }
     inline void set_target(int x, int y) { input.target = {x, y}; }
-    inline void set_from(pos from) { input.from = from; }
+    inline void set_from(Pos from) { input.from = from; }
     inline bool target_at_input() { return input.from == input.target; }
     inline void reset_lbutton_down() { is_lbutton_down = false; }
     inline void set_lbutton_down() { is_lbutton_down = true; }
@@ -175,8 +174,8 @@ public:
     inline bool is_current_turn(Color turn) { return in_hand->is_col(turn); }
     inline auto get_in_hand() { return in_hand; }
     inline auto get_input() { return input; }
-    inline void shift_from(pos shift, int max_x, int max_y) { input.from.loop_add(shift, max_x, max_y); }
-    inline void shift_target(pos shift, int max_x, int max_y) { input.target.loop_add(shift, max_x, max_y); }
+    inline void shift_from(Pos shift, int max_x, int max_y) { input.from.loop_add(shift, max_x, max_y); }
+    inline void shift_target(Pos shift, int max_x, int max_y) { input.target.loop_add(shift, max_x, max_y); }
     inline void next_single() { ++input_order_by_one; }
     inline void set_from_x(int val) { input.from.x = val; }
     inline void set_from_y(int val) { input.from.y = val; }
@@ -192,7 +191,7 @@ public:
     }
 private:
     FigureBoard* board;
-    const pos DEFAULT_INPUT_FROM{ 0, -1 };
+    const Pos DEFAULT_INPUT_FROM{ 0, -1 };
     Input input{ DEFAULT_INPUT_FROM, {-1, -1} };
     int  input_order_by_one{ 0 };
     bool input_order_by_two{ false };
@@ -200,7 +199,7 @@ private:
     HWND curr_chose_window{};
     bool is_curr_choice_moving{ false };
     Figure* in_hand = board->get_default_fig();
-    std::list<std::pair<bool, pos>> all_moves{};
+    std::list<std::pair<bool, Pos>> all_moves{};
 };
 
 inline MotionInput motion_input{&board};
