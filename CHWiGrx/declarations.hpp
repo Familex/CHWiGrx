@@ -5,7 +5,6 @@
 #include "../ChessCore/FigureBoard.h"
 
 // #define ALLOCATE_CONSOLE
-// #define NDEBUG
 
 #ifdef ALLOCATE_CONSOLE
 #include <stdio.h>
@@ -43,6 +42,9 @@ inline LPCTSTR CHOICE_WINDOW_CLASS_NAME = L"CHWIGRX_CHOICE";
 inline LPCTSTR CHOICE_WINDOW_TITLE = L"Pieces list";
 inline const Pos CHOICE_WINDOW_DEFAULT_POS = { 300, 300 };
 inline const Pos CHOICE_WINDOW_DEFAULT_DIMENTIONS = { 200, 200 };
+inline constexpr auto MAIN_WINDOW_CHOICE_TIMER_ID = 1;
+inline constexpr auto FIGURES_LIST_CHOICE_TIMER_ID = 2;
+inline constexpr auto TO_DESTROY_ELAPSE_DEFAULT_IN_MS = 5;
 
 /* single mutable globals */
 inline WindowState window_state = WindowState::GAME;
@@ -160,13 +162,14 @@ public:
     void clear();
     void prepare(Color turn);
     void calculate_possible_moves();
-    void init_curr_choice_window(HWND hWnd);
+    void init_curr_choice_window(HWND, WNDPROC);
     inline void activate_by_click() { input_order_by_two = true; }
     inline void deactivate_by_click() { input_order_by_two = false; }
     inline void deactivate_by_pos() { input_order_by_one = false; }
     inline void set_target(Pos target) { input.target = target; }
     inline void set_target(int x, int y) { input.target = {x, y}; }
     inline void set_from(Pos from) { input.from = from; }
+    inline void set_in_hand(Figure* in_hand) { this->in_hand = in_hand; }
     inline bool is_target_at_input() { return input.from == input.target; }
     inline void set_lbutton_up() { is_lbutton_down = false; }
     inline void set_lbutton_down() { is_lbutton_down = true; }

@@ -77,7 +77,7 @@ public:
     bool operator ==(const Figure& r) const { return this->id == r.id; }
     std::string as_string() {
         return std::format("{}.{}.{}.{}.{}",
-            id, position.x, position.y, (char)color, (char)type);
+            id, position.x, position.y, col_to_char(color), figure_type_to_char(type));
     }
     Id get_id() const { return id; }
     Pos get_pos() const { return position; }
@@ -88,6 +88,7 @@ public:
     bool empty() const { return id == ERR_ID; }
     bool is(Id id) const { return this->id == id; }
     bool at(Pos p) const { return position == p; }
+
 private:
     Id id{ ERR_ID };
     Pos position{};
@@ -124,7 +125,7 @@ public:
 
     Figure* create(Pos, Color, FigureType);
     Figure* create(Pos, Color, FigureType, Id, Figure* =nullptr);
-    Figure* create(Figure*);
+    Figure* create(Figure*, bool=true);
     Figure* get_default_fig();
     std::unique_ptr<Figure> submit_on(Figure* who, Pos on) {
         std::unique_ptr<Figure> tmp(FigureFabric::instance()->create(who));

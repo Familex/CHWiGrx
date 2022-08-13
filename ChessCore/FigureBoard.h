@@ -14,6 +14,8 @@ public:
     bool capture_figure(Figure*);
     bool capture_figure(const Id&);
     void uncapture_figure(const Id&);
+    void delete_fig(Pos);
+    void place_fig(Figure*);
     Figure* find_king(Color);
     std::vector<Figure*> get_figures_of(Color);
     std::vector<std::pair<bool, Pos>> expand_broom(const Figure*, const std::vector<Pos>& = {}, const std::vector<Pos>& = {}, const std::vector<Pos>& = {});
@@ -114,3 +116,5 @@ std::pair<bool, MoveRec> FigureBoard::provide_move(Figure* in_hand, const Input&
 
     return { true, curr_move };
 }
+
+bool is_valid_coords(Pos);

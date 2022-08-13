@@ -313,62 +313,14 @@ void set_menu_checkbox(HWND hWnd, UINT menu_item, bool state) {
     SetMenuItemInfoW(hMenu, menu_item, FALSE, &item_info);
 }
 
-// Создаёт окно в выбранной фигурой и привязывает к мыши
-void MotionInput::init_curr_choice_window(HWND hWnd) {
+// Создаёт окно c выбранной фигурой и привязывает к мыши
+void MotionInput::init_curr_choice_window(HWND hWnd, WNDPROC callback) {
     is_curr_choice_moving = true;
     POINT mouse{};
     GetCursorPos(&mouse);
-    curr_chose_window = create_curr_choice_window(hWnd, in_hand, mouse, window_stats.get_cell_width(), window_stats.get_cell_height(),
-        [](HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
-            static const int TO_DESTROY_TIMER_ID{ 99 }; // не могу захватить из вне
-            static const int TO_DESTROY_ELAPSE{ 5 };    // да и не надо так-то
-            switch (uMsg) {
-            case WM_CREATE:
-                SetTimer(hWnd, TO_DESTROY_TIMER_ID, TO_DESTROY_ELAPSE, NULL);
-                break;
-            case WM_TIMER:
-                if (wParam == TO_DESTROY_TIMER_ID) {
-                    KillTimer(hWnd, TO_DESTROY_TIMER_ID);
-                    SendMessage(hWnd, WM_EXITSIZEMOVE, NULL, NULL);
-                }
-                break;
-            case WM_ENTERSIZEMOVE:
-                KillTimer(hWnd, TO_DESTROY_TIMER_ID);
-                break;
-            case WM_EXITSIZEMOVE: // Фигуру отпустил
-            {
-                HWND parent = GetParent(hWnd);
-                POINT cur_pos{};
-                GetCursorPos(&cur_pos);
-                RECT parent_window;
-                GetWindowRect(parent, &parent_window);
-                Pos where_fig = window_stats.divide_by_cell_size(
-                    (cur_pos.y - parent_window.top - HEADER_HEIGHT),
-                    (cur_pos.x - parent_window.left)
-                );
-                on_lbutton_up(parent, wParam, lParam, where_fig);
-                InvalidateRect(parent, NULL, NULL);
-                DestroyWindow(hWnd);
-            }
-            break;
-            case WM_NCHITTEST:  // При перехвате нажатий мыши симулируем перетаскивание
-                return (LRESULT)HTCAPTION;
-            case WM_PAINT:
-            {
-                PAINTSTRUCT ps;
-                HDC hdc = BeginPaint(hWnd, &ps);
-                Figure* in_hand = (Figure*)GetWindowLongPtr(hWnd, GWLP_USERDATA);
-                if (in_hand) {
-                    draw_figure(hdc, in_hand->get_col(), in_hand->get_type(), Pos(0, 0), false);
-                }
-                EndPaint(hWnd, &ps);
-            }
-            break;
-            default:
-                return DefWindowProc(hWnd, uMsg, wParam, lParam);
-            }
-            return static_cast<LRESULT>(0);
-        });
+    curr_chose_window = create_curr_choice_window(hWnd, in_hand, mouse,
+        window_stats.get_cell_width(), window_stats.get_cell_height(),
+        callback);
     InvalidateRect(hWnd, NULL, NULL);
     SendMessage(curr_chose_window, WM_NCLBUTTONDOWN, HTCAPTION, MAKELPARAM(mouse.x, mouse.y));
 }

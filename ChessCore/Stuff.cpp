@@ -381,7 +381,7 @@ std::string BoardRepr::as_string() {
     std::string result{ "" };
     for (auto& fig : figures) {
         result += std::format("{};{};{};{};{};",
-            fig->get_id(), fig->get_pos().x, fig->get_pos().y, (char)fig->get_col(), (char)fig->get_type()
+            fig->get_id(), fig->get_pos().x, fig->get_pos().y, col_to_char(fig->get_col()), figure_type_to_char(fig->get_type())
         );
     }
     result += std::format("[{}{}", get_idw_char(), get_turn_char());
@@ -399,7 +399,7 @@ std::string BoardRepr::as_string() {
     result += ">~";
     for (auto& fig : captured_figures) {
         result += std::format("{},{},{},{},{},",
-            fig->get_id(), fig->get_pos().x, fig->get_pos().y, (char)fig->get_col(), (char)fig->get_type()
+            fig->get_id(), fig->get_pos().x, fig->get_pos().y, col_to_char(fig->get_col()), figure_type_to_char(fig->get_type())
         );
     }
     return result;
@@ -502,12 +502,12 @@ Figure* FigureFabric::get_default_fig() {
     return DEFAULT;
 }
 
-Figure* FigureFabric::create(Figure* to_copy) {
+Figure* FigureFabric::create(Figure* to_copy, bool is_id_will_be_copied) {
     if (to_copy->empty()) return DEFAULT;
     return create(
         to_copy->get_pos(),
         to_copy->get_col(),
         to_copy->get_type(),
-        to_copy->get_id()
+        is_id_will_be_copied ? to_copy->get_id() : this->id++
     );
 }

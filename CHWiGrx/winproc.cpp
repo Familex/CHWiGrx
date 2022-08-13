@@ -238,7 +238,55 @@ LRESULT mainproc::game_switch(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPa
                 motion_input.clear();
             }
             else {
-                motion_input.init_curr_choice_window(hWnd);
+                motion_input.init_curr_choice_window(hWnd, [](HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
+                    static const int TO_DESTROY_TIMER_ID{ MAIN_WINDOW_CHOICE_TIMER_ID }; 
+                    switch (uMsg) {
+                    case WM_CREATE:
+                        SetTimer(hWnd, TO_DESTROY_TIMER_ID, TO_DESTROY_ELAPSE_DEFAULT_IN_MS, NULL);
+                        break;
+                    case WM_TIMER:
+                        if (wParam == TO_DESTROY_TIMER_ID) {
+                            KillTimer(hWnd, TO_DESTROY_TIMER_ID);
+                            SendMessage(hWnd, WM_EXITSIZEMOVE, NULL, NULL);
+                        }
+                        break;
+                    case WM_ENTERSIZEMOVE:
+                        KillTimer(hWnd, TO_DESTROY_TIMER_ID);
+                        break;
+                    case WM_EXITSIZEMOVE: // Фигуру отпустил
+                    {
+                        HWND parent = GetParent(hWnd);
+                        POINT cur_pos{};
+                        GetCursorPos(&cur_pos);
+                        RECT parent_window;
+                        GetWindowRect(parent, &parent_window);
+                        Pos where_fig = window_stats.divide_by_cell_size(
+                            (cur_pos.y - parent_window.top - HEADER_HEIGHT),
+                            (cur_pos.x - parent_window.left)
+                        );
+                        on_lbutton_up(parent, wParam, lParam, where_fig);
+                        InvalidateRect(parent, NULL, NULL);
+                        DestroyWindow(hWnd);
+                    }
+                    break;
+                    case WM_NCHITTEST:  // При перехвате нажатий мыши симулируем перетаскивание
+                        return (LRESULT)HTCAPTION;
+                    case WM_PAINT:
+                    {
+                        PAINTSTRUCT ps;
+                        HDC hdc = BeginPaint(hWnd, &ps);
+                        Figure* in_hand = (Figure*)GetWindowLongPtr(hWnd, GWLP_USERDATA);
+                        if (in_hand) {
+                            draw_figure(hdc, in_hand->get_col(), in_hand->get_type(), Pos(0, 0), false);
+                        }
+                        EndPaint(hWnd, &ps);
+                    }
+                    break;
+                    default:
+                        return DefWindowProc(hWnd, uMsg, wParam, lParam);
+                    }
+                    return static_cast<LRESULT>(0);
+                    });
             }
         }
         break;
@@ -259,8 +307,8 @@ LRESULT mainproc::game_switch(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPa
 
         draw_board(hdcMem);
 
+        /* Возможные ходы текущей фигуры */
         {
-            /* Возможные ходы текущей фигуры */
             for (const auto& [is_eat, move_pos] : motion_input.get_possible_moves()) {
                 static const HBRUSH GREEN{ CreateSolidBrush(RGB(0, 255, 0)) };
                 static const HBRUSH DARK_GREEN{ CreateSolidBrush(RGB(0, 150, 0)) };
@@ -274,8 +322,8 @@ LRESULT mainproc::game_switch(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPa
             }
         }
 
+        /* Положение курсора и выделенной клетки */
         {
-            /* Положение курсора и выделенной клетки */
             static const HBRUSH RED{ CreateSolidBrush(RGB(255, 0, 0)) };
             static const HBRUSH BLUE{ CreateSolidBrush(RGB(0, 0, 255)) };
             const RECT from_cell = window_stats.get_cell(input.from);
@@ -415,7 +463,6 @@ LRESULT mainproc::edit_switch(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPa
 LRESULT CALLBACK choice_window_proc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) {
     
     SCROLLINFO si{.cbSize=sizeof(SCROLLINFO)};
-
     static PAINTSTRUCT ps;
     static HBITMAP hbmMem;
     static HGDIOBJ hOld;
@@ -438,7 +485,7 @@ LRESULT CALLBACK choice_window_proc(HWND hWnd, UINT message, WPARAM wParam, LPAR
 
             for (char type : ALL_FIGURES) {
                 unique_figures.push_back(
-                    FigureFabric::instance()->create({}, Color::White, FigureType(type))
+                    FigureFabric::instance()->create({}, Color::White, char_to_figure_type(type))
                 );
             }
 
@@ -629,6 +676,87 @@ LRESULT CALLBACK choice_window_proc(HWND hWnd, UINT message, WPARAM wParam, LPAR
             DeleteObject(hbmMem);
             DeleteDC(hdcMem);
             EndPaint(hWnd, &ps);
+        }
+            break;
+        case WM_LBUTTONDOWN:
+        {
+            motion_input.set_lbutton_down();
+            Pos figure_to_drag = {
+                (LOWORD(lParam)) / static_cast<int>(figures_cell_lenght),
+                (HIWORD(lParam) + curr_scroll) / static_cast<int>(figures_cell_lenght)
+            };
+            size_t index = figure_to_drag.y * figures_in_row + figure_to_drag.x;
+            motion_input.set_in_hand(FigureFabric::instance()->create(unique_figures[index], false));
+        }
+            break;
+        case WM_MOUSEMOVE:
+        {
+            if (motion_input.is_drags()) {
+                motion_input.init_curr_choice_window(hWnd,
+                    [](HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
+                        // выбранная фигура временная => удаляется при закрытии окна
+                        static const int TO_DESTROY_TIMER_ID{ FIGURES_LIST_CHOICE_TIMER_ID };
+                        switch (uMsg) {
+                        case WM_CREATE:
+                            SetTimer(hWnd, TO_DESTROY_TIMER_ID, TO_DESTROY_ELAPSE_DEFAULT_IN_MS, NULL);
+                            break;
+                        case WM_TIMER:
+                            if (wParam == TO_DESTROY_TIMER_ID) {
+                                KillTimer(hWnd, TO_DESTROY_TIMER_ID);
+                                SendMessage(hWnd, WM_EXITSIZEMOVE, NULL, NULL);
+                            }
+                            break;
+                        case WM_ENTERSIZEMOVE:
+                            KillTimer(hWnd, TO_DESTROY_TIMER_ID);
+                            break;
+                        case WM_EXITSIZEMOVE: // Фигуру отпустил
+                        {
+                            HWND hmain_window = GetWindow(GetParent(hWnd), GW_OWNER);
+                            POINT cur_pos{};
+                            GetCursorPos(&cur_pos);
+                            RECT main_window;
+                            GetWindowRect(hmain_window, &main_window);
+                            RECT figures_list;
+                            GetWindowRect(GetParent(hWnd), &figures_list);
+                            Pos where_fig = window_stats.divide_by_cell_size(
+                                (cur_pos.y - main_window.top - HEADER_HEIGHT),
+                                (cur_pos.x - main_window.left)
+                            );
+                            if (is_valid_coords(where_fig) &&
+                                !(figures_list.top <= cur_pos.y && cur_pos.y <= figures_list.bottom &&
+                                    figures_list.left <= cur_pos.x && cur_pos.x <= figures_list.right)) {
+                                auto to_place = reinterpret_cast<Figure*>(GetWindowLongPtr(hWnd, GWLP_USERDATA));
+                                to_place->move_to(where_fig);
+                                board.place_fig(to_place);
+                                InvalidateRect(hmain_window, NULL, NULL);
+                            }
+                            else {
+                                delete reinterpret_cast<Figure*>(GetWindowLongPtr(hWnd, GWLP_USERDATA));
+                            }
+                            motion_input.set_in_hand(FigureFabric::instance()->get_default_fig());
+                            motion_input.clear();
+                            DestroyWindow(hWnd);
+                        }
+                        break;
+                        case WM_NCHITTEST:  // При перехвате нажатий мыши симулируем перетаскивание
+                            return (LRESULT)HTCAPTION;
+                        case WM_PAINT:
+                        {
+                            PAINTSTRUCT ps;
+                            HDC hdc = BeginPaint(hWnd, &ps);
+                            Figure* in_hand = (Figure*)GetWindowLongPtr(hWnd, GWLP_USERDATA);
+                            if (in_hand) {
+                                draw_figure(hdc, in_hand->get_col(), in_hand->get_type(), Pos(0, 0), false);
+                            }
+                            EndPaint(hWnd, &ps);
+                        }
+                        break;
+                        default:
+                            return DefWindowProc(hWnd, uMsg, wParam, lParam);
+                        }
+                        return static_cast<LRESULT>(0);
+                    });
+            }
         }
             break;
         case WM_DESTROY:

@@ -94,12 +94,13 @@ void FigureBoard::apply_map(const BoardRepr& board_repr) {
 /// <param name="save_all_moves">нужно сохранять все ходы из истории или только последний</param>
 /// <returns>Репрезентация новой доски</returns>
 BoardRepr FigureBoard::get_repr(bool save_all_moves) {
+    // Конструируется строка, а потом парсится?! TODO
     std::string map = "";
     std::vector<MoveRec> past{};
     std::vector<MoveRec> future{};
     for (auto& [position, fig] : figures) {
         map += std::format("{};{};{};{};{};",
-            fig->get_id(), position.x, position.y, (char)fig->get_col(), (char)fig->get_type()
+            fig->get_id(), position.x, position.y, col_to_char(fig->get_col()), figure_type_to_char(fig->get_type())
         );
     }
     map += (idw ? "[t]" : "[f]");
@@ -122,7 +123,7 @@ BoardRepr FigureBoard::get_repr(bool save_all_moves) {
     map += ">~";
     for (auto& fig : captured_figures) {
         map += std::format("{},{},{},{},{},",
-            fig->get_id(), fig->get_pos().x, fig->get_pos().y, (char)fig->get_col(), (char)fig->get_type()
+            fig->get_id(), fig->get_pos().x, fig->get_pos().y, col_to_char(fig->get_col()), figure_type_to_char(fig->get_type())
         );
     }
     return map;
@@ -213,6 +214,17 @@ bool FigureBoard::capture_figure(const Id& id) {
     captured_figures.push_back(fig);
     figures.erase(fig->get_pos());
     return true;
+}
+
+void FigureBoard::delete_fig(Pos pos) {
+    delete figures[pos];
+    figures.erase(pos);
+}
+
+void FigureBoard::place_fig(Figure* fig) {
+    if (fig->empty()) throw std::logic_error("trying to place empty figure");
+    if (cont_fig(fig->get_pos())) delete_fig(fig->get_pos());
+    figures[fig->get_pos()] = fig;
 }
 
 bool is_valid_coords(Pos position) {
