@@ -544,6 +544,7 @@ LRESULT CALLBACK choice_window_proc(HWND hWnd, UINT message, WPARAM wParam, LPAR
             si.nPage = rect.bottom - rect.top;
             SetScrollInfo(hWnd, SB_VERT, &si, TRUE);
 
+            SetWindowPos(hWnd, NULL, NULL, NULL, rect.right - rect.left, rect.bottom - rect.top, SWP_NOMOVE);
         }
             InvalidateRect(hWnd, NULL, NULL);
             break;
