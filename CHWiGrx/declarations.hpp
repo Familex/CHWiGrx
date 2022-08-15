@@ -38,10 +38,11 @@ const int HEADER_HEIGHT = GetSystemMetrics(SM_CXPADDEDBORDER) +
                           GetSystemMetrics(SM_CYMENUSIZE)     +
                           GetSystemMetrics(SM_CYCAPTION)      +
                           GetSystemMetrics(SM_CYFRAME);
-inline LPCTSTR CHOICE_WINDOW_CLASS_NAME = L"CHWIGRX_CHOICE";
-inline LPCTSTR CHOICE_WINDOW_TITLE = L"Pieces list";
-inline const Pos CHOICE_WINDOW_DEFAULT_POS = { 300, 300 };
-inline const Pos CHOICE_WINDOW_DEFAULT_DIMENTIONS = { 200, 200 };
+inline const LPCTSTR FIGURES_LIST_WINDOW_CLASS_NAME = L"CHWIGRX:LIST";
+inline const LPCTSTR FIGURES_LIST_WINDOW_TITLE = L"Figures list";
+inline const LPCTSTR CURR_CHOICE_WINDOW_CLASS_NAME = L"CHWIGRX:CHOICE";
+inline const Pos FIGURES_LIST_WINDOW_DEFAULT_POS = { 300, 300 };
+inline const Pos FIGURES_LIST_WINDOW_DEFAULT_DIMENTIONS = { 200, 200 };
 inline constexpr auto MAIN_WINDOW_CHOICE_TIMER_ID = 1;
 inline constexpr auto FIGURES_LIST_CHOICE_TIMER_ID = 2;
 inline constexpr auto TO_DESTROY_ELAPSE_DEFAULT_IN_MS = 5;
@@ -56,18 +57,18 @@ inline std::map<char, std::map<char, HBITMAP>> pieces_bitmaps;
 inline bool save_all_moves = true;
 inline HBRUSH CHECKERBOARD_ONE = CHECKERBOARD_DARK;
 inline HBRUSH CHECKERBOARD_TWO = CHECKERBOARD_BRIGHT;
-inline HWND choice_window = NULL;
+inline HWND figures_list_window = NULL;
 
 /* misc functions */
 bool init_instance(HINSTANCE, LPTSTR, LPTSTR, int);
 INT_PTR CALLBACK about_proc(HWND, UINT, WPARAM, LPARAM);
 void cpy_str_to_clip(const std::string&);
-HWND create_curr_choice_window(HWND, Figure*, POINT, int, int, const WNDPROC, LPCWSTR = L"Chosen figure");
+HWND create_curr_choice_window(HWND, Figure*, POINT, int, int, const WNDPROC);
 bool prepare_window(HINSTANCE, int, UINT, UINT, WNDCLASSEX);
 int window_loop(HINSTANCE);
 void change_checkerboard_color_theme(HWND);
 void update_edit_menu_variables(HWND);
-HWND create_choice_window(HWND);
+HWND create_figures_list_window(HWND);
 void set_menu_checkbox(HWND, UINT, bool);
 
 std::string take_str_from_clip();
@@ -92,29 +93,31 @@ inline void Rectangle(HDC hdc, RECT rect) { Rectangle(hdc, rect.left, rect.top, 
 
 /* WINPROC functions */
 LRESULT CALLBACK main_window_proc(HWND, UINT, WPARAM, LPARAM);
-LRESULT CALLBACK choice_window_proc(HWND, UINT, WPARAM, LPARAM);
+LRESULT CALLBACK figures_list_window_proc(HWND, UINT, WPARAM, LPARAM);
+LRESULT CALLBACK curr_choice_window_callback_game_mode(HWND, UINT, WPARAM, LPARAM);
+LRESULT CALLBACK curr_choice_window_callback_figures_list(HWND, UINT, WPARAM, LPARAM);
 
 class WindowStats {
     /* Габариты окна для отрисовки и захвата ввода */
     /*  x-axis from left to right  (→)  **
     **  y-axis from top  to bottom (↓)  */
 public:
-    void recalculate_cell_size() {
+    WindowStats(Pos window_pos, Pos window_size) : window_pos(window_pos), window_size(window_size) {};
+    void virtual recalculate_cell_size() {
         cell_size = { window_size.x / WIDTH, window_size.y / HEIGHT };
     }
-    void set_window_size(Pos window_size) {
-        this->window_size = window_size;
-        recalculate_cell_size();
-    }
-    void set_window_size(int x, int y) {
+    void virtual set_window_size(int x /* HIWORD */, int y /* LOWORD */) {
         this->window_size.x = x;
         this->window_size.y = y;
         recalculate_cell_size();
     }
-    inline int get_window_height() { return window_size.x; }
-    inline int get_window_width() { return window_size.y; }
-    inline int get_real_height() { return window_size.x + EXTRA_WINDOW_SIZE.x; }
-    inline int get_real_width() { return window_size.y + EXTRA_WINDOW_SIZE.y; }
+    void set_window_size(Pos window_size) {
+        set_window_size(window_size.x, window_size.y);
+    }
+    inline int get_height() { return window_size.x; }
+    inline int get_width() { return window_size.y; }
+    inline int get_height_with_extra() { return window_size.x + EXTRA_WINDOW_SIZE.x; }
+    inline int get_width_with_extra() { return window_size.y + EXTRA_WINDOW_SIZE.y; }
     inline int get_cell_height() { return cell_size.x; }
     inline int get_cell_width() { return cell_size.y; }
     inline void set_prev_lbutton_click(Pos plbc) { prev_lbutton_click = plbc; }
@@ -143,17 +146,69 @@ public:
         };
     }
     inline RECT get_cell(int i, int j) { return get_cell({ i, j }); }
-private:
+    virtual ~WindowStats() {};
+protected:
     const int UNITS_TO_MOVE_ENOUGH = { 2 };
     const Pos EXTRA_WINDOW_SIZE = { 59, 16 };
-    Pos window_pos{ 300, 300 };
+    Pos window_pos;
     Pos prev_lbutton_click{};
-    Pos window_size = { 498, 498 };
+    Pos window_size;
     Pos cell_size = { window_size.x / WIDTH, window_size.y / HEIGHT };
     const int INDENTATION_FROM_EDGES{ 0 };
 };
 
-inline WindowStats window_stats{};
+inline WindowStats main_window{ { 300, 300 }, { 498, 498 } };
+
+class FiguresListStats : public WindowStats {
+public:
+    FiguresListStats(Pos window_pos, Pos window_size, size_t figures_in_row, size_t figures_num)
+        : WindowStats(window_pos, window_size), figures_in_row(figures_in_row) {
+        int rows_num = static_cast<int>(ceil(figures_num / static_cast<double>(figures_in_row)));
+        total_height_of_all_figures = static_cast<int>(rows_num * cell_size.x);
+    }
+    void set_window_size(int h, int w) override {
+        WindowStats::set_window_size(h, w);
+        recalculate_dimensions();
+    }
+    void recalculate_cell_size() override {
+        cell_size.x = static_cast<int>(std::max(0, window_size.y) / figures_in_row);
+        cell_size.y = cell_size.x;
+    }
+    void recalculate_dimensions() {
+        recalculate_cell_size();
+        int rows_num = static_cast<int>(ceil(MAX_FIGURES_IN_ROW / static_cast<double>(figures_in_row)));
+        total_height_of_all_figures = static_cast<int>(rows_num * cell_size.x);
+        max_scroll = std::max(static_cast<int>(total_height_of_all_figures), window_size.x);
+    }
+    inline size_t get_figures_in_row() const { return figures_in_row; }
+    inline void inc_figures_in_row() { if (figures_in_row < MAX_FIGURES_IN_ROW) figures_in_row++; }
+    inline void dec_figures_in_row() { if (figures_in_row != 1) figures_in_row--; }
+    inline size_t get_max_scroll() const { return max_scroll; }
+    // returns delta
+    inline int add_to_curr_scroll(int val) {
+        int old_scroll = curr_scroll;
+        curr_scroll = std::min(static_cast<int>(max_scroll), std::max(0, curr_scroll + val));
+        return curr_scroll - old_scroll;
+    }
+    inline int get_curr_scroll() const { return curr_scroll; }
+    inline int set_curr_scroll(int new_scroll) {
+        int delta = new_scroll - curr_scroll;
+        curr_scroll = new_scroll;
+        return delta;
+    }
+    inline size_t get_all_figures_height() const { return total_height_of_all_figures; }
+private:
+    size_t figures_in_row{ 2 };
+    size_t MAX_FIGURES_IN_ROW{ ALL_FIGURES.size() };
+    int curr_scroll{ 0 };
+    size_t max_scroll{ 0 };
+    long total_height_of_all_figures;
+};
+
+inline FiguresListStats figures_list{
+    FIGURES_LIST_WINDOW_DEFAULT_POS, FIGURES_LIST_WINDOW_DEFAULT_DIMENTIONS,
+    2, ALL_FIGURES.size()
+};
 
 /* Текущее состояние ввода */
 class MotionInput {

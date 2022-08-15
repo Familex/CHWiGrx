@@ -405,7 +405,7 @@ std::string BoardRepr::as_string() {
     return result;
 }
 
-// Преобразование в строку
+// Преобразование в строку (только один символ)
 std::string to_string(SideEvent side_event) {
     switch (side_event)
     {
@@ -422,7 +422,7 @@ std::string to_string(SideEvent side_event) {
     }
 }
 
-// Преобразование в строку
+// Преобразование в строку (только один символ)
 std::string to_string(MainEvent main_event) {
     switch (main_event)
     {

@@ -12,8 +12,7 @@ LRESULT CALLBACK main_window_proc(HWND hWnd, UINT message, WPARAM wParam, LPARAM
         case WindowState::EDIT:
             return mainproc::edit_switch(hWnd, message, wParam, lParam, ps, hbmMem, hOld, hdcMem, hdc);
         default:
-            assert(false);
-            break;
+            throw std::logic_error("Unexpected main window state: " + std::to_string(static_cast<int>(window_state)));
     }
     return static_cast<LRESULT>(0);
 }
@@ -117,7 +116,7 @@ LRESULT mainproc::game_switch(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPa
             motion_input.clear();
             update_edit_menu_variables(hWnd);
             change_checkerboard_color_theme(hWnd);
-            choice_window = create_choice_window(hWnd);
+            figures_list_window = create_figures_list_window(hWnd);
         }
             break;
         case IDM_ABOUT:
@@ -211,14 +210,14 @@ LRESULT mainproc::game_switch(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPa
     case WM_LBUTTONDOWN:
     {
         motion_input.set_lbutton_down();
-        window_stats.set_prev_lbutton_click({ HIWORD(lParam), LOWORD(lParam) });
+        main_window.set_prev_lbutton_click({ HIWORD(lParam), LOWORD(lParam) });
         motion_input.deactivate_by_pos();
         if (motion_input.is_active_by_click()) {
-            motion_input.set_target(window_stats.divide_by_cell_size(HIWORD(lParam), LOWORD(lParam)));
+            motion_input.set_target(main_window.divide_by_cell_size(HIWORD(lParam), LOWORD(lParam)));
             InvalidateRect(hWnd, NULL, NULL);
             return 0;
         }
-        Pos from = window_stats.divide_by_cell_size(HIWORD(lParam), LOWORD(lParam));
+        Pos from = main_window.divide_by_cell_size(HIWORD(lParam), LOWORD(lParam));
         if (board.cont_fig(from)) {
             motion_input.set_from(from);
             motion_input.prepare(turn);
@@ -227,10 +226,10 @@ LRESULT mainproc::game_switch(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPa
     }
     break;
     case WM_LBUTTONUP:
-        on_lbutton_up(hWnd, wParam, lParam, window_stats.divide_by_cell_size(HIWORD(lParam), LOWORD(lParam)));
+        on_lbutton_up(hWnd, wParam, lParam, main_window.divide_by_cell_size(HIWORD(lParam), LOWORD(lParam)));
         break;
     case WM_MOVE:
-        window_stats.set_window_pos(LOWORD(lParam), HIWORD(lParam));
+        main_window.set_window_pos(LOWORD(lParam), HIWORD(lParam));
         break;
     case WM_MOUSEMOVE:
         if (motion_input.is_drags()) {
@@ -238,60 +237,13 @@ LRESULT mainproc::game_switch(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPa
                 motion_input.clear();
             }
             else {
-                motion_input.init_curr_choice_window(hWnd, [](HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
-                    static const int TO_DESTROY_TIMER_ID{ MAIN_WINDOW_CHOICE_TIMER_ID }; 
-                    switch (uMsg) {
-                    case WM_CREATE:
-                        SetTimer(hWnd, TO_DESTROY_TIMER_ID, TO_DESTROY_ELAPSE_DEFAULT_IN_MS, NULL);
-                        break;
-                    case WM_TIMER:
-                        if (wParam == TO_DESTROY_TIMER_ID) {
-                            KillTimer(hWnd, TO_DESTROY_TIMER_ID);
-                            SendMessage(hWnd, WM_EXITSIZEMOVE, NULL, NULL);
-                        }
-                        break;
-                    case WM_ENTERSIZEMOVE:
-                        KillTimer(hWnd, TO_DESTROY_TIMER_ID);
-                        break;
-                    case WM_EXITSIZEMOVE: // Фигуру отпустил
-                    {
-                        HWND parent = GetParent(hWnd);
-                        POINT cur_pos{};
-                        GetCursorPos(&cur_pos);
-                        RECT parent_window;
-                        GetWindowRect(parent, &parent_window);
-                        Pos where_fig = window_stats.divide_by_cell_size(
-                            (cur_pos.y - parent_window.top - HEADER_HEIGHT),
-                            (cur_pos.x - parent_window.left)
-                        );
-                        on_lbutton_up(parent, wParam, lParam, where_fig);
-                        InvalidateRect(parent, NULL, NULL);
-                        DestroyWindow(hWnd);
-                    }
-                    break;
-                    case WM_NCHITTEST:  // При перехвате нажатий мыши симулируем перетаскивание
-                        return (LRESULT)HTCAPTION;
-                    case WM_PAINT:
-                    {
-                        PAINTSTRUCT ps;
-                        HDC hdc = BeginPaint(hWnd, &ps);
-                        Figure* in_hand = (Figure*)GetWindowLongPtr(hWnd, GWLP_USERDATA);
-                        if (in_hand) {
-                            draw_figure(hdc, in_hand->get_col(), in_hand->get_type(), Pos(0, 0), false);
-                        }
-                        EndPaint(hWnd, &ps);
-                    }
-                    break;
-                    default:
-                        return DefWindowProc(hWnd, uMsg, wParam, lParam);
-                    }
-                    return static_cast<LRESULT>(0);
-                    });
+                motion_input.init_curr_choice_window(hWnd,
+                    curr_choice_window_callback_game_mode);
             }
         }
         break;
     case WM_SIZE:
-        window_stats.set_window_size(HIWORD(lParam), LOWORD(lParam));
+        main_window.set_window_size(HIWORD(lParam), LOWORD(lParam));
         InvalidateRect(hWnd, NULL, NULL);
         break;
     case WM_PAINT:
@@ -300,8 +252,8 @@ LRESULT mainproc::game_switch(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPa
         hdc = BeginPaint(hWnd, &ps);
         hdcMem = CreateCompatibleDC(hdc);
         hbmMem = CreateCompatibleBitmap(hdc,
-            window_stats.get_window_width(),
-            window_stats.get_window_height()
+            main_window.get_width(),
+            main_window.get_height()
         );
         hOld = SelectObject(hdcMem, hbmMem);
 
@@ -312,7 +264,7 @@ LRESULT mainproc::game_switch(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPa
             for (const auto& [is_eat, move_pos] : motion_input.get_possible_moves()) {
                 static const HBRUSH GREEN{ CreateSolidBrush(RGB(0, 255, 0)) };
                 static const HBRUSH DARK_GREEN{ CreateSolidBrush(RGB(0, 150, 0)) };
-                const RECT cell = window_stats.get_cell(move_pos);
+                const RECT cell = main_window.get_cell(move_pos);
                 if (is_eat) {
                     FillRect(hdcMem, &cell, DARK_GREEN);
                 }
@@ -326,8 +278,8 @@ LRESULT mainproc::game_switch(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPa
         {
             static const HBRUSH RED{ CreateSolidBrush(RGB(255, 0, 0)) };
             static const HBRUSH BLUE{ CreateSolidBrush(RGB(0, 0, 255)) };
-            const RECT from_cell = window_stats.get_cell(input.from);
-            const RECT targ_cell = window_stats.get_cell(input.target);
+            const RECT from_cell = main_window.get_cell(input.from);
+            const RECT targ_cell = main_window.get_cell(input.target);
             FillRect(hdcMem, &from_cell, RED);
             FillRect(hdcMem, &targ_cell, BLUE);
         }
@@ -336,8 +288,8 @@ LRESULT mainproc::game_switch(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPa
 
         /* Копирование временного буфера в основной */
         BitBlt(hdc, 0, 0,
-            window_stats.get_window_width(),
-            window_stats.get_window_height(),
+            main_window.get_width(),
+            main_window.get_height(),
             hdcMem, 0, 0, SRCCOPY
         );
 
@@ -370,7 +322,7 @@ LRESULT mainproc::edit_switch(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPa
                     break;
                 case IDM_SET_GAME_WINDOW_MODE:
                     window_state = WindowState::GAME;
-                    DestroyWindow(choice_window);
+                    DestroyWindow(figures_list_window);
                     SetMenu(hWnd, LoadMenu(hInst, MAKEINTRESOURCE(IDC_CHWIGRX)));
                     change_checkerboard_color_theme(hWnd);
                     break;
@@ -384,14 +336,14 @@ LRESULT mainproc::edit_switch(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPa
                 }
                     break;
                 case IDM_TOGGLE_LIST_WINDOW:
-                    if (choice_window == NULL) {
-                        choice_window = create_choice_window(hWnd);
+                    if (figures_list_window == NULL) {
+                        figures_list_window = create_figures_list_window(hWnd);
                     }
                     else {
-                        DestroyWindow(choice_window);
-                        choice_window = NULL;
+                        DestroyWindow(figures_list_window);
+                        figures_list_window = NULL;
                     }
-                    set_menu_checkbox(hWnd, IDM_TOGGLE_LIST_WINDOW, choice_window != NULL);
+                    set_menu_checkbox(hWnd, IDM_TOGGLE_LIST_WINDOW, figures_list_window != NULL);
                     break;
                 case IDM_WHITE_START:
                     turn = Color::White;
@@ -418,10 +370,10 @@ LRESULT mainproc::edit_switch(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPa
         }
             break;
         case WM_MOVE:
-            window_stats.set_window_pos(LOWORD(lParam), HIWORD(lParam));
+            main_window.set_window_pos(LOWORD(lParam), HIWORD(lParam));
             break;
         case WM_SIZE:
-            window_stats.set_window_size(HIWORD(lParam), LOWORD(lParam));
+            main_window.set_window_size(HIWORD(lParam), LOWORD(lParam));
             InvalidateRect(hWnd, NULL, NULL);
             break;
         case WM_PAINT:
@@ -429,8 +381,8 @@ LRESULT mainproc::edit_switch(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPa
             hdc = BeginPaint(hWnd, &ps);
             hdcMem = CreateCompatibleDC(hdc);
             hbmMem = CreateCompatibleBitmap(hdc,
-                window_stats.get_window_width(),
-                window_stats.get_window_height()
+                main_window.get_width(),
+                main_window.get_height()
             );
             hOld = SelectObject(hdcMem, hbmMem);
 
@@ -439,8 +391,8 @@ LRESULT mainproc::edit_switch(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPa
 
             /* Копирование временного буфера в основной */
             BitBlt(hdc, 0, 0,
-                window_stats.get_window_width(),
-                window_stats.get_window_height(),
+                main_window.get_width(),
+                main_window.get_height(),
                 hdcMem, 0, 0, SRCCOPY
             );
 
@@ -460,7 +412,7 @@ LRESULT mainproc::edit_switch(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPa
     return static_cast<LRESULT>(0);
 }
 
-LRESULT CALLBACK choice_window_proc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) {
+LRESULT CALLBACK figures_list_window_proc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) {
     
     SCROLLINFO si{.cbSize=sizeof(SCROLLINFO)};
     static PAINTSTRUCT ps;
@@ -469,19 +421,12 @@ LRESULT CALLBACK choice_window_proc(HWND hWnd, UINT message, WPARAM wParam, LPAR
     static HDC hdcMem;
     static HDC hdc;
     static std::vector<Figure*> unique_figures;
-    static size_t figures_cell_lenght = 83;
-    static size_t figures_in_row = 2;
-    static int curr_scroll = 0;
-    static size_t max_scroll = 0;
     static bool is_resizes = true;  // also to horizontal scrollbar
     static bool is_scrolls = false;
-    static long total_height_of_all_figures = static_cast<long>(figures_cell_lenght);
 
     switch (message) {
         case WM_CREATE:
         {
-            RECT rect;
-            GetClientRect(hWnd, &rect);
 
             for (char type : ALL_FIGURES) {
                 unique_figures.push_back(
@@ -490,22 +435,19 @@ LRESULT CALLBACK choice_window_proc(HWND hWnd, UINT message, WPARAM wParam, LPAR
             }
 
             si.fMask = SIF_POS | SIF_RANGE | SIF_PAGE;
-            si.nPos = static_cast<int>(figures_in_row);
+            si.nPos = static_cast<int>(figures_list.get_figures_in_row());
             si.nMax = static_cast<int>(unique_figures.size());
             si.nMin = 1;
             si.nPage = 1;
             SetScrollInfo(hWnd, SB_HORZ, &si, TRUE);
 
-            figures_cell_lenght = (rect.right - rect.left) / figures_in_row;
-            int rows_num = static_cast<int>(ceil(unique_figures.size() / static_cast<double>(figures_in_row)));
-            total_height_of_all_figures = static_cast<int>(rows_num * figures_cell_lenght);
-            max_scroll = std::max(total_height_of_all_figures, rect.bottom - rect.top);
+            figures_list.recalculate_dimensions();
 
             si.fMask = SIF_POS | SIF_RANGE | SIF_PAGE;
             si.nPos = 0;
-            si.nMax = static_cast<int>(max_scroll);
+            si.nMax = static_cast<int>(figures_list.get_max_scroll());
             si.nMin = 0;
-            si.nPage = rect.bottom - rect.top;
+            si.nPage = figures_list.get_height();
             SetScrollInfo(hWnd, SB_VERT, &si, TRUE);
         }
             UpdateWindow(hWnd);
@@ -513,69 +455,55 @@ LRESULT CALLBACK choice_window_proc(HWND hWnd, UINT message, WPARAM wParam, LPAR
         case WM_HSCROLL:
         {
             is_resizes = true;
-            RECT rect;
-            GetClientRect(hWnd, &rect);
 
             switch (LOWORD(wParam))
             {
                 case SB_PAGELEFT: case SB_LINELEFT:
-                    if (figures_in_row > 1) {
-                        figures_in_row--;
-                    }
+                    figures_list.dec_figures_in_row();
                     break;
                 case SB_PAGERIGHT: case SB_LINERIGHT:
-                    if (figures_in_row < unique_figures.size()) {
-                        figures_in_row++;
-                    }
+                    figures_list.inc_figures_in_row();
                     break;
             }
             si.fMask = SIF_POS;
-            si.nPos = static_cast<int>(figures_in_row);
+            si.nPos = static_cast<int>(figures_list.get_figures_in_row());
             SetScrollInfo(hWnd, SB_HORZ, &si, TRUE);
 
-            figures_cell_lenght = (rect.right - rect.left) / figures_in_row;
-            int rows_num = static_cast<int>(ceil(unique_figures.size() / static_cast<double>(figures_in_row)));
-            total_height_of_all_figures = static_cast<int>(rows_num * figures_cell_lenght);
-            max_scroll = total_height_of_all_figures;
+            figures_list.recalculate_dimensions();
 
             si.fMask = SIF_RANGE | SIF_PAGE;
             si.nMin = 0;
-            si.nMax = static_cast<int>(max_scroll);
-            si.nPage = rect.bottom - rect.top;
+            si.nMax = static_cast<int>(figures_list.get_max_scroll());
+            si.nPage = figures_list.get_height();
             SetScrollInfo(hWnd, SB_VERT, &si, TRUE);
 
-            SetWindowPos(hWnd, NULL, NULL, NULL, rect.right - rect.left, rect.bottom - rect.top, SWP_NOMOVE);
+            SetWindowPos(hWnd, NULL, NULL, NULL,
+                figures_list.get_width(), figures_list.get_height(), SWP_NOMOVE);
         }
             InvalidateRect(hWnd, NULL, NULL);
             break;
         case WM_VSCROLL:
         {
             is_scrolls = true;
-            int new_scroll;
+            int delta = 0;
             switch (LOWORD(wParam))
             {
             case SB_PAGEUP:
-                new_scroll = curr_scroll - 30; break;
+                delta = figures_list.add_to_curr_scroll(-30);
+                break;
             case SB_LINEUP:
-                new_scroll = curr_scroll - 10;
+                delta = figures_list.add_to_curr_scroll(-10);
                 break;
             case SB_PAGEDOWN:
-                new_scroll = curr_scroll + 30;
+                delta = figures_list.add_to_curr_scroll(30);
                 break;
             case SB_LINEDOWN:
-                new_scroll = curr_scroll + 10;
+                delta = figures_list.add_to_curr_scroll(10);
                 break;
             case SB_THUMBPOSITION:
-                new_scroll = HIWORD(wParam);
+                delta = figures_list.set_curr_scroll(HIWORD(wParam));
                 break;
-            default:
-                new_scroll = curr_scroll;
             }
-            
-            new_scroll = std::min(static_cast<int>(max_scroll), std::max(0, new_scroll));
-            if (new_scroll == curr_scroll) break;
-            int delta = new_scroll - curr_scroll;
-            curr_scroll = new_scroll;
 
             ScrollWindowEx(hWnd, 0, -delta, (CONST RECT*) NULL,
                 (CONST RECT*) NULL, (HRGN)NULL, (PRECT)NULL,
@@ -583,7 +511,7 @@ LRESULT CALLBACK choice_window_proc(HWND hWnd, UINT message, WPARAM wParam, LPAR
             UpdateWindow(hWnd);
             
             si.fMask = SIF_POS;
-            si.nPos = curr_scroll;
+            si.nPos = figures_list.get_curr_scroll();
             SetScrollInfo(hWnd, SB_VERT, &si, TRUE);
         }            
             InvalidateRect(hWnd, NULL, NULL);
@@ -591,18 +519,12 @@ LRESULT CALLBACK choice_window_proc(HWND hWnd, UINT message, WPARAM wParam, LPAR
         case WM_SIZE:
         {
             is_resizes = true;
-            int height = HIWORD(lParam);
-            int width = LOWORD(lParam);
-            figures_cell_lenght = width / figures_in_row;
-            int rows_num = static_cast<int>(ceil(unique_figures.size() / static_cast<double>(figures_in_row)));
-            total_height_of_all_figures = static_cast<int>(rows_num * figures_cell_lenght);
-            max_scroll = std::max(0L, total_height_of_all_figures - height);
-            curr_scroll = std::min(curr_scroll, static_cast<int>(max_scroll));
+            figures_list.set_window_size(HIWORD(lParam), LOWORD(lParam));
             
             si.fMask = SIF_RANGE | SIF_PAGE | SIF_POS;
-            si.nMax = total_height_of_all_figures;
-            si.nPage = height;
-            si.nPos = curr_scroll;
+            si.nMax = figures_list.get_all_figures_height();
+            si.nPage = figures_list.get_height();
+            si.nPos = figures_list.get_curr_scroll();
             SetScrollInfo(hWnd, SB_VERT, &si, TRUE);
         }
             InvalidateRect(hWnd, NULL, NULL);
@@ -610,8 +532,8 @@ LRESULT CALLBACK choice_window_proc(HWND hWnd, UINT message, WPARAM wParam, LPAR
         case WM_GETMINMAXINFO:
         {
             LPMINMAXINFO lpMMI = (LPMINMAXINFO)lParam;
-            lpMMI->ptMinTrackSize.y = static_cast<LONG>(figures_cell_lenght);
-            lpMMI->ptMaxTrackSize.y = total_height_of_all_figures + HEADER_HEIGHT;
+            lpMMI->ptMinTrackSize.y = static_cast<LONG>(figures_list.get_cell_width());
+            lpMMI->ptMaxTrackSize.y = figures_list.get_all_figures_height() + HEADER_HEIGHT;
         }
             break;
         case WM_PAINT:
@@ -619,35 +541,35 @@ LRESULT CALLBACK choice_window_proc(HWND hWnd, UINT message, WPARAM wParam, LPAR
             hdc = BeginPaint(hWnd, &ps);
             PRECT prect = &ps.rcPaint;
 
-            size_t height = prect->bottom - prect->top;
-            size_t width = prect->right - prect->left;
-            int rows_num = static_cast<int>(ceil(unique_figures.size() / static_cast<double>(figures_in_row)));
-            total_height_of_all_figures = static_cast<int>(rows_num * figures_cell_lenght);
+            int height = figures_list.get_height();
+            int width = figures_list.get_width();
+            int curr_scroll = figures_list.get_curr_scroll();
+            size_t all_figures_height = figures_list.get_all_figures_height();
 
             hdcMem = CreateCompatibleDC(hdc);
-            hbmMem = CreateCompatibleBitmap(hdc, static_cast<int>(width), static_cast<int>(total_height_of_all_figures));
+            hbmMem = CreateCompatibleBitmap(hdc, static_cast<int>(width), static_cast<int>(all_figures_height));
             hOld = SelectObject(hdcMem, hbmMem);
 
             /* фон */
             RECT full_rect = { .left = prect->left, .top = prect->top + curr_scroll,
-                .right = prect->right, .bottom = prect->bottom + curr_scroll};
+                .right = prect->right, .bottom = prect->bottom + curr_scroll };
             FillRect(hdcMem, &full_rect, CHECKERBOARD_DARK);
 
             /* Отрисовка фигур */
             for (int index = 0; index < unique_figures.size(); ++index) {
-                int x = static_cast<int>(index / figures_in_row);
-                int y = static_cast<int>(index % figures_in_row);
+                int x = static_cast<int>(index / figures_list.get_figures_in_row());
+                int y = static_cast<int>(index % figures_list.get_figures_in_row());
                 Figure* fig_to_draw = unique_figures[index];
                 draw_figure(hdcMem, fig_to_draw->get_col(), fig_to_draw->get_type(), { x, y },
-                    true, static_cast<int>(figures_cell_lenght), static_cast<int>(figures_cell_lenght));
+                    true, static_cast<int>(figures_list.get_cell_height()), static_cast<int>(figures_list.get_cell_width()));
             }
 
             /* Копирование временного буфера в основной (взято из майкросовтовской документации) */
             if (is_scrolls) {
                 BitBlt(ps.hdc,
                     prect->left, prect->top,
-                    (prect->right - prect->left),
-                    (prect->bottom - prect->top),
+                    width,
+                    height,
                     hdcMem,
                     prect->left,
                     prect->top + curr_scroll,
@@ -657,7 +579,7 @@ LRESULT CALLBACK choice_window_proc(HWND hWnd, UINT message, WPARAM wParam, LPAR
             else if (is_resizes) {
                 BitBlt(ps.hdc,
                     0, 0,
-                    prect->right - prect->left, static_cast<int>(total_height_of_all_figures),
+                    width, static_cast<int>(all_figures_height),
                     hdcMem,
                     0, curr_scroll,
                     SRCCOPY);
@@ -667,7 +589,7 @@ LRESULT CALLBACK choice_window_proc(HWND hWnd, UINT message, WPARAM wParam, LPAR
                 // При разворачивании окна заходит сюда
                 BitBlt(ps.hdc,
                     0, 0,
-                    prect->right - prect->left, static_cast<int>(total_height_of_all_figures),
+                    width, static_cast<int>(all_figures_height),
                     hdcMem,
                     0, curr_scroll,
                     SRCCOPY);
@@ -683,80 +605,18 @@ LRESULT CALLBACK choice_window_proc(HWND hWnd, UINT message, WPARAM wParam, LPAR
         {
             motion_input.set_lbutton_down();
             Pos figure_to_drag = {
-                (LOWORD(lParam)) / static_cast<int>(figures_cell_lenght),
-                (HIWORD(lParam) + curr_scroll) / static_cast<int>(figures_cell_lenght)
+                (LOWORD(lParam)) / static_cast<int>(figures_list.get_cell_width()),
+                (HIWORD(lParam) + figures_list.get_curr_scroll()) / static_cast<int>(figures_list.get_cell_width())
             };
-            size_t index = figure_to_drag.y * figures_in_row + figure_to_drag.x;
+            size_t index = figure_to_drag.y * figures_list.get_figures_in_row() + figure_to_drag.x;
+            if (index >= unique_figures.size()) break;  // there was a click in a non-standard part of the window => ignore
             motion_input.set_in_hand(FigureFabric::instance()->create(unique_figures[index], false));
         }
             break;
         case WM_MOUSEMOVE:
         {
             if (motion_input.is_drags()) {
-                motion_input.init_curr_choice_window(hWnd,
-                    [](HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
-                        // выбранная фигура временная => удаляется при закрытии окна
-                        static const int TO_DESTROY_TIMER_ID{ FIGURES_LIST_CHOICE_TIMER_ID };
-                        switch (uMsg) {
-                        case WM_CREATE:
-                            SetTimer(hWnd, TO_DESTROY_TIMER_ID, TO_DESTROY_ELAPSE_DEFAULT_IN_MS, NULL);
-                            break;
-                        case WM_TIMER:
-                            if (wParam == TO_DESTROY_TIMER_ID) {
-                                KillTimer(hWnd, TO_DESTROY_TIMER_ID);
-                                SendMessage(hWnd, WM_EXITSIZEMOVE, NULL, NULL);
-                            }
-                            break;
-                        case WM_ENTERSIZEMOVE:
-                            KillTimer(hWnd, TO_DESTROY_TIMER_ID);
-                            break;
-                        case WM_EXITSIZEMOVE: // Фигуру отпустил
-                        {
-                            HWND hmain_window = GetWindow(GetParent(hWnd), GW_OWNER);
-                            POINT cur_pos{};
-                            GetCursorPos(&cur_pos);
-                            RECT main_window;
-                            GetWindowRect(hmain_window, &main_window);
-                            RECT figures_list;
-                            GetWindowRect(GetParent(hWnd), &figures_list);
-                            Pos where_fig = window_stats.divide_by_cell_size(
-                                (cur_pos.y - main_window.top - HEADER_HEIGHT),
-                                (cur_pos.x - main_window.left)
-                            );
-                            if (is_valid_coords(where_fig) &&
-                                !(figures_list.top <= cur_pos.y && cur_pos.y <= figures_list.bottom &&
-                                    figures_list.left <= cur_pos.x && cur_pos.x <= figures_list.right)) {
-                                auto to_place = reinterpret_cast<Figure*>(GetWindowLongPtr(hWnd, GWLP_USERDATA));
-                                to_place->move_to(where_fig);
-                                board.place_fig(to_place);
-                                InvalidateRect(hmain_window, NULL, NULL);
-                            }
-                            else {
-                                delete reinterpret_cast<Figure*>(GetWindowLongPtr(hWnd, GWLP_USERDATA));
-                            }
-                            motion_input.set_in_hand(FigureFabric::instance()->get_default_fig());
-                            motion_input.clear();
-                            DestroyWindow(hWnd);
-                        }
-                        break;
-                        case WM_NCHITTEST:  // При перехвате нажатий мыши симулируем перетаскивание
-                            return (LRESULT)HTCAPTION;
-                        case WM_PAINT:
-                        {
-                            PAINTSTRUCT ps;
-                            HDC hdc = BeginPaint(hWnd, &ps);
-                            Figure* in_hand = (Figure*)GetWindowLongPtr(hWnd, GWLP_USERDATA);
-                            if (in_hand) {
-                                draw_figure(hdc, in_hand->get_col(), in_hand->get_type(), Pos(0, 0), false);
-                            }
-                            EndPaint(hWnd, &ps);
-                        }
-                        break;
-                        default:
-                            return DefWindowProc(hWnd, uMsg, wParam, lParam);
-                        }
-                        return static_cast<LRESULT>(0);
-                    });
+                motion_input.init_curr_choice_window(hWnd, curr_choice_window_callback_figures_list);
             }
         }
             break;
@@ -766,7 +626,7 @@ LRESULT CALLBACK choice_window_proc(HWND hWnd, UINT message, WPARAM wParam, LPAR
                 delete figure;
             }
             unique_figures.clear();
-            choice_window = NULL;
+            figures_list_window = NULL;
             HWND owner = GetWindow(hWnd, GW_OWNER); // это должен быть GetParent, но оный возвращает NULL
             set_menu_checkbox(owner, IDM_TOGGLE_LIST_WINDOW, false);
         }
@@ -775,5 +635,119 @@ LRESULT CALLBACK choice_window_proc(HWND hWnd, UINT message, WPARAM wParam, LPAR
             return DefWindowProc(hWnd, message, wParam, lParam);
     }
 
+    return static_cast<LRESULT>(0);
+}
+
+LRESULT CALLBACK curr_choice_window_callback_game_mode(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
+    static const int TO_DESTROY_TIMER_ID{ MAIN_WINDOW_CHOICE_TIMER_ID };
+    switch (uMsg) {
+        case WM_CREATE:
+            SetTimer(hWnd, TO_DESTROY_TIMER_ID, TO_DESTROY_ELAPSE_DEFAULT_IN_MS, NULL);
+            break;
+        case WM_TIMER:
+            if (wParam == TO_DESTROY_TIMER_ID) {
+                KillTimer(hWnd, TO_DESTROY_TIMER_ID);
+                SendMessage(hWnd, WM_EXITSIZEMOVE, NULL, NULL);
+            }
+            break;
+        case WM_ENTERSIZEMOVE:
+            KillTimer(hWnd, TO_DESTROY_TIMER_ID);
+            break;
+        case WM_EXITSIZEMOVE: // Фигуру отпустил
+        {
+            HWND parent = GetParent(hWnd);
+            POINT cur_pos{};
+            GetCursorPos(&cur_pos);
+            RECT parent_window;
+            GetWindowRect(parent, &parent_window);
+            Pos where_fig = main_window.divide_by_cell_size(
+                (cur_pos.y - parent_window.top - HEADER_HEIGHT),
+                (cur_pos.x - parent_window.left)
+            );
+            on_lbutton_up(parent, wParam, lParam, where_fig);
+            InvalidateRect(parent, NULL, NULL);
+            DestroyWindow(hWnd);
+        }
+        break;
+        case WM_NCHITTEST:  // При перехвате нажатий мыши симулируем перетаскивание
+            return (LRESULT)HTCAPTION;
+        case WM_PAINT:
+        {
+            PAINTSTRUCT ps;
+            HDC hdc = BeginPaint(hWnd, &ps);
+            Figure* in_hand = (Figure*)GetWindowLongPtr(hWnd, GWLP_USERDATA);
+            if (in_hand) {
+                draw_figure(hdc, in_hand->get_col(), in_hand->get_type(), Pos(0, 0), false);
+            }
+            EndPaint(hWnd, &ps);
+        }
+        break;
+        default:
+            return DefWindowProc(hWnd, uMsg, wParam, lParam);
+    }
+    return static_cast<LRESULT>(0);
+}
+
+LPARAM curr_choice_window_callback_figures_list(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
+    // выбранная фигура временная => удаляется при закрытии окна
+    static const int TO_DESTROY_TIMER_ID{ FIGURES_LIST_CHOICE_TIMER_ID };
+    switch (uMsg) {
+    case WM_CREATE:
+        SetTimer(hWnd, TO_DESTROY_TIMER_ID, TO_DESTROY_ELAPSE_DEFAULT_IN_MS, NULL);
+        break;
+    case WM_TIMER:
+        if (wParam == TO_DESTROY_TIMER_ID) {
+            KillTimer(hWnd, TO_DESTROY_TIMER_ID);
+            SendMessage(hWnd, WM_EXITSIZEMOVE, NULL, NULL);
+        }
+        break;
+    case WM_ENTERSIZEMOVE:
+        KillTimer(hWnd, TO_DESTROY_TIMER_ID);
+        break;
+    case WM_EXITSIZEMOVE: // Фигуру отпустил
+    {
+        HWND hmain_window = GetWindow(GetParent(hWnd), GW_OWNER);
+        POINT cur_pos{};
+        GetCursorPos(&cur_pos);
+        RECT main_window_rect;
+        GetWindowRect(hmain_window, &main_window_rect);
+        RECT figures_list;
+        GetWindowRect(GetParent(hWnd), &figures_list);
+        Pos where_fig = main_window.divide_by_cell_size(
+            (cur_pos.y - main_window_rect.top - HEADER_HEIGHT),
+            (cur_pos.x - main_window_rect.left)
+        );
+        if (is_valid_coords(where_fig) &&
+            !(figures_list.top <= cur_pos.y && cur_pos.y <= figures_list.bottom &&
+                figures_list.left <= cur_pos.x && cur_pos.x <= figures_list.right)) {
+            auto to_place = reinterpret_cast<Figure*>(GetWindowLongPtr(hWnd, GWLP_USERDATA));
+            to_place->move_to(where_fig);
+            board.place_fig(to_place);
+            InvalidateRect(hmain_window, NULL, NULL);
+        }
+        else {
+            delete reinterpret_cast<Figure*>(GetWindowLongPtr(hWnd, GWLP_USERDATA));
+        }
+        motion_input.set_in_hand(FigureFabric::instance()->get_default_fig());
+        motion_input.clear();
+        DestroyWindow(hWnd);
+    }
+    break;
+    case WM_NCHITTEST:  // При перехвате нажатий мыши симулируем перетаскивание
+        return (LRESULT)HTCAPTION;
+    case WM_PAINT:
+    {
+        PAINTSTRUCT ps;
+        HDC hdc = BeginPaint(hWnd, &ps);
+        Figure* in_hand = (Figure*)GetWindowLongPtr(hWnd, GWLP_USERDATA);
+        if (in_hand) {
+            draw_figure(hdc, in_hand->get_col(), in_hand->get_type(), Pos(0, 0), false);
+        }
+        EndPaint(hWnd, &ps);
+    }
+    break;
+    default:
+        return DefWindowProc(hWnd, uMsg, wParam, lParam);
+    }
     return static_cast<LRESULT>(0);
 }

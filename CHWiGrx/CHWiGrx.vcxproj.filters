@@ -38,7 +38,7 @@
     <ClCompile Include="funcs.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
-    <ClCompile Include="winproc.cpp">
+    <ClCompile Include="callbacks.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
   </ItemGroup>

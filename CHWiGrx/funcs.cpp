@@ -44,8 +44,8 @@ bool init_instance(HINSTANCE hInstance, LPTSTR szTitle, LPTSTR szWindowClass, in
     hInst = hInstance; // Сохранить маркер экземпляра в глобальной переменной
 
     HWND hWnd = CreateWindowW(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW,
-        window_stats.get_window_pos_x(), window_stats.get_window_pos_y(),
-        window_stats.get_real_width(), window_stats.get_real_height(),
+        main_window.get_window_pos_x(), main_window.get_window_pos_y(),
+        main_window.get_width_with_extra(), main_window.get_height_with_extra(),
         nullptr, nullptr, hInstance, nullptr
     );
 
@@ -112,7 +112,7 @@ void draw_figure(HDC hdc, Color col, FigureType type, Pos begin_paint, bool is_t
 }
 
 void draw_figure(HDC hdc, Color col, FigureType type, Pos begin_paint, bool is_transpanent) {
-    draw_figure(hdc, col, type, begin_paint, is_transpanent, window_stats.get_cell_height(), window_stats.get_cell_width());
+    draw_figure(hdc, col, type, begin_paint, is_transpanent, main_window.get_cell_height(), main_window.get_cell_width());
 }
 
 /// <summary>
@@ -233,8 +233,8 @@ std::string take_str_from_clip() {
 /// <param name="callback">Функция окна</param>
 /// <param name="class_name">Имя класса окна</param>
 /// <returns>Дескриптор окна</returns>
-HWND create_curr_choice_window(HWND parent, Figure* in_hand, POINT mouse, int w, int h, const WNDPROC callback, LPCWSTR class_name) {
-    UnregisterClass(class_name, GetModuleHandle(nullptr));
+HWND create_curr_choice_window(HWND parent, Figure* in_hand, POINT mouse, int w, int h, const WNDPROC callback) {
+    UnregisterClass(CURR_CHOICE_WINDOW_CLASS_NAME, GetModuleHandle(nullptr));
     WNDCLASSEX wc{ sizeof(WNDCLASSEX) };
     HWND hWindow{};
     Figure* for_storage = in_hand;  // Возможно нужно копировать TODO
@@ -245,10 +245,10 @@ HWND create_curr_choice_window(HWND parent, Figure* in_hand, POINT mouse, int w,
     wc.hIcon = LoadIcon(nullptr, MAKEINTRESOURCE(IDI_CHWIGRX));
     wc.hIconSm = LoadIcon(nullptr, MAKEINTRESOURCE(IDI_CHWIGRX));
     wc.lpfnWndProc = callback;
-    wc.lpszClassName = class_name;
+    wc.lpszClassName = CURR_CHOICE_WINDOW_CLASS_NAME;
     wc.style = CS_VREDRAW | CS_HREDRAW;
-    const auto create_window = [&hWindow, &parent, &mouse, &w, &h, for_storage, &class_name]() -> HWND {
-        if (hWindow = CreateWindow(class_name, L"", WS_POPUP | WS_EX_TRANSPARENT | WS_EX_LAYERED,
+    const auto create_window = [&hWindow, &parent, &mouse, &w, &h, for_storage]() -> HWND {
+        if (hWindow = CreateWindow(CURR_CHOICE_WINDOW_CLASS_NAME, L"", WS_POPUP | WS_EX_TRANSPARENT | WS_EX_LAYERED,
             mouse.x - w / 2, mouse.y - h / 2, w, h, parent, nullptr, nullptr, nullptr), !hWindow)
             return nullptr
         ;
@@ -279,7 +279,7 @@ void on_lbutton_up(HWND hWnd, WPARAM wParam, LPARAM lParam, Pos where_fig) {
     else {
         motion_input.set_target(where_fig.x, where_fig.y);
         if (motion_input.is_target_at_input()) {
-            if (window_stats.get_prev_lbutton_click() != Pos(HIWORD(lParam), LOWORD(lParam))) { // Отпустили в пределах клетки, но в другом месте
+            if (main_window.get_prev_lbutton_click() != Pos(HIWORD(lParam), LOWORD(lParam))) { // Отпустили в пределах клетки, но в другом месте
                 motion_input.clear();
                 InvalidateRect(hWnd, NULL, NULL);
                 return;
@@ -319,7 +319,7 @@ void MotionInput::init_curr_choice_window(HWND hWnd, WNDPROC callback) {
     POINT mouse{};
     GetCursorPos(&mouse);
     curr_chose_window = create_curr_choice_window(hWnd, in_hand, mouse,
-        window_stats.get_cell_width(), window_stats.get_cell_height(),
+        main_window.get_cell_width(), main_window.get_cell_height(),
         callback);
     InvalidateRect(hWnd, NULL, NULL);
     SendMessage(curr_chose_window, WM_NCLBUTTONDOWN, HTCAPTION, MAKELPARAM(mouse.x, mouse.y));
@@ -395,7 +395,7 @@ void copy_repr_to_clip() {
 void draw_board(HDC hdc) {
     for (int i{}; i < HEIGHT; ++i) {
         for (int j{}; j < WIDTH; ++j) {
-            const RECT cell = window_stats.get_cell(i, j);
+            const RECT cell = main_window.get_cell(i, j);
             if ((i + j) % 2) {
                 FillRect(hdc, &cell, CHECKERBOARD_ONE);
             }
@@ -444,8 +444,8 @@ void update_edit_menu_variables(HWND hWnd) {
         set_menu_checkbox(hWnd, IDM_IDW_FALSE, true);
 }
 
-HWND create_choice_window(HWND parent) {
-    UnregisterClass(CHOICE_WINDOW_CLASS_NAME, GetModuleHandle(nullptr));
+HWND create_figures_list_window(HWND parent) {
+    UnregisterClass(FIGURES_LIST_WINDOW_CLASS_NAME, GetModuleHandle(nullptr));
     WNDCLASSEX wc{ sizeof(WNDCLASSEX) };
     HWND hWindow{};
     wc.cbClsExtra = 0;
@@ -454,13 +454,13 @@ HWND create_choice_window(HWND parent) {
     wc.hCursor = LoadCursor(hInst, MAKEINTRESOURCE(IDC_MINIMAL_CURSOR));
     wc.hIcon = LoadIcon(hInst, MAKEINTRESOURCE(IDI_CHWIGRX));
     wc.hIconSm = LoadIcon(hInst, MAKEINTRESOURCE(IDI_CHWIGRX));
-    wc.lpfnWndProc = choice_window_proc;
-    wc.lpszClassName = CHOICE_WINDOW_CLASS_NAME;
+    wc.lpfnWndProc = figures_list_window_proc;
+    wc.lpszClassName = FIGURES_LIST_WINDOW_CLASS_NAME;
     wc.style = CS_VREDRAW | CS_HREDRAW;
     const auto create_window = [&hWindow, &parent]() -> HWND {
-        if (hWindow = CreateWindow(CHOICE_WINDOW_CLASS_NAME, CHOICE_WINDOW_TITLE, WS_OVERLAPPEDWINDOW | WS_VSCROLL | WS_HSCROLL,
-            CHOICE_WINDOW_DEFAULT_POS.x, CHOICE_WINDOW_DEFAULT_POS.y,
-            CHOICE_WINDOW_DEFAULT_DIMENTIONS.x, CHOICE_WINDOW_DEFAULT_DIMENTIONS.y,
+        if (hWindow = CreateWindow(FIGURES_LIST_WINDOW_CLASS_NAME, FIGURES_LIST_WINDOW_TITLE, WS_OVERLAPPEDWINDOW | WS_VSCROLL | WS_HSCROLL,
+            FIGURES_LIST_WINDOW_DEFAULT_POS.x, FIGURES_LIST_WINDOW_DEFAULT_POS.y,
+            FIGURES_LIST_WINDOW_DEFAULT_DIMENTIONS.x, FIGURES_LIST_WINDOW_DEFAULT_DIMENTIONS.y,
             parent, nullptr, hInst, nullptr), !hWindow)
             return nullptr;
         ShowWindow(hWindow, SW_SHOWDEFAULT);

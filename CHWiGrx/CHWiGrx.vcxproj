@@ -159,7 +159,7 @@
   <ItemGroup>
     <ClCompile Include="main.cpp" />
     <ClCompile Include="funcs.cpp" />
-    <ClCompile Include="winproc.cpp" />
+    <ClCompile Include="callbacks.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="CHWiGrx.rc" />
