@@ -1,6 +1,7 @@
 #pragma once
 #include <new>
 #include <map>
+#include <set>
 #include <list>
 #include <tuple>
 #include <format>
@@ -27,10 +28,6 @@ std::vector<std::string> split(std::string, const std::string&&);
 void remove_first_occurrence(std::string& str, char c);
 
 constexpr int EN_PASSANT_INDENT = 4;
-inline const std::string ALL_FIGURES{ "PHRBQK" };
-inline const std::string ALL_PROMOTION_FIGURES{ "HRBQ" };
-inline const std::string NOT_FIGURES{ "E" };
-inline const std::string COLOR_CHARS{ "NBW" };
 
 enum class GameEndType {Checkmate, FiftyRule, Stalemate, InsufficientMaterial, MoveRepeat, NotGameEnd};
 
@@ -63,9 +60,19 @@ Color char_to_col(char);
 char col_to_char(Color);
 Color what_next(Color);
 
+inline const std::set<Color> PLAYABLE_COLORS = { {Color::White, Color::Black} };
+
 enum class FigureType { None, Pawn, Knight, Rook, Bishop, Queen, King };
 FigureType char_to_figure_type(char ch = 'N');
 char figure_type_to_char(FigureType);
+
+inline const std::set<FigureType> PLAYABLE_FIGURES{
+    {FigureType::Pawn, FigureType::Knight, FigureType::Rook, FigureType::Bishop, FigureType::Queen, FigureType::King}
+};
+
+inline const std::set<FigureType> PROMOTION_FIGURES{
+    {FigureType::Knight, FigureType::Rook, FigureType::Bishop, FigureType::Queen}
+};
 
 class Figure {
 public:
@@ -87,6 +94,7 @@ public:
     bool is_col(Figure* fig) const { return color == fig->get_col(); }
     bool empty() const { return id == ERR_ID; }
     bool is(Id id) const { return this->id == id; }
+    bool is(FigureType type) const { return this->type == type; }
     bool at(Pos p) const { return position == p; }
 
 private:
@@ -209,6 +217,21 @@ private:
 class BoardRepr {
 public:
     BoardRepr(std::string);
+    BoardRepr(std::list<Figure*>&& figures, Color turn, bool idw, std::vector<Id>&& can_castle, std::vector<MoveRec>&& past = {},
+        std::vector<MoveRec>&& future = {}, std::list<Figure*>&& captured_figures = {}) :
+        figures(figures), turn(turn), idw(idw), past(past),
+        future(future), captured_figures(captured_figures), can_castle(can_castle) {};
+    BoardRepr(std::list<Figure*>&& figures, Color turn, bool idw, std::vector<MoveRec>&& past = {},
+        std::vector<MoveRec>&& future = {}, std::list<Figure*>&& captured_figures = {}) :
+        figures(figures), turn(turn), idw(idw), past(past),
+        future(future), captured_figures(captured_figures), can_castle(can_castle) {
+        // all can castle by default
+        for (auto fig : figures) {
+            if (fig->is(FigureType::Rook)) {
+                can_castle.push_back(fig->get_id());
+            }
+        }
+    };
     std::string as_string();
     char get_idw_char() const { return idw ? 'T' : 'F'; }
     bool get_idw() const { return idw; }
