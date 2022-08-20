@@ -17,7 +17,7 @@ LRESULT CALLBACK main_window_proc(HWND hWnd, UINT message, WPARAM wParam, LPARAM
     return static_cast<LRESULT>(0);
 }
 
-LRESULT mainproc::game_switch(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam, PAINTSTRUCT ps, HBITMAP hbmMem, HGDIOBJ hOld, HDC hdcMem, HDC hdc) {
+LRESULT CALLBACK mainproc::game_switch(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam, PAINTSTRUCT ps, HBITMAP hbmMem, HGDIOBJ hOld, HDC hdcMem, HDC hdc) {
     switch (message) {
     case WM_COMMAND:
     {
@@ -58,11 +58,11 @@ LRESULT mainproc::game_switch(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPa
         }
         break;
         case IDM_RESET_START_MAP_IDW:
-            start_board_repr = { DEFAULT_CHESS_BOARD_IDW };
+            start_board_repr = DEFAULT_CHESS_BOARD_IDW;
             restart();
             break;
         case IDM_RESET_START_MAP_NIDW:
-            start_board_repr = { DEFAULT_CHESS_BOARD_NIDW };
+            start_board_repr = DEFAULT_CHESS_BOARD_NIDW;
             restart();
             break;
         case IDM_RESTART:
@@ -110,9 +110,6 @@ LRESULT mainproc::game_switch(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPa
         {
             window_state = WindowState::EDIT;
             SetMenu(hWnd, LoadMenu(hInst, MAKEINTRESOURCE(IDR_CHWIGRX_EDIT_MENU)));
-            BoardRepr empty_repr = { EMPTY_BOARD };
-            board.reset(empty_repr);
-            turn = empty_repr.get_turn();
             motion_input.clear();
             update_edit_menu_variables(hWnd);
             change_checkerboard_color_theme(hWnd);
@@ -238,7 +235,7 @@ LRESULT mainproc::game_switch(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPa
             }
             else {
                 motion_input.init_curr_choice_window(hWnd,
-                    curr_choice_window_callback_game_mode);
+                    curr_choice_window_callback<true>);
             }
         }
         break;
@@ -274,15 +271,7 @@ LRESULT mainproc::game_switch(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPa
             }
         }
 
-        /* Положение курсора и выделенной клетки */
-        {
-            static const HBRUSH RED{ CreateSolidBrush(RGB(255, 0, 0)) };
-            static const HBRUSH BLUE{ CreateSolidBrush(RGB(0, 0, 255)) };
-            const RECT from_cell = main_window.get_cell(input.from);
-            const RECT targ_cell = main_window.get_cell(input.target);
-            FillRect(hdcMem, &from_cell, RED);
-            FillRect(hdcMem, &targ_cell, BLUE);
-        }
+        draw_input(hdcMem, input);
 
         draw_figures_on_board(hdcMem);
 
@@ -309,7 +298,7 @@ LRESULT mainproc::game_switch(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPa
     return static_cast<LRESULT>(0);
 }
 
-LRESULT mainproc::edit_switch(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam, PAINTSTRUCT ps, HBITMAP hbmMem, HGDIOBJ hOld, HDC hdcMem, HDC hdc) {
+LRESULT CALLBACK mainproc::edit_switch(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam, PAINTSTRUCT ps, HBITMAP hbmMem, HGDIOBJ hOld, HDC hdcMem, HDC hdc) {
     switch (message)
     {
         case WM_COMMAND:
@@ -333,6 +322,13 @@ LRESULT mainproc::edit_switch(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPa
                     BoardRepr board_repr(board_repr_str);
                     turn = board_repr.get_turn();
                     board.reset(board_repr);
+                }
+                    InvalidateRect(hWnd, NULL, NULL);
+                    break;
+                case IDM_CLEAR_BOARD:
+                {
+                    board.reset(BoardRepr({}, turn, board.get_idw()));
+                    motion_input.clear();
                 }
                     break;
                 case IDM_TOGGLE_LIST_WINDOW:
@@ -369,6 +365,30 @@ LRESULT mainproc::edit_switch(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPa
             }
         }
             break;
+        case WM_LBUTTONDOWN:
+        {
+            motion_input.set_lbutton_down();
+            main_window.set_prev_lbutton_click({ HIWORD(lParam), LOWORD(lParam) });
+            if (motion_input.is_active_by_click()) {
+                motion_input.set_target(main_window.divide_by_cell_size(HIWORD(lParam), LOWORD(lParam)));
+                InvalidateRect(hWnd, NULL, NULL);
+                return 0;
+            }
+            Pos from = main_window.divide_by_cell_size(HIWORD(lParam), LOWORD(lParam));
+            if (board.cont_fig(from)) {
+                motion_input.set_from(from);
+                motion_input.set_in_hand(board.get_fig(from));
+            }
+        }
+            break;
+        case WM_MOUSEMOVE:
+        {
+            if (motion_input.is_drags()) {
+                motion_input.init_curr_choice_window(hWnd, curr_choice_window_callback<false>);
+            }
+        }
+            InvalidateRect(hWnd, NULL, NULL);
+            break;
         case WM_MOVE:
             main_window.set_window_pos(LOWORD(lParam), HIWORD(lParam));
             break;
@@ -387,9 +407,10 @@ LRESULT mainproc::edit_switch(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPa
             hOld = SelectObject(hdcMem, hbmMem);
 
             draw_board(hdcMem);
+            draw_input(hdcMem, motion_input.get_input());
             draw_figures_on_board(hdcMem);
 
-            /* Копирование временного буфера в основной */
+            // Копирование временного буфера в основной
             BitBlt(hdc, 0, 0,
                 main_window.get_width(),
                 main_window.get_height(),
@@ -420,23 +441,32 @@ LRESULT CALLBACK figures_list_window_proc(HWND hWnd, UINT message, WPARAM wParam
     static HGDIOBJ hOld;
     static HDC hdcMem;
     static HDC hdc;
-    static std::vector<Figure*> unique_figures;
+    static std::map<Color, std::vector<Figure*>> figures_prototypes;
+    static Color curr_color{ Color::White };
     static bool is_resizes = true;  // also to horizontal scrollbar
     static bool is_scrolls = false;
 
     switch (message) {
         case WM_CREATE:
         {
-
-            for (char type : ALL_FIGURES) {
-                unique_figures.push_back(
-                    FigureFabric::instance()->create({}, Color::White, char_to_figure_type(type))
-                );
+            for (Color col : PLAYABLE_COLORS) {
+                for (FigureType type : PLAYABLE_FIGURES) {
+                    figures_prototypes[col].push_back(
+                        FigureFabric::instance()->create({}, col, type)
+                    );
+                }
             }
+
+            RECT window_rect{};
+            GetWindowRect(hWnd, &window_rect);
+            figures_list.set_rect(window_rect);
+            figures_list.clear_scrolling();
+            is_resizes = true;
+            is_scrolls = false;
 
             si.fMask = SIF_POS | SIF_RANGE | SIF_PAGE;
             si.nPos = static_cast<int>(figures_list.get_figures_in_row());
-            si.nMax = static_cast<int>(unique_figures.size());
+            si.nMax = static_cast<int>(figures_prototypes[curr_color].size());
             si.nMin = 1;
             si.nPage = 1;
             SetScrollInfo(hWnd, SB_HORZ, &si, TRUE);
@@ -556,10 +586,10 @@ LRESULT CALLBACK figures_list_window_proc(HWND hWnd, UINT message, WPARAM wParam
             FillRect(hdcMem, &full_rect, CHECKERBOARD_DARK);
 
             /* Отрисовка фигур */
-            for (int index = 0; index < unique_figures.size(); ++index) {
+            for (int index = 0; index < figures_prototypes[curr_color].size(); ++index) {
                 int x = static_cast<int>(index / figures_list.get_figures_in_row());
                 int y = static_cast<int>(index % figures_list.get_figures_in_row());
-                Figure* fig_to_draw = unique_figures[index];
+                Figure* fig_to_draw = figures_prototypes[curr_color][index];
                 draw_figure(hdcMem, fig_to_draw->get_col(), fig_to_draw->get_type(), { x, y },
                     true, static_cast<int>(figures_list.get_cell_height()), static_cast<int>(figures_list.get_cell_width()));
             }
@@ -609,9 +639,15 @@ LRESULT CALLBACK figures_list_window_proc(HWND hWnd, UINT message, WPARAM wParam
                 (HIWORD(lParam) + figures_list.get_curr_scroll()) / static_cast<int>(figures_list.get_cell_width())
             };
             size_t index = figure_to_drag.y * figures_list.get_figures_in_row() + figure_to_drag.x;
-            if (index >= unique_figures.size()) break;  // there was a click in a non-standard part of the window => ignore
-            motion_input.set_in_hand(FigureFabric::instance()->create(unique_figures[index], false));
+            if (index >= figures_prototypes[curr_color].size()) break;  // there was a click in a non-standard part of the window => ignore
+            motion_input.set_in_hand(FigureFabric::instance()->create(figures_prototypes[curr_color][index], false));
         }
+            break;
+        case WM_RBUTTONUP:
+        {
+            curr_color = what_next(curr_color);
+        }
+            InvalidateRect(hWnd, NULL, NULL);
             break;
         case WM_MOUSEMOVE:
         {
@@ -622,10 +658,12 @@ LRESULT CALLBACK figures_list_window_proc(HWND hWnd, UINT message, WPARAM wParam
             break;
         case WM_DESTROY:
         {
-            for (Figure* figure : unique_figures) {
-                delete figure;
+            for (Color col : PLAYABLE_COLORS) {
+                for (Figure* figure : figures_prototypes[col]) {
+                    delete figure;
+                }
             }
-            unique_figures.clear();
+            figures_prototypes.clear();
             figures_list_window = NULL;
             HWND owner = GetWindow(hWnd, GW_OWNER); // это должен быть GetParent, но оный возвращает NULL
             set_menu_checkbox(owner, IDM_TOGGLE_LIST_WINDOW, false);
@@ -638,7 +676,8 @@ LRESULT CALLBACK figures_list_window_proc(HWND hWnd, UINT message, WPARAM wParam
     return static_cast<LRESULT>(0);
 }
 
-LRESULT CALLBACK curr_choice_window_callback_game_mode(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
+template <int check_moves_validity>
+LRESULT CALLBACK curr_choice_window_callback(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
     static const int TO_DESTROY_TIMER_ID{ MAIN_WINDOW_CHOICE_TIMER_ID };
     switch (uMsg) {
         case WM_CREATE:
@@ -664,12 +703,22 @@ LRESULT CALLBACK curr_choice_window_callback_game_mode(HWND hWnd, UINT uMsg, WPA
                 (cur_pos.y - parent_window.top - HEADER_HEIGHT),
                 (cur_pos.x - parent_window.left)
             );
-            on_lbutton_up(parent, wParam, lParam, where_fig);
+            if (check_moves_validity && !is_valid_coords(where_fig)) {
+                // Вынесли фигуру за пределы доски => удаляем с доски
+                board.delete_fig(
+                    reinterpret_cast<Figure*>(GetWindowLongPtr(hWnd, GWLP_USERDATA))->get_pos()
+                );
+                motion_input.clear();
+            }
+            else {
+                on_lbutton_up(parent, wParam, lParam, where_fig, check_moves_validity);
+            }
             InvalidateRect(parent, NULL, NULL);
             DestroyWindow(hWnd);
         }
         break;
-        case WM_NCHITTEST:  // При перехвате нажатий мыши симулируем перетаскивание
+        case WM_NCHITTEST:
+            // При перехвате нажатий мыши симулируем перетаскивание
             return (LRESULT)HTCAPTION;
         case WM_PAINT:
         {
@@ -688,7 +737,7 @@ LRESULT CALLBACK curr_choice_window_callback_game_mode(HWND hWnd, UINT uMsg, WPA
     return static_cast<LRESULT>(0);
 }
 
-LPARAM curr_choice_window_callback_figures_list(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
+LPARAM CALLBACK curr_choice_window_callback_figures_list(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
     // выбранная фигура временная => удаляется при закрытии окна
     static const int TO_DESTROY_TIMER_ID{ FIGURES_LIST_CHOICE_TIMER_ID };
     switch (uMsg) {
@@ -723,6 +772,9 @@ LPARAM curr_choice_window_callback_figures_list(HWND hWnd, UINT uMsg, WPARAM wPa
             auto to_place = reinterpret_cast<Figure*>(GetWindowLongPtr(hWnd, GWLP_USERDATA));
             to_place->move_to(where_fig);
             board.place_fig(to_place);
+            if (to_place->is(FigureType::Rook)) {
+                board.on_castling(to_place->get_id());
+            }
             InvalidateRect(hmain_window, NULL, NULL);
         }
         else {

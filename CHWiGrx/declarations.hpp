@@ -31,9 +31,9 @@ enum class WindowState { GAME, EDIT };
 inline HINSTANCE hInst;
 inline const HBRUSH CHECKERBOARD_DARK { CreateSolidBrush(RGB(50, 50, 50)) };
 inline const HBRUSH CHECKERBOARD_BRIGHT { CreateSolidBrush(RGB(128, 128, 128)) };
-inline const char* DEFAULT_CHESS_BOARD_IDW =  "1;0;0;B;R;2;0;1;B;H;3;0;2;B;B;4;0;3;B;Q;5;0;4;B;K;6;0;5;B;B;7;0;6;B;H;8;0;7;B;R;9;1;0;B;P;10;1;1;B;P;11;1;2;B;P;12;1;3;B;P;13;1;4;B;P;14;1;5;B;P;15;1;6;B;P;16;1;7;B;P;17;6;0;W;P;18;6;1;W;P;19;6;2;W;P;20;6;3;W;P;21;6;4;W;P;22;6;5;W;P;23;6;6;W;P;24;6;7;W;P;25;7;0;W;R;26;7;1;W;H;27;7;2;W;B;28;7;3;W;Q;29;7;4;W;K;30;7;5;W;B;31;7;6;W;H;32;7;7;W;R;[TW1;8;25;32;]<><>~";
-inline const char* DEFAULT_CHESS_BOARD_NIDW = "1;0;0;W;R;2;0;1;W;H;3;0;2;W;B;4;0;3;W;Q;5;0;4;W;K;6;0;5;W;B;7;0;6;W;H;8;0;7;W;R;9;1;0;W;P;10;1;1;W;P;11;1;2;W;P;12;1;3;W;P;13;1;4;W;P;14;1;5;W;P;15;1;6;W;P;16;1;7;W;P;17;6;0;B;P;18;6;1;B;P;19;6;2;B;P;20;6;3;B;P;21;6;4;B;P;22;6;5;B;P;23;6;6;B;P;24;6;7;B;P;25;7;0;B;R;26;7;1;B;H;27;7;2;B;B;28;7;3;B;Q;29;7;4;B;K;30;7;5;B;B;31;7;6;B;H;32;7;7;B;R;[FW1;8;25;32;]<><>~";
-inline const char* EMPTY_BOARD = "[TW]<><>~";
+inline const BoardRepr DEFAULT_CHESS_BOARD_IDW =  BoardRepr("1;0;0;B;R;2;0;1;B;H;3;0;2;B;B;4;0;3;B;Q;5;0;4;B;K;6;0;5;B;B;7;0;6;B;H;8;0;7;B;R;9;1;0;B;P;10;1;1;B;P;11;1;2;B;P;12;1;3;B;P;13;1;4;B;P;14;1;5;B;P;15;1;6;B;P;16;1;7;B;P;17;6;0;W;P;18;6;1;W;P;19;6;2;W;P;20;6;3;W;P;21;6;4;W;P;22;6;5;W;P;23;6;6;W;P;24;6;7;W;P;25;7;0;W;R;26;7;1;W;H;27;7;2;W;B;28;7;3;W;Q;29;7;4;W;K;30;7;5;W;B;31;7;6;W;H;32;7;7;W;R;[TW1;8;25;32;]<><>~");
+inline const BoardRepr DEFAULT_CHESS_BOARD_NIDW = BoardRepr("1;0;0;W;R;2;0;1;W;H;3;0;2;W;B;4;0;3;W;Q;5;0;4;W;K;6;0;5;W;B;7;0;6;W;H;8;0;7;W;R;9;1;0;W;P;10;1;1;W;P;11;1;2;W;P;12;1;3;W;P;13;1;4;W;P;14;1;5;W;P;15;1;6;W;P;16;1;7;W;P;17;6;0;B;P;18;6;1;B;P;19;6;2;B;P;20;6;3;B;P;21;6;4;B;P;22;6;5;B;P;23;6;6;B;P;24;6;7;B;P;25;7;0;B;R;26;7;1;B;H;27;7;2;B;B;28;7;3;B;Q;29;7;4;B;K;30;7;5;B;B;31;7;6;B;H;32;7;7;B;R;[FW1;8;25;32;]<><>~");
+inline const BoardRepr EMPTY_REPR = BoardRepr({}, Color::White, true);
 const int HEADER_HEIGHT = GetSystemMetrics(SM_CXPADDEDBORDER) +
                           GetSystemMetrics(SM_CYMENUSIZE)     +
                           GetSystemMetrics(SM_CYCAPTION)      +
@@ -41,15 +41,15 @@ const int HEADER_HEIGHT = GetSystemMetrics(SM_CXPADDEDBORDER) +
 inline const LPCTSTR FIGURES_LIST_WINDOW_CLASS_NAME = L"CHWIGRX:LIST";
 inline const LPCTSTR FIGURES_LIST_WINDOW_TITLE = L"Figures list";
 inline const LPCTSTR CURR_CHOICE_WINDOW_CLASS_NAME = L"CHWIGRX:CHOICE";
-inline const Pos FIGURES_LIST_WINDOW_DEFAULT_POS = { 300, 300 };
-inline const Pos FIGURES_LIST_WINDOW_DEFAULT_DIMENTIONS = { 200, 200 };
+inline const Pos FIGURES_LIST_WINDOW_DEFAULT_POS = { CW_USEDEFAULT, CW_USEDEFAULT };
+inline const Pos FIGURES_LIST_WINDOW_DEFAULT_DIMENTIONS = { 300, 300 };
 inline constexpr auto MAIN_WINDOW_CHOICE_TIMER_ID = 1;
 inline constexpr auto FIGURES_LIST_CHOICE_TIMER_ID = 2;
 inline constexpr auto TO_DESTROY_ELAPSE_DEFAULT_IN_MS = 5;
 
 /* single mutable globals */
 inline WindowState window_state = WindowState::GAME;
-inline std::string start_board_repr{ DEFAULT_CHESS_BOARD_IDW };
+inline BoardRepr start_board_repr{ DEFAULT_CHESS_BOARD_IDW };
 inline FigureBoard board{ start_board_repr };
 inline Color turn{ Color::White };
 inline char chose{ 'Q' };
@@ -73,7 +73,7 @@ void set_menu_checkbox(HWND, UINT, bool);
 
 std::string take_str_from_clip();
 void update_check_title(HWND);
-void on_lbutton_up(HWND, WPARAM, LPARAM, Pos where_fig);
+void on_lbutton_up(HWND, WPARAM, LPARAM, Pos where_fig, bool=true);
 void restart();
 void copy_repr_to_clip();
 void make_move(HWND);
@@ -83,6 +83,8 @@ void inline draw_figure(HDC, Color, FigureType, Pos, bool = true);
 void draw_figure(HDC, Color, FigureType, Pos, bool, int, int);
 void draw_board(HDC);
 void draw_figures_on_board(HDC);
+void draw_input(HDC, Input);
+
 
 namespace mainproc {
     LRESULT game_switch(HWND, UINT, WPARAM, LPARAM, PAINTSTRUCT, HBITMAP, HGDIOBJ, HDC, HDC);
@@ -91,10 +93,11 @@ namespace mainproc {
 
 inline void Rectangle(HDC hdc, RECT rect) { Rectangle(hdc, rect.left, rect.top, rect.right, rect.bottom); }
 
-/* WINPROC functions */
+/* WNDPROC functions */
 LRESULT CALLBACK main_window_proc(HWND, UINT, WPARAM, LPARAM);
 LRESULT CALLBACK figures_list_window_proc(HWND, UINT, WPARAM, LPARAM);
-LRESULT CALLBACK curr_choice_window_callback_game_mode(HWND, UINT, WPARAM, LPARAM);
+template <int>
+LRESULT CALLBACK curr_choice_window_callback(HWND, UINT, WPARAM, LPARAM);
 LRESULT CALLBACK curr_choice_window_callback_figures_list(HWND, UINT, WPARAM, LPARAM);
 
 class WindowStats {
@@ -113,6 +116,10 @@ public:
     }
     void set_window_size(Pos window_size) {
         set_window_size(window_size.x, window_size.y);
+    }
+    inline void set_rect(RECT rect) {
+        set_window_pos({ rect.left, rect.top });
+        set_window_size(rect.right - rect.left, rect.bottom - rect.top);
     }
     inline int get_height() { return window_size.x; }
     inline int get_width() { return window_size.y; }
@@ -166,8 +173,8 @@ public:
         int rows_num = static_cast<int>(ceil(figures_num / static_cast<double>(figures_in_row)));
         total_height_of_all_figures = static_cast<int>(rows_num * cell_size.x);
     }
-    void set_window_size(int h, int w) override {
-        WindowStats::set_window_size(h, w);
+    void set_window_size(int w, int h) override {
+        WindowStats::set_window_size(w, h);
         recalculate_dimensions();
     }
     void recalculate_cell_size() override {
@@ -197,9 +204,13 @@ public:
         return delta;
     }
     inline size_t get_all_figures_height() const { return total_height_of_all_figures; }
+    inline void clear_scrolling() {
+        max_scroll = 0;
+        curr_scroll = 0;
+    }
 private:
     size_t figures_in_row{ 2 };
-    size_t MAX_FIGURES_IN_ROW{ ALL_FIGURES.size() };
+    size_t MAX_FIGURES_IN_ROW{ PLAYABLE_FIGURES.size() };
     int curr_scroll{ 0 };
     size_t max_scroll{ 0 };
     long total_height_of_all_figures;
@@ -207,7 +218,7 @@ private:
 
 inline FiguresListStats figures_list{
     FIGURES_LIST_WINDOW_DEFAULT_POS, FIGURES_LIST_WINDOW_DEFAULT_DIMENTIONS,
-    2, ALL_FIGURES.size()
+    2, PLAYABLE_FIGURES.size()
 };
 
 /* Текущее состояние ввода */

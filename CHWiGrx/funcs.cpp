@@ -184,10 +184,9 @@ void make_move(HWND hWnd) {
 }
 
 void restart() {
-    BoardRepr tmp_board_repr{ start_board_repr };
-    board.reset(tmp_board_repr);
+    board.reset(start_board_repr);
     motion_input.clear();
-    turn = tmp_board_repr.get_turn();
+    turn = start_board_repr.get_turn();
 }
 
 // Копирует строку в буффер обмена
@@ -267,7 +266,7 @@ HWND create_curr_choice_window(HWND parent, Figure* in_hand, POINT mouse, int w,
     return create_window();
 }
 
-void on_lbutton_up(HWND hWnd, WPARAM wParam, LPARAM lParam, Pos where_fig) {
+void on_lbutton_up(HWND hWnd, WPARAM wParam, LPARAM lParam, Pos where_fig, bool use_move_check_and_log) {
     motion_input.set_lbutton_up();
     motion_input.deactivate_by_pos();
     if (motion_input.is_active_by_click()) {
@@ -289,7 +288,13 @@ void on_lbutton_up(HWND hWnd, WPARAM wParam, LPARAM lParam, Pos where_fig) {
             InvalidateRect(hWnd, NULL, NULL);
         }
         else {
-            make_move(hWnd);
+            if (use_move_check_and_log) {
+                make_move(hWnd);
+            }
+            else if (is_valid_coords(motion_input.get_input().target)) {
+                board.move_fig(motion_input.get_input());
+                motion_input.clear();
+            }
         }
     }
 }
@@ -406,6 +411,16 @@ void draw_board(HDC hdc) {
     }
 }
 
+// Положение курсора и выделенной клетки
+void draw_input(HDC hdcMem, Input input) {
+    static const HBRUSH RED{ CreateSolidBrush(RGB(255, 0, 0)) };
+    static const HBRUSH BLUE{ CreateSolidBrush(RGB(0, 0, 255)) };
+    const RECT from_cell = main_window.get_cell(input.from);
+    const RECT targ_cell = main_window.get_cell(input.target);
+    FillRect(hdcMem, &from_cell, RED);
+    FillRect(hdcMem, &targ_cell, BLUE);
+}
+
 /* Отрисовать фигуры на поле (та, что в руке, не рисуется) */
 void draw_figures_on_board(HDC hdc) {
     for (const auto& figure : board.all_figures()) {
@@ -460,7 +475,7 @@ HWND create_figures_list_window(HWND parent) {
     const auto create_window = [&hWindow, &parent]() -> HWND {
         if (hWindow = CreateWindow(FIGURES_LIST_WINDOW_CLASS_NAME, FIGURES_LIST_WINDOW_TITLE, WS_OVERLAPPEDWINDOW | WS_VSCROLL | WS_HSCROLL,
             FIGURES_LIST_WINDOW_DEFAULT_POS.x, FIGURES_LIST_WINDOW_DEFAULT_POS.y,
-            FIGURES_LIST_WINDOW_DEFAULT_DIMENTIONS.x, FIGURES_LIST_WINDOW_DEFAULT_DIMENTIONS.y,
+            figures_list.get_width_with_extra(), figures_list.get_height_with_extra(),
             parent, nullptr, hInst, nullptr), !hWindow)
             return nullptr;
         ShowWindow(hWindow, SW_SHOWDEFAULT);

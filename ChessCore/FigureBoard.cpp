@@ -133,7 +133,7 @@ void FigureBoard::reset_castling(bool castle_state) {
     castling.clear();
     for (const Color& col : { Color::Black, Color::White }) {
         for (const auto& aspt_to_rook : get_figures_of(col)) {
-            if (aspt_to_rook->get_type() == FigureType::Rook) {
+            if (aspt_to_rook->is(FigureType::Rook)) {
                 castling[aspt_to_rook->get_id()] = castle_state;
             }
         }

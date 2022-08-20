@@ -49,6 +49,9 @@ public:
         fig->move_to(to);
         figures[fig->get_pos()] = fig;
     }
+    void move_fig(Input input) {
+        move_fig(get_fig(input.from), input.target);
+    }
     bool has_castling(Id id) { return castling[id]; }
     void off_castling(Id id) { castling[id] = false; }
     void on_castling(Id id)  { castling[id] = true; }
