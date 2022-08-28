@@ -87,9 +87,9 @@ INT_PTR CALLBACK about_proc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPara
 /// <param name="w_beg">Левая координата</param>
 /// <param name="h_beg">Верхняя координата</param>
 /// <param name="is_transpanent">Сделать ли фон прозрачным</param>
-void draw_figure(HDC hdc, Color col, FigureType type, Pos begin_paint, bool is_transpanent, int h, int w) {
-    const int h_beg = begin_paint.x * h;
+void draw_figure(HDC hdc, Color col, FigureType type, Pos begin_paint, bool is_transpanent, int w, int h) {
     const int w_beg = begin_paint.y * w;
+    const int h_beg = begin_paint.x * h;
     int h_end = h_beg + h;
     int w_end = w_beg + h;
     HBITMAP hBitmap = pieces_bitmaps[col_to_char(col)][figure_type_to_char(type)];
@@ -112,7 +112,7 @@ void draw_figure(HDC hdc, Color col, FigureType type, Pos begin_paint, bool is_t
 }
 
 void draw_figure(HDC hdc, Color col, FigureType type, Pos begin_paint, bool is_transpanent) {
-    draw_figure(hdc, col, type, begin_paint, is_transpanent, main_window.get_cell_height(), main_window.get_cell_width());
+    draw_figure(hdc, col, type, begin_paint, is_transpanent, main_window.get_cell_width(), main_window.get_cell_height());
 }
 
 /// <summary>
@@ -137,9 +137,9 @@ void make_move(HWND hWnd) {
         return;
     }
 
-    #ifdef ALLOCATE_CONSOLE
+    #ifdef _DEBUG
         std::cout << "Curr move was: " << move_rec.as_string() << '\n';
-    #endif // ALLOCATE_CONSOLE
+    #endif // _DEBUG
 
     board.set_last_move({ motion_input.get_in_hand(), motion_input.get_input(), turn, move_rec.ms, move_rec.promotion_choice });
     turn = what_next(turn);
@@ -278,7 +278,7 @@ void on_lbutton_up(HWND hWnd, WPARAM wParam, LPARAM lParam, Pos where_fig, bool 
     else {
         motion_input.set_target(where_fig.x, where_fig.y);
         if (motion_input.is_target_at_input()) {
-            if (main_window.get_prev_lbutton_click() != Pos(HIWORD(lParam), LOWORD(lParam))) { // Отпустили в пределах клетки, но в другом месте
+            if (main_window.get_prev_lbutton_click() != Pos(LOWORD(lParam), HIWORD(lParam))) { // Отпустили в пределах клетки, но в другом месте
                 motion_input.clear();
                 InvalidateRect(hWnd, NULL, NULL);
                 return;
@@ -326,7 +326,7 @@ void MotionInput::init_curr_choice_window(HWND hWnd, WNDPROC callback) {
     curr_chose_window = create_curr_choice_window(hWnd, in_hand, mouse,
         main_window.get_cell_width(), main_window.get_cell_height(),
         callback);
-    InvalidateRect(hWnd, NULL, NULL);
+    RedrawWindow(hWnd, NULL, NULL, RDW_INVALIDATE | RDW_UPDATENOW);  // Форсирую перерисовку, т.к. появляется артефакт
     SendMessage(curr_chose_window, WM_NCLBUTTONDOWN, HTCAPTION, MAKELPARAM(mouse.x, mouse.y));
 }
 
@@ -415,8 +415,8 @@ void draw_board(HDC hdc) {
 void draw_input(HDC hdcMem, Input input) {
     static const HBRUSH RED{ CreateSolidBrush(RGB(255, 0, 0)) };
     static const HBRUSH BLUE{ CreateSolidBrush(RGB(0, 0, 255)) };
-    const RECT from_cell = main_window.get_cell(input.from);
-    const RECT targ_cell = main_window.get_cell(input.target);
+    const RECT from_cell = main_window.get_cell(change_axes(input.from));
+    const RECT targ_cell = main_window.get_cell(change_axes(input.target));
     FillRect(hdcMem, &from_cell, RED);
     FillRect(hdcMem, &targ_cell, BLUE);
 }

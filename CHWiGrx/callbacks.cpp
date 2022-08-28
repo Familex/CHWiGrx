@@ -200,21 +200,21 @@ LRESULT CALLBACK mainproc::game_switch(HWND hWnd, UINT message, WPARAM wParam, L
     case WM_RBUTTONDOWN:
         motion_input.clear();
         InvalidateRect(hWnd, NULL, NULL);
-#ifdef ALLOCATE_CONSOLE
-        std::cout << "Curr board: " << board.get_repr(true).as_string() << '\n';
-#endif // ALLOCATE_CONSOLE
+        #ifdef _DEBUG
+            std::cout << "Curr board: " << board.get_repr(true).as_string() << '\n';
+        #endif // _DEBUG
         break;
     case WM_LBUTTONDOWN:
     {
         motion_input.set_lbutton_down();
-        main_window.set_prev_lbutton_click({ HIWORD(lParam), LOWORD(lParam) });
+        main_window.set_prev_lbutton_click({ LOWORD(lParam), HIWORD(lParam) });
         motion_input.deactivate_by_pos();
         if (motion_input.is_active_by_click()) {
-            motion_input.set_target(main_window.divide_by_cell_size(HIWORD(lParam), LOWORD(lParam)));
+            motion_input.set_target(main_window.divide_by_cell_size(LOWORD(lParam), HIWORD(lParam)).change_axes());
             InvalidateRect(hWnd, NULL, NULL);
             return 0;
         }
-        Pos from = main_window.divide_by_cell_size(HIWORD(lParam), LOWORD(lParam));
+        Pos from = main_window.divide_by_cell_size(LOWORD(lParam), HIWORD(lParam)).change_axes();
         if (board.cont_fig(from)) {
             motion_input.set_from(from);
             motion_input.prepare(turn);
@@ -223,7 +223,7 @@ LRESULT CALLBACK mainproc::game_switch(HWND hWnd, UINT message, WPARAM wParam, L
     }
     break;
     case WM_LBUTTONUP:
-        on_lbutton_up(hWnd, wParam, lParam, main_window.divide_by_cell_size(HIWORD(lParam), LOWORD(lParam)));
+        on_lbutton_up(hWnd, wParam, lParam, main_window.divide_by_cell_size(LOWORD(lParam), HIWORD(lParam)).change_axes());
         break;
     case WM_MOVE:
         main_window.set_window_pos(LOWORD(lParam), HIWORD(lParam));
@@ -235,12 +235,12 @@ LRESULT CALLBACK mainproc::game_switch(HWND hWnd, UINT message, WPARAM wParam, L
             }
             else {
                 motion_input.init_curr_choice_window(hWnd,
-                    curr_choice_window_callback<true>);
+                    curr_choice_window_proc<true>);
             }
         }
         break;
     case WM_SIZE:
-        main_window.set_window_size(HIWORD(lParam), LOWORD(lParam));
+        main_window.set_window_size(LOWORD(lParam), HIWORD(lParam));
         InvalidateRect(hWnd, NULL, NULL);
         break;
     case WM_PAINT:
@@ -261,7 +261,7 @@ LRESULT CALLBACK mainproc::game_switch(HWND hWnd, UINT message, WPARAM wParam, L
             for (const auto& [is_eat, move_pos] : motion_input.get_possible_moves()) {
                 static const HBRUSH GREEN{ CreateSolidBrush(RGB(0, 255, 0)) };
                 static const HBRUSH DARK_GREEN{ CreateSolidBrush(RGB(0, 150, 0)) };
-                const RECT cell = main_window.get_cell(move_pos);
+                const RECT cell = main_window.get_cell(change_axes(move_pos));
                 if (is_eat) {
                     FillRect(hdcMem, &cell, DARK_GREEN);
                 }
@@ -365,16 +365,19 @@ LRESULT CALLBACK mainproc::edit_switch(HWND hWnd, UINT message, WPARAM wParam, L
             }
         }
             break;
+        case WM_LBUTTONUP:
+            on_lbutton_up(hWnd, wParam, lParam, main_window.divide_by_cell_size(LOWORD(lParam), HIWORD(lParam)).change_axes(), false);
+            break;
         case WM_LBUTTONDOWN:
         {
             motion_input.set_lbutton_down();
-            main_window.set_prev_lbutton_click({ HIWORD(lParam), LOWORD(lParam) });
+            main_window.set_prev_lbutton_click({ LOWORD(lParam), HIWORD(lParam) });
             if (motion_input.is_active_by_click()) {
-                motion_input.set_target(main_window.divide_by_cell_size(HIWORD(lParam), LOWORD(lParam)));
+                motion_input.set_target(main_window.divide_by_cell_size(LOWORD(lParam), HIWORD(lParam)).change_axes());
                 InvalidateRect(hWnd, NULL, NULL);
                 return 0;
             }
-            Pos from = main_window.divide_by_cell_size(HIWORD(lParam), LOWORD(lParam));
+            Pos from = main_window.divide_by_cell_size(LOWORD(lParam), HIWORD(lParam)).change_axes();
             if (board.cont_fig(from)) {
                 motion_input.set_from(from);
                 motion_input.set_in_hand(board.get_fig(from));
@@ -384,7 +387,7 @@ LRESULT CALLBACK mainproc::edit_switch(HWND hWnd, UINT message, WPARAM wParam, L
         case WM_MOUSEMOVE:
         {
             if (motion_input.is_drags()) {
-                motion_input.init_curr_choice_window(hWnd, curr_choice_window_callback<false>);
+                motion_input.init_curr_choice_window(hWnd, curr_choice_window_proc<false>);
             }
         }
             InvalidateRect(hWnd, NULL, NULL);
@@ -393,7 +396,7 @@ LRESULT CALLBACK mainproc::edit_switch(HWND hWnd, UINT message, WPARAM wParam, L
             main_window.set_window_pos(LOWORD(lParam), HIWORD(lParam));
             break;
         case WM_SIZE:
-            main_window.set_window_size(HIWORD(lParam), LOWORD(lParam));
+            main_window.set_window_size(LOWORD(lParam), HIWORD(lParam));
             InvalidateRect(hWnd, NULL, NULL);
             break;
         case WM_PAINT:
@@ -480,7 +483,6 @@ LRESULT CALLBACK figures_list_window_proc(HWND hWnd, UINT message, WPARAM wParam
             si.nPage = figures_list.get_height();
             SetScrollInfo(hWnd, SB_VERT, &si, TRUE);
         }
-            UpdateWindow(hWnd);
             break;
         case WM_HSCROLL:
         {
@@ -508,9 +510,8 @@ LRESULT CALLBACK figures_list_window_proc(HWND hWnd, UINT message, WPARAM wParam
             SetScrollInfo(hWnd, SB_VERT, &si, TRUE);
 
             SetWindowPos(hWnd, NULL, NULL, NULL,
-                figures_list.get_width(), figures_list.get_height(), SWP_NOMOVE);
+                figures_list.get_width_with_extra(), figures_list.get_height_with_extra(), SWP_NOMOVE);
         }
-            InvalidateRect(hWnd, NULL, NULL);
             break;
         case WM_VSCROLL:
         {
@@ -544,28 +545,25 @@ LRESULT CALLBACK figures_list_window_proc(HWND hWnd, UINT message, WPARAM wParam
             si.nPos = figures_list.get_curr_scroll();
             SetScrollInfo(hWnd, SB_VERT, &si, TRUE);
         }            
-            InvalidateRect(hWnd, NULL, NULL);
             break;
         case WM_SIZE:
         {
             is_resizes = true;
-            figures_list.set_window_size(HIWORD(lParam), LOWORD(lParam));
-            
+            figures_list.set_window_size(LOWORD(lParam), HIWORD(lParam));
             si.fMask = SIF_RANGE | SIF_PAGE | SIF_POS;
-            si.nMax = figures_list.get_all_figures_height();
+            si.nMax = static_cast<int>(figures_list.get_all_figures_height());
             si.nPage = figures_list.get_height();
             si.nPos = figures_list.get_curr_scroll();
             SetScrollInfo(hWnd, SB_VERT, &si, TRUE);
         }
-            InvalidateRect(hWnd, NULL, NULL);
             break;
         case WM_GETMINMAXINFO:
         {
-            LPMINMAXINFO lpMMI = (LPMINMAXINFO)lParam;
-            lpMMI->ptMinTrackSize.y = static_cast<LONG>(figures_list.get_cell_width());
-            lpMMI->ptMaxTrackSize.y = figures_list.get_all_figures_height() + HEADER_HEIGHT;
+            LPMINMAXINFO lpMMI = reinterpret_cast<LPMINMAXINFO>(lParam);
+            lpMMI->ptMinTrackSize.y = static_cast<LONG>(figures_list.get_cell_height());
+            lpMMI->ptMaxTrackSize.y = static_cast<int>(figures_list.get_all_figures_height()) + HEADER_HEIGHT;
         }
-            break;
+        break;
         case WM_PAINT:
         {
             hdc = BeginPaint(hWnd, &ps);
@@ -634,11 +632,11 @@ LRESULT CALLBACK figures_list_window_proc(HWND hWnd, UINT message, WPARAM wParam
         case WM_LBUTTONDOWN:
         {
             motion_input.set_lbutton_down();
-            Pos figure_to_drag = {
+            Pos figure_to_drag = Pos(
                 (LOWORD(lParam)) / static_cast<int>(figures_list.get_cell_width()),
                 (HIWORD(lParam) + figures_list.get_curr_scroll()) / static_cast<int>(figures_list.get_cell_width())
-            };
-            size_t index = figure_to_drag.y * figures_list.get_figures_in_row() + figure_to_drag.x;
+            ).change_axes();
+            size_t index = figure_to_drag.x * figures_list.get_figures_in_row() + figure_to_drag.y;
             if (index >= figures_prototypes[curr_color].size()) break;  // there was a click in a non-standard part of the window => ignore
             motion_input.set_in_hand(FigureFabric::instance()->create(figures_prototypes[curr_color][index], false));
         }
@@ -652,7 +650,7 @@ LRESULT CALLBACK figures_list_window_proc(HWND hWnd, UINT message, WPARAM wParam
         case WM_MOUSEMOVE:
         {
             if (motion_input.is_drags()) {
-                motion_input.init_curr_choice_window(hWnd, curr_choice_window_callback_figures_list);
+                motion_input.init_curr_choice_window(hWnd, curr_choice_window_figures_list_proc);
             }
         }
             break;
@@ -676,8 +674,8 @@ LRESULT CALLBACK figures_list_window_proc(HWND hWnd, UINT message, WPARAM wParam
     return static_cast<LRESULT>(0);
 }
 
-template <int check_moves_validity>
-LRESULT CALLBACK curr_choice_window_callback(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
+template <bool check_moves_validity>
+LRESULT CALLBACK curr_choice_window_proc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
     static const int TO_DESTROY_TIMER_ID{ MAIN_WINDOW_CHOICE_TIMER_ID };
     switch (uMsg) {
         case WM_CREATE:
@@ -697,14 +695,9 @@ LRESULT CALLBACK curr_choice_window_callback(HWND hWnd, UINT uMsg, WPARAM wParam
             HWND parent = GetParent(hWnd);
             POINT cur_pos{};
             GetCursorPos(&cur_pos);
-            RECT parent_window;
-            GetWindowRect(parent, &parent_window);
-            Pos where_fig = main_window.divide_by_cell_size(
-                (cur_pos.y - parent_window.top - HEADER_HEIGHT),
-                (cur_pos.x - parent_window.left)
-            );
+            Pos where_fig = main_window.get_figure_under_mouse(cur_pos);
             if (!check_moves_validity && !is_valid_coords(where_fig)) {
-                // Вынесли фигуру за пределы доски => удаляем с доски
+                // Вынесли фигуру за пределы доски без проверки валидности => удаляем с доски
                 board.delete_fig(
                     reinterpret_cast<Figure*>(GetWindowLongPtr(hWnd, GWLP_USERDATA))->get_pos()
                 );
@@ -737,7 +730,7 @@ LRESULT CALLBACK curr_choice_window_callback(HWND hWnd, UINT uMsg, WPARAM wParam
     return static_cast<LRESULT>(0);
 }
 
-LPARAM CALLBACK curr_choice_window_callback_figures_list(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
+LRESULT CALLBACK curr_choice_window_figures_list_proc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
     // выбранная фигура временная => удаляется при закрытии окна
     static const int TO_DESTROY_TIMER_ID{ FIGURES_LIST_CHOICE_TIMER_ID };
     switch (uMsg) {
@@ -758,14 +751,9 @@ LPARAM CALLBACK curr_choice_window_callback_figures_list(HWND hWnd, UINT uMsg, W
         HWND hmain_window = GetWindow(GetParent(hWnd), GW_OWNER);
         POINT cur_pos{};
         GetCursorPos(&cur_pos);
-        RECT main_window_rect;
-        GetWindowRect(hmain_window, &main_window_rect);
         RECT figures_list;
         GetWindowRect(GetParent(hWnd), &figures_list);
-        Pos where_fig = main_window.divide_by_cell_size(
-            (cur_pos.y - main_window_rect.top - HEADER_HEIGHT),
-            (cur_pos.x - main_window_rect.left)
-        );
+        Pos where_fig = main_window.get_figure_under_mouse(cur_pos);
         if (is_valid_coords(where_fig) &&
             !(figures_list.top <= cur_pos.y && cur_pos.y <= figures_list.bottom &&
                 figures_list.left <= cur_pos.x && cur_pos.x <= figures_list.right)) {

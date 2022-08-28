@@ -3,6 +3,8 @@
 #include <variant>
 
 class FigureBoard {
+    /*  x-axis from top to bottom (↓)  **
+    **  y-axis from left to right (→)  */
 public:
     FigureBoard(BoardRepr);
     void reset(const BoardRepr&);

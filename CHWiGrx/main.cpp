@@ -23,15 +23,14 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
         pieces_bitmaps['W']['H'] = LoadBitmap(hInstance, MAKEINTRESOURCE(IDB_WHITE_KNIGHT));
     }
 
-    #ifdef ALLOCATE_CONSOLE
+    #ifdef _DEBUG
     if (AllocConsole()) {
         FILE* tmp;
         freopen_s(&tmp, "conin$", "r", stdin);
         freopen_s(&tmp, "conout$", "w", stdout);
         freopen_s(&tmp, "conout$", "w", stderr);
     }
-    #endif // ALLOCATE_CONSOLE
-
+    #endif // _DEBUG
     if (!prepare_window(hInstance, nCmdShow, IDS_APP_TITLE, IDC_CHWIGRX,
         {
             .cbSize = sizeof(WNDCLASSEX),

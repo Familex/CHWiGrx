@@ -52,8 +52,13 @@ struct Pos {
         if (this->y >= max_y) this->y = 0;
         if (this->y < 0) this->y = max_y - 1;
     }
+    Pos change_axes() { std::swap(x, y); return *this; }
     bool in(std::vector<Pos> lst) { return std::find(lst.begin(), lst.end(), *this) != lst.end(); }
 };
+
+inline Pos change_axes(const Pos val) {
+    return Pos(val.y, val.x);
+}
 
 enum class Color { None, Black, White };
 Color char_to_col(char);

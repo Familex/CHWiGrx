@@ -4,14 +4,11 @@
 #include "framework.hpp"
 #include "../ChessCore/FigureBoard.h"
 
-// #define ALLOCATE_CONSOLE
-
-#ifdef ALLOCATE_CONSOLE
+#ifdef _DEBUG
 #include <stdio.h>
 #include <iostream>
 #include <string>
-using namespace std::string_literals;
-#endif // ALLOCATE_CONSOLE
+#endif // _DEBUG
 
 /* virtual keys for numbers */
 #define VK_0 48
@@ -38,6 +35,7 @@ const int HEADER_HEIGHT = GetSystemMetrics(SM_CXPADDEDBORDER) +
                           GetSystemMetrics(SM_CYMENUSIZE)     +
                           GetSystemMetrics(SM_CYCAPTION)      +
                           GetSystemMetrics(SM_CYFRAME);
+const int SCROLLBAR_WIDTH = GetSystemMetrics(SM_CXVSCROLL);
 inline const LPCTSTR FIGURES_LIST_WINDOW_CLASS_NAME = L"CHWIGRX:LIST";
 inline const LPCTSTR FIGURES_LIST_WINDOW_TITLE = L"Figures list";
 inline const LPCTSTR CURR_CHOICE_WINDOW_CLASS_NAME = L"CHWIGRX:CHOICE";
@@ -96,9 +94,9 @@ inline void Rectangle(HDC hdc, RECT rect) { Rectangle(hdc, rect.left, rect.top, 
 /* WNDPROC functions */
 LRESULT CALLBACK main_window_proc(HWND, UINT, WPARAM, LPARAM);
 LRESULT CALLBACK figures_list_window_proc(HWND, UINT, WPARAM, LPARAM);
-template <int>
-LRESULT CALLBACK curr_choice_window_callback(HWND, UINT, WPARAM, LPARAM);
-LRESULT CALLBACK curr_choice_window_callback_figures_list(HWND, UINT, WPARAM, LPARAM);
+template <bool>
+LRESULT CALLBACK curr_choice_window_proc(HWND, UINT, WPARAM, LPARAM);
+LRESULT CALLBACK curr_choice_window_figures_list_proc(HWND, UINT, WPARAM, LPARAM);
 
 class WindowStats {
     /* Габариты окна для отрисовки и захвата ввода */
@@ -109,9 +107,8 @@ public:
     void virtual recalculate_cell_size() {
         cell_size = { window_size.x / WIDTH, window_size.y / HEIGHT };
     }
-    void virtual set_window_size(int x /* HIWORD */, int y /* LOWORD */) {
-        this->window_size.x = x;
-        this->window_size.y = y;
+    void virtual set_window_size(int x /* LOWORD */, int y /* HIWORD */) {
+        this->window_size = { x, y };
         recalculate_cell_size();
     }
     void set_window_size(Pos window_size) {
@@ -121,12 +118,12 @@ public:
         set_window_pos({ rect.left, rect.top });
         set_window_size(rect.right - rect.left, rect.bottom - rect.top);
     }
-    inline int get_height() { return window_size.x; }
-    inline int get_width() { return window_size.y; }
-    inline int get_height_with_extra() { return window_size.x + EXTRA_WINDOW_SIZE.x; }
-    inline int get_width_with_extra() { return window_size.y + EXTRA_WINDOW_SIZE.y; }
-    inline int get_cell_height() { return cell_size.x; }
-    inline int get_cell_width() { return cell_size.y; }
+    inline int get_width() { return window_size.x; }
+    inline int get_height() { return window_size.y; }
+    inline virtual int get_width_with_extra() { return window_size.x + EXTRA_WINDOW_SIZE.x; }
+    inline virtual int get_height_with_extra() { return window_size.y + EXTRA_WINDOW_SIZE.y; }
+    inline int get_cell_width() { return cell_size.x; }
+    inline int get_cell_height() { return cell_size.y; }
     inline void set_prev_lbutton_click(Pos plbc) { prev_lbutton_click = plbc; }
     inline Pos get_prev_lbutton_click() { return prev_lbutton_click; }
     inline void set_window_pos(Pos wp) { window_pos = wp; }
@@ -146,17 +143,23 @@ public:
     }
     inline RECT get_cell(Pos start) {
         return {
-            start.y * cell_size.y + INDENTATION_FROM_EDGES,
-            start.x * cell_size.x + INDENTATION_FROM_EDGES,
-            (start.y + 1) * cell_size.y - INDENTATION_FROM_EDGES * 2,
-            (start.x + 1) * cell_size.x - INDENTATION_FROM_EDGES * 2
+            .left = start.x * cell_size.x + INDENTATION_FROM_EDGES,
+            .top = start.y * cell_size.y + INDENTATION_FROM_EDGES,
+            .right = (start.x + 1) * cell_size.x - INDENTATION_FROM_EDGES * 2,
+            .bottom = (start.y + 1) * cell_size.y - INDENTATION_FROM_EDGES * 2
         };
     }
     inline RECT get_cell(int i, int j) { return get_cell({ i, j }); }
+    inline Pos get_figure_under_mouse(POINT mouse) {
+        return divide_by_cell_size(
+            mouse.x - window_pos.x,
+            mouse.y - window_pos.y
+        ).change_axes();
+    }
     virtual ~WindowStats() {};
 protected:
     const int UNITS_TO_MOVE_ENOUGH = { 2 };
-    const Pos EXTRA_WINDOW_SIZE = { 59, 16 };
+    const Pos EXTRA_WINDOW_SIZE = { 0, HEADER_HEIGHT };
     Pos window_pos;
     Pos prev_lbutton_click{};
     Pos window_size;
@@ -171,21 +174,27 @@ public:
     FiguresListStats(Pos window_pos, Pos window_size, size_t figures_in_row, size_t figures_num)
         : WindowStats(window_pos, window_size), figures_in_row(figures_in_row) {
         int rows_num = static_cast<int>(ceil(figures_num / static_cast<double>(figures_in_row)));
-        total_height_of_all_figures = static_cast<int>(rows_num * cell_size.x);
+        total_height_of_all_figures = static_cast<int>(rows_num * cell_size.y);
     }
     void set_window_size(int w, int h) override {
         WindowStats::set_window_size(w, h);
         recalculate_dimensions();
     }
     void recalculate_cell_size() override {
-        cell_size.x = static_cast<int>(std::max(0, window_size.y) / figures_in_row);
-        cell_size.y = cell_size.x;
+        cell_size.x = cell_size.y = static_cast<int>(std::max(0, window_size.x) / figures_in_row);
+    }
+    inline int get_width_with_extra() override {
+        // Может не быть слайдера TODO
+        return WindowStats::get_width_with_extra() + SCROLLBAR_WIDTH;
+    }
+    inline int get_height_with_extra() override {
+        return WindowStats::get_height_with_extra() + SCROLLBAR_WIDTH;
     }
     void recalculate_dimensions() {
         recalculate_cell_size();
         int rows_num = static_cast<int>(ceil(MAX_FIGURES_IN_ROW / static_cast<double>(figures_in_row)));
-        total_height_of_all_figures = static_cast<int>(rows_num * cell_size.x);
-        max_scroll = std::max(static_cast<int>(total_height_of_all_figures), window_size.x);
+        total_height_of_all_figures = static_cast<int>(rows_num * cell_size.y);
+        max_scroll = std::max(static_cast<int>(total_height_of_all_figures), window_size.y);
     }
     inline size_t get_figures_in_row() const { return figures_in_row; }
     inline void inc_figures_in_row() { if (figures_in_row < MAX_FIGURES_IN_ROW) figures_in_row++; }
