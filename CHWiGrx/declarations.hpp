@@ -35,14 +35,14 @@ const int HEADER_HEIGHT = GetSystemMetrics(SM_CXPADDEDBORDER) +
                           GetSystemMetrics(SM_CYMENUSIZE)     +
                           GetSystemMetrics(SM_CYCAPTION)      +
                           GetSystemMetrics(SM_CYFRAME);
-const int SCROLLBAR_WIDTH = GetSystemMetrics(SM_CXVSCROLL);
+const int SCROLLBAR_THICKNESS = GetSystemMetrics(SM_CXVSCROLL);
 inline const LPCTSTR FIGURES_LIST_WINDOW_CLASS_NAME = L"CHWIGRX:LIST";
 inline const LPCTSTR FIGURES_LIST_WINDOW_TITLE = L"Figures list";
 inline const LPCTSTR CURR_CHOICE_WINDOW_CLASS_NAME = L"CHWIGRX:CHOICE";
 inline const Pos FIGURES_LIST_WINDOW_DEFAULT_POS = { CW_USEDEFAULT, CW_USEDEFAULT };
 inline const Pos FIGURES_LIST_WINDOW_DEFAULT_DIMENTIONS = { 300, 300 };
-inline constexpr auto MAIN_WINDOW_CHOICE_TIMER_ID = 1;
-inline constexpr auto FIGURES_LIST_CHOICE_TIMER_ID = 2;
+inline constexpr auto MAIN_WINDOW_CHOICE_TO_DESTROY_TIMER_ID = 1;
+inline constexpr auto FIGURES_LIST_CHOICE_TO_DESTROY_TIMER_ID = 2;
 inline constexpr auto TO_DESTROY_ELAPSE_DEFAULT_IN_MS = 5;
 
 /* single mutable globals */
@@ -72,6 +72,7 @@ void set_menu_checkbox(HWND, UINT, bool);
 std::string take_str_from_clip();
 void update_check_title(HWND);
 void on_lbutton_up(HWND, WPARAM, LPARAM, Pos where_fig, bool=true);
+void on_lbutton_down(HWND, LPARAM);
 void restart();
 void copy_repr_to_clip();
 void make_move(HWND);
@@ -107,16 +108,16 @@ public:
     void virtual recalculate_cell_size() {
         cell_size = { window_size.x / WIDTH, window_size.y / HEIGHT };
     }
-    void virtual set_window_size(int x /* LOWORD */, int y /* HIWORD */) {
+    void virtual set_size(int x /* LOWORD */, int y /* HIWORD */) {
         this->window_size = { x, y };
         recalculate_cell_size();
     }
-    void set_window_size(Pos window_size) {
-        set_window_size(window_size.x, window_size.y);
+    void set_size(Pos window_size) {
+        set_size(window_size.x, window_size.y);
     }
     inline void set_rect(RECT rect) {
-        set_window_pos({ rect.left, rect.top });
-        set_window_size(rect.right - rect.left, rect.bottom - rect.top);
+        set_pos({ rect.left, rect.top });
+        set_size(rect.right - rect.left, rect.bottom - rect.top);
     }
     inline int get_width() { return window_size.x; }
     inline int get_height() { return window_size.y; }
@@ -126,8 +127,8 @@ public:
     inline int get_cell_height() { return cell_size.y; }
     inline void set_prev_lbutton_click(Pos plbc) { prev_lbutton_click = plbc; }
     inline Pos get_prev_lbutton_click() { return prev_lbutton_click; }
-    inline void set_window_pos(Pos wp) { window_pos = wp; }
-    inline void set_window_pos(int x, int y) { window_pos.x = x; window_pos.y = y; }
+    inline void set_pos(Pos wp) { window_pos = wp; }
+    inline void set_pos(int x, int y) { window_pos.x = x; window_pos.y = y; }
     inline int get_window_pos_x() { return window_pos.x; }
     inline int get_window_pos_y() { return window_pos.y; }
     inline bool is_mouse_moved_enough(Pos mouse) {
@@ -176,8 +177,8 @@ public:
         int rows_num = static_cast<int>(ceil(figures_num / static_cast<double>(figures_in_row)));
         total_height_of_all_figures = static_cast<int>(rows_num * cell_size.y);
     }
-    void set_window_size(int w, int h) override {
-        WindowStats::set_window_size(w, h);
+    void set_size(int w, int h) override {
+        WindowStats::set_size(w, h);
         recalculate_dimensions();
     }
     void recalculate_cell_size() override {
@@ -185,10 +186,10 @@ public:
     }
     inline int get_width_with_extra() override {
         // Может не быть слайдера TODO
-        return WindowStats::get_width_with_extra() + SCROLLBAR_WIDTH;
+        return WindowStats::get_width_with_extra() + SCROLLBAR_THICKNESS;
     }
     inline int get_height_with_extra() override {
-        return WindowStats::get_height_with_extra() + SCROLLBAR_WIDTH;
+        return WindowStats::get_height_with_extra() + SCROLLBAR_THICKNESS;
     }
     void recalculate_dimensions() {
         recalculate_cell_size();
@@ -238,7 +239,10 @@ public:
     void prepare(Color turn);
     void calculate_possible_moves();
     void init_curr_choice_window(HWND, WNDPROC);
-    inline void activate_by_click() { input_order_by_two = true; }
+    inline void activate_by_click() { 
+        input_order_by_two = true;
+        input_order_by_one = 2;
+    }
     inline void deactivate_by_click() { input_order_by_two = false; }
     inline void deactivate_by_pos() { input_order_by_one = false; }
     inline void set_target(Pos target) { input.target = target; }

@@ -50,3 +50,4 @@
 /TODO.txt
 *.user
 /.vs/Chess/FileContentIndex
+*.claudiaideconfig

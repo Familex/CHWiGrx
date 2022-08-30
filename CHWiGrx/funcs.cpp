@@ -121,7 +121,6 @@ void draw_figure(HDC hdc, Color col, FigureType type, Pos begin_paint, bool is_t
 /// <param name="hWnd">Дескриптор окна</param>
 void make_move(HWND hWnd) {
     if (!motion_input.is_current_turn(turn)) {
-        motion_input.clear();
         InvalidateRect(hWnd, NULL, NULL);
         return;
     }
@@ -132,7 +131,6 @@ void make_move(HWND hWnd) {
     );
 
     if (!is_legal_move) {
-        motion_input.clear();
         InvalidateRect(hWnd, NULL, NULL);
         return;
     }
@@ -143,7 +141,6 @@ void make_move(HWND hWnd) {
 
     board.set_last_move({ motion_input.get_in_hand(), motion_input.get_input(), turn, move_rec.ms, move_rec.promotion_choice });
     turn = what_next(turn);
-    motion_input.clear();
     InvalidateRect(hWnd, NULL, NULL);
 
     GameEndType curr_game_end_state = board.game_end_check(turn);
@@ -270,7 +267,12 @@ void on_lbutton_up(HWND hWnd, WPARAM wParam, LPARAM lParam, Pos where_fig, bool 
     motion_input.set_lbutton_up();
     motion_input.deactivate_by_pos();
     if (motion_input.is_active_by_click()) {
-        make_move(hWnd);
+        if (use_move_check_and_log) {
+            make_move(hWnd);
+        }
+        else {
+            board.move_fig(motion_input.get_input());
+        }
         motion_input.clear();
         InvalidateRect(hWnd, NULL, NULL);
         return;
@@ -290,6 +292,7 @@ void on_lbutton_up(HWND hWnd, WPARAM wParam, LPARAM lParam, Pos where_fig, bool 
         else {
             if (use_move_check_and_log) {
                 make_move(hWnd);
+                motion_input.clear();
             }
             else if (is_valid_coords(motion_input.get_input().target)) {
                 board.move_fig(motion_input.get_input());
@@ -298,6 +301,24 @@ void on_lbutton_up(HWND hWnd, WPARAM wParam, LPARAM lParam, Pos where_fig, bool 
         }
     }
 }
+
+void on_lbutton_down(HWND hWnd, LPARAM lParam) {
+    motion_input.set_lbutton_down();
+    main_window.set_prev_lbutton_click({ LOWORD(lParam), HIWORD(lParam) });
+    motion_input.deactivate_by_pos();
+    if (motion_input.is_active_by_click()) {
+        motion_input.set_target(main_window.divide_by_cell_size(LOWORD(lParam), HIWORD(lParam)).change_axes());
+        InvalidateRect(hWnd, NULL, NULL);
+    }
+    else {
+        Pos from = main_window.divide_by_cell_size(LOWORD(lParam), HIWORD(lParam)).change_axes();
+        if (board.cont_fig(from)) {
+            motion_input.set_from(from);
+            motion_input.prepare(turn);
+        }
+    }
+    InvalidateRect(hWnd, NULL, NULL);
+};
 
 bool is_legal_board_repr(const std::string& str) {
     return (str.find('<') != str.npos &&

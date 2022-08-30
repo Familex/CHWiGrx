@@ -1,11 +1,11 @@
 #include "declarations.hpp"
 
 LRESULT CALLBACK main_window_proc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) {
-    static PAINTSTRUCT ps;
-    static HBITMAP hbmMem;
-    static HGDIOBJ hOld;
-    static HDC hdcMem;
-    static HDC hdc;
+    static PAINTSTRUCT ps{};
+    static HBITMAP hbmMem{};
+    static HGDIOBJ hOld{};
+    static HDC hdcMem{};
+    static HDC hdc{};
     switch (window_state) {
         case WindowState::GAME:
             return mainproc::game_switch(hWnd, message, wParam, lParam, ps, hbmMem, hOld, hdcMem, hdc);
@@ -205,32 +205,20 @@ LRESULT CALLBACK mainproc::game_switch(HWND hWnd, UINT message, WPARAM wParam, L
         #endif // _DEBUG
         break;
     case WM_LBUTTONDOWN:
-    {
-        motion_input.set_lbutton_down();
-        main_window.set_prev_lbutton_click({ LOWORD(lParam), HIWORD(lParam) });
-        motion_input.deactivate_by_pos();
-        if (motion_input.is_active_by_click()) {
-            motion_input.set_target(main_window.divide_by_cell_size(LOWORD(lParam), HIWORD(lParam)).change_axes());
-            InvalidateRect(hWnd, NULL, NULL);
-            return 0;
-        }
-        Pos from = main_window.divide_by_cell_size(LOWORD(lParam), HIWORD(lParam)).change_axes();
-        if (board.cont_fig(from)) {
-            motion_input.set_from(from);
-            motion_input.prepare(turn);
-        }
-        InvalidateRect(hWnd, NULL, NULL);
-    }
-    break;
+        on_lbutton_down(hWnd, lParam);
+        break;
     case WM_LBUTTONUP:
-        on_lbutton_up(hWnd, wParam, lParam, main_window.divide_by_cell_size(LOWORD(lParam), HIWORD(lParam)).change_axes());
+        on_lbutton_up(hWnd, wParam, lParam,
+            main_window.divide_by_cell_size(LOWORD(lParam), HIWORD(lParam)).change_axes()
+        );
         break;
     case WM_MOVE:
-        main_window.set_window_pos(LOWORD(lParam), HIWORD(lParam));
+        main_window.set_pos(LOWORD(lParam), HIWORD(lParam));
         break;
     case WM_MOUSEMOVE:
         if (motion_input.is_drags()) {
             if (motion_input.is_active_by_click()) {
+                // Отмена ввода при перетягивании конечной клетки
                 motion_input.clear();
             }
             else {
@@ -240,7 +228,7 @@ LRESULT CALLBACK mainproc::game_switch(HWND hWnd, UINT message, WPARAM wParam, L
         }
         break;
     case WM_SIZE:
-        main_window.set_window_size(LOWORD(lParam), HIWORD(lParam));
+        main_window.set_size(LOWORD(lParam), HIWORD(lParam));
         InvalidateRect(hWnd, NULL, NULL);
         break;
     case WM_PAINT:
@@ -366,37 +354,25 @@ LRESULT CALLBACK mainproc::edit_switch(HWND hWnd, UINT message, WPARAM wParam, L
         }
             break;
         case WM_LBUTTONUP:
-            on_lbutton_up(hWnd, wParam, lParam, main_window.divide_by_cell_size(LOWORD(lParam), HIWORD(lParam)).change_axes(), false);
+            on_lbutton_up(hWnd, wParam, lParam,
+                main_window.divide_by_cell_size(LOWORD(lParam), HIWORD(lParam)).change_axes(),
+                false
+            );
             break;
         case WM_LBUTTONDOWN:
-        {
-            motion_input.set_lbutton_down();
-            main_window.set_prev_lbutton_click({ LOWORD(lParam), HIWORD(lParam) });
-            if (motion_input.is_active_by_click()) {
-                motion_input.set_target(main_window.divide_by_cell_size(LOWORD(lParam), HIWORD(lParam)).change_axes());
-                InvalidateRect(hWnd, NULL, NULL);
-                return 0;
-            }
-            Pos from = main_window.divide_by_cell_size(LOWORD(lParam), HIWORD(lParam)).change_axes();
-            if (board.cont_fig(from)) {
-                motion_input.set_from(from);
-                motion_input.set_in_hand(board.get_fig(from));
-            }
-        }
+            on_lbutton_down(hWnd, lParam);
             break;
         case WM_MOUSEMOVE:
-        {
-            if (motion_input.is_drags()) {
+            if (!motion_input.is_active_by_click() && motion_input.is_drags()) {
                 motion_input.init_curr_choice_window(hWnd, curr_choice_window_proc<false>);
             }
-        }
             InvalidateRect(hWnd, NULL, NULL);
             break;
         case WM_MOVE:
-            main_window.set_window_pos(LOWORD(lParam), HIWORD(lParam));
+            main_window.set_pos(LOWORD(lParam), HIWORD(lParam));
             break;
         case WM_SIZE:
-            main_window.set_window_size(LOWORD(lParam), HIWORD(lParam));
+            main_window.set_size(LOWORD(lParam), HIWORD(lParam));
             InvalidateRect(hWnd, NULL, NULL);
             break;
         case WM_PAINT:
@@ -549,7 +525,7 @@ LRESULT CALLBACK figures_list_window_proc(HWND hWnd, UINT message, WPARAM wParam
         case WM_SIZE:
         {
             is_resizes = true;
-            figures_list.set_window_size(LOWORD(lParam), HIWORD(lParam));
+            figures_list.set_size(LOWORD(lParam), HIWORD(lParam));
             si.fMask = SIF_RANGE | SIF_PAGE | SIF_POS;
             si.nMax = static_cast<int>(figures_list.get_all_figures_height());
             si.nPage = figures_list.get_height();
@@ -560,8 +536,8 @@ LRESULT CALLBACK figures_list_window_proc(HWND hWnd, UINT message, WPARAM wParam
         case WM_GETMINMAXINFO:
         {
             LPMINMAXINFO lpMMI = reinterpret_cast<LPMINMAXINFO>(lParam);
-            lpMMI->ptMinTrackSize.y = static_cast<LONG>(figures_list.get_cell_height());
-            lpMMI->ptMaxTrackSize.y = static_cast<int>(figures_list.get_all_figures_height()) + HEADER_HEIGHT;
+            lpMMI->ptMinTrackSize.y = static_cast<LONG>(figures_list.get_cell_height() + SCROLLBAR_THICKNESS);
+            lpMMI->ptMaxTrackSize.y = static_cast<int>(figures_list.get_all_figures_height()) + HEADER_HEIGHT - SCROLLBAR_THICKNESS;
         }
         break;
         case WM_PAINT:
@@ -676,7 +652,7 @@ LRESULT CALLBACK figures_list_window_proc(HWND hWnd, UINT message, WPARAM wParam
 
 template <bool check_moves_validity>
 LRESULT CALLBACK curr_choice_window_proc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
-    static const int TO_DESTROY_TIMER_ID{ MAIN_WINDOW_CHOICE_TIMER_ID };
+    static const int TO_DESTROY_TIMER_ID{ MAIN_WINDOW_CHOICE_TO_DESTROY_TIMER_ID };
     switch (uMsg) {
         case WM_CREATE:
             SetTimer(hWnd, TO_DESTROY_TIMER_ID, TO_DESTROY_ELAPSE_DEFAULT_IN_MS, NULL);
@@ -687,7 +663,7 @@ LRESULT CALLBACK curr_choice_window_proc(HWND hWnd, UINT uMsg, WPARAM wParam, LP
                 SendMessage(hWnd, WM_EXITSIZEMOVE, NULL, NULL);
             }
             break;
-        case WM_ENTERSIZEMOVE:
+        case WM_ENTERSIZEMOVE: // Фигуру начали передвигать
             KillTimer(hWnd, TO_DESTROY_TIMER_ID);
             break;
         case WM_EXITSIZEMOVE: // Фигуру отпустил
@@ -732,7 +708,7 @@ LRESULT CALLBACK curr_choice_window_proc(HWND hWnd, UINT uMsg, WPARAM wParam, LP
 
 LRESULT CALLBACK curr_choice_window_figures_list_proc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
     // выбранная фигура временная => удаляется при закрытии окна
-    static const int TO_DESTROY_TIMER_ID{ FIGURES_LIST_CHOICE_TIMER_ID };
+    static const int TO_DESTROY_TIMER_ID{ FIGURES_LIST_CHOICE_TO_DESTROY_TIMER_ID };
     switch (uMsg) {
     case WM_CREATE:
         SetTimer(hWnd, TO_DESTROY_TIMER_ID, TO_DESTROY_ELAPSE_DEFAULT_IN_MS, NULL);
