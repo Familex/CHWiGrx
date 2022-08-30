@@ -206,11 +206,13 @@ LRESULT CALLBACK mainproc::game_switch(HWND hWnd, UINT message, WPARAM wParam, L
         break;
     case WM_LBUTTONDOWN:
         on_lbutton_down(hWnd, lParam);
+        InvalidateRect(hWnd, NULL, NULL);
         break;
     case WM_LBUTTONUP:
         on_lbutton_up(hWnd, wParam, lParam,
             main_window.divide_by_cell_size(lParam).change_axes()
         );
+        InvalidateRect(hWnd, NULL, NULL);
         break;
     case WM_MOVE:
         main_window.set_pos(lParam);
@@ -357,9 +359,11 @@ LRESULT CALLBACK mainproc::edit_switch(HWND hWnd, UINT message, WPARAM wParam, L
                 main_window.divide_by_cell_size(lParam).change_axes(),
                 false
             );
+            InvalidateRect(hWnd, NULL, NULL);
             break;
         case WM_LBUTTONDOWN:
             on_lbutton_down(hWnd, lParam);
+            InvalidateRect(hWnd, NULL, NULL);
             break;
         case WM_MOUSEMOVE:
             if (!motion_input.is_active_by_click() && motion_input.is_drags()) {

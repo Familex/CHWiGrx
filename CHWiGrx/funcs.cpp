@@ -292,14 +292,15 @@ void on_lbutton_up(HWND hWnd, WPARAM wParam, LPARAM lParam, Pos where_fig, bool 
             InvalidateRect(hWnd, NULL, NULL);
         }
         else {
-            if (use_move_check_and_log) {
-                make_move(hWnd);
-                motion_input.clear();
+            if (!motion_input.get_in_hand()->empty()) {
+                if (use_move_check_and_log) {
+                    make_move(hWnd);
+                }
+                else if (is_valid_coords(motion_input.get_input().target)) {
+                    board.move_fig(motion_input.get_input(), false);
+                }
             }
-            else if (is_valid_coords(motion_input.get_input().target)) {
-                board.move_fig(motion_input.get_input(), false);
-                motion_input.clear();
-            }
+            motion_input.clear();
         }
     }
 }
@@ -392,7 +393,7 @@ void MotionInput::clear() {
 void MotionInput::prepare(Color turn) {
     in_hand = board->get_fig(input.from);
     input.target = input.from;
-    if (in_hand->get_col() == turn && not in_hand->empty()) {
+    if (not in_hand->empty() && in_hand->get_col() == turn) {
         calculate_possible_moves();
     }
 }
