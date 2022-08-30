@@ -444,56 +444,37 @@ std::string to_string(MainEvent main_event) {
 }
 
 Figure* FigureFabric::create(Pos position, Color color, FigureType type, Id id, Figure* placement) {
+    this->id = std::max(id, this->id);  // this->id должен быть актуальным
     switch (type) {
         case FigureType::Pawn:
-            return placement
-                   ? new (placement) Figure(id, position, color, FigureType::Pawn)
-                   : new Figure(id, position, color, FigureType::Pawn);
         case FigureType::Knight:
-            return placement
-                   ? new (placement) Figure(id, position, color, FigureType::Knight)
-                   : new Figure(id, position, color, FigureType::Knight);
         case FigureType::Rook:
-            return placement
-                   ? new (placement) Figure(id, position, color, FigureType::Rook)
-                   : new Figure(id, position, color, FigureType::Rook);
         case FigureType::Bishop:
-            return placement
-                   ? new (placement) Figure(id, position, color, FigureType::Bishop)
-                   : new Figure(id, position, color, FigureType::Bishop);
         case FigureType::Queen:
-            return placement
-                   ? new (placement) Figure(id, position, color, FigureType::Queen)
-                   : new Figure(id, position, color, FigureType::Queen);
         case FigureType::King:
             return placement
-                   ? new (placement) Figure(id, position, color, FigureType::King)
-                   : new Figure(id, position, color, FigureType::King);
+                   ? new (placement) Figure(id++, position, color, type)
+                   : new Figure(id++, position, color, type);
         case FigureType::None:
-            return new Figure(id, position, Color::None, FigureType::None);
+            return new Figure(id++, position, Color::None, FigureType::None);
         default:
             return get_default_fig();
-        }
+    }
 }
 
 Figure* FigureFabric::create(Pos position, Color color, FigureType type) {
     switch (type) {
-    case FigureType::Pawn:
-        return new Figure(this->id++, position, color, FigureType::Pawn);
-    case FigureType::Knight:
-        return new Figure(this->id++, position, color, FigureType::Knight);
-    case FigureType::Rook:
-        return new Figure(this->id++, position, color, FigureType::Rook);
-    case FigureType::Bishop:
-        return new Figure(this->id++, position, color, FigureType::Bishop);
-    case FigureType::Queen:
-        return new Figure(this->id++, position, color, FigureType::Queen);
-    case FigureType::King:
-        return new Figure(this->id++, position, color, FigureType::King);
-    case FigureType::None:
-        return new Figure(this->id++, position, Color::None, FigureType::None);
-    default:
-        return get_default_fig();
+        case FigureType::Pawn:
+        case FigureType::Knight:
+        case FigureType::Rook:
+        case FigureType::Bishop:
+        case FigureType::Queen:
+        case FigureType::King:
+            return new Figure(this->id++, position, color, type);
+        case FigureType::None:
+            return new Figure(this->id++, position, Color::None, FigureType::None);
+        default:
+            return get_default_fig();
     }
 }
 

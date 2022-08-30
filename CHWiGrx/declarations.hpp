@@ -112,9 +112,8 @@ public:
         this->window_size = { x, y };
         recalculate_cell_size();
     }
-    void set_size(Pos window_size) {
-        set_size(window_size.x, window_size.y);
-    }
+    void set_size(Pos window_size) { set_size(window_size.x, window_size.y); }
+    void set_size(LPARAM lParam) { set_size(LOWORD(lParam), HIWORD(lParam)); }
     inline void set_rect(RECT rect) {
         set_pos({ rect.left, rect.top });
         set_size(rect.right - rect.left, rect.bottom - rect.top);
@@ -129,6 +128,7 @@ public:
     inline Pos get_prev_lbutton_click() { return prev_lbutton_click; }
     inline void set_pos(Pos wp) { window_pos = wp; }
     inline void set_pos(int x, int y) { window_pos.x = x; window_pos.y = y; }
+    inline void set_pos(LPARAM lParam) { set_pos(LOWORD(lParam), HIWORD(lParam)); }
     inline int get_window_pos_x() { return window_pos.x; }
     inline int get_window_pos_y() { return window_pos.y; }
     inline bool is_mouse_moved_enough(Pos mouse) {
@@ -142,6 +142,7 @@ public:
     inline Pos divide_by_cell_size(int x, int y) {
         return {x / cell_size.x, y / cell_size.y};
     }
+    inline Pos divide_by_cell_size(LPARAM lParam) { return divide_by_cell_size(LOWORD(lParam), HIWORD(lParam)); }
     inline RECT get_cell(Pos start) {
         return {
             .left = start.x * cell_size.x + INDENTATION_FROM_EDGES,
@@ -181,6 +182,7 @@ public:
         WindowStats::set_size(w, h);
         recalculate_dimensions();
     }
+    void set_size(LPARAM lParam) { set_size(LOWORD(lParam), HIWORD(lParam)); }
     void recalculate_cell_size() override {
         cell_size.x = cell_size.y = static_cast<int>(std::max(0, window_size.x) / figures_in_row);
     }

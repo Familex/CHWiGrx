@@ -209,11 +209,11 @@ LRESULT CALLBACK mainproc::game_switch(HWND hWnd, UINT message, WPARAM wParam, L
         break;
     case WM_LBUTTONUP:
         on_lbutton_up(hWnd, wParam, lParam,
-            main_window.divide_by_cell_size(LOWORD(lParam), HIWORD(lParam)).change_axes()
+            main_window.divide_by_cell_size(lParam).change_axes()
         );
         break;
     case WM_MOVE:
-        main_window.set_pos(LOWORD(lParam), HIWORD(lParam));
+        main_window.set_pos(lParam);
         break;
     case WM_MOUSEMOVE:
         if (motion_input.is_drags()) {
@@ -228,8 +228,7 @@ LRESULT CALLBACK mainproc::game_switch(HWND hWnd, UINT message, WPARAM wParam, L
         }
         break;
     case WM_SIZE:
-        main_window.set_size(LOWORD(lParam), HIWORD(lParam));
-        InvalidateRect(hWnd, NULL, NULL);
+        main_window.set_size(lParam);
         break;
     case WM_PAINT:
     {
@@ -355,7 +354,7 @@ LRESULT CALLBACK mainproc::edit_switch(HWND hWnd, UINT message, WPARAM wParam, L
             break;
         case WM_LBUTTONUP:
             on_lbutton_up(hWnd, wParam, lParam,
-                main_window.divide_by_cell_size(LOWORD(lParam), HIWORD(lParam)).change_axes(),
+                main_window.divide_by_cell_size(lParam).change_axes(),
                 false
             );
             break;
@@ -366,14 +365,12 @@ LRESULT CALLBACK mainproc::edit_switch(HWND hWnd, UINT message, WPARAM wParam, L
             if (!motion_input.is_active_by_click() && motion_input.is_drags()) {
                 motion_input.init_curr_choice_window(hWnd, curr_choice_window_proc<false>);
             }
-            InvalidateRect(hWnd, NULL, NULL);
             break;
         case WM_MOVE:
-            main_window.set_pos(LOWORD(lParam), HIWORD(lParam));
+            main_window.set_pos(lParam);
             break;
         case WM_SIZE:
-            main_window.set_size(LOWORD(lParam), HIWORD(lParam));
-            InvalidateRect(hWnd, NULL, NULL);
+            main_window.set_size(lParam);
             break;
         case WM_PAINT:
         {
@@ -413,7 +410,6 @@ LRESULT CALLBACK mainproc::edit_switch(HWND hWnd, UINT message, WPARAM wParam, L
 }
 
 LRESULT CALLBACK figures_list_window_proc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) {
-    
     SCROLLINFO si{.cbSize=sizeof(SCROLLINFO)};
     static PAINTSTRUCT ps;
     static HBITMAP hbmMem;
@@ -520,12 +516,12 @@ LRESULT CALLBACK figures_list_window_proc(HWND hWnd, UINT message, WPARAM wParam
             si.fMask = SIF_POS;
             si.nPos = figures_list.get_curr_scroll();
             SetScrollInfo(hWnd, SB_VERT, &si, TRUE);
-        }            
+        }
             break;
         case WM_SIZE:
         {
             is_resizes = true;
-            figures_list.set_size(LOWORD(lParam), HIWORD(lParam));
+            figures_list.set_size(lParam);
             si.fMask = SIF_RANGE | SIF_PAGE | SIF_POS;
             si.nMax = static_cast<int>(figures_list.get_all_figures_height());
             si.nPage = figures_list.get_height();

@@ -271,7 +271,9 @@ void on_lbutton_up(HWND hWnd, WPARAM wParam, LPARAM lParam, Pos where_fig, bool 
             make_move(hWnd);
         }
         else {
-            board.move_fig(motion_input.get_input());
+            if (!motion_input.is_target_at_input()) {
+                board.move_fig(motion_input.get_input(), false);
+            }
         }
         motion_input.clear();
         InvalidateRect(hWnd, NULL, NULL);
@@ -295,7 +297,7 @@ void on_lbutton_up(HWND hWnd, WPARAM wParam, LPARAM lParam, Pos where_fig, bool 
                 motion_input.clear();
             }
             else if (is_valid_coords(motion_input.get_input().target)) {
-                board.move_fig(motion_input.get_input());
+                board.move_fig(motion_input.get_input(), false);
                 motion_input.clear();
             }
         }
@@ -307,11 +309,11 @@ void on_lbutton_down(HWND hWnd, LPARAM lParam) {
     main_window.set_prev_lbutton_click({ LOWORD(lParam), HIWORD(lParam) });
     motion_input.deactivate_by_pos();
     if (motion_input.is_active_by_click()) {
-        motion_input.set_target(main_window.divide_by_cell_size(LOWORD(lParam), HIWORD(lParam)).change_axes());
+        motion_input.set_target(main_window.divide_by_cell_size(lParam).change_axes());
         InvalidateRect(hWnd, NULL, NULL);
     }
     else {
-        Pos from = main_window.divide_by_cell_size(LOWORD(lParam), HIWORD(lParam)).change_axes();
+        Pos from = main_window.divide_by_cell_size(lParam).change_axes();
         if (board.cont_fig(from)) {
             motion_input.set_from(from);
             motion_input.prepare(turn);

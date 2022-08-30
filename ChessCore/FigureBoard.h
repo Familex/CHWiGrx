@@ -42,17 +42,23 @@ public:
         }
         return tmp;
     }
-    void move_fig(Figure* fig, Pos to) {
+    void move_fig(Figure* fig, Pos to, bool capture=true) {
         Figure* maybe_eat = get_fig(to);
         if (not maybe_eat->empty()) {
-            capture_figure(maybe_eat);
+            if (capture) {
+                capture_figure(maybe_eat);
+            }
+            else {
+                figures.erase(maybe_eat->get_pos());
+                delete maybe_eat;
+            }
         }
         figures.erase(fig->get_pos());
         fig->move_to(to);
         figures[fig->get_pos()] = fig;
     }
-    void move_fig(Input input) {
-        move_fig(get_fig(input.from), input.target);
+    void move_fig(Input input, bool capture=true) {
+        move_fig(get_fig(input.from), input.target, capture);
     }
     bool has_castling(Id id) { return castling[id]; }
     void off_castling(Id id) { castling[id] = false; }
