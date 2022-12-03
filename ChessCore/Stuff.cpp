@@ -95,7 +95,7 @@ char col_to_char(Color col) {
 std::vector<Pos> to_pos_vector(const std::vector<Figure*>& lst) {
     std::vector<Pos> acc{};
     for (const auto& fig : lst) {
-        acc.push_back(fig->get_pos());
+        acc.emplace_back(fig->get_pos());
     }
     return acc;
 }
@@ -380,8 +380,9 @@ MoveRec::MoveRec(std::string map) {
 std::string BoardRepr::as_string() {
     std::string result{ "" };
     for (auto& fig : figures) {
+        auto pos = fig->get_pos();
         result += std::format("{};{};{};{};{};",
-            fig->get_id(), fig->get_pos().x, fig->get_pos().y, col_to_char(fig->get_col()), figure_type_to_char(fig->get_type())
+            fig->get_id(), pos.x, pos.y, col_to_char(fig->get_col()), figure_type_to_char(fig->get_type())
         );
     }
     result += std::format("[{}{}", get_idw_char(), get_turn_char());

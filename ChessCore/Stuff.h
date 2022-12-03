@@ -56,7 +56,7 @@ struct Pos {
     bool in(std::vector<Pos> lst) { return std::find(lst.begin(), lst.end(), *this) != lst.end(); }
 };
 
-inline Pos change_axes(const Pos val) {
+inline Pos change_axes(const Pos& val) {
     return Pos(val.y, val.x);
 }
 
@@ -149,7 +149,7 @@ public:
         delete DEFAULT;
     }
 private:
-    FigureFabric() {};
+    FigureFabric() = default;
     Figure* DEFAULT = new Figure();
     Id id{ 1 };
 };
@@ -229,7 +229,7 @@ public:
     BoardRepr(std::list<Figure*>&& figures, Color turn, bool idw, std::vector<MoveRec>&& past = {},
         std::vector<MoveRec>&& future = {}, std::list<Figure*>&& captured_figures = {}) :
         figures(figures), turn(turn), idw(idw), past(past),
-        future(future), captured_figures(captured_figures), can_castle(can_castle) {
+        future(future), captured_figures(captured_figures) {
         // all can castle by default
         for (auto fig : figures) {
             if (fig->is(FigureType::Rook)) {

@@ -208,7 +208,7 @@ bool FigureBoard::capture_figure(Figure* it) {
 /// </summary>
 /// <param name="it">Идентификатор фигуры</param>
 /// <returns>Получилось ли съесть</returns>
-bool FigureBoard::capture_figure(const Id& id) {
+bool FigureBoard::capture_figure(const Id id) {
     if (id == ERR_ID) { return false; }
     Figure* fig = get_fig(id);
     captured_figures.push_back(fig);
@@ -939,7 +939,7 @@ bool FigureBoard::restore_move() {
 /// Фигуры с полученным идендификатором не было в съеденных
 /// </exception>
 /// <param name="id">Идентификатор фигуры</param>
-void FigureBoard::uncapture_figure(const Id& id) {
+void FigureBoard::uncapture_figure(const Id id) {
     if (id == ERR_ID) return;
     auto to_resurrect_id = std::find_if(
         captured_figures.begin(), captured_figures.end(),

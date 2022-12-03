@@ -14,8 +14,8 @@ public:
     bool is_empty(Pos);
     bool is_empty() { return figures.size() <= 1; }
     bool capture_figure(Figure*);
-    bool capture_figure(const Id&);
-    void uncapture_figure(const Id&);
+    bool capture_figure(const Id);
+    void uncapture_figure(const Id);
     void delete_fig(Pos);
     void place_fig(Figure*);
     Figure* find_king(Color);

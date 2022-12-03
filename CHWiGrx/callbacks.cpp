@@ -318,6 +318,7 @@ LRESULT CALLBACK mainproc::edit_switch(HWND hWnd, UINT message, WPARAM wParam, L
                 {
                     board.reset(BoardRepr({}, turn, board.get_idw()));
                     motion_input.clear();
+                    InvalidateRect(hWnd, NULL, NULL);
                 }
                     break;
                 case IDM_TOGGLE_LIST_WINDOW:
