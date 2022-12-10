@@ -88,8 +88,8 @@ inline void Rectangle(HDC hdc, RECT rect) { Rectangle(hdc, rect.left, rect.top, 
 
 /* ---- WNDPROC functions ---------------------------------- */
 namespace mainproc {
-    LRESULT main_game_state_wndproc(HWND, UINT, WPARAM, LPARAM, PAINTSTRUCT, HBITMAP, HGDIOBJ, HDC, HDC);
-    LRESULT main_edit_state_wndproc(HWND, UINT, WPARAM, LPARAM, PAINTSTRUCT, HBITMAP, HGDIOBJ, HDC, HDC);
+    LRESULT main_game_state_wndproc(HWND, UINT, WPARAM, LPARAM);
+    LRESULT main_edit_state_wndproc(HWND, UINT, WPARAM, LPARAM);
 }
 LRESULT CALLBACK main_default_wndproc(HWND, UINT, WPARAM, LPARAM);
 LRESULT CALLBACK figures_list_wndproc(HWND, UINT, WPARAM, LPARAM);
