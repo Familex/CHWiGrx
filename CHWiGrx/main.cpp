@@ -35,7 +35,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
         {
             .cbSize = sizeof(WNDCLASSEX),
             .style = CS_HREDRAW | CS_VREDRAW,
-            .lpfnWndProc = main_window_proc,
+            .lpfnWndProc = main_default_wndproc,
             .cbClsExtra = 0,
             .cbWndExtra = 0,
             .hInstance = hInstance,

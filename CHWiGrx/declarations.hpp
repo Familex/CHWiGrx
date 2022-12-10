@@ -84,20 +84,18 @@ void draw_board(HDC);
 void draw_figures_on_board(HDC);
 void draw_input(HDC, Input);
 
-
-namespace mainproc {
-    LRESULT game_switch(HWND, UINT, WPARAM, LPARAM, PAINTSTRUCT, HBITMAP, HGDIOBJ, HDC, HDC);
-    LRESULT edit_switch(HWND, UINT, WPARAM, LPARAM, PAINTSTRUCT, HBITMAP, HGDIOBJ, HDC, HDC);
-}
-
 inline void Rectangle(HDC hdc, RECT rect) { Rectangle(hdc, rect.left, rect.top, rect.right, rect.bottom); }
 
-/* WNDPROC functions */
-LRESULT CALLBACK main_window_proc(HWND, UINT, WPARAM, LPARAM);
-LRESULT CALLBACK figures_list_window_proc(HWND, UINT, WPARAM, LPARAM);
+/* ---- WNDPROC functions ---------------------------------- */
+namespace mainproc {
+    LRESULT main_game_state_wndproc(HWND, UINT, WPARAM, LPARAM, PAINTSTRUCT, HBITMAP, HGDIOBJ, HDC, HDC);
+    LRESULT main_edit_state_wndproc(HWND, UINT, WPARAM, LPARAM, PAINTSTRUCT, HBITMAP, HGDIOBJ, HDC, HDC);
+}
+LRESULT CALLBACK main_default_wndproc(HWND, UINT, WPARAM, LPARAM);
+LRESULT CALLBACK figures_list_wndproc(HWND, UINT, WPARAM, LPARAM);
+LRESULT CALLBACK curr_choice_figures_list_wndproc(HWND, UINT, WPARAM, LPARAM);
 template <bool>
-LRESULT CALLBACK curr_choice_window_proc(HWND, UINT, WPARAM, LPARAM);
-LRESULT CALLBACK curr_choice_window_figures_list_proc(HWND, UINT, WPARAM, LPARAM);
+LRESULT CALLBACK curr_choice_wndproc(HWND, UINT, WPARAM, LPARAM);
 
 class WindowStats {
     /* Габариты окна для отрисовки и захвата ввода */

@@ -493,7 +493,7 @@ HWND create_figures_list_window(HWND parent) {
     wc.hCursor = LoadCursor(hInst, MAKEINTRESOURCE(IDC_MINIMAL_CURSOR));
     wc.hIcon = LoadIcon(hInst, MAKEINTRESOURCE(IDI_CHWIGRX));
     wc.hIconSm = LoadIcon(hInst, MAKEINTRESOURCE(IDI_CHWIGRX));
-    wc.lpfnWndProc = figures_list_window_proc;
+    wc.lpfnWndProc = figures_list_wndproc;
     wc.lpszClassName = FIGURES_LIST_WINDOW_CLASS_NAME;
     wc.style = CS_VREDRAW | CS_HREDRAW;
     const auto create_window = [&hWindow, &parent]() -> HWND {

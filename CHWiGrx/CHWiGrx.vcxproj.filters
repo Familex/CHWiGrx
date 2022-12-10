@@ -16,6 +16,9 @@
     <Filter Include="Файлы ресурсов\pieces">
       <UniqueIdentifier>{ebbc46bc-f73c-417d-aa62-1066d38b2e2b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="callbacks">
+      <UniqueIdentifier>{2b0ec98a-d535-4eca-9cab-ce312a5836ab}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="framework.hpp">
@@ -38,8 +41,23 @@
     <ClCompile Include="funcs.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
-    <ClCompile Include="callbacks.cpp">
-      <Filter>Исходные файлы</Filter>
+    <ClCompile Include="callbacks\main_default_wndproc.cpp">
+      <Filter>callbacks</Filter>
+    </ClCompile>
+    <ClCompile Include="callbacks\curr_choice_figures_list_wndproc.cpp">
+      <Filter>callbacks</Filter>
+    </ClCompile>
+    <ClCompile Include="callbacks\curr_choice_wndproc.cpp">
+      <Filter>callbacks</Filter>
+    </ClCompile>
+    <ClCompile Include="callbacks\figure_list_wndproc.cpp">
+      <Filter>callbacks</Filter>
+    </ClCompile>
+    <ClCompile Include="callbacks\main_edit_state_wndproc.cpp">
+      <Filter>callbacks</Filter>
+    </ClCompile>
+    <ClCompile Include="callbacks\main_game_state_wndproc.cpp">
+      <Filter>callbacks</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
