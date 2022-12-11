@@ -25,7 +25,7 @@ LRESULT CALLBACK main_default_wndproc(HWND hWnd, UINT message, WPARAM wParam, LP
                     break;
 
                 case IDM_EXIT:
-                    // нужно ли чистить память?
+                    // РЅСѓР¶РЅРѕ Р»Рё С‡РёСЃС‚РёС‚СЊ РїР°РјСЏС‚СЊ?
                     DestroyWindow(hWnd);
                     break;
             } 

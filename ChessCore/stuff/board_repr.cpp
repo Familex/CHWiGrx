@@ -29,7 +29,7 @@ std::string BoardRepr::as_string() {
     return result;
 }
 
-// Сведения о рокировке привязаны к id соответствующих ладей (заключены в квадратные скобки)
+// РЎРІРµРґРµРЅРёСЏ Рѕ СЂРѕРєРёСЂРѕРІРєРµ РїСЂРёРІСЏР·Р°РЅС‹ Рє id СЃРѕРѕС‚РІРµС‚СЃС‚РІСѓСЋС‰РёС… Р»Р°РґРµР№ (Р·Р°РєР»СЋС‡РµРЅС‹ РІ РєРІР°РґСЂР°С‚РЅС‹Рµ СЃРєРѕР±РєРё)
 BoardRepr::BoardRepr(std::string board_repr) {
     const size_t npos = std::string::npos;
     size_t meta_start = board_repr.find('[');
@@ -50,7 +50,7 @@ BoardRepr::BoardRepr(std::string board_repr) {
     for (const char& c : { 't', 'T', 'f', 'F', 'w', 'W', 'b', 'B' }) {
         remove_first_occurrence(meta, c);
     }
-    // здесь значение meta содержит только информацию о возможных рокировках
+    // Р·РґРµСЃСЊ Р·РЅР°С‡РµРЅРёРµ meta СЃРѕРґРµСЂР¶РёС‚ С‚РѕР»СЊРєРѕ РёРЅС„РѕСЂРјР°С†РёСЋ Рѕ РІРѕР·РјРѕР¶РЅС‹С… СЂРѕРєРёСЂРѕРІРєР°С…
     for (auto& castle_id : split(meta, ";")) {
         if (!castle_id.empty())
             can_castle.push_back(stoi(castle_id));

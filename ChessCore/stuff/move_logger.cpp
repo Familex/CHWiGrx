@@ -1,25 +1,25 @@
 #include "move_logger.h"
 
-// Возвращает последний сделанный ход
+// Р’РѕР·РІСЂР°С‰Р°РµС‚ РїРѕСЃР»РµРґРЅРёР№ СЃРґРµР»Р°РЅРЅС‹Р№ С…РѕРґ
 MoveRec MoveLogger::get_last_move() {
     if (prev_moves.empty())
         return {};
     return prev_moves.back();
 }
 
-// Добавляет в лог ход
+// Р”РѕР±Р°РІР»СЏРµС‚ РІ Р»РѕРі С…РѕРґ
 void MoveLogger::add(const MoveRec& move_rec) {
     prev_moves.push_back(move_rec);
     future_moves.clear();
 }
 
-// Обнуляет лог
+// РћР±РЅСѓР»СЏРµС‚ Р»РѕРі
 void MoveLogger::reset() {
     prev_moves.clear();
     future_moves.clear();
 }
 
-// Достает из будущих ходов следующий
+// Р”РѕСЃС‚Р°РµС‚ РёР· Р±СѓРґСѓС‰РёС… С…РѕРґРѕРІ СЃР»РµРґСѓСЋС‰РёР№
 MoveRec MoveLogger::pop_future_move() {
     if (future_moves.empty()) return {};
     MoveRec future = future_moves.back();
@@ -27,7 +27,7 @@ MoveRec MoveLogger::pop_future_move() {
     return future;
 }
 
-// Добавляет последний ход в следующие и возвращает его
+// Р”РѕР±Р°РІР»СЏРµС‚ РїРѕСЃР»РµРґРЅРёР№ С…РѕРґ РІ СЃР»РµРґСѓСЋС‰РёРµ Рё РІРѕР·РІСЂР°С‰Р°РµС‚ РµРіРѕ
 MoveRec MoveLogger::move_last_to_future() {
     if (prev_moves.empty()) return {};
     auto last = get_last_move();

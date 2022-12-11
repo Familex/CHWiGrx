@@ -1,7 +1,7 @@
 #include "figure_fabric.h"
 
 Figure* FigureFabric::create(Pos position, Color color, FigureType type, Id id, Figure* placement) {
-    this->id = std::max(id, this->id);  // this->id должен быть актуальным
+    this->id = std::max(id, this->id);  // this->id РґРѕР»Р¶РµРЅ Р±С‹С‚СЊ Р°РєС‚СѓР°Р»СЊРЅС‹Рј
     switch (type) {
     case FigureType::Pawn:
     case FigureType::Knight:
@@ -36,7 +36,7 @@ Figure* FigureFabric::create(Pos position, Color color, FigureType type) {
 }
 
 Figure* FigureFabric::get_default_fig() {
-    if (not DEFAULT->empty()) throw std::logic_error("default figure was deleted *.*"); // на время разработки - очень часто вылезает эта ошибка
+    if (not DEFAULT->empty()) throw std::logic_error("default figure was deleted *.*"); // РЅР° РІСЂРµРјСЏ СЂР°Р·СЂР°Р±РѕС‚РєРё - РѕС‡РµРЅСЊ С‡Р°СЃС‚Рѕ РІС‹Р»РµР·Р°РµС‚ СЌС‚Р° РѕС€РёР±РєР°
     return DEFAULT;
 }
 

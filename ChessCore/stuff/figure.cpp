@@ -1,6 +1,6 @@
 #include "figure.h"
 
-// Оставить от вектора фигур только вектор их позиций
+// РћСЃС‚Р°РІРёС‚СЊ РѕС‚ РІРµРєС‚РѕСЂР° С„РёРіСѓСЂ С‚РѕР»СЊРєРѕ РІРµРєС‚РѕСЂ РёС… РїРѕР·РёС†РёР№
 std::vector<Pos> to_pos_vector(const std::vector<Figure*>& lst) {
     std::vector<Pos> acc{};
     for (const auto& fig : lst) {

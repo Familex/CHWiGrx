@@ -1,6 +1,6 @@
 #include "move_rec.h"
 
-// Преобразование в строку
+// РџСЂРµРѕР±СЂР°Р·РѕРІР°РЅРёРµ РІ СЃС‚СЂРѕРєСѓ
 std::string MoveRec::as_string() {
     std::string result{ "" };
     result += std::format("{}.{}.{}.{}.{}.{}.{}.{{",
@@ -34,11 +34,11 @@ std::string MoveRec::as_string() {
     return result;
 }
 
-// Коструктор из строки
+// РљРѕСЃС‚СЂСѓРєС‚РѕСЂ РёР· СЃС‚СЂРѕРєРё
 MoveRec::MoveRec(std::string map) {
     if (map.empty()) throw std::invalid_argument("Empty map");
     auto data = split(map, ".");
-    // Возможно нижнюю конструкцию стоит вставить в фабрику
+    // Р’РѕР·РјРѕР¶РЅРѕ РЅРёР¶РЅСЋСЋ РєРѕРЅСЃС‚СЂСѓРєС†РёСЋ СЃС‚РѕРёС‚ РІСЃС‚Р°РІРёС‚СЊ РІ С„Р°Р±СЂРёРєСѓ
     Id new_id = std::stoi(data[0]);
     Color new_col = char_to_col(data[3][0]);
     Pos new_pos = { std::stoi(data[1]), std::stoi(data[2]) };
