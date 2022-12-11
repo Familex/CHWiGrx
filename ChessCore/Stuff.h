@@ -222,12 +222,12 @@ private:
 class BoardRepr {
 public:
     BoardRepr(std::string);
-    BoardRepr(std::list<Figure*>&& figures, Color turn, bool idw, std::vector<Id>&& can_castle, std::vector<MoveRec>&& past = {},
-        std::vector<MoveRec>&& future = {}, std::list<Figure*>&& captured_figures = {}) :
+    BoardRepr(std::vector<Figure*>&& figures, Color turn, bool idw, std::vector<Id>&& can_castle, std::vector<MoveRec>&& past = {},
+        std::vector<MoveRec>&& future = {}, std::vector<Figure*>&& captured_figures = {}) :
         figures(figures), turn(turn), idw(idw), past(past),
         future(future), captured_figures(captured_figures), can_castle(can_castle) {};
-    BoardRepr(std::list<Figure*>&& figures, Color turn, bool idw, std::vector<MoveRec>&& past = {},
-        std::vector<MoveRec>&& future = {}, std::list<Figure*>&& captured_figures = {}) :
+    BoardRepr(std::vector<Figure*>&& figures, Color turn, bool idw, std::vector<MoveRec>&& past = {},
+        std::vector<MoveRec>&& future = {}, std::vector<Figure*>&& captured_figures = {}) :
         figures(figures), turn(turn), idw(idw), past(past),
         future(future), captured_figures(captured_figures) {
         // all can castle by default
@@ -237,29 +237,30 @@ public:
             }
         }
     };
+    BoardRepr* operator =(const BoardRepr& other);
+    void clear();
     std::string as_string();
     char get_idw_char() const { return idw ? 'T' : 'F'; }
     bool get_idw() const { return idw; }
     char get_turn_char() const { return turn == Color::White ? 'W' : 'B'; }
     std::vector<Id> get_who_can_castle() const { return can_castle; }
-    Color get_turn() const { return turn; }
     bool empty() const { return figures.empty(); }
-    void set_figures(std::list<Figure*>&& figs) { figures = figs; }
+    void set_figures(std::vector<Figure*>&& figs);
     void set_turn(Color t) { turn = t; }
     void set_idw(bool idw) { this->idw = idw; }
-    std::list<Figure*> get_figures() const { return figures; }
-    std::list<Figure*> get_figures() { return figures; }
     void set_past(const std::vector<MoveRec>& past) { this->past = past; }
     void set_future(const std::vector<MoveRec>& future) { this->future = future; }
-    std::vector<MoveRec> get_past()   const { return past; }
+    Color get_turn() const { return turn; }
+    std::vector<Figure*> get_figures() const { return figures; }
+    std::vector<MoveRec> get_past() const { return past; }
     std::vector<MoveRec> get_future() const { return future; }
-    std::list<Figure*> get_captured_figures() const { return captured_figures; }
+    std::vector<Figure*> get_captured_figures() const { return captured_figures; }
 private:
-    std::list<Figure*> figures;
+    std::vector<Figure*> figures;
     Color turn{ Color::White };
     bool idw{ true };
     std::vector<MoveRec> past;
     std::vector<MoveRec> future;
-    std::list<Figure*> captured_figures;
+    std::vector<Figure*> captured_figures;
     std::vector<Id> can_castle;
 };

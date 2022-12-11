@@ -4,9 +4,6 @@ FigureBoard::FigureBoard(BoardRepr board_repr) {
     reset(board_repr);
 }
 
-/// <summary>
-/// Заполение словарей moves и eats
-/// </summary>
 void FigureBoard::init_figures_moves() {
     std::vector<Pos>temp_left_up;
     std::vector<Pos>temp_left_down;
@@ -53,10 +50,6 @@ void FigureBoard::init_figures_moves() {
 
 }
 
-/// <summary>
-/// 
-/// </summary>
-/// <param name="map">Репрезентация новой доски</param>
 void FigureBoard::reset(const BoardRepr& map) {
     move_logger.reset();
     curr_id = 0;
@@ -75,24 +68,17 @@ void FigureBoard::reset(const BoardRepr& map) {
     reset_castling(map);
 }
 
-/// <summary>
-/// Инициализация полей с помощью новой доски
-/// </summary>
-/// <param name="board_repr">Репрезентация новой доски</param>
 void FigureBoard::apply_map(const BoardRepr& board_repr) {
     idw = board_repr.get_idw();
     move_logger.set_past(board_repr.get_past());
     move_logger.set_future(board_repr.get_future());
-    captured_figures = board_repr.get_captured_figures();
+    for (const auto& cap_fig : board_repr.get_captured_figures()) {
+        captured_figures.push_back( FigureFabric::instance()->create(cap_fig) );
+    }
     for (const auto& fig : board_repr.get_figures())
-        figures[fig->get_pos()] = fig;
+        figures[fig->get_pos()] = FigureFabric::instance()->create(fig);
 }
 
-/// <summary>
-/// Возвращает репрезенрацию доски
-/// </summary>
-/// <param name="save_all_moves">нужно сохранять все ходы из истории или только последний</param>
-/// <returns>Репрезентация новой доски</returns>
 BoardRepr FigureBoard::get_repr(bool save_all_moves) {
     // Конструируется строка, а потом парсится?! TODO
     std::string map = "";
@@ -147,11 +133,6 @@ void FigureBoard::reset_castling(const BoardRepr& board_repr) {
     }
 }
 
-/// <summary>
-/// Возвращает фигуру по позиции
-/// </summary>
-/// <param name="position">Позиция фигуры</param>
-/// <returns>Итератор на фигуру</returns>
 Figure* FigureBoard::get_fig(Pos position) {
     if (figures.find(position) != figures.end()) {
         return figures[position];
@@ -161,11 +142,6 @@ Figure* FigureBoard::get_fig(Pos position) {
     }
 }
 
-/// <summary>
-/// Возвращает фигуру по идентификатору
-/// </summary>
-/// <param name="id">Идентификатор фигуры</param>
-/// <returns>Итератор на фигуру</returns>
 Figure* FigureBoard::get_fig(Id id) {
     for (const auto& [_, fig] : figures) {
         if (fig->is(id)) {

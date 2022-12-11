@@ -148,26 +148,31 @@ void make_move(HWND hWnd) {
     if (curr_game_end_state != GameEndType::NotGameEnd) {
         std::wstring body = L"";
         std::wstring head = L"Game end";
-        switch (curr_game_end_state) {
-        case GameEndType::Checkmate: case GameEndType::Stalemate: {
-            auto who_next = what_next(turn);
-            body = who_next == Color::White ? L"White wins!" :
-                who_next == Color::Black ? L"Black wins!" :
-                L"None wins!";
-            break;
-        }
+        switch (curr_game_end_state) 
+        {
+            case GameEndType::Checkmate: case GameEndType::Stalemate:
+            {
+                auto who_next = what_next(turn);
+                body = who_next == Color::White ? L"White wins!" :
+                    who_next == Color::Black ? L"Black wins!" :
+                    L"None wins!";
+            }
+                break;
+                
             case GameEndType::FiftyRule:
                 body = L"Fifty rule";
                 break;
+                
             case GameEndType::InsufficientMaterial:
                 body = L"Insufficient material";
                 break;
+
             case GameEndType::MoveRepeat:
                 body = L"Move repeat rule";
                 break;
+                
             default:
                 throw std::runtime_error("unexpected game end");
-                break;
         }
         auto result = MessageBox(hWnd, (body + L"\nCopy board to clip?").c_str(), head.c_str(), MB_YESNO);
         if (result == IDYES) {
