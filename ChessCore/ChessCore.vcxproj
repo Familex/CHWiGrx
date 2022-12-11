@@ -154,11 +154,21 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="FigureBoard.cpp" />
-    <ClCompile Include="Stuff.cpp" />
+    <ClCompile Include="stuff\board_repr.cpp" />
+    <ClCompile Include="stuff\figure.cpp" />
+    <ClCompile Include="stuff\figure_fabric.cpp" />
+    <ClCompile Include="stuff\move_logger.cpp" />
+    <ClCompile Include="stuff\move_rec.cpp" />
+    <ClCompile Include="stuff\stuff.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="FigureBoard.h" />
-    <ClInclude Include="Stuff.h" />
+    <ClInclude Include="stuff\board_repr.h" />
+    <ClInclude Include="stuff\figure.h" />
+    <ClInclude Include="stuff\figure_fabric.h" />
+    <ClInclude Include="stuff\move_logger.h" />
+    <ClInclude Include="stuff\move_rec.h" />
+    <ClInclude Include="stuff\stuff.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

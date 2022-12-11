@@ -1,5 +1,7 @@
 #pragma once
-#include "Stuff.h"
+
+#include "stuff/board_repr.h"
+#include "stuff/move_logger.h"
 #include <variant>
 
 class FigureBoard {

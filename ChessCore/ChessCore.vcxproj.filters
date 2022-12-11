@@ -13,21 +13,60 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="stuff">
+      <UniqueIdentifier>{d23765ea-c6f7-403c-b59c-4b72cff1989d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="stuff\h">
+      <UniqueIdentifier>{b94dbd8a-9380-4548-8eac-4da73402c419}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="stuff\src">
+      <UniqueIdentifier>{7d1d16c2-5464-4484-ab61-33a1bf3d2813}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="FigureBoard.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
-    <ClCompile Include="Stuff.cpp">
-      <Filter>Исходные файлы</Filter>
+    <ClCompile Include="stuff\stuff.cpp">
+      <Filter>stuff\src</Filter>
+    </ClCompile>
+    <ClCompile Include="stuff\board_repr.cpp">
+      <Filter>stuff\src</Filter>
+    </ClCompile>
+    <ClCompile Include="stuff\figure_fabric.cpp">
+      <Filter>stuff\src</Filter>
+    </ClCompile>
+    <ClCompile Include="stuff\move_logger.cpp">
+      <Filter>stuff\src</Filter>
+    </ClCompile>
+    <ClCompile Include="stuff\figure.cpp">
+      <Filter>stuff\src</Filter>
+    </ClCompile>
+    <ClCompile Include="stuff\move_rec.cpp">
+      <Filter>stuff\src</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="FigureBoard.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
-    <ClInclude Include="Stuff.h">
-      <Filter>Файлы заголовков</Filter>
+    <ClInclude Include="stuff\board_repr.h">
+      <Filter>stuff\h</Filter>
+    </ClInclude>
+    <ClInclude Include="stuff\figure_fabric.h">
+      <Filter>stuff\h</Filter>
+    </ClInclude>
+    <ClInclude Include="stuff\move_logger.h">
+      <Filter>stuff\h</Filter>
+    </ClInclude>
+    <ClInclude Include="stuff\stuff.h">
+      <Filter>stuff\h</Filter>
+    </ClInclude>
+    <ClInclude Include="stuff\figure.h">
+      <Filter>stuff\h</Filter>
+    </ClInclude>
+    <ClInclude Include="stuff\move_rec.h">
+      <Filter>stuff\h</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

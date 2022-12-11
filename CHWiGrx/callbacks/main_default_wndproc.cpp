@@ -28,16 +28,6 @@ LRESULT CALLBACK main_default_wndproc(HWND hWnd, UINT message, WPARAM wParam, LP
                     // нужно ли чистить память?
                     DestroyWindow(hWnd);
                     break;
-                    
-                default:
-                    switch (window_state) {
-                        case WindowState::GAME:
-                            return mainproc::main_game_state_wndproc(hWnd, message, wParam, lParam);
-                        case WindowState::EDIT:
-                            return mainproc::main_edit_state_wndproc(hWnd, message, wParam, lParam);
-                        default:
-                            return static_cast<LRESULT>(0);
-                    }
             } 
         }
             break;
@@ -58,15 +48,15 @@ LRESULT CALLBACK main_default_wndproc(HWND hWnd, UINT message, WPARAM wParam, LP
         case WM_DESTROY:
             PostQuitMessage(0);
             break;
-
+    }
+    
+    switch (window_state)
+    {
+        case WindowState::GAME:
+            return mainproc::main_game_state_wndproc(hWnd, message, wParam, lParam);
+        case WindowState::EDIT:
+            return mainproc::main_edit_state_wndproc(hWnd, message, wParam, lParam);
         default:
-            switch (window_state) {
-                case WindowState::GAME:
-                    return mainproc::main_game_state_wndproc(hWnd, message, wParam, lParam);
-                case WindowState::EDIT:
-                    return mainproc::main_edit_state_wndproc(hWnd, message, wParam, lParam);
-                default:
-                    return static_cast<LRESULT>(0);
-            }
+            return static_cast<LRESULT>(0);
     }
 }
