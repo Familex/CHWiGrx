@@ -244,7 +244,7 @@ HWND create_curr_choice_window(HWND parent, Figure* in_hand, POINT mouse, int w,
     wc.hbrBackground = NULL;
     wc.hCursor = LoadCursor(nullptr, MAKEINTRESOURCE(IDC_MINIMAL_CURSOR));
     wc.hIcon = LoadIcon(nullptr, MAKEINTRESOURCE(IDI_GAME_MODE_BIG));
-    wc.hIconSm = LoadIcon(nullptr, MAKEINTRESOURCE(IDI_GAME_MODE_BIG));
+    wc.hIconSm = LoadIcon(nullptr, MAKEINTRESOURCE(IDI_GAME_MODE_SMALL));
     wc.lpfnWndProc = callback;
     wc.lpszClassName = CURR_CHOICE_WINDOW_CLASS_NAME;
     wc.style = CS_VREDRAW | CS_HREDRAW;
