@@ -15,10 +15,18 @@ LRESULT CALLBACK mainproc::main_edit_state_wndproc(HWND hWnd, UINT message, WPAR
             switch (wmId)
             {
                 case IDM_SET_GAME_WINDOW_MODE:
+                {
                     window_state = WindowState::GAME;
+                    // set icon
+                    auto hBigGameIcon = LoadImage(hInst, MAKEINTRESOURCE(IDI_GAME_MODE_BIG), IMAGE_ICON, 0, 0, LR_DEFAULTSIZE | LR_SHARED);
+                    auto hMiniGameIcon = LoadImage(hInst, MAKEINTRESOURCE(IDI_GAME_MODE_SMALL), IMAGE_ICON, 0, 0, LR_DEFAULTSIZE | LR_SHARED);
+                    SendMessage(hWnd, WM_SETICON, ICON_BIG, reinterpret_cast<LPARAM>(hBigGameIcon));
+                    SendMessage(hWnd, WM_SETICON, ICON_SMALL, reinterpret_cast<LPARAM>(hMiniGameIcon));
+
                     DestroyWindow(figures_list_window);
                     SetMenu(hWnd, LoadMenu(hInst, MAKEINTRESOURCE(IDC_CHWIGRX)));
                     change_checkerboard_color_theme(hWnd);
+                }
                     break;
 
                 case IDM_CLEAR_BOARD:

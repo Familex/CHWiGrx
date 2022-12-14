@@ -93,7 +93,13 @@ LRESULT CALLBACK mainproc::main_game_state_wndproc(HWND hWnd, UINT message, WPAR
                 case IDM_SET_EDITOR_WINDOW_MODE:
                 {
                     window_state = WindowState::EDIT;
+                    // set icon
+                    auto hEditIcon = LoadImage(hInst, MAKEINTRESOURCE(IDI_EDIT_MODE), IMAGE_ICON, 0, 0, LR_DEFAULTSIZE | LR_SHARED);
+                    SendMessage(hWnd, WM_SETICON, ICON_SMALL, reinterpret_cast<LPARAM>(hEditIcon));
+                    SendMessage(hWnd, WM_SETICON, ICON_BIG, reinterpret_cast<LPARAM>(hEditIcon));
+                    // set menu
                     SetMenu(hWnd, LoadMenu(hInst, MAKEINTRESOURCE(IDR_CHWIGRX_EDIT_MENU)));
+                    // board prepare
                     motion_input.clear();
                     update_edit_menu_variables(hWnd);
                     change_checkerboard_color_theme(hWnd);

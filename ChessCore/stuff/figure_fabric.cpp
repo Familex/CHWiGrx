@@ -36,7 +36,9 @@ Figure* FigureFabric::create(Pos position, Color color, FigureType type) {
 }
 
 Figure* FigureFabric::get_default_fig() {
-    if (not DEFAULT->empty()) throw std::logic_error("default figure was deleted *.*"); // на время разработки - очень часто вылезает эта ошибка
+    #ifdef _DEBUG
+        if (not DEFAULT->empty()) throw std::logic_error("default figure was deleted *.*"); // на время разработки - очень часто вылезает эта ошибка
+    #endif // _DEBUG
     return DEFAULT;
 }
 

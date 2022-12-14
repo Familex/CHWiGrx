@@ -19,6 +19,9 @@
     <Filter Include="callbacks">
       <UniqueIdentifier>{2b0ec98a-d535-4eca-9cab-ce312a5836ab}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Файлы ресурсов\icons">
+      <UniqueIdentifier>{76b5483f-f3c3-4ac3-b43c-015d9cdbb594}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="framework.hpp">
@@ -107,6 +110,15 @@
     </Image>
     <Image Include="pieces\WR.bmp">
       <Filter>Файлы ресурсов\pieces</Filter>
+    </Image>
+    <Image Include="icons\game_mode_big.ico">
+      <Filter>Файлы ресурсов\icons</Filter>
+    </Image>
+    <Image Include="icons\edit_mode.ico">
+      <Filter>Файлы ресурсов\icons</Filter>
+    </Image>
+    <Image Include="icons\game_mode_small.ico">
+      <Filter>Файлы ресурсов\icons</Filter>
     </Image>
   </ItemGroup>
   <ItemGroup>

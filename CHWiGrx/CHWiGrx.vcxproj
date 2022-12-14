@@ -171,6 +171,9 @@
   </ItemGroup>
   <ItemGroup>
     <Image Include="CHWiGrx.ico" />
+    <Image Include="icons\game_mode_big.ico" />
+    <Image Include="icons\edit_mode.ico" />
+    <Image Include="icons\game_mode_small.ico" />
     <Image Include="pieces\BB.bmp" />
     <Image Include="pieces\BH.bmp" />
     <Image Include="pieces\BK.bmp" />

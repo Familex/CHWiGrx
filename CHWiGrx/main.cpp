@@ -39,10 +39,10 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
             .cbClsExtra = 0,
             .cbWndExtra = 0,
             .hInstance = hInstance,
-            .hIcon = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_CHWIGRX)),
+            .hIcon = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_GAME_MODE_BIG)),
             .hCursor = LoadCursor(hInstance, MAKEINTRESOURCE(IDC_MINIMAL_CURSOR)),
             .hbrBackground = (HBRUSH)(COLOR_WINDOW),
-            .hIconSm = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_SMALL))
+            .hIconSm = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_GAME_MODE_SMALL))
         })) {
         return FALSE;
     }

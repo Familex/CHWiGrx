@@ -243,8 +243,8 @@ HWND create_curr_choice_window(HWND parent, Figure* in_hand, POINT mouse, int w,
     wc.cbWndExtra = sizeof(in_hand);
     wc.hbrBackground = NULL;
     wc.hCursor = LoadCursor(nullptr, MAKEINTRESOURCE(IDC_MINIMAL_CURSOR));
-    wc.hIcon = LoadIcon(nullptr, MAKEINTRESOURCE(IDI_CHWIGRX));
-    wc.hIconSm = LoadIcon(nullptr, MAKEINTRESOURCE(IDI_CHWIGRX));
+    wc.hIcon = LoadIcon(nullptr, MAKEINTRESOURCE(IDI_GAME_MODE_BIG));
+    wc.hIconSm = LoadIcon(nullptr, MAKEINTRESOURCE(IDI_GAME_MODE_BIG));
     wc.lpfnWndProc = callback;
     wc.lpszClassName = CURR_CHOICE_WINDOW_CLASS_NAME;
     wc.style = CS_VREDRAW | CS_HREDRAW;
@@ -496,8 +496,8 @@ HWND create_figures_list_window(HWND parent) {
     wc.cbWndExtra = 0;
     wc.hbrBackground = NULL;
     wc.hCursor = LoadCursor(hInst, MAKEINTRESOURCE(IDC_MINIMAL_CURSOR));
-    wc.hIcon = LoadIcon(hInst, MAKEINTRESOURCE(IDI_CHWIGRX));
-    wc.hIconSm = LoadIcon(hInst, MAKEINTRESOURCE(IDI_CHWIGRX));
+    wc.hIcon = LoadIcon(hInst, MAKEINTRESOURCE(IDI_FIGURES_LIST));
+    wc.hIconSm = LoadIcon(hInst, MAKEINTRESOURCE(IDI_FIGURES_LIST));
     wc.lpfnWndProc = figures_list_wndproc;
     wc.lpszClassName = FIGURES_LIST_WINDOW_CLASS_NAME;
     wc.style = CS_VREDRAW | CS_HREDRAW;
