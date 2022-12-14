@@ -170,7 +170,6 @@
     <ResourceCompile Include="CHWiGrx.rc" />
   </ItemGroup>
   <ItemGroup>
-    <Image Include="CHWiGrx.ico" />
     <Image Include="icons\game_mode_big.ico" />
     <Image Include="icons\edit_mode.ico" />
     <Image Include="icons\game_mode_small.ico" />
@@ -186,7 +185,6 @@
     <Image Include="pieces\WP.bmp" />
     <Image Include="pieces\WQ.bmp" />
     <Image Include="pieces\WR.bmp" />
-    <Image Include="small.ico" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ChessCore\ChessCore.vcxproj">
