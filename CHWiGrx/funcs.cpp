@@ -142,6 +142,7 @@ void make_move(HWND hWnd) {
     board.set_last_move({ motion_input.get_in_hand(), motion_input.get_input(), turn, move_rec.ms, move_rec.promotion_choice });
     turn = what_next(turn);
     InvalidateRect(hWnd, NULL, NULL);
+    UpdateWindow(hWnd);
 
     GameEndType curr_game_end_state = board.game_end_check(turn);
 

@@ -1,5 +1,16 @@
 #include "board_repr.h"
 
+BoardRepr::BoardRepr(const BoardRepr& other) : turn(other.turn), idw(other.idw), past(other.past),
+future(other.future), can_castle(other.can_castle) 
+{
+    for (auto fig : other.figures) {
+        figures.push_back( FigureFabric::instance()->create(fig, true) );
+    }
+    for (auto fig : other.captured_figures) {
+        captured_figures.push_back( FigureFabric::instance()->create(fig, true) );
+    }
+}
+
 std::string BoardRepr::as_string() {
     std::string result{ "" };
     for (const auto& fig : figures) {
@@ -138,12 +149,18 @@ void BoardRepr::clear()
 
 BoardRepr* BoardRepr::operator =(const BoardRepr& other) {
     this->clear();
-    figures = other.figures;
+    for (const auto& fig : other.figures)
+    {
+        this->figures.push_back( FigureFabric::instance()->create(fig, true) );
+    }
+    for (const auto& fig : other.captured_figures)
+    {
+        this->captured_figures.push_back(FigureFabric::instance()->create(fig, true));
+    }
+    future = other.future;
     turn = other.turn;
     idw = other.idw;
     past = other.past;
-    future = other.future;
-    captured_figures = other.captured_figures;
     can_castle = other.can_castle;
     return this;
 }

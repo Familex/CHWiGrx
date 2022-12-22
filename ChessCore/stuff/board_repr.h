@@ -6,6 +6,7 @@
 
 class BoardRepr {
 public:
+    BoardRepr(const BoardRepr&);
     BoardRepr(std::string);
     BoardRepr(std::vector<Figure*>&& figures, Color turn, bool idw, std::vector<Id>&& can_castle, std::vector<MoveRec>&& past = {},
         std::vector<MoveRec>&& future = {}, std::vector<Figure*>&& captured_figures = {}) :
