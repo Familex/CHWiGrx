@@ -3,6 +3,8 @@
 #include "resource.hpp"
 #include "framework.hpp"
 #include "../ChessCore/FigureBoard.h"
+#include "../ChessCore/bot.h"
+#include <optional>
 
 #ifdef _DEBUG
 #include <stdio.h>
@@ -56,6 +58,9 @@ inline bool save_all_moves = true;
 inline HBRUSH CHECKERBOARD_ONE = CHECKERBOARD_DARK;
 inline HBRUSH CHECKERBOARD_TWO = CHECKERBOARD_BRIGHT;
 inline HWND figures_list_window = NULL;
+inline bot::Type bot_type = bot::Type::Random;
+inline bot::Difficulty bot_difficulty = bot::Difficulty::D0;
+inline Color bot_turn = Color::Black;
 
 /* misc functions */
 bool init_instance(HINSTANCE, LPTSTR, LPTSTR, int);
@@ -71,12 +76,13 @@ void set_menu_checkbox(HWND, UINT, bool);
 
 std::string take_str_from_clip();
 void update_check_title(HWND);
-void on_lbutton_up(HWND, WPARAM, LPARAM, Pos where_fig, bool=true);
+void on_lbutton_up(HWND, WPARAM, LPARAM, Pos, bool=true);
 void on_lbutton_down(HWND, LPARAM);
 void restart();
 void copy_repr_to_clip();
-void make_move(HWND);
+void make_move(HWND, std::optional<Input> = std::nullopt);
 bool is_legal_board_repr(const std::string&);
+bool is_bot_move();
 
 void inline draw_figure(HDC, Color, FigureType, Pos, bool = true);
 void draw_figure(HDC, Color, FigureType, Pos, bool, int, int);

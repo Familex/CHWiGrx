@@ -14,9 +14,9 @@ public:
     Figure* create(Pos, Color, FigureType);
     Figure* create(Pos, Color, FigureType, Id, Figure* = nullptr);
     Figure* create(Figure*, bool = true);
-    Figure* get_default_fig();
+    Figure* get_default_fig() const;
     std::unique_ptr<Figure> submit_on(Figure* who, Pos on) {
-        std::unique_ptr<Figure> tmp(FigureFabric::instance()->create(who));
+        std::unique_ptr<Figure> tmp(FigureFabric::instance()->create(who, true));
         tmp->move_to(on);
         return tmp;
     }

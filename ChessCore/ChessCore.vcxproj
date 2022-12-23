@@ -153,6 +153,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="bot.cpp" />
     <ClCompile Include="FigureBoard.cpp" />
     <ClCompile Include="stuff\board_repr.cpp" />
     <ClCompile Include="stuff\figure.cpp" />
@@ -162,6 +163,7 @@
     <ClCompile Include="stuff\stuff.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="bot.h" />
     <ClInclude Include="FigureBoard.h" />
     <ClInclude Include="stuff\board_repr.h" />
     <ClInclude Include="stuff\figure.h" />

@@ -45,6 +45,9 @@
     <ClCompile Include="stuff\move_rec.cpp">
       <Filter>stuff\src</Filter>
     </ClCompile>
+    <ClCompile Include="bot.cpp">
+      <Filter>stuff\src</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="FigureBoard.h">
@@ -66,6 +69,9 @@
       <Filter>stuff\h</Filter>
     </ClInclude>
     <ClInclude Include="stuff\move_rec.h">
+      <Filter>stuff\h</Filter>
+    </ClInclude>
+    <ClInclude Include="bot.h">
       <Filter>stuff\h</Filter>
     </ClInclude>
   </ItemGroup>

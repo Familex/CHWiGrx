@@ -119,14 +119,19 @@ void draw_figure(HDC hdc, Color col, FigureType type, Pos begin_paint, bool is_t
 /// Совершает ход
 /// </summary>
 /// <param name="hWnd">Дескриптор окна</param>
-void make_move(HWND hWnd) {
-    if (!motion_input.is_current_turn(turn)) {
-        InvalidateRect(hWnd, NULL, NULL);
-        return;
+void make_move(HWND hWnd, std::optional<Input> input_) {
+
+    Figure* in_hand = motion_input.get_in_hand();
+    Input input = motion_input.get_input();
+    
+    if (is_bot_move())
+    {
+        input = bot::create_move(bot_type, board, turn);
+        in_hand = board.get_fig(input.from);
     }
 
     auto [is_legal_move, move_rec] = board.provide_move(
-        motion_input.get_in_hand(), motion_input.get_input(),
+        in_hand, input,
         turn, [c = chose] { return c; }
     );
 
@@ -139,7 +144,7 @@ void make_move(HWND hWnd) {
         std::cout << "Curr move was: " << move_rec.as_string() << '\n';
     #endif // _DEBUG
 
-    board.set_last_move({ motion_input.get_in_hand(), motion_input.get_input(), turn, move_rec.ms, move_rec.promotion_choice });
+    board.set_last_move({ in_hand, input, turn, move_rec.ms, move_rec.promotion_choice });
     turn = what_next(turn);
     InvalidateRect(hWnd, NULL, NULL);
     UpdateWindow(hWnd);
@@ -184,6 +189,16 @@ void make_move(HWND hWnd) {
     }
 
     update_check_title(hWnd);
+
+    if (is_bot_move())
+    {
+        make_move(hWnd, bot::create_move(bot_type, board, turn));
+    }
+}
+
+bool is_bot_move()
+{
+    return bot_type != bot::Type::None && turn == bot_turn;
 }
 
 void restart() {
@@ -312,6 +327,11 @@ void on_lbutton_up(HWND hWnd, WPARAM wParam, LPARAM lParam, Pos where_fig, bool 
 }
 
 void on_lbutton_down(HWND hWnd, LPARAM lParam) {
+    // bot move guard
+    if (bot_type != bot::Type::None && turn == bot_turn) {
+        return;
+    }
+
     motion_input.set_lbutton_down();
     main_window.set_prev_lbutton_click({ LOWORD(lParam), HIWORD(lParam) });
     motion_input.deactivate_by_pos();

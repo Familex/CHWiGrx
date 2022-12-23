@@ -45,7 +45,7 @@ struct Pos {
     Pos operator-(const Pos& right) const { return { (x - right.x), (y - right.y) }; }
     Pos operator+(const Pos& right) const { return { (x + right.x), (y + right.y) }; }
     Pos& operator +=(const Pos& r) { this->x += r.x; this->y += r.y; return *this; }
-    Pos mul_x(int mx) { return { x * mx, y }; }
+    Pos mul_x(int mx) const { return { x * mx, y }; }
     void loop_add(Pos add, int max_x, int max_y) {
         this->x += add.x; this->y += add.y;
         if (this->x >= max_x) this->x = 0;
@@ -54,7 +54,7 @@ struct Pos {
         if (this->y < 0) this->y = max_y - 1;
     }
     Pos change_axes() { std::swap(x, y); return *this; }
-    bool in(std::vector<Pos> lst) { return std::find(lst.begin(), lst.end(), *this) != lst.end(); }
+    bool in(std::vector<Pos> lst) const { return std::find(lst.begin(), lst.end(), *this) != lst.end(); }
 };
 
 inline Pos change_axes(const Pos& val) {
