@@ -453,7 +453,7 @@ void draw_input(HDC hdcMem, Input input) {
 
 /* Отрисовать фигуры на поле (та, что в руке, не рисуется) */
 void draw_figures_on_board(HDC hdc) {
-    for (const auto& figure : board.all_figures()) {
+    for (const auto& figure : board.get_all_figures()) {
         if (!motion_input.is_figure_dragged(figure->get_id())) {
             draw_figure(hdc, figure->get_col(), figure->get_type(), figure->get_pos());
         }

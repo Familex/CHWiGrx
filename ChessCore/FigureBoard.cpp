@@ -79,7 +79,7 @@ void FigureBoard::apply_map(const BoardRepr& board_repr) {
         figures[fig->get_pos()] = FigureFabric::instance()->create(fig);
 }
 
-BoardRepr FigureBoard::get_repr(bool save_all_moves) {
+BoardRepr FigureBoard::get_repr(bool save_all_moves) const {
     std::vector<Figure*> fig_vec;
     for (auto& [_, fig] : figures)
         fig_vec.push_back(fig);
@@ -113,16 +113,16 @@ void FigureBoard::reset_castling(const BoardRepr& board_repr) {
     }
 }
 
-Figure* FigureBoard::get_fig(Pos position) {
+Figure* FigureBoard::get_fig(Pos position) const {
     if (figures.find(position) != figures.end()) {
-        return figures[position];
+        return figures.at(position);
     }
     else {
         return get_default_fig();
     }
 }
 
-Figure* FigureBoard::get_fig(Id id) {
+Figure* FigureBoard::get_fig(Id id) const {
     for (const auto& [_, fig] : figures) {
         if (fig->is(id)) {
             return fig;
@@ -134,15 +134,15 @@ Figure* FigureBoard::get_fig(Id id) {
 /// <summary>
 /// Показывает содержит ли клетка фигуру
 /// </summary>
-bool FigureBoard::cont_fig(Pos position) {
-    return not get_fig(position)->empty();
+bool FigureBoard::cont_fig(Pos position) const {
+    return figures.contains(position);
 }
 
 /// <summary>
 /// Показывает не содержит ли клетка фигуру
 /// </summary>
-bool FigureBoard::is_empty(Pos position) {
-    return get_fig(position)->empty();
+bool FigureBoard::is_empty(Pos position) const {
+    return !figures.contains(position);
 }
 
 /// <summary>
@@ -191,7 +191,7 @@ bool is_valid_coords(Pos position) {
 
 /// <param name="col">Цвет фигур</param>
 /// <returns>Все фигуры определённого цвета</returns>
-std::vector<Figure*> FigureBoard::get_figures_of(Color col) {
+std::vector<Figure*> FigureBoard::get_figures_of(Color col) const {
     std::vector<Figure*> acc{};
     for (const auto& [_, fig] : figures) {
         if (fig->is_col(col)) {
@@ -201,7 +201,7 @@ std::vector<Figure*> FigureBoard::get_figures_of(Color col) {
     return acc;
 }
 
-Figure* FigureBoard::find_king(Color col) {
+Figure* FigureBoard::find_king(Color col) const {
     auto map_ptr = std::find_if(
         figures.begin(),
         figures.end(),
@@ -225,11 +225,15 @@ Figure* FigureBoard::find_king(Color col) {
 /// <param name="ours">Фигуры, в которые врезаемся, но не можем съесть</param>
 /// <param name="enemies">Фигуры, в которые врезаемся и можем съесть</param>
 /// <returns>Серия из пар ест ли фигура и куда попадает</returns>
-std::vector<std::pair<bool, Pos>> FigureBoard::expand_broom(const Figure* in_hand, const std::vector<Pos>& to_ignore, const std::vector<Pos>& ours, const std::vector<Pos>& enemies) {
+std::vector<std::pair<bool, Pos>> FigureBoard::expand_broom(const Figure* in_hand, 
+                                                            const std::vector<Pos>& to_ignore, 
+                                                            const std::vector<Pos>& ours, 
+                                                            const std::vector<Pos>& enemies) const {
     std::vector<std::pair<bool, Pos>> possible_moves{}; // list { pair{ is_eat, targ }, ... }
-    auto in_hand_pos = in_hand->get_pos();
-    for (auto& eat_beams : eats[in_hand->get_type()]) {
-        for (auto& eat : eat_beams) {
+    const auto in_hand_pos = in_hand->get_pos();
+    const auto in_hand_type = in_hand->get_type();
+    for (const std::vector<Pos>& eat_beams : eats.at(in_hand_type)) {
+        for (Pos eat : eat_beams) {
             Pos curr{ in_hand_pos + (in_hand->is_col(Color::White) ? eat : eat.mul_x(-1)) };
             if (not is_valid_coords(curr)) continue;
             if (curr.in(ours)) {
@@ -250,8 +254,8 @@ std::vector<std::pair<bool, Pos>> FigureBoard::expand_broom(const Figure* in_han
             }
         }
     }
-    for (auto& move_beams : moves[in_hand->get_type()]) {
-        for (auto& move : move_beams) {
+    for (const auto& move_beams : moves.at(in_hand->get_type())) {
+        for (Pos move : move_beams) {
             Pos curr{ in_hand_pos + (in_hand->is_col(Color::White) ? move : move.mul_x(-1)) };
             if (not is_valid_coords(curr)) continue;
             if (not ((not curr.in(to_ignore) && cont_fig(curr)) || curr.in(ours) || curr.in(enemies))) {
@@ -275,7 +279,10 @@ std::vector<std::pair<bool, Pos>> FigureBoard::expand_broom(const Figure* in_han
 /// <param name="ours">Фигуры, в которые врезаемся, но не можем съесть</param>
 /// <param name="enemies">Фигуры, в которые врезаемся и можем съесть</param>
 /// <returns>Серия из пар ест ли фигура и куда попадает</returns>
-std::vector<std::pair<bool, Pos>> FigureBoard::get_all_possible_moves(const Figure* in_hand, const std::vector<Pos>& to_ignore, const std::vector<Pos>& ours, const std::vector<Pos>&enemies) {
+std::vector<std::pair<bool, Pos>> FigureBoard::get_all_possible_moves(const Figure* in_hand, 
+                                                                      const std::vector<Pos>& to_ignore, 
+                                                                      const std::vector<Pos>& ours, 
+                                                                      const std::vector<Pos>&enemies) const {
     std::vector<std::pair<bool, Pos>> all_moves{ expand_broom(in_hand, to_ignore, ours, enemies) };
     Pos in_hand_pos = in_hand->get_pos();
     Figure* in_hand_it{ get_fig(in_hand_pos) };
@@ -355,7 +362,11 @@ std::vector<std::pair<bool, Pos>> FigureBoard::get_all_possible_moves(const Figu
 /// <param name="ours">Фигуры, которые предотвращают шах</param>
 /// <param name="enemies">Фигуры, которые шах могут поставить</param>
 /// <returns>Наличие шаха</returns>
-bool FigureBoard::check_for_when(Color col, const std::vector<Pos>& to_ignore, Pos to_defend, const std::vector<Figure*>& ours, const std::vector<Figure*>& enemies) {
+bool FigureBoard::check_for_when(Color col,
+                                 const std::vector<Pos>& to_ignore, 
+                                 Pos to_defend, 
+                                 const std::vector<Figure*>& ours, 
+                                 const std::vector<Figure*>& enemies) const {
     auto king_it = find_king(col);
     if (to_defend == Pos()) {
         if (king_it->empty()) {
@@ -386,7 +397,9 @@ bool FigureBoard::check_for_when(Color col, const std::vector<Pos>& to_ignore, P
 /// <param name="to_ignore">Фигуры, которые нужно игнорировать</param>
 /// <param name="to_defend">Позиция короля или фигуры, которой можно поставить шах</param>
 /// <returns>Наличие пата</returns>
-bool FigureBoard::stalemate_for(Color col, const std::vector<Pos>& to_ignore, Pos to_defend) {
+bool FigureBoard::stalemate_for(Color col, 
+                                const std::vector<Pos>& to_ignore, 
+                                Pos to_defend) const {
     auto king_it = find_king(col);
     if (king_it->empty())
         return true; // Нет короля
@@ -423,7 +436,9 @@ bool FigureBoard::stalemate_for(Color col, const std::vector<Pos>& to_ignore, Po
 /// <param name="to_ignore">Фигуры, которые нужно игнорировать</param>
 /// <param name="to_defend">Позиция короля или фигуры, которой можно поставить шах (мат)</param>
 /// <returns>Наличие мата</returns>
-bool FigureBoard::checkmate_for(Color col, const std::vector<Pos>& to_ignore, Pos to_defend /*тут, возможно, не король*/) {
+bool FigureBoard::checkmate_for(Color col,  
+                                const std::vector<Pos>& to_ignore, 
+                                Pos to_defend /*тут, возможно, не король*/) const {
     auto king_it = find_king(col);
     if (to_defend == Pos()) {
         if (king_it->empty()) {
@@ -475,7 +490,11 @@ bool FigureBoard::checkmate_for(Color col, const std::vector<Pos>& to_ignore, Po
 /// <param name="king_end_col">Целевой столбец для короля</param>
 /// <param name="rook_end_col">Целевой столбец для ладьи</param>
 /// <returns>Валидна ли рокировка</returns>
-std::tuple<bool, MoveMessage, Figure*, Figure*> FigureBoard::castling_check(MoveMessage move_message, Figure* in_hand, const Input& input, int king_end_col, int rook_end_col) {
+std::tuple<bool, MoveMessage, Figure*, Figure*> FigureBoard::castling_check(MoveMessage move_message, 
+                                                                            Figure* in_hand,
+                                                                            const Input& input,  
+                                                                            int king_end_col, 
+                                                                            int rook_end_col) const {
     // Рокировка на g-фланг
     bool castling_can_be_done = true;
     Id must_be_empty = ERR_ID;
@@ -534,7 +553,7 @@ std::tuple<bool, MoveMessage, Figure*, Figure*> FigureBoard::castling_check(Move
 /// <para>Король и слон против короля и слонов, где все слоны на одном цвете</para>
 /// </summary>
 /// <returns>Не хватает ли материала для мата</returns>
-bool FigureBoard::insufficient_material() {
+bool FigureBoard::insufficient_material() const {
     size_t size = cnt_of_figures();
     if (size <= 2) return true;
     if (size == 3 &&
@@ -547,7 +566,7 @@ bool FigureBoard::insufficient_material() {
         ) return true;
     size_t b_cell_bishops_cnt{};
     size_t w_cell_bishops_cnt{};
-    for (const auto& fig : all_figures()) {
+    for (const auto& fig : get_all_figures()) {
         if (fig->get_type() == FigureType::Bishop)
             if ((fig->get_pos().x + fig->get_pos().y) % 2)
                 ++b_cell_bishops_cnt;
@@ -559,7 +578,7 @@ bool FigureBoard::insufficient_material() {
     return not (b_cell_bishops_cnt && w_cell_bishops_cnt);
 }
 
-GameEndType FigureBoard::game_end_check(Color col) {
+GameEndType FigureBoard::game_end_check(Color col) const {
     if (stalemate_for(col)) return GameEndType::Stalemate;
     if (checkmate_for(col)) return GameEndType::Checkmate;
     if (insufficient_material()) return GameEndType::InsufficientMaterial;
@@ -575,7 +594,8 @@ GameEndType FigureBoard::game_end_check(Color col) {
 /// <param name="in_hand">Фигура, которой собираются ходить</param>
 /// <param name="input">Ввод</param>
 /// <returns>Сообщение хода</returns>
-std::variant<ErrorEvent, MoveMessage> FigureBoard::move_check(Figure* in_hand, Input input) {
+std::variant<ErrorEvent, MoveMessage> FigureBoard::move_check(Figure* in_hand, 
+                                                              Input input) const {
     MoveMessage move_message{ MainEvent::E, {} };
     Figure* targ{ get_fig(input.target) };
 

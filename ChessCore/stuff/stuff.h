@@ -42,8 +42,8 @@ struct Pos {
     Pos() : x(-1), y(-1) {};
     Pos(int x, int y) : x(x), y(y) {};
     auto operator <=> (const Pos& other) const = default;
-    Pos operator-(const Pos& right) { return { (x - right.x), (y - right.y) }; }
-    Pos operator+(const Pos& right) { return { (x + right.x), (y + right.y) }; }
+    Pos operator-(const Pos& right) const { return { (x - right.x), (y - right.y) }; }
+    Pos operator+(const Pos& right) const { return { (x + right.x), (y + right.y) }; }
     Pos& operator +=(const Pos& r) { this->x += r.x; this->y += r.y; return *this; }
     Pos mul_x(int mx) { return { x * mx, y }; }
     void loop_add(Pos add, int max_x, int max_y) {

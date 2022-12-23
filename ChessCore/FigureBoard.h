@@ -10,35 +10,54 @@ class FigureBoard {
 public:
     FigureBoard(BoardRepr);
     void reset(const BoardRepr&);
-    Figure* get_fig(Pos);
-    Figure* get_fig(Id);
-    bool cont_fig(Pos);
-    bool is_empty(Pos);
-    bool is_empty() { return figures.size() <= 1; }
+    Figure* get_fig(Pos) const;
+    Figure* get_fig(Id) const;
+    bool cont_fig(Pos) const;
+    bool is_empty(Pos) const;
+    bool is_empty() const { return figures.size() <= 1; }
     bool capture_figure(Figure*);
     bool capture_figure(const Id);
     void uncapture_figure(const Id);
     void delete_fig(Pos);
     void place_fig(Figure*);
-    Figure* find_king(Color);
-    std::vector<Figure*> get_figures_of(Color);
-    std::vector<std::pair<bool, Pos>> expand_broom(const Figure*, const std::vector<Pos>& = {}, const std::vector<Pos>& = {}, const std::vector<Pos>& = {});
-    std::vector<std::pair<bool, Pos>> get_all_possible_moves(const Figure*, const std::vector<Pos>& = {}, const std::vector<Pos>& = {}, const std::vector<Pos>& = {});
-    bool checkmate_for(Color, const std::vector<Pos>& = {}, Pos = {});
-    bool stalemate_for(Color, const std::vector<Pos>& = {}, Pos = {});
-    bool check_for_when(Color, const std::vector<Pos>& = {}, Pos = {}, const std::vector<Figure*>& = {}, const std::vector<Figure*>& = {});
-    std::variant<ErrorEvent, MoveMessage> move_check(Figure*, Input);
-    std::tuple<bool, MoveMessage, Figure*, Figure*> castling_check(MoveMessage, Figure*, const Input&, int, int);
+    Figure* find_king(Color) const;
+    std::vector<Figure*> get_figures_of(Color) const;
+    std::vector<std::pair<bool, Pos>> expand_broom(const Figure*, 
+                                                   const std::vector<Pos> & = {},
+                                                   const std::vector<Pos> & = {}, 
+                                                   const std::vector<Pos> & = {}) const;
+    std::vector<std::pair<bool, Pos>> get_all_possible_moves(const Figure*, 
+                                                             const std::vector<Pos> & = {},
+                                                             const std::vector<Pos> & = {},
+                                                             const std::vector<Pos> & = {}) const;
+    bool checkmate_for(Color, 
+                       const std::vector<Pos>& = {}, 
+                       Pos = {}) const;
+    bool stalemate_for(Color,
+                       const std::vector<Pos>& = {}, 
+                       Pos = {}) const;
+    bool check_for_when(Color, 
+                        const std::vector<Pos>& = {},
+                        Pos = {}, 
+                        const std::vector<Figure*>& = {}, 
+                        const std::vector<Figure*>& = {}) const;
+    std::variant<ErrorEvent, MoveMessage> move_check(Figure*, 
+                                                     Input) const;
+    std::tuple<bool, MoveMessage, Figure*, Figure*> castling_check(MoveMessage, 
+                                                                   Figure*, 
+                                                                   const Input&, 
+                                                                   int,  
+                                                                   int) const;
     void reset_castling(bool=true);
     void reset_castling(const BoardRepr&);
-    Figure* get_default_fig() { return FigureFabric::instance()->get_default_fig(); }
+    Figure* get_default_fig() const { return FigureFabric::instance()->get_default_fig(); }
     inline bool get_idw() const { return idw; }
     inline void set_idw(bool new_idw) {
         idw = new_idw;
         init_figures_moves();
     }
-    std::list<Figure*> all_figures() {
-        std::list<Figure*> tmp;
+    std::vector<Figure*> get_all_figures() const {
+        std::vector<Figure*> tmp;
         for (const auto& [_, fig] : figures) {
             tmp.push_back(fig);
         }
@@ -62,23 +81,23 @@ public:
     void move_fig(Input input, bool capture=true) {
         move_fig(get_fig(input.from), input.target, capture);
     }
-    bool has_castling(Id id) { return castling[id]; }
+    bool has_castling(Id id) const { return castling.at(id); }
     void off_castling(Id id) { castling[id] = false; }
     void on_castling(Id id)  { castling[id] = true; }
-    MoveRec get_last_move() { return move_logger.get_last_move(); }
+    MoveRec get_last_move() const { return move_logger.get_last_move(); }
     void set_last_move(const MoveRec& move_rec) { this->move_logger.add(move_rec); }
     template <typename Func> std::pair<bool, MoveRec> provide_move(Figure*, const Input&, Color turn, const Func&);
     bool provide_move(const MoveRec&);
     bool undo_move();
     bool restore_move();
     void apply_map(const BoardRepr&);
-    void place_figure(Figure*& fig) { figures[fig->get_pos()] = fig; }
+    void place_figure(Figure* fig) { figures[fig->get_pos()] = fig; }
     void init_figures_moves();
-    GameEndType game_end_check(Color);
+    GameEndType game_end_check(Color) const;
     void promotion_fig(Figure*, FigureType);
     size_t cnt_of_figures() const { return figures.size(); }
-    bool insufficient_material();
-    BoardRepr get_repr(bool);
+    bool insufficient_material() const;
+    BoardRepr get_repr(bool) const;
     ~FigureBoard() {
         for (auto& [_, fig] : figures) {
             if (not fig->empty())

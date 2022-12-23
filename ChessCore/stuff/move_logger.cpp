@@ -1,7 +1,7 @@
 #include "move_logger.h"
 
 // Возвращает последний сделанный ход
-MoveRec MoveLogger::get_last_move() {
+MoveRec MoveLogger::get_last_move() const {
     if (prev_moves.empty())
         return {};
     return prev_moves.back();
@@ -36,7 +36,7 @@ MoveRec MoveLogger::move_last_to_future() {
     return last;
 }
 
-bool MoveLogger::is_fifty_move_rule_was_triggered() {
+bool MoveLogger::is_fifty_move_rule_was_triggered() const {
     size_t without_eat_and_pawnmoves = 0;
     for (auto move{ prev_moves.rbegin() }; move != prev_moves.rend(); ++move) {
         if (move->get_who_went()->get_type() == FigureType::Pawn || move->ms.main_ev == MainEvent::EAT) {
@@ -49,6 +49,6 @@ bool MoveLogger::is_fifty_move_rule_was_triggered() {
     return without_eat_and_pawnmoves >= 50;
 }
 
-bool MoveLogger::is_moves_repeat_rule_was_triggered() {
+bool MoveLogger::is_moves_repeat_rule_was_triggered() const {
     return false;
 }
