@@ -8,14 +8,34 @@ class BoardRepr {
 public:
     BoardRepr(const BoardRepr&);
     BoardRepr(std::string);
-    BoardRepr(std::vector<Figure*>&& figures, Color turn, bool idw, std::vector<Id>&& can_castle, std::vector<MoveRec>&& past = {},
-        std::vector<MoveRec>&& future = {}, std::vector<Figure*>&& captured_figures = {}) :
-        figures(figures), turn(turn), idw(idw), past(past),
-        future(future), captured_figures(captured_figures), can_castle(can_castle) {};
-    BoardRepr(std::vector<Figure*>&& figures, Color turn, bool idw, std::vector<MoveRec>&& past = {},
-        std::vector<MoveRec>&& future = {}, std::vector<Figure*>&& captured_figures = {}) :
-        figures(figures), turn(turn), idw(idw), past(past),
-        future(future), captured_figures(captured_figures) {
+    BoardRepr(const std::vector<Figure*>& figures, 
+              Color turn, 
+              bool idw, 
+              const std::vector<Id>& can_castle, 
+              const std::vector<MoveRec>& past = {},
+              const std::vector<MoveRec>& future = {},
+              const std::vector<Figure*>& captured_figures = {}) 
+        : figures(figures)
+        , turn(turn)
+        , idw(idw)
+        , past(past)
+        , future(future)
+        , captured_figures(captured_figures)
+        , can_castle(can_castle)
+    {
+    };
+    BoardRepr(const std::vector<Figure*>& figures, 
+              Color turn, 
+              bool idw,
+              const std::vector<MoveRec>& past = {},
+              const std::vector<MoveRec>& future = {}, 
+              const std::vector<Figure*>& captured_figures = {}) 
+        : figures(figures)
+        , turn(turn)
+        , idw(idw)
+        , past(past)
+        , future(future)
+        , captured_figures(captured_figures) {
         // all can castle by default
         for (auto fig : figures) {
             if (fig->is(FigureType::Rook)) {

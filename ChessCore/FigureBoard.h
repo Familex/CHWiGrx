@@ -97,7 +97,7 @@ private:
     Id curr_id{};
     MoveLogger move_logger{};
     std::map<Pos, Figure*> figures;
-    std::list<Figure*> captured_figures;
+    std::vector<Figure*> captured_figures;
     std::map<Id, bool> castling;
     std::map<FigureType, shift_broom> moves;
     std::map<FigureType, shift_broom> eats;

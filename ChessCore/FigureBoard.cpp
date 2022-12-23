@@ -80,39 +80,19 @@ void FigureBoard::apply_map(const BoardRepr& board_repr) {
 }
 
 BoardRepr FigureBoard::get_repr(bool save_all_moves) {
-    // Конструируется строка, а потом парсится?! TODO
-    std::string map = "";
-    std::vector<MoveRec> past{};
-    std::vector<MoveRec> future{};
-    for (auto& [position, fig] : figures) {
-        map += std::format("{};{};{};{};{};",
-            fig->get_id(), position.x, position.y, col_to_char(fig->get_col()), figure_type_to_char(fig->get_type())
-        );
-    }
-    map += (idw ? "[t]" : "[f]");
-
-    if (save_all_moves) {
-        past = move_logger.get_past();
-        future = move_logger.get_future();
-    }
-    else {
-        past = { move_logger.get_last_move() };
-    }
-    map += "<";
-    for (MoveRec& mr : past)
-        map += std::format("{}$", mr.as_string());
-    map += ">";
-
-    map += "<";
-    for (MoveRec& mr : future)
-        map += std::format("{}$", mr.as_string());
-    map += ">~";
-    for (auto& fig : captured_figures) {
-        map += std::format("{},{},{},{},{},",
-            fig->get_id(), fig->get_pos().x, fig->get_pos().y, col_to_char(fig->get_col()), figure_type_to_char(fig->get_type())
-        );
-    }
-    return map;
+    std::vector<Figure*> fig_vec;
+    for (auto& [_, fig] : figures)
+        fig_vec.push_back(fig);
+    return {
+        fig_vec,
+        Color::White,
+        idw,
+        save_all_moves 
+            ? move_logger.get_past() 
+            : std::vector<MoveRec>{ move_logger.get_last_move() },
+        move_logger.get_future(),
+        captured_figures
+    };
 }
 
 void FigureBoard::reset_castling(bool castle_state) {
