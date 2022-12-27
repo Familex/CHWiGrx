@@ -190,7 +190,7 @@ void make_move(HWND hWnd, std::optional<Input> input_) {
         InvalidateRect(hWnd, NULL, NULL);
     }
 
-    update_check_title(hWnd);
+    update_main_window_title(hWnd);
 
     if (is_bot_move())
     {
@@ -406,17 +406,47 @@ void MotionInput::prepare(Color turn) {
     }
 }
 
-void update_check_title(HWND hWnd) {
-    std::wstring curr_text = L"CHWiGrx";
+void update_main_window_title(HWND hWnd) {
+    /* CHWiGrx vs bot [check] */
+    std::wstring title = L"CHWiGrx ";
+    title.reserve(64);    // hardcoded (CHWiGrx vs NeuralNetwork bot diff.NaN [Check to Black])
+
+    if (bot_type != bot::Type::None) {
+        title += L"vs ";
+        
+        switch (bot_type)
+        {
+            case bot::Type::Unselected:    title += L"Unselected "; break;
+            case bot::Type::Random:        title += L"Random "; break;
+            case bot::Type::Minimax:       title += L"Minimax "; break;
+            case bot::Type::AlphaBeta:     title += L"AlphaBeta "; break;
+            case bot::Type::MonteCarlo:    title += L"MonteCarlo "; break;
+            case bot::Type::NeuralNetwork: title += L"NeuralNetwork "; break;
+            default:                       title += L"Undefined "; break;
+        }
+        
+        title += L"bot ";
+
+        switch (bot_difficulty)
+        {
+            case bot::Difficulty::D0: title += L"diff.0 "; break;
+            case bot::Difficulty::D1: title += L"diff.1 "; break;
+            case bot::Difficulty::D2: title += L"diff.2 "; break;
+            case bot::Difficulty::D3: title += L"diff.3 "; break;
+            default: title += L"diff.NaN "; break;
+        }
+    }
+
     if (board.is_empty()) {
-        curr_text += L" [Empty board]";
+        title += L"[Empty board]";
     }
     else if (board.check_for_when(turn)) {
-        curr_text += L" [Check to ";
-        curr_text += turn == Color::White ? L"White" : turn == Color::Black ? L"Black" : L"None";
-        curr_text += L"]";
+        title += L"[Check to ";
+        title += turn == Color::White ? L"White" : turn == Color::Black ? L"Black" : L"None";
+        title += L"]";
     }
-    SetWindowText(hWnd, curr_text.c_str());
+    
+    SetWindowText(hWnd, title.c_str());
 }
 
 void copy_repr_to_clip() {

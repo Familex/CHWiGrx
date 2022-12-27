@@ -13,16 +13,16 @@
 #endif // _DEBUG
 
 /* virtual keys for numbers */
-#define VK_0 48
-#define VK_1 49
-#define VK_2 50
-#define VK_3 51
-#define VK_4 52
-#define VK_5 53
-#define VK_6 54
-#define VK_7 55
-#define VK_8 56
-#define VK_9 57
+constexpr auto VK_0 = 48;
+constexpr auto VK_1 = 49;
+constexpr auto VK_2 = 50;
+constexpr auto VK_3 = 51;
+constexpr auto VK_4 = 52;
+constexpr auto VK_5 = 53;
+constexpr auto VK_6 = 54;
+constexpr auto VK_7 = 55;
+constexpr auto VK_8 = 56;
+constexpr auto VK_9 = 57;
 
 enum class WindowState { GAME, EDIT };
 
@@ -79,7 +79,7 @@ void update_game_menu_variables(HWND);
 void update_bot_menu_variables(HWND);
 
 std::string take_str_from_clip();
-void update_check_title(HWND);
+void update_main_window_title(HWND);
 void on_lbutton_up(HWND, WPARAM, LPARAM, Pos, bool=true);
 void on_lbutton_down(HWND, LPARAM);
 void restart();

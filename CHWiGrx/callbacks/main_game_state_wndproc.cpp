@@ -133,6 +133,11 @@ LRESULT CALLBACK mainproc::main_game_state_wndproc(HWND hWnd, UINT message, WPAR
                     update_bot_menu_variables(hWnd);
                     break;
 
+                case IDM_BOTDIFFICULTY_VERYHARD:
+                    bot_difficulty = bot::Difficulty::D3;
+                    update_bot_menu_variables(hWnd);
+                    break;
+
                 case IDM_BOTTYPE_RANDOM:
                     bot_type = bot::Type::Random;
                     update_bot_menu_variables(hWnd);
@@ -156,7 +161,7 @@ LRESULT CALLBACK mainproc::main_game_state_wndproc(HWND hWnd, UINT message, WPAR
                     return DefWindowProc(hWnd, message, wParam, lParam);
             }
         }
-        update_check_title(hWnd);   // Для надёжности обновлю на все исходы
+        update_main_window_title(hWnd);   // Для надёжности обновлю на все исходы
         InvalidateRect(hWnd, NULL, NULL);
         break;
         

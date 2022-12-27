@@ -33,6 +33,7 @@ LRESULT CALLBACK main_default_wndproc(HWND hWnd, UINT message, WPARAM wParam, LP
             break;
            
         case WM_CREATE:
+            update_main_window_title(hWnd);
             update_game_menu_variables(hWnd);
             break;
 
