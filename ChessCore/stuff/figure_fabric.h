@@ -8,14 +8,12 @@ public:
         static FigureFabric INSTANCE;
         return &INSTANCE;
     }
-    FigureFabric(FigureFabric const&) = delete;
-    void operator=(FigureFabric const&) = delete;
 
-    Figure* create(Pos, Color, FigureType);
-    Figure* create(Pos, Color, FigureType, Id, Figure* = nullptr);
-    Figure* create(Figure*, bool = true);
+    Figure* create(const Pos, const Color, const FigureType);
+    Figure* create(const Pos, const Color, const FigureType, const Id, Figure* = nullptr) const;
+    Figure* create(const Figure*, const bool = true);
     Figure* get_default_fig() const;
-    std::unique_ptr<Figure> submit_on(Figure* who, Pos on) {
+    std::unique_ptr<Figure> submit_on(const Figure* who, const Pos on) {
         std::unique_ptr<Figure> tmp(FigureFabric::instance()->create(who, true));
         tmp->move_to(on);
         return tmp;
@@ -25,6 +23,9 @@ public:
     }
 private:
     FigureFabric() = default;
+    FigureFabric(FigureFabric const&) = delete;
+    void operator=(FigureFabric const&) = delete;
+    
     Figure* DEFAULT = new Figure();
     Id id{ 1 };
 };
