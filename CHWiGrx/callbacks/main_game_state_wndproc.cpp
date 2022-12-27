@@ -107,6 +107,47 @@ LRESULT CALLBACK mainproc::main_game_state_wndproc(HWND hWnd, UINT message, WPAR
                 }
                     break;
                     
+                /* ---- Bot ------------------------------------------- */
+                case IDM_TOGGLE_BOT:
+                    if (bot_type != bot::Type::None) { 
+                        bot_type = bot::Type::None; 
+                    }
+                    else { 
+                        bot_type = bot::Type::Unselected; 
+                    }
+                    update_bot_menu_variables(hWnd);
+                    break;
+                    
+                case IDM_BOTDIFFICULTY_EASY:
+                    bot_difficulty = bot::Difficulty::D0;
+                    update_bot_menu_variables(hWnd);
+                    break;
+
+                case IDM_BOTDIFFICULTY_NORMAL:
+                    bot_difficulty = bot::Difficulty::D1;
+                    update_bot_menu_variables(hWnd);
+                    break;
+
+                case IDM_BOTDIFFICULTY_HARD:
+                    bot_difficulty = bot::Difficulty::D2;
+                    update_bot_menu_variables(hWnd);
+                    break;
+
+                case IDM_BOTTYPE_RANDOM:
+                    bot_type = bot::Type::Random;
+                    update_bot_menu_variables(hWnd);
+                    break;
+
+                case IDM_BOTCOLOR_WHITE:
+                    bot_turn = Color::White;
+                    update_bot_menu_variables(hWnd);
+                    break;
+
+                case IDM_BOTCOLOR_BLACK:
+                    bot_turn = Color::Black;
+                    update_bot_menu_variables(hWnd);
+                    break;
+                    
                 case IDM_ABOUT:
                     DialogBox(hInst, MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, about_proc);
                     break;

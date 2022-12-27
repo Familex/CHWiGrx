@@ -170,6 +170,7 @@
     <ResourceCompile Include="CHWiGrx.rc" />
   </ItemGroup>
   <ItemGroup>
+    <Image Include="icons\figures_list.ico" />
     <Image Include="icons\game_mode_big.ico" />
     <Image Include="icons\edit_mode.ico" />
     <Image Include="icons\game_mode_small.ico" />

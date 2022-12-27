@@ -93,7 +93,7 @@ void draw_figure(HDC hdc, Color col, FigureType type, Pos begin_paint, bool is_t
     int h_end = h_beg + h;
     int w_end = w_beg + h;
     HBITMAP hBitmap = pieces_bitmaps[col_to_char(col)][figure_type_to_char(type)];
-    BITMAP bm;
+    BITMAP bm{};
     GetObject(hBitmap, sizeof(BITMAP), &bm);
     HDC hdcMem = CreateCompatibleDC(hdc);
     HGDIOBJ hOldBitmap = SelectObject(hdcMem, hBitmap);
@@ -120,6 +120,8 @@ void draw_figure(HDC hdc, Color col, FigureType type, Pos begin_paint, bool is_t
 /// </summary>
 /// <param name="hWnd">Дескриптор окна</param>
 void make_move(HWND hWnd, std::optional<Input> input_) {
+    if (!is_bot_move() && !motion_input.is_current_turn(turn))
+        return;     // Запрет хода вне очереди
 
     Figure* in_hand = motion_input.get_in_hand();
     Input input = motion_input.get_input();
@@ -487,6 +489,84 @@ void update_edit_menu_variables(HWND hWnd) {
         set_menu_checkbox(hWnd, IDM_IDW_TRUE, true);
     else
         set_menu_checkbox(hWnd, IDM_IDW_FALSE, true);
+}
+
+void update_bot_menu_variables(HWND hWnd)
+{
+    for (auto menu_id : {
+            IDM_TOGGLE_BOT,
+            IDM_BOTCOLOR_WHITE, IDM_BOTCOLOR_BLACK,
+            IDM_BOTDIFFICULTY_EASY, IDM_BOTDIFFICULTY_NORMAL, IDM_BOTDIFFICULTY_HARD,
+            IDM_BOTTYPE_RANDOM,
+        }) {
+        set_menu_checkbox(hWnd, menu_id, false);
+    }
+    
+    if (bot_type != bot::Type::None) {
+        set_menu_checkbox(hWnd, IDM_TOGGLE_BOT, true);
+
+        if (bot_turn == Color::White)
+            set_menu_checkbox(hWnd, IDM_BOTCOLOR_WHITE, true);
+        else if (bot_turn == Color::Black)
+            set_menu_checkbox(hWnd, IDM_BOTCOLOR_BLACK, true);
+        
+        if (bot_difficulty == bot::Difficulty::D0)
+            set_menu_checkbox(hWnd, IDM_BOTDIFFICULTY_EASY, true);
+        else if (bot_difficulty == bot::Difficulty::D1)
+            set_menu_checkbox(hWnd, IDM_BOTDIFFICULTY_NORMAL, true);
+        else if (bot_difficulty == bot::Difficulty::D2)
+            set_menu_checkbox(hWnd, IDM_BOTDIFFICULTY_HARD, true);
+        else if (bot_difficulty == bot::Difficulty::D3)
+            set_menu_checkbox(hWnd, IDM_BOTDIFFICULTY_VERYHARD, true);
+            
+        if (bot_type == bot::Type::Random)
+            set_menu_checkbox(hWnd, IDM_BOTTYPE_RANDOM, true);
+        else if (bot_type == bot::Type::NeuralNetwork)
+            ;   // placeholder;
+    }
+    else {
+        // without bot
+    }
+}
+
+void update_game_menu_variables(HWND hWnd)
+{
+    update_bot_menu_variables(hWnd);
+
+    for (auto menu_id : { 
+            IDM_TOGGLE_SAVE_ALL_MOVES,
+            IDM_SET_CHOICE_TO_QUEEN, IDM_SET_CHOICE_TO_ROOK, IDM_SET_CHOICE_TO_BISHOP, IDM_SET_CHOICE_TO_KNIGHT,
+        }) {
+        set_menu_checkbox(hWnd, menu_id, false);
+    }
+
+    if (save_all_moves)
+        set_menu_checkbox(hWnd, IDM_TOGGLE_SAVE_ALL_MOVES, true);
+
+    switch (chose)
+    {
+        case 'Q':
+            set_menu_checkbox(hWnd, IDM_SET_CHOICE_TO_QUEEN, true);
+            break;
+            
+        case 'R':
+            set_menu_checkbox(hWnd, IDM_SET_CHOICE_TO_ROOK, true);
+            break;
+           
+        case 'B':
+            set_menu_checkbox(hWnd, IDM_SET_CHOICE_TO_BISHOP, true);
+            break;
+            
+        case 'H':
+            set_menu_checkbox(hWnd, IDM_SET_CHOICE_TO_KNIGHT, true);
+            break;
+
+        default:
+            #ifdef _DEBUG
+                assert(("Unknown chose", false));
+            #endif
+            break;
+    }
 }
 
 HWND create_figures_list_window(HWND parent) {

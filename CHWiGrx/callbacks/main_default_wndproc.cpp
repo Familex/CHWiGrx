@@ -32,6 +32,10 @@ LRESULT CALLBACK main_default_wndproc(HWND hWnd, UINT message, WPARAM wParam, LP
         }
             break;
            
+        case WM_CREATE:
+            update_game_menu_variables(hWnd);
+            break;
+
         case WM_LBUTTONDOWN:
             on_lbutton_down(hWnd, lParam);
             InvalidateRect(hWnd, NULL, NULL);

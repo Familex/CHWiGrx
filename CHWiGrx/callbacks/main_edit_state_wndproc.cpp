@@ -26,6 +26,7 @@ LRESULT CALLBACK mainproc::main_edit_state_wndproc(HWND hWnd, UINT message, WPAR
                     DestroyWindow(figures_list_window);
                     SetMenu(hWnd, LoadMenu(hInst, MAKEINTRESOURCE(IDC_CHWIGRX)));
                     change_checkerboard_color_theme(hWnd);
+                    update_bot_menu_variables(hWnd);
                 }
                     break;
 

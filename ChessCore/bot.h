@@ -8,6 +8,7 @@ namespace bot {
     
     enum class Type {
         None,   // bot is missing
+        Unselected, // bot is selected, but not yet chosen
 
         // bot behavior patterns
         Random,

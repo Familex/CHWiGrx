@@ -69,12 +69,6 @@
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
-    <Image Include="small.ico">
-      <Filter>Файлы ресурсов</Filter>
-    </Image>
-    <Image Include="CHWiGrx.ico">
-      <Filter>Файлы ресурсов</Filter>
-    </Image>
     <Image Include="pieces\BR.bmp">
       <Filter>Файлы ресурсов\pieces</Filter>
     </Image>
@@ -119,6 +113,9 @@
     </Image>
     <Image Include="icons\game_mode_small.ico">
       <Filter>Файлы ресурсов\icons</Filter>
+    </Image>
+    <Image Include="icons\figures_list.ico">
+      <Filter>Файлы ресурсов</Filter>
     </Image>
   </ItemGroup>
   <ItemGroup>

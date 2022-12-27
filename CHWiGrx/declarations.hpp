@@ -70,9 +70,13 @@ HWND create_curr_choice_window(HWND, Figure*, POINT, int, int, const WNDPROC);
 bool prepare_window(HINSTANCE, int, UINT, UINT, WNDCLASSEX);
 int window_loop(HINSTANCE);
 void change_checkerboard_color_theme(HWND);
-void update_edit_menu_variables(HWND);
 HWND create_figures_list_window(HWND);
+
+/* menu */
 void set_menu_checkbox(HWND, UINT, bool);
+void update_edit_menu_variables(HWND);
+void update_game_menu_variables(HWND);
+void update_bot_menu_variables(HWND);
 
 std::string take_str_from_clip();
 void update_check_title(HWND);
