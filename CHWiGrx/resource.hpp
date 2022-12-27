@@ -4,25 +4,19 @@
 //
 #define IDD_ABOUTBOX                    001
 #define IDD_CHWIGRX_DIALOG              002
-
 #define IDR_CHWIGRX_EDIT_MENU           101
 #define IDR_MAINFRAME                   102
-
 #define IDC_MYICON                      201
 #define IDC_CHWIGRX_EDIT                202
-
 #define IDS_EDIT_TITLE                  301
 #define IDS_APP_TITLE                   302
 #define IDS_STRING105                   303
-
 #define IDI_GAME_MODE_BIG               401
 #define IDI_GAME_MODE_SMALL             402
 #define IDI_EDIT_MODE                   403
 #define IDI_FIGURES_LIST                404
-
 #define IDC_MINIMAL_CURSOR              501
 #define IDC_CHWIGRX                     502
-
 #define IDB_BLACK_PAWN                  601
 #define IDB_BLACK_ROOK                  602
 #define IDB_BLACK_KING                  603
@@ -35,7 +29,6 @@
 #define IDB_WHITE_QUEEN                 610
 #define IDB_WHITE_BISHOP                611
 #define IDB_WHITE_KNIGHT                612
-
 #define IDM_ABOUT                       701
 #define IDM_EXIT                        702
 #define IDM_RESTART                     703
