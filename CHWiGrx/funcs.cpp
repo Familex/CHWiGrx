@@ -168,12 +168,9 @@ void make_move(HWND hWnd, std::optional<Input> input_) {
                 break;
 
             case GameEndType::Stalemate:
-            {
-                auto who_next = what_next(turn);
-                body = who_next == Color::Black ? L"Stalemate to white!" :
-                    who_next == Color::White ? L"Stalemate to black!" :
+                body = turn == Color::White ? L"Stalemate to white!" :
+                    turn == Color::Black ? L"Stalemate to black!" :
                     L"Stalemate?";
-            }
                 break;
                 
             case GameEndType::FiftyRule:
