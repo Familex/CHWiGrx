@@ -26,7 +26,11 @@ public:
                                                    const std::vector<Pos> & = {},
                                                    const std::vector<Pos> & = {}, 
                                                    const std::vector<Pos> & = {}) const;
-    std::vector<std::pair<bool, Pos>> get_all_possible_moves(const Figure*, 
+    std::vector<std::pair<bool, Pos>> get_all_moves(const Figure*, 
+                                                    const std::vector<Pos> & = {},
+                                                    const std::vector<Pos> & = {},
+                                                    const std::vector<Pos> & = {}) const;
+    std::vector<std::pair<bool, Pos>> get_all_possible_moves(const Figure*,
                                                              const std::vector<Pos> & = {},
                                                              const std::vector<Pos> & = {},
                                                              const std::vector<Pos> & = {}) const;

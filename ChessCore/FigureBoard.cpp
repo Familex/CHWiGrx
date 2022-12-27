@@ -279,7 +279,7 @@ std::vector<std::pair<bool, Pos>> FigureBoard::expand_broom(const Figure* in_han
 /// <param name="ours">Фигуры, в которые врезаемся, но не можем съесть</param>
 /// <param name="enemies">Фигуры, в которые врезаемся и можем съесть</param>
 /// <returns>Серия из пар ест ли фигура и куда попадает</returns>
-std::vector<std::pair<bool, Pos>> FigureBoard::get_all_possible_moves(const Figure* in_hand, 
+std::vector<std::pair<bool, Pos>> FigureBoard::get_all_moves(const Figure* in_hand, 
                                                                       const std::vector<Pos>& to_ignore, 
                                                                       const std::vector<Pos>& ours, 
                                                                       const std::vector<Pos>&enemies) const {
@@ -351,6 +351,36 @@ std::vector<std::pair<bool, Pos>> FigureBoard::get_all_possible_moves(const Figu
     }
 
     return all_moves;
+}
+
+// get_all_moves with check for check
+std::vector<std::pair<bool, Pos>> FigureBoard::get_all_possible_moves(
+                                                        const Figure* in_hand,
+                                                        const std::vector<Pos>& to_ignore,
+                                                        const std::vector<Pos>& ours,
+                                                        const std::vector<Pos>& enemies) const
+{
+    std::vector<std::pair<bool, Pos>> all_possible_moves;
+
+    for (const auto& move : get_all_moves(in_hand))
+    {
+        auto moved_fig = FigureFabric::instance()->submit_on(in_hand, move.second);
+        const std::vector<Pos> to_ignore =
+            move.first
+            ? std::vector<Pos>{ move.second, in_hand->get_pos() }
+            : std::vector<Pos>{ in_hand->get_pos() };
+        Pos to_defend =
+            in_hand->is(FigureType::King)
+            ? move.second
+            : Pos{};
+        //                             extra argument when checking the king ↓
+        if (!check_for_when(in_hand->get_col(), to_ignore, to_defend, { moved_fig.get() }))
+        {
+            all_possible_moves.push_back( move );
+        }
+    }
+
+    return all_possible_moves;
 }
 
 /// <summary>

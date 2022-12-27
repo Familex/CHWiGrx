@@ -283,7 +283,7 @@ private:
     HWND curr_chose_window{};
     bool is_curr_choice_moving{ false };
     Figure* in_hand = board->get_default_fig();
-    std::list<std::pair<bool, Pos>> all_moves{};
+    std::vector<std::pair<bool, Pos>> all_moves{};
 };
 
 inline MotionInput motion_input{&board};

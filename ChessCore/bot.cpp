@@ -25,31 +25,19 @@ Input bot::create_move(const bot::Type bot_type,
 }
 
 Input bot::impl::random_move(const FigureBoard& board, const Color turn) noexcept {
-    std::vector<std::pair<Figure*, std::pair<bool, Pos>>> possible_figures_and_moves;
+    std::vector<std::pair<Figure*, std::pair<bool, Pos>>> possible_figure_moves;
     //                    ~~~~~~~            ~~~~  ~~~
     //                      in_hand           is_eat target
     for (const auto& fig : board.get_figures_of(turn)) {
         for (const auto& move : board.get_all_possible_moves(fig))
         {
-            auto moved_fig = FigureFabric::instance()->submit_on(fig, move.second);
-            const std::vector<Pos> to_ignore = 
-                move.first 
-                ? std::vector<Pos>{ move.second, fig->get_pos() } 
-                : std::vector<Pos>{ fig->get_pos() };
-            Pos to_defend =
-                fig->is(FigureType::King)
-                ? move.second
-                : Pos{};
-            if (!board.check_for_when(turn, to_ignore, to_defend, { moved_fig.get() }))
-            {
-                possible_figures_and_moves.push_back({fig, move});
-            }
+            possible_figure_moves.push_back({ fig, move });
         }
     }
-    if (possible_figures_and_moves.empty()) {
+    if (possible_figure_moves.empty()) {
         return Input();
     }
-    const auto& [fig, move] = possible_figures_and_moves[rand() % possible_figures_and_moves.size()];
+    const auto& [fig, move] = possible_figure_moves[rand() % possible_figure_moves.size()];
     return { fig->get_pos(), move.second };
 }
 

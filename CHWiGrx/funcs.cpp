@@ -382,27 +382,7 @@ void MotionInput::init_curr_choice_window(HWND hWnd, WNDPROC callback) {
 
 // Заполняет поле возможных ходов для текущей фигуры
 void MotionInput::calculate_possible_moves() {
-    all_moves.clear();
-    for (const auto& [is_eat, move_pos] : board->get_all_possible_moves(in_hand)) {
-        if (in_hand->get_type() == FigureType::King) {
-            if (is_eat
-                ? not board->check_for_when(in_hand->get_col(), { in_hand->get_pos(), move_pos }, move_pos)
-                : not board->check_for_when(in_hand->get_col(), { in_hand->get_pos() }, move_pos)
-                ) {
-                all_moves.push_back({ is_eat, move_pos });
-            }
-        }
-        else {
-            auto in_hand_in_tmp = FigureFabric::instance()->submit_on(in_hand, move_pos);
-            bool check = (is_eat
-                ? board->check_for_when(in_hand->get_col(), { in_hand->get_pos(), move_pos }, {}, { in_hand_in_tmp.get() })
-                : board->check_for_when(in_hand->get_col(), { in_hand->get_pos() }, {}, { in_hand_in_tmp.get() })
-                );
-            if (not check) {
-                all_moves.push_back({ is_eat, move_pos });
-            }
-        }
-    }
+    all_moves = board->get_all_possible_moves(in_hand);
 }
 
 void MotionInput::clear() {
