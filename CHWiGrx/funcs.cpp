@@ -158,12 +158,21 @@ void make_move(HWND hWnd, std::optional<Input> input_) {
         std::wstring head = L"Game end";
         switch (curr_game_end_state) 
         {
-            case GameEndType::Checkmate: case GameEndType::Stalemate:
+            case GameEndType::Checkmate:
             {
                 auto who_next = what_next(turn);
                 body = who_next == Color::White ? L"White wins!" :
                     who_next == Color::Black ? L"Black wins!" :
                     L"None wins!";
+            }
+                break;
+
+            case GameEndType::Stalemate:
+            {
+                auto who_next = what_next(turn);
+                body = who_next == Color::Black ? L"Stalemate to white!" :
+                    who_next == Color::White ? L"Stalemate to black!" :
+                    L"Stalemate?";
             }
                 break;
                 
