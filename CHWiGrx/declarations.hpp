@@ -7,9 +7,9 @@
 #include <optional>
 
 #ifdef _DEBUG
-#include <stdio.h>
-#include <iostream>
-#include <string>
+    #include <stdio.h>
+    #include <iostream>
+    #include <string>
 #endif // _DEBUG
 
 /* virtual keys for numbers */
@@ -33,11 +33,11 @@ inline const HBRUSH CHECKERBOARD_BRIGHT { CreateSolidBrush(RGB(128, 128, 128)) }
 inline const BoardRepr DEFAULT_CHESS_BOARD_IDW = BoardRepr("1;0;0;B;R;2;0;1;B;H;3;0;2;B;B;4;0;3;B;Q;5;0;4;B;K;6;0;5;B;B;7;0;6;B;H;8;0;7;B;R;9;1;0;B;P;10;1;1;B;P;11;1;2;B;P;12;1;3;B;P;13;1;4;B;P;14;1;5;B;P;15;1;6;B;P;16;1;7;B;P;17;6;0;W;P;18;6;1;W;P;19;6;2;W;P;20;6;3;W;P;21;6;4;W;P;22;6;5;W;P;23;6;6;W;P;24;6;7;W;P;25;7;0;W;R;26;7;1;W;H;27;7;2;W;B;28;7;3;W;Q;29;7;4;W;K;30;7;5;W;B;31;7;6;W;H;32;7;7;W;R;[TW1;8;25;32;]<><>~");
 inline const BoardRepr DEFAULT_CHESS_BOARD_NIDW = BoardRepr("1;0;0;W;R;2;0;1;W;H;3;0;2;W;B;4;0;3;W;Q;5;0;4;W;K;6;0;5;W;B;7;0;6;W;H;8;0;7;W;R;9;1;0;W;P;10;1;1;W;P;11;1;2;W;P;12;1;3;W;P;13;1;4;W;P;14;1;5;W;P;15;1;6;W;P;16;1;7;W;P;17;6;0;B;P;18;6;1;B;P;19;6;2;B;P;20;6;3;B;P;21;6;4;B;P;22;6;5;B;P;23;6;6;B;P;24;6;7;B;P;25;7;0;B;R;26;7;1;B;H;27;7;2;B;B;28;7;3;B;Q;29;7;4;B;K;30;7;5;B;B;31;7;6;B;H;32;7;7;B;R;[FW1;8;25;32;]<><>~");
 inline const BoardRepr EMPTY_REPR = BoardRepr({}, Color::White, true);
-const int HEADER_HEIGHT = GetSystemMetrics(SM_CXPADDEDBORDER) +
-                          GetSystemMetrics(SM_CYMENUSIZE)     +
-                          GetSystemMetrics(SM_CYCAPTION)      +
-                          GetSystemMetrics(SM_CYFRAME);
-const int SCROLLBAR_THICKNESS = GetSystemMetrics(SM_CXVSCROLL);
+inline const int HEADER_HEIGHT = GetSystemMetrics(SM_CXPADDEDBORDER) +
+                                 GetSystemMetrics(SM_CYMENUSIZE)     +
+                                 GetSystemMetrics(SM_CYCAPTION)      +
+                                 GetSystemMetrics(SM_CYFRAME);
+inline const int SCROLLBAR_THICKNESS = GetSystemMetrics(SM_CXVSCROLL);
 inline const LPCTSTR FIGURES_LIST_WINDOW_CLASS_NAME = L"CHWIGRX:LIST";
 inline const LPCTSTR FIGURES_LIST_WINDOW_TITLE = L"Figures list";
 inline const LPCTSTR CURR_CHOICE_WINDOW_CLASS_NAME = L"CHWIGRX:CHOICE";
@@ -78,6 +78,7 @@ void update_edit_menu_variables(HWND);
 void update_game_menu_variables(HWND);
 void update_bot_menu_variables(HWND);
 
+/* board logic */
 std::string take_str_from_clip();
 void update_main_window_title(HWND);
 void on_lbutton_up(HWND, WPARAM, LPARAM, Pos, bool=true);
@@ -88,12 +89,12 @@ void make_move(HWND, std::optional<Input> = std::nullopt);
 bool is_legal_board_repr(const std::string&);
 bool is_bot_move();
 
-void inline draw_figure(HDC, Color, FigureType, Pos, bool = true);
-void draw_figure(HDC, Color, FigureType, Pos, bool, int, int);
-void draw_board(HDC);
-void draw_figures_on_board(HDC);
-void draw_input(HDC, Input);
-
+/* draw */
+inline void draw_figure(HDC, Color, FigureType, Pos, bool = true);
+inline void draw_figure(HDC, Color, FigureType, Pos, bool, int, int);
+inline void draw_board(HDC);
+inline void draw_figures_on_board(HDC);
+inline void draw_input(HDC, Input);
 inline void Rectangle(HDC hdc, RECT rect) { Rectangle(hdc, rect.left, rect.top, rect.right, rect.bottom); }
 
 /* ---- WNDPROC functions ---------------------------------- */
@@ -175,9 +176,7 @@ protected:
     Pos window_size;
     Pos cell_size = { window_size.x / WIDTH, window_size.y / HEIGHT };
     const int INDENTATION_FROM_EDGES{ 0 };
-};
-
-inline WindowStats main_window{ { 300, 300 }, { 498, 498 } };
+} inline main_window{ { 300, 300 }, { 498, 498 } };
 
 class FiguresListStats : public WindowStats {
 public:
@@ -234,9 +233,7 @@ private:
     int curr_scroll{ 0 };
     size_t max_scroll{ 0 };
     long total_height_of_all_figures;
-};
-
-inline FiguresListStats figures_list{
+} inline figures_list{
     FIGURES_LIST_WINDOW_DEFAULT_POS, FIGURES_LIST_WINDOW_DEFAULT_DIMENTIONS,
     2, PLAYABLE_FIGURES.size()
 };
@@ -288,6 +285,4 @@ private:
     bool is_curr_choice_moving{ false };
     Figure* in_hand = board->get_default_fig();
     std::vector<std::pair<bool, Pos>> all_moves{};
-};
-
-inline MotionInput motion_input{&board};
+} inline motion_input{ &board };
