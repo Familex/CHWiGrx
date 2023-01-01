@@ -51,7 +51,7 @@ LRESULT CALLBACK curr_choice_figures_list_wndproc(HWND hWnd, UINT uMsg, WPARAM w
         HDC hdc = BeginPaint(hWnd, &ps);
         Figure* in_hand = (Figure*)GetWindowLongPtr(hWnd, GWLP_USERDATA);
         if (in_hand) {
-            draw_figure(hdc, in_hand->get_col(), in_hand->get_type(), Pos(0, 0), false);
+            draw_figure(hdc, in_hand, Pos(0, 0), false);
         }
         EndPaint(hWnd, &ps);
     }

@@ -79,20 +79,12 @@ INT_PTR CALLBACK about_proc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPara
     return static_cast<INT_PTR>(FALSE);
 }
 
-/// <summary>
-/// Рисует фигуру на контекст изображения
-/// </summary>
-/// <param name="hdc">Контекст отображения</param>
-/// <param name="figure">Фигура для отрисовки</param>
-/// <param name="w_beg">Левая координата</param>
-/// <param name="h_beg">Верхняя координата</param>
-/// <param name="is_transpanent">Сделать ли фон прозрачным</param>
-void draw_figure(HDC hdc, Color col, FigureType type, Pos begin_paint, bool is_transpanent, int w, int h) {
+void draw_figure(HDC hdc, const Figure* figure, const Pos begin_paint, const bool is_transpanent, const int w, const int h) {
     const int w_beg = begin_paint.y * w;
     const int h_beg = begin_paint.x * h;
     int h_end = h_beg + h;
     int w_end = w_beg + h;
-    HBITMAP hBitmap = pieces_bitmaps[col_to_char(col)][figure_type_to_char(type)];
+    HBITMAP hBitmap = pieces_bitmaps[col_to_char(figure->get_col())][figure_type_to_char(figure->get_type())];
     BITMAP bm{};
     GetObject(hBitmap, sizeof(BITMAP), &bm);
     HDC hdcMem = CreateCompatibleDC(hdc);
@@ -101,18 +93,32 @@ void draw_figure(HDC hdc, Color col, FigureType type, Pos begin_paint, bool is_t
     if (is_transpanent) {
         TransparentBlt(hdc, w_beg, h_beg,
             w, h,
-            hdcMem, 0, 0, bm.bmWidth, bm.bmHeight, RGB(255, 0, 0));
+            hdcMem, 0, 0, bm.bmWidth, bm.bmHeight, TRANSPARENCY_PLACEHOLDER);
     }
     else {
         StretchBlt(hdc, w_beg, h_beg,
             w, h,
             hdcMem, 0, 0, bm.bmWidth, bm.bmHeight, SRCCOPY);
     }
+    
+    // if it's a castring rook, add a star to right top corner
+    if (board.has_castling(figure->get_id()))
+    {
+        HBITMAP hStarBitmap = other_bitmaps["star"];
+        GetObject(hStarBitmap, sizeof(BITMAP), &bm);
+        HGDIOBJ hOldBitmap = SelectObject(hdcMem, hStarBitmap);
+        SetStretchBltMode(hdc, STRETCH_DELETESCANS);
+        TransparentBlt(hdc, 
+            w_beg + w * 2 / 3, h_beg,
+            w / 3, h / 3,
+            hdcMem, 0, 0, bm.bmWidth, bm.bmHeight, TRANSPARENCY_PLACEHOLDER);
+    }
+    
     DeleteDC(hdcMem);
 }
 
-void draw_figure(HDC hdc, Color col, FigureType type, Pos begin_paint, bool is_transpanent) {
-    draw_figure(hdc, col, type, begin_paint, is_transpanent, main_window.get_cell_width(), main_window.get_cell_height());
+void draw_figure(HDC hdc, const Figure* figure, const Pos begin_paint, const bool is_transpanent) {
+    draw_figure(hdc, figure, begin_paint, is_transpanent, main_window.get_cell_width(), main_window.get_cell_height());
 }
 
 /// <summary>
@@ -282,7 +288,7 @@ HWND create_curr_choice_window(HWND parent, Figure* in_hand, POINT mouse, int w,
         ;
         SetWindowPos(hWindow, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
         SetWindowLongPtr(hWindow, GWL_EXSTYLE, GetWindowLongPtr(hWindow, GWL_EXSTYLE) | WS_EX_LAYERED);
-        SetLayeredWindowAttributes(hWindow, RGB(255, 0, 0), 255, LWA_COLORKEY);
+        SetLayeredWindowAttributes(hWindow, TRANSPARENCY_PLACEHOLDER, 0xFF, LWA_COLORKEY);
         SetWindowLongPtr(hWindow, GWLP_USERDATA, (LONG_PTR)for_storage);
         ShowWindow(hWindow, SW_SHOWDEFAULT);
         UpdateWindow(hWindow);
@@ -496,7 +502,7 @@ void draw_input(HDC hdcMem, Input input) {
 void draw_figures_on_board(HDC hdc) {
     for (const auto& figure : board.get_all_figures()) {
         if (!motion_input.is_figure_dragged(figure->get_id())) {
-            draw_figure(hdc, figure->get_col(), figure->get_type(), figure->get_pos());
+            draw_figure(hdc, figure, figure->get_pos());
         }
     }
 }

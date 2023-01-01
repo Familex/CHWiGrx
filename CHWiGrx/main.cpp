@@ -23,6 +23,10 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
         pieces_bitmaps['W']['H'] = LoadBitmap(hInstance, MAKEINTRESOURCE(IDB_WHITE_KNIGHT));
     }
 
+    {
+        other_bitmaps["star"] = LoadBitmap(hInstance, MAKEINTRESOURCE(IDB_STAR));
+    }
+
     #ifdef _DEBUG
     if (AllocConsole()) {
         FILE* tmp;

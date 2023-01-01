@@ -85,7 +85,12 @@ public:
     void move_fig(Input input, bool capture=true) {
         move_fig(get_fig(input.from), input.target, capture);
     }
-    bool has_castling(Id id) const { return castling.at(id); }
+    bool has_castling(Id id) const { 
+        if (castling.contains(id)) {
+            return castling.at(id);
+        }
+        return false;
+    }
     void off_castling(Id id) { castling[id] = false; }
     void on_castling(Id id)  { castling[id] = true; }
     MoveRec get_last_move() const { return move_logger.get_last_move(); }

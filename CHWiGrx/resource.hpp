@@ -29,6 +29,7 @@
 #define IDB_WHITE_QUEEN                 610
 #define IDB_WHITE_BISHOP                611
 #define IDB_WHITE_KNIGHT                612
+#define IDB_STAR                        613
 #define IDM_ABOUT                       701
 #define IDM_EXIT                        702
 #define IDM_RESTART                     703
@@ -69,7 +70,7 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        101
+#define _APS_NEXT_RESOURCE_VALUE        102
 #define _APS_NEXT_COMMAND_VALUE         737
 #define _APS_NEXT_CONTROL_VALUE         1000
 #define _APS_NEXT_SYMED_VALUE           101

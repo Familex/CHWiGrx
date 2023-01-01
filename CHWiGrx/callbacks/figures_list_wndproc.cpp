@@ -151,7 +151,7 @@ LRESULT CALLBACK figures_list_wndproc(HWND hWnd, UINT message, WPARAM wParam, LP
                 int x = static_cast<int>(index / figures_list.get_figures_in_row());
                 int y = static_cast<int>(index % figures_list.get_figures_in_row());
                 Figure* fig_to_draw = figures_prototypes[curr_color][index];
-                draw_figure(hdcMem, fig_to_draw->get_col(), fig_to_draw->get_type(), { x, y },
+                draw_figure(hdcMem, fig_to_draw, { x, y },
                     true, static_cast<int>(figures_list.get_cell_height()), static_cast<int>(figures_list.get_cell_width()));
             }
 

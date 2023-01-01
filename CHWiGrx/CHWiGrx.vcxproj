@@ -159,7 +159,7 @@
   <ItemGroup>
     <ClCompile Include="callbacks\curr_choice_figures_list_wndproc.cpp" />
     <ClCompile Include="callbacks\curr_choice_wndproc.cpp" />
-    <ClCompile Include="callbacks\figure_list_wndproc.cpp" />
+    <ClCompile Include="callbacks\figures_list_wndproc.cpp" />
     <ClCompile Include="callbacks\main_default_wndproc.cpp" />
     <ClCompile Include="callbacks\main_edit_state_wndproc.cpp" />
     <ClCompile Include="callbacks\main_game_state_wndproc.cpp" />
