@@ -1,7 +1,8 @@
 #include "figure_fabric.h"
 
-Figure* FigureFabric::create(const Pos position, const Color color, const FigureType type, const Id id, Figure* placement) const {
-    // ignore this->id
+Figure* FigureFabric::create(const Pos position, const Color color, const FigureType type, const Id id, Figure* placement) {
+    this->id = std::max(this->id, id + 1);
+
     switch (type) {
     case FigureType::Pawn:
     case FigureType::Knight:

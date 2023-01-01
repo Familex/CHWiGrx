@@ -10,7 +10,7 @@ public:
     }
 
     Figure* create(const Pos, const Color, const FigureType);
-    Figure* create(const Pos, const Color, const FigureType, const Id, Figure* = nullptr) const;
+    Figure* create(const Pos, const Color, const FigureType, const Id, Figure* = nullptr);
     Figure* create(const Figure*, const bool = true);
     Figure* get_default_fig() const;
     std::unique_ptr<Figure> submit_on(const Figure* who, const Pos on) {
