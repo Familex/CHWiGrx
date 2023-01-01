@@ -24,6 +24,18 @@ LRESULT CALLBACK main_default_wndproc(HWND hWnd, UINT message, WPARAM wParam, LP
                     InvalidateRect(hWnd, NULL, NULL);
                     break;
 
+                case IDM_WINDOW_MAKEQUAD:
+                {
+                    RECT rect;
+                    GetWindowRect(hWnd, &rect);
+                    
+                    int quad_side = (rect.right - rect.left + rect.bottom - rect.top) / 2;
+                    main_window.set_size(quad_side, quad_side + HEADER_HEIGHT);
+                    SetWindowPos(hWnd, NULL, 
+                        0, 0, quad_side, quad_side + HEADER_HEIGHT, SWP_NOZORDER | SWP_NOMOVE);
+                }
+                    break;
+                    
                 case IDM_EXIT:
                     // нужно ли чистить память?
                     DestroyWindow(hWnd);

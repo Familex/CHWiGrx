@@ -92,6 +92,8 @@ public:
     }
     void off_castling(Id id) { castling[id] = false; }
     void on_castling(Id id)  { castling[id] = true; }
+    std::vector<MoveRec> get_last_moves() const { return move_logger.get_past(); }
+    std::vector<MoveRec> get_future_moves() const { return move_logger.get_future(); }
     MoveRec get_last_move() const { return move_logger.get_last_move(); }
     void set_last_move(const MoveRec& move_rec) { this->move_logger.add(move_rec); }
     template <typename Func> std::pair<bool, MoveRec> provide_move(Figure*, const Input&, Color turn, const Func&);

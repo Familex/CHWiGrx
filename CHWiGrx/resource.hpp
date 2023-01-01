@@ -64,6 +64,8 @@
 #define IDM_BOTCOLOR_BLACK              734
 #define IDM_TOGGLE_BOT                  735
 #define IDM_BOTDIFFICULTY_VERYHARD      736
+#define IDM_WINDOW_MAKEQUAD             737
+#define IDM_WINDOW_MOVELOG              738
 #define IDC_STATIC                      -1
 
 // Next default values for new objects
@@ -71,7 +73,7 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        102
-#define _APS_NEXT_COMMAND_VALUE         737
+#define _APS_NEXT_COMMAND_VALUE         739
 #define _APS_NEXT_CONTROL_VALUE         1000
 #define _APS_NEXT_SYMED_VALUE           101
 #endif

@@ -19,7 +19,8 @@ template <typename ...Ts>
 void debug_print(Ts ...args)
 {
     #ifdef _DEBUG
-        (std::cout << ... << args) << std::endl;
+        ((std::cout << args << " "), ...);
+        std::cout << std::endl;
     #endif
 }
 

@@ -148,7 +148,7 @@ void make_move(HWND hWnd, std::optional<Input> input_) {
         return;
     }
 
-    debug_print("Curr move was: ", move_rec.as_string());
+    debug_print("Curr move was:", move_rec.as_string());
 
     board.set_last_move({ in_hand, input, turn, move_rec.ms, move_rec.promotion_choice });
     turn = what_next(turn);
