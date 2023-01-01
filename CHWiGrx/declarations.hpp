@@ -90,11 +90,11 @@ bool is_legal_board_repr(const std::string&);
 bool is_bot_move();
 
 /* draw */
-inline void draw_figure(HDC, Color, FigureType, Pos, bool = true);
-inline void draw_figure(HDC, Color, FigureType, Pos, bool, int, int);
-inline void draw_board(HDC);
-inline void draw_figures_on_board(HDC);
-inline void draw_input(HDC, Input);
+void draw_figure(HDC, Color, FigureType, Pos, bool = true);
+void draw_figure(HDC, Color, FigureType, Pos, bool, int, int);
+void draw_board(HDC);
+void draw_figures_on_board(HDC);
+void draw_input(HDC, Input);
 inline void Rectangle(HDC hdc, RECT rect) { Rectangle(hdc, rect.left, rect.top, rect.right, rect.bottom); }
 
 /* ---- WNDPROC functions ---------------------------------- */
