@@ -97,8 +97,8 @@ std::string to_string(MainEvent main_event);
 
 struct MoveMessage {
     MainEvent main_ev{ MainEvent::E };
-    std::list<SideEvent> side_evs;
+    std::vector<SideEvent> side_evs;
     std::vector<Id> to_eat;
-    std::list<std::pair<Id, Input>> to_move;
-    std::list<Id> what_castling_breaks;
+    std::vector<std::pair<Id, Input>> to_move;
+    std::vector<Id> what_castling_breaks;
 };

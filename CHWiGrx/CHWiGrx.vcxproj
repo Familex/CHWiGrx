@@ -163,6 +163,7 @@
     <ClCompile Include="callbacks\main_default_wndproc.cpp" />
     <ClCompile Include="callbacks\main_edit_state_wndproc.cpp" />
     <ClCompile Include="callbacks\main_game_state_wndproc.cpp" />
+    <ClCompile Include="callbacks\moves_list_wndproc.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="funcs.cpp" />
   </ItemGroup>
@@ -174,6 +175,7 @@
     <Image Include="icons\game_mode_big.ico" />
     <Image Include="icons\edit_mode.ico" />
     <Image Include="icons\game_mode_small.ico" />
+    <Image Include="other_images\star.bmp" />
     <Image Include="pieces\BB.bmp" />
     <Image Include="pieces\BH.bmp" />
     <Image Include="pieces\BK.bmp" />
@@ -193,6 +195,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <None Include="icons\Minimal.ani" />
     <None Include="Minimal.ani" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

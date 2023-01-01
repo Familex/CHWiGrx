@@ -239,9 +239,9 @@ LRESULT CALLBACK mainproc::main_game_state_wndproc(HWND hWnd, UINT message, WPAR
     case WM_RBUTTONDOWN:
         motion_input.clear();
         InvalidateRect(hWnd, NULL, NULL);
-        #ifdef _DEBUG
-            std::cout << "Curr board: " << board.get_repr(true).as_string() << '\n';
-        #endif // _DEBUG
+        
+        debug_print("Curr board: ", board.get_repr(true).as_string());
+            
         break;
         
     case WM_LBUTTONUP:

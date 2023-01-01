@@ -5,12 +5,23 @@
 #include "../ChessCore/FigureBoard.h"
 #include "../ChessCore/bot.h"
 #include <optional>
+#include <string>
+
+using namespace std::string_literals;
 
 #ifdef _DEBUG
     #include <stdio.h>
     #include <iostream>
     #include <string>
 #endif // _DEBUG
+
+template <typename ...Ts>
+void debug_print(Ts ...args)
+{
+    #ifdef _DEBUG
+        (std::cout << ... << args) << std::endl;
+    #endif
+}
 
 /* virtual keys for numbers */
 constexpr auto VK_0 = 48;
@@ -68,6 +79,7 @@ inline Color bot_turn = Color::Black;
 bool init_instance(HINSTANCE, LPTSTR, LPTSTR, int);
 INT_PTR CALLBACK about_proc(HWND, UINT, WPARAM, LPARAM);
 void cpy_str_to_clip(const std::string&);
+std::string take_str_from_clip();
 HWND create_curr_choice_window(HWND, Figure*, POINT, int, int, const WNDPROC);
 bool prepare_window(HINSTANCE, int, UINT, UINT, WNDCLASSEX);
 int window_loop(HINSTANCE);
@@ -81,7 +93,6 @@ void update_game_menu_variables(HWND);
 void update_bot_menu_variables(HWND);
 
 /* board logic */
-std::string take_str_from_clip();
 void update_main_window_title(HWND);
 void on_lbutton_up(HWND, WPARAM, LPARAM, Pos, bool=true);
 void on_lbutton_down(HWND, LPARAM);
@@ -107,8 +118,8 @@ namespace mainproc {
 LRESULT CALLBACK main_default_wndproc(HWND, UINT, WPARAM, LPARAM);
 LRESULT CALLBACK figures_list_wndproc(HWND, UINT, WPARAM, LPARAM);
 LRESULT CALLBACK curr_choice_figures_list_wndproc(HWND, UINT, WPARAM, LPARAM);
-template <bool>
-LRESULT CALLBACK curr_choice_wndproc(HWND, UINT, WPARAM, LPARAM);
+template <bool> LRESULT CALLBACK curr_choice_wndproc(HWND, UINT, WPARAM, LPARAM);
+LRESULT CALLBACK moves_list_wndproc(HWND, UINT, WPARAM, LPARAM);
 
 class WindowStats {
     /* Габариты окна для отрисовки и захвата ввода */

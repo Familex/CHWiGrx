@@ -86,9 +86,8 @@ public:
         move_fig(get_fig(input.from), input.target, capture);
     }
     bool has_castling(Id id) const { 
-        if (castling.contains(id)) {
-            return castling.at(id);
-        }
+        if (castling.contains(id))
+            return castling.at(id); 
         return false;
     }
     void off_castling(Id id) { castling[id] = false; }

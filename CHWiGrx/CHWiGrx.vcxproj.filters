@@ -22,6 +22,9 @@
     <Filter Include="Файлы ресурсов\icons">
       <UniqueIdentifier>{76b5483f-f3c3-4ac3-b43c-015d9cdbb594}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Файлы ресурсов\other_images">
+      <UniqueIdentifier>{12d77ce8-3848-49c3-9a67-834522f336b2}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="framework.hpp">
@@ -53,13 +56,16 @@
     <ClCompile Include="callbacks\curr_choice_wndproc.cpp">
       <Filter>callbacks</Filter>
     </ClCompile>
-    <ClCompile Include="callbacks\figure_list_wndproc.cpp">
+    <ClCompile Include="callbacks\figures_list_wndproc.cpp">
       <Filter>callbacks</Filter>
     </ClCompile>
     <ClCompile Include="callbacks\main_edit_state_wndproc.cpp">
       <Filter>callbacks</Filter>
     </ClCompile>
     <ClCompile Include="callbacks\main_game_state_wndproc.cpp">
+      <Filter>callbacks</Filter>
+    </ClCompile>
+    <ClCompile Include="callbacks\moves_list_wndproc.cpp">
       <Filter>callbacks</Filter>
     </ClCompile>
   </ItemGroup>
@@ -117,10 +123,16 @@
     <Image Include="icons\figures_list.ico">
       <Filter>Файлы ресурсов</Filter>
     </Image>
+    <Image Include="other_images\star.bmp">
+      <Filter>Файлы ресурсов\other_images</Filter>
+    </Image>
   </ItemGroup>
   <ItemGroup>
     <None Include="Minimal.ani">
       <Filter>Файлы ресурсов</Filter>
+    </None>
+    <None Include="icons\Minimal.ani">
+      <Filter>Файлы ресурсов\icons</Filter>
     </None>
   </ItemGroup>
 </Project>
