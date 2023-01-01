@@ -30,24 +30,17 @@
 *.exe
 *.out
 *.app
-/.vs/Chess/v17
-/x64/Debug
-/Debug
-/ChessCore/x64/Debug
-/ChessCore/Debug
-/CHWiGrx/Debug/CHWiGrx.tlog
-/CHWiGrx/Debug
-/CHWiGrx/x64/Debug/CHWiGrx.tlog
-/CHWiGrx/x64/Debug
-/CHWiGrx/CHWiGrx.suppress
-/ChessCore/x64/Release/ChessCore.tlog
-/ChessCore/x64/Release
-/CHWiGrx/x64/Release/CHWiGrx.tlog
-/CHWiGrx/x64/Release
-/x64/Release
-/CHWiGrx/old.txt
+
+# vs artifacts
+.vs/
+x64/
+[Dd]ebug/
+[Rr]elease/
+*.suppress
 *.aps
-/TODO.txt
 *.user
-/.vs/Chess/FileContentIndex
+
+# my files
+/TODO.txt
+psd/
 *.claudiaideconfig
