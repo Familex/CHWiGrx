@@ -343,7 +343,7 @@ void on_lbutton_up(HWND hWnd, WPARAM wParam, LPARAM lParam, Pos where_fig, bool 
 
 void on_lbutton_down(HWND hWnd, LPARAM lParam) {
     // bot move guard
-    if (bot_type != bot::Type::None && turn == bot_turn) {
+    if (window_state == WindowState::GAME && bot_type != bot::Type::None && turn == bot_turn) {
         return;
     }
 
