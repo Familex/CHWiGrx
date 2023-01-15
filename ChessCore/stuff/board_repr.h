@@ -48,7 +48,7 @@ public:
     std::string as_string();
     char get_idw_char() const { return idw ? 'T' : 'F'; }
     bool get_idw() const { return idw; }
-    char get_turn_char() const { return turn == Color::White ? 'W' : 'B'; }
+    char get_turn_char() const;
     std::vector<Id> get_who_can_castle() const { return can_castle; }
     bool empty() const { return figures.empty(); }
     void set_figures(std::vector<Figure*>&& figs);

@@ -463,8 +463,7 @@ void update_main_window_title(HWND hWnd) {
 }
 
 void copy_repr_to_clip() {
-    BoardRepr board_repr = board.get_repr(save_all_moves);
-    board_repr.set_turn(turn);
+    BoardRepr board_repr = board.get_repr(turn, save_all_moves);
     std::string board_repr_str = board_repr.as_string();
     cpy_str_to_clip(
         board_repr_str

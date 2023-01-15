@@ -40,6 +40,13 @@ std::string BoardRepr::as_string() {
     return result;
 }
 
+char BoardRepr::get_turn_char() const {
+    return 
+          turn == Color::White ? 'W' 
+        : turn == Color::Black ? 'B' 
+        : 'E';
+}
+
 // Сведения о рокировке привязаны к id соответствующих ладей (заключены в квадратные скобки)
 BoardRepr::BoardRepr(std::string board_repr) {
     const size_t npos = std::string::npos;

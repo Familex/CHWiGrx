@@ -79,13 +79,13 @@ void FigureBoard::apply_map(const BoardRepr& board_repr) {
         figures[fig->get_pos()] = FigureFabric::instance()->create(fig);
 }
 
-BoardRepr FigureBoard::get_repr(bool save_all_moves) const {
+BoardRepr FigureBoard::get_repr(Color turn, bool save_all_moves) const {
     std::vector<Figure*> fig_vec;
     for (auto& [_, fig] : figures)
         fig_vec.push_back(fig);
     return {
         fig_vec,
-        Color::White,
+        turn,
         idw,
         save_all_moves 
             ? move_logger.get_past() 

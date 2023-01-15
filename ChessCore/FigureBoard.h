@@ -107,7 +107,7 @@ public:
     void promotion_fig(Figure*, FigureType);
     size_t cnt_of_figures() const { return figures.size(); }
     bool insufficient_material() const;
-    BoardRepr get_repr(bool) const;
+    BoardRepr get_repr(Color, bool) const;
     ~FigureBoard() {
         for (auto& [_, fig] : figures) {
             if (not fig->empty())
