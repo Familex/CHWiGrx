@@ -609,8 +609,8 @@ bool FigureBoard::insufficient_material() const {
 }
 
 GameEndType FigureBoard::game_end_check(Color col) const {
-    if (stalemate_for(col)) return GameEndType::Stalemate;
     if (checkmate_for(col)) return GameEndType::Checkmate;
+    if (stalemate_for(col)) return GameEndType::Stalemate;
     if (insufficient_material()) return GameEndType::InsufficientMaterial;
     if (move_logger.is_fifty_move_rule_was_triggered()) return GameEndType::FiftyRule;
     if (move_logger.is_moves_repeat_rule_was_triggered()) return GameEndType::MoveRepeat;
