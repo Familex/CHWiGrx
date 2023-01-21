@@ -26,8 +26,7 @@ bool prepare_window(HINSTANCE hInstance, int nCmdShow, UINT title_id, UINT windo
 int window_loop(HINSTANCE hInstance) {
     MSG msg;
     HACCEL hAccel = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_CHWIGRX));
-    BOOL bRet = 0;
-    while (bRet = GetMessage(&msg, nullptr, 0, 0)) {
+    while (BOOL bRet = GetMessage(&msg, nullptr, 0, 0)) {
         if (-1 == bRet) break;
         if (!TranslateAccelerator(msg.hwnd, hAccel, &msg)) {
             TranslateMessage(&msg);
@@ -155,9 +154,9 @@ void make_move(HWND hWnd, std::optional<Input> input_) {
     InvalidateRect(hWnd, NULL, NULL);
     UpdateWindow(hWnd);
 
-    GameEndType curr_game_end_state = board.game_end_check(turn);
-
-    if (curr_game_end_state != GameEndType::NotGameEnd) {
+    if (GameEndType curr_game_end_state = board.game_end_check(turn); 
+            curr_game_end_state != GameEndType::NotGameEnd
+        ) {
         std::wstring body = L"";
         std::wstring head = L"Game end";
         switch (curr_game_end_state) 

@@ -5,8 +5,7 @@ LRESULT CALLBACK main_default_wndproc(HWND hWnd, UINT message, WPARAM wParam, LP
     {
         case WM_COMMAND:
         {
-            int wmId = LOWORD(wParam);
-            switch (wmId)
+            switch (int wmId = LOWORD(wParam); wmId)
             {
                 case IDM_COPY_MAP:
                     copy_repr_to_clip();

@@ -21,8 +21,10 @@ LRESULT CALLBACK curr_choice_wndproc<check_moves_validity>(HWND hWnd, UINT uMsg,
             HWND parent = GetParent(hWnd);
             POINT cur_pos{};
             GetCursorPos(&cur_pos);
-            Pos where_fig = main_window.get_figure_under_mouse(cur_pos);
-            if (!check_moves_validity && !is_valid_coords(where_fig)) {
+            
+            if (Pos where_fig = main_window.get_figure_under_mouse(cur_pos); 
+                    !check_moves_validity && !is_valid_coords(where_fig)
+                ) {
                 // Вынесли фигуру за пределы доски без проверки валидности => удаляем с доски
                 board.delete_fig(
                     reinterpret_cast<Figure*>(GetWindowLongPtr(hWnd, GWLP_USERDATA))->get_pos()
@@ -43,8 +45,10 @@ LRESULT CALLBACK curr_choice_wndproc<check_moves_validity>(HWND hWnd, UINT uMsg,
         {
             PAINTSTRUCT ps;
             HDC hdc = BeginPaint(hWnd, &ps);
-            Figure* in_hand = (Figure*)GetWindowLongPtr(hWnd, GWLP_USERDATA);
-            if (in_hand) {
+            
+            if (Figure* in_hand = (Figure*)GetWindowLongPtr(hWnd, GWLP_USERDATA); 
+                    in_hand
+                ) {
                 draw_figure(hdc, in_hand, Pos(0, 0), false);
             }
             EndPaint(hWnd, &ps);

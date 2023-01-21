@@ -11,8 +11,7 @@ LRESULT CALLBACK mainproc::main_edit_state_wndproc(HWND hWnd, UINT message, WPAR
     {
         case WM_COMMAND:
         {
-            int wmId = LOWORD(wParam);
-            switch (wmId)
+            switch (int wmId = LOWORD(wParam); wmId)
             {
                 case IDM_SET_GAME_WINDOW_MODE:
                 {

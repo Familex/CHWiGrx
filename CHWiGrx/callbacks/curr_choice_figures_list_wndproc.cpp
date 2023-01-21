@@ -23,10 +23,12 @@ LRESULT CALLBACK curr_choice_figures_list_wndproc(HWND hWnd, UINT uMsg, WPARAM w
         GetCursorPos(&cur_pos);
         RECT figures_list;
         GetWindowRect(GetParent(hWnd), &figures_list);
-        Pos where_fig = main_window.get_figure_under_mouse(cur_pos);
-        if (is_valid_coords(where_fig) &&
-            !(figures_list.top <= cur_pos.y && cur_pos.y <= figures_list.bottom &&
-                figures_list.left <= cur_pos.x && cur_pos.x <= figures_list.right)) {
+        
+        if (Pos where_fig = main_window.get_figure_under_mouse(cur_pos); 
+                is_valid_coords(where_fig) &&
+                !(figures_list.top <= cur_pos.y && cur_pos.y <= figures_list.bottom &&
+                    figures_list.left <= cur_pos.x && cur_pos.x <= figures_list.right)
+            ) {
             auto to_place = reinterpret_cast<Figure*>(GetWindowLongPtr(hWnd, GWLP_USERDATA));
             to_place->move_to(where_fig);
             board.place_fig(to_place);
@@ -49,8 +51,10 @@ LRESULT CALLBACK curr_choice_figures_list_wndproc(HWND hWnd, UINT uMsg, WPARAM w
     {
         PAINTSTRUCT ps;
         HDC hdc = BeginPaint(hWnd, &ps);
-        Figure* in_hand = (Figure*)GetWindowLongPtr(hWnd, GWLP_USERDATA);
-        if (in_hand) {
+       
+        if (Figure* in_hand = (Figure*)GetWindowLongPtr(hWnd, GWLP_USERDATA); 
+                in_hand
+            ) {
             draw_figure(hdc, in_hand, Pos(0, 0), false);
         }
         EndPaint(hWnd, &ps);
