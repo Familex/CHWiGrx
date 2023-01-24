@@ -135,7 +135,7 @@ public:
         this->window_size = { x, y };
         recalculate_cell_size();
     }
-    void set_size(Pos window_size) { set_size(window_size.x, window_size.y); }
+    void set_size(Pos new_window_size) { set_size(new_window_size.x, new_window_size.y); }
     void set_size(LPARAM lParam) { set_size(LOWORD(lParam), HIWORD(lParam)); }
     inline void set_rect(RECT rect) {
         set_pos({ rect.left, rect.top });
@@ -265,7 +265,7 @@ public:
         input_order_by_one = 2;
     }
     inline void deactivate_by_click() { input_order_by_two = false; }
-    inline void deactivate_by_pos() { input_order_by_one = false; }
+    inline void deactivate_by_pos() { input_order_by_one = 0; }
     inline void set_target(Pos target) { input.target = target; }
     inline void set_target(int x, int y) { input.target = {x, y}; }
     inline void set_from(Pos from) { input.from = from; }

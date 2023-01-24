@@ -105,7 +105,7 @@ void draw_figure(HDC hdc, const Figure* figure, const Pos begin_paint, const boo
     {
         HBITMAP hStarBitmap = other_bitmaps["star"];
         GetObject(hStarBitmap, sizeof(BITMAP), &bm);
-        HGDIOBJ hOldBitmap = SelectObject(hdcMem, hStarBitmap);
+        HGDIOBJ hOldBitmap = SelectObject(hdcMem, hStarBitmap); // <- new hOldBitmap?
         SetStretchBltMode(hdc, STRETCH_DELETESCANS);
         TransparentBlt(hdc, 
             w_beg + w * 2 / 3, h_beg,

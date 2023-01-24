@@ -1,7 +1,7 @@
 #include "figure_fabric.h"
 
-Figure* FigureFabric::create(const Pos position, const Color color, const FigureType type, const Id id, Figure* placement) {
-    this->id = std::max(this->id, id + 1);
+Figure* FigureFabric::create(const Pos position, const Color color, const FigureType type, const Id new_id, Figure* placement) {
+    this->id = std::max(this->id, new_id + 1);
 
     switch (type) {
     case FigureType::Pawn:
@@ -11,10 +11,10 @@ Figure* FigureFabric::create(const Pos position, const Color color, const Figure
     case FigureType::Queen:
     case FigureType::King:
         return placement
-            ? new (placement) Figure(id, position, color, type)
-            : new Figure(id, position, color, type);
+            ? new (placement) Figure(new_id, position, color, type)
+            : new Figure(new_id, position, color, type);
     case FigureType::None:
-        return new Figure(id, position, Color::None, FigureType::None);
+        return new Figure(new_id, position, Color::None, FigureType::None);
     default:
         return get_default_fig();
     }
