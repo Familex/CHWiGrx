@@ -165,7 +165,9 @@ bool FigureBoard::capture_figure(Figure* it) {
 /// <param name="it">Идентификатор фигуры</param>
 /// <returns>Получилось ли съесть</returns>
 bool FigureBoard::capture_figure(const Id id) {
-    if (id == ERR_ID) { return false; }
+    if (id == ERR_ID) {
+        return false; 
+    }
     Figure* fig = get_fig(id);
     captured_figures.push_back(fig);
     figures.erase(fig->get_pos());
@@ -720,13 +722,14 @@ std::variant<ErrorEvent, MoveMessage> FigureBoard::move_check(Figure* in_hand,
         if (std::abs(shift.y) == 1 && is_empty(input.target) &&
             last_move.ms.main_ev == MainEvent::LMOVE && last_move.get_who_went_pos().y == input.target.y &&
             (
+                // maybe can be simplified into one condition
                 in_hand->get_col() == Color::White && (
-                    input.from.x == 3 && idw && shift.x == -1 && cont_fig(input.from + Pos(0, shift.y)) ||
-                    input.from.x == (HEIGHT - EN_PASSANT_INDENT) && not idw && shift.x == 1 && cont_fig(input.from + Pos(0, shift.y))
+                    input.from.x == (EN_PASSANT_INDENT - 1) && idw && shift.x == -1 && cont_fig(input.from + Pos(0, shift.y)) ||
+                    input.from.x == (HEIGHT - EN_PASSANT_INDENT) && !idw && shift.x == 1 && cont_fig(input.from + Pos(0, shift.y))
                     ) ||
                 in_hand->get_col() == Color::Black && (
                     input.from.x == (HEIGHT - EN_PASSANT_INDENT) && idw && shift.x == 1 && cont_fig(input.from + Pos(0, shift.y)) ||
-                    input.from.x == 3 && not idw && shift.x == -1 && cont_fig(input.from + Pos(0, shift.y))
+                    input.from.x == (EN_PASSANT_INDENT - 1) && !idw && shift.x == -1 && cont_fig(input.from + Pos(0, shift.y))
                     )
                 )) {
             auto in_hand_in_targ_tmp = FigureFabric::instance()->submit_on(in_hand, input.target);
@@ -746,8 +749,14 @@ std::variant<ErrorEvent, MoveMessage> FigureBoard::move_check(Figure* in_hand,
                 }
             }
             move_message.main_ev = MainEvent::EN_PASSANT;
-            move_message.to_eat.push_back(get_fig({ input.from.x, input.target.y })->get_id());
-            move_message.to_eat.push_back(targ->get_id());
+            if (Id to_eat = get_fig({ input.from.x, input.target.y })->get_id();
+                    to_eat != ERR_ID) {
+                move_message.to_eat.push_back(to_eat);
+            }
+            if (Id to_eat = targ->get_id();
+                    !targ->empty()) {
+                move_message.to_eat.push_back(to_eat);
+            }
             return move_message;
         }
     }
@@ -880,19 +889,19 @@ bool FigureBoard::provide_move(const MoveRec& move_rec) {
         move_fig(in_hand, input.target);
         break;
     case MainEvent::EN_PASSANT: case MainEvent::EAT:
-        move_fig(in_hand, input.target);
         for (const Id& it : ms.to_eat) {
             if (it != ERR_ID && get_fig(it)->get_pos() != input.target)
                 capture_figure(it);
         }
+        move_fig(in_hand, input.target);
         break;
     case MainEvent::CASTLING:
         if (has_castling(ms.to_move.back().first)) {
-            move_fig(in_hand, input.target);
             for (const auto& [who, frominto] : ms.to_move) {
                 auto who_it = get_fig(who);
                 move_fig(who_it, frominto.target);
             }
+            move_fig(in_hand, input.target);
         }
         else {
             return false;
