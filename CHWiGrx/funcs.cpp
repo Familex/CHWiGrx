@@ -216,9 +216,10 @@ bool is_bot_move()
 }
 
 void restart() {
-    board.reset(start_board_repr);
+    BoardRepr start_board_repr_copy{ start_board_repr }; // explicit copy constructor
+    board.reset(std::move(start_board_repr_copy));
     motion_input.clear();
-    turn = start_board_repr.get_turn();
+    turn = start_board_repr.turn;
 }
 
 // Копирует строку в буффер обмена

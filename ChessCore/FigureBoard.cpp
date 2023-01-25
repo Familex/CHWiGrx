@@ -1,7 +1,7 @@
 #include "FigureBoard.h"
 
-FigureBoard::FigureBoard(BoardRepr board_repr) {
-    reset(board_repr);
+FigureBoard::FigureBoard(BoardRepr&& board_repr) {
+    reset(std::forward<BoardRepr>(board_repr));
 }
 
 void FigureBoard::init_figures_moves() {
@@ -50,7 +50,7 @@ void FigureBoard::init_figures_moves() {
 
 }
 
-void FigureBoard::reset(const BoardRepr& map) {
+void FigureBoard::reset(BoardRepr&& map) {
     move_logger.reset();
     curr_id = 0;
     for (auto& [_, fig] : figures) {
@@ -63,27 +63,30 @@ void FigureBoard::reset(const BoardRepr& map) {
             delete fig;
     }
     captured_figures.clear();
-    apply_map(map);
-    init_figures_moves();
     reset_castling(map);
+    init_figures_moves();
+    apply_map(std::move(map));
 }
 
-void FigureBoard::apply_map(const BoardRepr& board_repr) {
-    idw = board_repr.get_idw();
-    move_logger.set_past(board_repr.get_past());
-    move_logger.set_future(board_repr.get_future());
-    for (const auto& cap_fig : board_repr.get_captured_figures()) {
-        captured_figures.push_back( FigureFabric::instance()->create(cap_fig) );
+void FigureBoard::apply_map(BoardRepr&& board_repr) {
+    idw = board_repr.idw;
+    move_logger.set_past(board_repr.past);
+    move_logger.set_future(board_repr.future);
+    for (const auto& cap_fig : board_repr.captured_figures) {
+        captured_figures.push_back( cap_fig );  /* move ownership */
     }
-    for (const auto& fig : board_repr.get_figures())
-        figures[fig->get_pos()] = FigureFabric::instance()->create(fig);
+    board_repr.captured_figures.clear();    /* delete ownership */
+    for (const auto& fig : board_repr.figures) {
+        figures[fig->get_pos()] = fig;  /* move ownership */
+    }
+    board_repr.figures.clear();  /* delete ownership */
 }
 
 BoardRepr FigureBoard::get_repr(Color turn, bool save_all_moves) const {
     std::vector<Figure*> fig_vec;
     for (auto& [_, fig] : figures)
         fig_vec.push_back(fig);
-    return {
+    return BoardRepr{
         fig_vec,
         turn,
         idw,
@@ -108,7 +111,7 @@ void FigureBoard::reset_castling(bool castle_state) {
 
 void FigureBoard::reset_castling(const BoardRepr& board_repr) {
     reset_castling(false);
-    for (Id& castle_id : board_repr.get_who_can_castle()) {
+    for (Id castle_id : board_repr.can_castle) {
         castling[castle_id] = true;
     }
 }

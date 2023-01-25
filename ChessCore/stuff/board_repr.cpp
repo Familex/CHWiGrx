@@ -1,7 +1,11 @@
 #include "board_repr.h"
 
-BoardRepr::BoardRepr(const BoardRepr& other) : turn(other.turn), idw(other.idw), past(other.past),
-future(other.future), can_castle(other.can_castle) 
+BoardRepr::BoardRepr(const BoardRepr& other) noexcept 
+    : turn(other.turn)
+    , idw(other.idw)
+    , past(other.past)
+    , future(other.future)
+    , can_castle(other.can_castle) 
 {
     for (auto fig : other.figures) {
         figures.push_back( FigureFabric::instance()->create(fig, true) );
@@ -11,7 +15,7 @@ future(other.future), can_castle(other.can_castle)
     }
 }
 
-std::string BoardRepr::as_string() {
+std::string BoardRepr::as_string() noexcept {
     std::string result{ "" };
     for (const auto& fig : figures) {
         auto pos = fig->get_pos();
@@ -40,7 +44,7 @@ std::string BoardRepr::as_string() {
     return result;
 }
 
-char BoardRepr::get_turn_char() const {
+char BoardRepr::get_turn_char() const noexcept {
     return 
           turn == Color::White ? 'W' 
         : turn == Color::Black ? 'B' 
@@ -48,7 +52,7 @@ char BoardRepr::get_turn_char() const {
 }
 
 // Сведения о рокировке привязаны к id соответствующих ладей (заключены в квадратные скобки)
-BoardRepr::BoardRepr(std::string board_repr) {
+BoardRepr::BoardRepr(std::string board_repr) noexcept {
     const size_t npos = std::string::npos;
     size_t meta_start = board_repr.find('[');
     size_t meta_end = board_repr.find(']');
@@ -129,15 +133,13 @@ BoardRepr::BoardRepr(std::string board_repr) {
     }
 }
 
-void BoardRepr::set_figures(std::vector<Figure*>&& figs) {
-    for (auto prev_fig : figures)
-    {
-        delete prev_fig;
-    }
-    figures = figs;
+BoardRepr::BoardRepr(BoardRepr&& br) noexcept
+{
+    clear();
+    *this = std::move(br);
 }
 
-void BoardRepr::clear()
+void BoardRepr::clear() noexcept
 {
     for (auto fig : figures)
     {
@@ -154,7 +156,7 @@ void BoardRepr::clear()
     future.clear();
 }
 
-BoardRepr* BoardRepr::operator =(const BoardRepr& other) {
+BoardRepr* BoardRepr::operator =(const BoardRepr& other) noexcept {
     this->clear();
     for (const auto& fig : other.figures)
     {

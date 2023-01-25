@@ -16,8 +16,8 @@ LRESULT CALLBACK main_default_wndproc(HWND hWnd, UINT message, WPARAM wParam, LP
                     std::string board_repr_str = take_str_from_clip();
                     if (!is_legal_board_repr(board_repr_str)) break;
                     BoardRepr board_repr(board_repr_str);
-                    turn = board_repr.get_turn();
-                    board.reset(board_repr);
+                    turn = board_repr.turn;
+                    board.reset(std::move(board_repr));
                     motion_input.clear();
                 }
                     InvalidateRect(hWnd, NULL, NULL);

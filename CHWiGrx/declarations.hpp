@@ -63,7 +63,7 @@ inline constexpr COLORREF TRANSPARENCY_PLACEHOLDER = RGB(0xFF, 0x0, 0x0);
 /* single mutable globals */
 inline WindowState window_state = WindowState::GAME;
 inline BoardRepr start_board_repr{ DEFAULT_CHESS_BOARD_IDW };
-inline FigureBoard board{ start_board_repr };
+inline FigureBoard board{ BoardRepr{ start_board_repr } /* <- explicit copy */ };
 inline Color turn{ Color::White };
 inline FigureType chose{ FigureType::Queen };
 inline std::map<char, std::map<char, HBITMAP>> pieces_bitmaps;

@@ -62,7 +62,7 @@ namespace FigureBoardTesting
             
             TEST_METHOD(Basic)
             {
-                FigureBoard board{ base };
+                FigureBoard board{ BoardRepr{base} };
 
                 // white first moves
                 for (Id id = 17_id; id <= 24_id; ++id) {
@@ -77,7 +77,7 @@ namespace FigureBoardTesting
 
             TEST_METHOD(BasicReversed)
             {
-                FigureBoard board{ baseReversed };
+                FigureBoard board{ BoardRepr{baseReversed} };
 
                 // white first moves
                 for (Id id = 17_id; id <= 24_id; ++id) {
@@ -93,7 +93,7 @@ namespace FigureBoardTesting
 
             TEST_METHOD(Detailed)
             {
-                FigureBoard board{ base };
+                FigureBoard board{ BoardRepr{base} };
 
                 auto p_17 = board.get_fig(17_id);
                 auto p_17_moves = board.get_all_possible_moves(p_17);
@@ -132,7 +132,7 @@ namespace FigureBoardTesting
             
             TEST_METHOD(DetailedReversed)
             {
-                FigureBoard board{ baseReversed };
+                FigureBoard board{ BoardRepr{baseReversed} };
 
                 auto p_17 = board.get_fig(17_id);
                 auto p_17_moves = board.get_all_possible_moves(p_17);
@@ -276,6 +276,7 @@ namespace FigureBoardTesting
                 }
 
             }   // TEST_METHOD(EnPassantReversed)
+            
             TEST_METHOD(Promotion)
             {
                 FigureBoard board{ BoardRepr{

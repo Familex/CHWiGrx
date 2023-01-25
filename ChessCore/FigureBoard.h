@@ -8,8 +8,8 @@ class FigureBoard {
     /*  x-axis from top to bottom (↓)  **
     **  y-axis from left to right (→)  */
 public:
-    FigureBoard(BoardRepr);
-    void reset(const BoardRepr&);
+    FigureBoard(BoardRepr&&);
+    void reset(BoardRepr&&);
     Figure* get_fig(Pos) const;
     Figure* get_fig(Id) const;
     bool cont_fig(Pos) const;
@@ -102,7 +102,7 @@ public:
     bool provide_move(const MoveRec&);
     bool undo_move();
     bool restore_move();
-    void apply_map(const BoardRepr&);
+    void apply_map(BoardRepr&&);
     void place_figure(Figure* fig) { figures[fig->get_pos()] = fig; }
     void init_figures_moves();
     GameEndType game_end_check(Color) const;

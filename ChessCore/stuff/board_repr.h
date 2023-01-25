@@ -4,17 +4,28 @@
 #include "figure.h"
 #include "move_rec.h"
 
-class BoardRepr {
-public:
-    BoardRepr(const BoardRepr&);
-    BoardRepr(std::string);
-    BoardRepr(const std::vector<Figure*>& figures, 
-              Color turn, 
-              bool idw, 
-              const std::vector<Id>& can_castle, 
-              const std::vector<MoveRec>& past = {},
-              const std::vector<MoveRec>& future = {},
-              const std::vector<Figure*>& captured_figures = {}) 
+/* Data Transfer Structure */
+struct BoardRepr {
+    /* ---- Fields ---- */
+    std::vector<Figure*> figures;
+    Color turn{ Color::White };
+    bool idw{ true };
+    std::vector<MoveRec> past;
+    std::vector<MoveRec> future;
+    std::vector<Figure*> captured_figures;
+    std::vector<Id> can_castle;
+    
+    /* ---- Methods ---- */
+    explicit BoardRepr(const BoardRepr&) noexcept;    
+    explicit BoardRepr(std::string) noexcept;
+    explicit BoardRepr(
+                const std::vector<Figure*>& figures, 
+                Color turn, 
+                bool idw, 
+                const std::vector<Id>& can_castle, 
+                const std::vector<MoveRec>& past = {},
+                const std::vector<MoveRec>& future = {},
+                const std::vector<Figure*>& captured_figures = {}) noexcept
         : figures(figures)
         , turn(turn)
         , idw(idw)
@@ -24,12 +35,15 @@ public:
         , can_castle(can_castle)
     {
     };
-    BoardRepr(const std::vector<Figure*>& figures, 
-              Color turn, 
-              bool idw,
-              const std::vector<MoveRec>& past = {},
-              const std::vector<MoveRec>& future = {}, 
-              const std::vector<Figure*>& captured_figures = {}) 
+    
+    /* Without castling (automatically set all to true) */
+    explicit BoardRepr(
+                const std::vector<Figure*>& figures, 
+                Color turn, 
+                bool idw,
+                const std::vector<MoveRec>& past = {},
+                const std::vector<MoveRec>& future = {}, 
+                const std::vector<Figure*>& captured_figures = {}) noexcept
         : figures(figures)
         , turn(turn)
         , idw(idw)
@@ -43,30 +57,11 @@ public:
             }
         }
     };
-    BoardRepr* operator =(const BoardRepr& other);
-    void clear();
-    std::string as_string();
-    char get_idw_char() const { return idw ? 'T' : 'F'; }
-    bool get_idw() const { return idw; }
-    char get_turn_char() const;
-    std::vector<Id> get_who_can_castle() const { return can_castle; }
-    bool empty() const { return figures.empty(); }
-    void set_figures(std::vector<Figure*>&& figs);
-    void set_turn(Color t) { turn = t; }
-    void set_idw(bool idw) { this->idw = idw; }
-    void set_past(const std::vector<MoveRec>& past) { this->past = past; }
-    void set_future(const std::vector<MoveRec>& future) { this->future = future; }
-    Color get_turn() const { return turn; }
-    std::vector<Figure*> get_figures() const { return figures; }
-    std::vector<MoveRec> get_past() const { return past; }
-    std::vector<MoveRec> get_future() const { return future; }
-    std::vector<Figure*> get_captured_figures() const { return captured_figures; }
-private:
-    std::vector<Figure*> figures;
-    Color turn{ Color::White };
-    bool idw{ true };
-    std::vector<MoveRec> past;
-    std::vector<MoveRec> future;
-    std::vector<Figure*> captured_figures;
-    std::vector<Id> can_castle;
+    BoardRepr(BoardRepr&&) noexcept;
+    BoardRepr* operator =(const BoardRepr& other) noexcept;
+    void clear() noexcept;
+    std::string as_string() noexcept;
+    char get_idw_char() const noexcept { return idw ? 'T' : 'F'; }
+    char get_turn_char() const noexcept;
+    bool empty() const noexcept { return figures.empty(); }
 };
