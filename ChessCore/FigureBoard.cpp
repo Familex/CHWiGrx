@@ -1,7 +1,7 @@
 #include "FigureBoard.h"
 
 FigureBoard::FigureBoard(BoardRepr&& board_repr) {
-    reset(std::forward<BoardRepr>(board_repr));
+    reset(std::move(board_repr));
 }
 
 void FigureBoard::init_figures_moves() {
@@ -64,8 +64,8 @@ void FigureBoard::reset(BoardRepr&& map) {
     }
     captured_figures.clear();
     reset_castling(map);
-    init_figures_moves();
     apply_map(std::move(map));
+    init_figures_moves();
 }
 
 void FigureBoard::apply_map(BoardRepr&& board_repr) {

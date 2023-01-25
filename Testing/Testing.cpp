@@ -1,4 +1,4 @@
-#include "pch.h"
+#include "pch.hpp"
 #include "CppUnitTest.h"
 #include "../ChessCore/FigureBoard.h"
 
@@ -81,12 +81,12 @@ namespace FigureBoardTesting
 
                 // white first moves
                 for (Id id = 17_id; id <= 24_id; ++id) {
-                    Assert::AreEqual(board.get_all_possible_moves(board.get_fig(id)).size(), 2ull);
+                    Assert::AreEqual(board.get_all_moves(board.get_fig(id)).size(), 2ull);
                 }
 
                 // black first moves
                 for (Id id = 9_id; id <= 16_id; ++id) {
-                    Assert::AreEqual(board.get_all_possible_moves(board.get_fig(id)).size(), 2ull);
+                    Assert::AreEqual(board.get_all_moves(board.get_fig(id)).size(), 2ull);
                 }
 
             }	// TEST_METHOD(Basic)
