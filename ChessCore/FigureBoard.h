@@ -96,7 +96,9 @@ public:
     std::vector<MoveRec> get_future_moves() const { return move_logger.get_future(); }
     MoveRec get_last_move() const { return move_logger.get_last_move(); }
     void set_last_move(const MoveRec& move_rec) { this->move_logger.add(move_rec); }
-    template <typename Func> std::pair<bool, MoveRec> provide_move(Figure*, const Input&, Color turn, const Func&);
+    template <typename Func> 
+        requires std::is_invocable_v<Func>&& std::is_same_v<std::invoke_result_t<Func>, FigureType>
+    std::pair<bool, MoveRec> provide_move(Figure*, const Input&, Color turn, const Func&);
     bool provide_move(const MoveRec&);
     bool undo_move();
     bool restore_move();
@@ -143,8 +145,9 @@ private:
 /// <param name="get_choise">Функция, возвращающая тип фигуры для превращения</param>
 /// <returns></returns>
 template <typename Func>
+    requires std::is_invocable_v<Func>&& std::is_same_v<std::invoke_result_t<Func>, FigureType>
 std::pair<bool, MoveRec> FigureBoard::provide_move(Figure* in_hand, const Input& input, Color turn, const Func& get_choise) {
-    char choice = get_choise();
+    auto choice = get_choise();
     auto ms = move_check(in_hand, input);
     if (std::holds_alternative<ErrorEvent>(ms)) {
         return { false, {} };

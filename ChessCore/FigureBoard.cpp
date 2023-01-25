@@ -316,7 +316,7 @@ std::vector<std::pair<bool, Pos>> FigureBoard::get_all_moves(const Figure* in_ha
         if (last_move.ms.main_ev == MainEvent::LMOVE && std::abs(last_move.get_who_went_pos().y - in_hand_pos.y) == 1) {
             int shift_y = last_move.get_who_went_pos().y - in_hand_pos.y;
             if (in_hand->is_col(Color::White)) {
-                if (in_hand_pos.x == 3 && idw && cont_fig(in_hand_pos + Pos(0, shift_y)) && is_empty(in_hand_pos + Pos(-1, shift_y))) {
+                if (in_hand_pos.x == (EN_PASSANT_INDENT - 1) && idw && cont_fig(in_hand_pos + Pos(0, shift_y)) && is_empty(in_hand_pos + Pos(-1, shift_y))) {
                     all_moves.push_back({ true, in_hand_pos + Pos(-1, shift_y) });
                 }
                 if (in_hand_pos.x == (HEIGHT - EN_PASSANT_INDENT) && not idw && cont_fig(in_hand_pos + Pos(0, shift_y)) && is_empty(in_hand_pos + Pos(1, shift_y))) {
@@ -327,7 +327,7 @@ std::vector<std::pair<bool, Pos>> FigureBoard::get_all_moves(const Figure* in_ha
                 if (in_hand_pos.x == (HEIGHT - EN_PASSANT_INDENT) && idw && cont_fig(in_hand_pos + Pos(0, shift_y)) && is_empty(in_hand_pos + Pos(1, shift_y))) {
                     all_moves.push_back({ true, in_hand_pos + Pos(1, shift_y) });
                 }
-                if (in_hand_pos.x == 3 && not idw && cont_fig(in_hand_pos + Pos(0, shift_y)) && is_empty(in_hand_pos + Pos(-1, shift_y))) {
+                if (in_hand_pos.x == (EN_PASSANT_INDENT - 1) && not idw && cont_fig(in_hand_pos + Pos(0, shift_y)) && is_empty(in_hand_pos + Pos(-1, shift_y))) {
                     all_moves.push_back({ true, in_hand_pos + Pos(-1, shift_y) });
                 }
             }
@@ -402,7 +402,7 @@ bool FigureBoard::check_for_when(Color col,
     auto king_it = find_king(col);
     if (to_defend == Pos()) {
         if (king_it->empty()) {
-            return true; // Нечего защищать
+            return false; // Нечего защищать
         }
         else {
             to_defend = king_it->get_pos();
@@ -434,7 +434,7 @@ bool FigureBoard::stalemate_for(Color col,
                                 Pos to_defend) const {
     auto king_it = find_king(col);
     if (king_it->empty())
-        return true; // Нет короля
+        return false; // Нет короля
     if (to_defend == Pos()) to_defend = king_it->get_pos();
     for (auto& aspt : get_figures_of(col)) {
         for (const auto& [is_eat, curr] : expand_broom(aspt)) {
@@ -822,7 +822,7 @@ bool FigureBoard::undo_move() {
     auto last = move_logger.move_last_to_future();
     Figure* in_hand_fig = last.get_who_went();
     auto in_hand = get_fig(in_hand_fig->get_id());
-    char chose = last.promotion_choice;
+    FigureType chose = last.promotion_choice;
     auto turn = last.turn;
     auto input = last.input;
     MoveMessage ms = last.ms;
@@ -923,7 +923,7 @@ bool FigureBoard::provide_move(const MoveRec& move_rec) {
             }
             break;
         case SideEvent::PROMOTION:
-            promotion_fig(in_hand, char_to_figure_type(choice));
+            promotion_fig(in_hand, choice);
             break;
         case SideEvent::CHECK:
             break;

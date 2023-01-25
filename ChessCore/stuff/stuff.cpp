@@ -131,6 +131,22 @@ std::string to_string(SideEvent side_event) {
     }
 }
 
+std::wstring to_wstring(SideEvent side_event) {
+    switch (side_event)
+    {
+    case SideEvent::E:
+        return L"E";
+    case SideEvent::CHECK:
+        return L"C";
+    case SideEvent::PROMOTION:
+        return L"P";
+    case SideEvent::CASTLING_BREAK:
+        return L"B";
+    default:
+        return L"N";
+    }
+}
+
 // Преобразование в строку (только один символ)
 std::string to_string(MainEvent main_event) {
     switch (main_event)
@@ -152,3 +168,68 @@ std::string to_string(MainEvent main_event) {
     }
 }
 
+std::wstring to_wstring(MainEvent main_event) {
+    switch (main_event)
+    {
+    case MainEvent::E:
+        return L"E";
+    case MainEvent::EAT:
+        return L"T";
+    case MainEvent::MOVE:
+        return L"M";
+    case MainEvent::LMOVE:
+        return L"L";
+    case MainEvent::CASTLING:
+        return L"C";
+    case MainEvent::EN_PASSANT:
+        return L"P";
+    default:
+        return L"N";
+    }
+}
+
+std::string to_string(FigureType figure_type)
+{
+    switch (figure_type)
+    {
+    case FigureType::Pawn:
+        return "Pawn";
+    case FigureType::Rook:
+        return "Rook";
+    case FigureType::Knight:
+        return "Knight";
+    case FigureType::Bishop:
+        return "Bishop";
+    case FigureType::Queen:
+        return "Queen";
+    case FigureType::King:
+        return "King";
+    case FigureType::None:
+        return "None";
+    default:
+        return "Error";
+    }
+}
+
+std::wstring to_wstring(FigureType figure_type)
+{
+    switch (figure_type)
+    {
+    case FigureType::Pawn:
+        return L"Pawn";
+    case FigureType::Rook:
+        return L"Rook";
+    case FigureType::Knight:
+        return L"Knight";
+    case FigureType::Bishop:
+        return L"Bishop";
+    case FigureType::Queen:
+        return L"Queen";
+    case FigureType::King:
+        return L"King";
+    case FigureType::None:
+        return L"None";
+    default:
+        return L"Error";
+    }
+}

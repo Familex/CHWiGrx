@@ -148,8 +148,8 @@ void make_move(HWND hWnd, std::optional<Input> input_) {
     }
 
     debug_print("Curr move was:", move_rec.as_string());
-
-    board.set_last_move({ in_hand, input, turn, move_rec.ms, move_rec.promotion_choice });
+        
+    board.set_last_move({ in_hand, input, turn, move_rec.ms, move_rec.promotion_choice });  // why not just move_rec?
     turn = what_next(turn);
     InvalidateRect(hWnd, NULL, NULL);
     UpdateWindow(hWnd);
@@ -586,19 +586,19 @@ void update_game_menu_variables(HWND hWnd)
 
     switch (chose)
     {
-        case 'Q':
+        case FigureType::Queen:
             set_menu_checkbox(hWnd, IDM_SET_CHOICE_TO_QUEEN, true);
             break;
             
-        case 'R':
+        case FigureType::Rook:
             set_menu_checkbox(hWnd, IDM_SET_CHOICE_TO_ROOK, true);
             break;
            
-        case 'B':
+        case FigureType::Bishop:
             set_menu_checkbox(hWnd, IDM_SET_CHOICE_TO_BISHOP, true);
             break;
             
-        case 'H':
+        case FigureType::Knight:
             set_menu_checkbox(hWnd, IDM_SET_CHOICE_TO_KNIGHT, true);
             break;
 

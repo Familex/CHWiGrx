@@ -10,7 +10,7 @@ std::string MoveRec::as_string() {
         input.target.x,
         input.target.y,
         to_string(ms.main_ev),
-        promotion_choice
+        figure_type_to_char(promotion_choice)
     );
     for (SideEvent& side_ev : ms.side_evs) {
         result += to_string(side_ev) + ",";
@@ -76,7 +76,7 @@ MoveRec::MoveRec(std::string map) {
         ms.main_ev = MainEvent::E;
         break;
     }
-    promotion_choice = data[10][0];
+    promotion_choice = char_to_figure_type(data[10][0]);
     for (const auto c : data[11]) {
         if (c != ',' && c != '{' && c != '}' && c != ' ')
             switch (c) {

@@ -5,7 +5,7 @@
 #include "figure_fabric.h"
 
 struct MoveRec {
-    MoveRec(Figure* who_went, Input input, Color turn, MoveMessage ms, char p)
+    MoveRec(Figure* who_went, Input input, Color turn, MoveMessage ms, FigureType p)
         : who_went(*who_went)
         , input(input)
         , turn(turn)
@@ -16,7 +16,7 @@ struct MoveRec {
         , input()
         , turn()
         , ms()
-        , promotion_choice('N') {};
+        , promotion_choice(FigureType::None) {};
     Figure* get_who_went() const {
         if (who_went.empty()) return FigureFabric::instance()->get_default_fig();
         return FigureFabric::instance()->create(
@@ -35,6 +35,6 @@ struct MoveRec {
     Input input;
     Color turn;
     MoveMessage ms;
-    char promotion_choice;
+    FigureType promotion_choice;
     std::string as_string();
 };

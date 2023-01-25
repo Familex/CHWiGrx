@@ -93,7 +93,11 @@ enum class MainEvent { E, EAT, MOVE, LMOVE, CASTLING, EN_PASSANT };
 enum class SideEvent { E, CHECK, PROMOTION, CASTLING_BREAK };
 
 std::string to_string(SideEvent side_event);
+std::wstring to_wstring(SideEvent side_event);
 std::string to_string(MainEvent main_event);
+std::wstring to_wstring(MainEvent main_event);
+std::string to_string(FigureType);
+std::wstring to_wstring(FigureType);
 
 struct MoveMessage {
     MainEvent main_ev{ MainEvent::E };

@@ -75,18 +75,18 @@ LRESULT CALLBACK mainproc::main_game_state_wndproc(HWND hWnd, UINT message, WPAR
                     // можно просто всё занулять
                     UINT item_menu_to_set_id = wmId;
                     UINT curr_item_menu_state =
-                        chose == 'Q' ? IDM_SET_CHOICE_TO_QUEEN
-                        : chose == 'R' ? IDM_SET_CHOICE_TO_ROOK
-                        : chose == 'H' ? IDM_SET_CHOICE_TO_KNIGHT
-                        : chose == 'B' ? IDM_SET_CHOICE_TO_BISHOP
+                        chose == FigureType::Queen ? IDM_SET_CHOICE_TO_QUEEN
+                        : chose == FigureType::Rook ? IDM_SET_CHOICE_TO_ROOK
+                        : chose == FigureType::Knight ? IDM_SET_CHOICE_TO_KNIGHT
+                        : chose == FigureType::Bishop ? IDM_SET_CHOICE_TO_BISHOP
                         : NULL;
                     set_menu_checkbox(hWnd, curr_item_menu_state, false);
                     set_menu_checkbox(hWnd, item_menu_to_set_id, true);
-                    chose = wmId == IDM_SET_CHOICE_TO_ROOK ? 'R'
-                        : wmId == IDM_SET_CHOICE_TO_KNIGHT ? 'H'
-                        : wmId == IDM_SET_CHOICE_TO_QUEEN ? 'Q'
-                        : wmId == IDM_SET_CHOICE_TO_BISHOP ? 'B'
-                        : 'N';
+                    chose = wmId == IDM_SET_CHOICE_TO_QUEEN ? FigureType::Queen
+                        : wmId == IDM_SET_CHOICE_TO_ROOK ? FigureType::Rook
+                        : wmId == IDM_SET_CHOICE_TO_KNIGHT ? FigureType::Knight
+                        : wmId == IDM_SET_CHOICE_TO_BISHOP ? FigureType::Bishop
+                        : FigureType::None;
                 }
                     break;
                     

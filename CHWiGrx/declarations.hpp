@@ -65,7 +65,7 @@ inline WindowState window_state = WindowState::GAME;
 inline BoardRepr start_board_repr{ DEFAULT_CHESS_BOARD_IDW };
 inline FigureBoard board{ start_board_repr };
 inline Color turn{ Color::White };
-inline char chose{ 'Q' };
+inline FigureType chose{ FigureType::Queen };
 inline std::map<char, std::map<char, HBITMAP>> pieces_bitmaps;
 inline std::map<const char*, HBITMAP> other_bitmaps;
 inline bool save_all_moves = true;
