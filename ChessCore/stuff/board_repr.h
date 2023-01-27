@@ -19,7 +19,7 @@ struct BoardRepr {
     explicit BoardRepr(const BoardRepr&) noexcept;    
     explicit BoardRepr(std::string) noexcept;
     explicit BoardRepr(
-                const std::vector<Figure*>& figures, 
+                std::vector<Figure*>&& figures, 
                 Color turn, 
                 bool idw, 
                 const std::vector<Id>& can_castle, 
@@ -38,7 +38,7 @@ struct BoardRepr {
     
     /* Without castling (automatically set all to true) */
     explicit BoardRepr(
-                const std::vector<Figure*>& figures, 
+                std::vector<Figure*>&& figures, 
                 Color turn, 
                 bool idw,
                 const std::vector<MoveRec>& past = {},

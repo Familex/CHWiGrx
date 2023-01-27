@@ -68,6 +68,11 @@ void FigureBoard::reset(BoardRepr&& map) {
     init_figures_moves();
 }
 
+void FigureBoard::operator= (BoardRepr&& board_repr)
+{
+    reset(std::move(board_repr));
+}
+
 void FigureBoard::apply_map(BoardRepr&& board_repr) {
     idw = board_repr.idw;
     move_logger.set_past(board_repr.past);
@@ -87,7 +92,7 @@ BoardRepr FigureBoard::get_repr(Color turn, bool save_all_moves) const {
     for (auto& [_, fig] : figures)
         fig_vec.push_back(fig);
     return BoardRepr{
-        fig_vec,
+        std::move(fig_vec),
         turn,
         idw,
         save_all_moves 

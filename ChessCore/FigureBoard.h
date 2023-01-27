@@ -10,6 +10,9 @@ class FigureBoard {
 public:
     FigureBoard(BoardRepr&&);
     void reset(BoardRepr&&);
+    void operator =(BoardRepr&&);
+    void operator =(const BoardRepr&) = delete;
+    FigureBoard(const FigureBoard&) = delete;
     Figure* get_fig(Pos) const;
     Figure* get_fig(Id) const;
     bool cont_fig(Pos) const;
