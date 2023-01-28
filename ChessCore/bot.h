@@ -25,15 +25,15 @@ namespace bot {
         D3 = 3,
     };
 
-    Input create_move(const Type, const FigureBoard&, Color turn) noexcept;
+    [[nodiscard]] Input create_move(const Type, const FigureBoard&, Color turn) noexcept;
     
     namespace impl {
 
-        Input random_move(const FigureBoard&, const Color) noexcept;
-        Input minimax_move(const FigureBoard&, const Color) noexcept;
-        Input alpha_beta_move(const FigureBoard&, const Color) noexcept;
-        Input monte_carlo_move(const FigureBoard&, const Color) noexcept;
-        Input neural_network_move(const FigureBoard&, const Color) noexcept;
+        [[nodiscard]] Input random_move(const FigureBoard&, const Color) noexcept;
+        [[nodiscard]] Input minimax_move(const FigureBoard&, const Color) noexcept;
+        [[nodiscard]] Input alpha_beta_move(const FigureBoard&, const Color) noexcept;
+        [[nodiscard]] Input monte_carlo_move(const FigureBoard&, const Color) noexcept;
+        [[nodiscard]] Input neural_network_move(const FigureBoard&, const Color) noexcept;
 
     }
     

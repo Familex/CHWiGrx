@@ -588,6 +588,8 @@ namespace FigureBoardTesting
 
                 Assert::AreEqual(gam(45_id).size(), 8ull);
             }
+            
+            
         };
 
     }	// namespace Moves

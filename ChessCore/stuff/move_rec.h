@@ -5,36 +5,26 @@
 #include "figure_fabric.h"
 
 struct MoveRec {
-    MoveRec(Figure* who_went, Input input, Color turn, MoveMessage ms, FigureType p)
-        : who_went(*who_went)
-        , input(input)
-        , turn(turn)
-        , ms(ms)
-        , promotion_choice(p) {};
-    MoveRec()
-        : who_went()
-        , input()
-        , turn()
-        , ms()
-        , promotion_choice(FigureType::None) {};
-    Figure* get_who_went() const {
-        if (who_went.empty()) return FigureFabric::instance()->get_default_fig();
-        return FigureFabric::instance()->create(
-            who_went.get_pos(),
-            who_went.get_col(),
-            who_went.get_type(),
-            who_went.get_id()
-        );
-    }
-    Pos get_who_went_pos() const {
-        if (who_went.empty()) return { -1, -1 };
-        return who_went.get_pos();
-    }
-    MoveRec(std::string);
+    [[nodiscard]] MoveRec(const Figure* who_went, 
+                          const Input& input,
+                          const Color turn, 
+                          const MoveMessage& ms, 
+                          const FigureType p) noexcept
+        : who_went{ *who_went }
+        , input{ input }
+        , turn{ turn }
+        , ms{ ms }
+        , promotion_choice{ p } {};
+        
+    [[nodiscard]] MoveRec() noexcept = default;
+        
+    [[nodiscard]] MoveRec(const std::string&);
+    
+    [[nodiscard]] std::string as_string() const;
+    
     Figure who_went{};
-    Input input;
-    Color turn;
-    MoveMessage ms;
-    FigureType promotion_choice;
-    std::string as_string();
+    Input input{};
+    Color turn{ Color::None };
+    MoveMessage ms{};
+    FigureType promotion_choice{ FigureType::None };
 };

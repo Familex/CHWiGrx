@@ -4,20 +4,22 @@
 
 class FigureFabric {
 public:
-    static FigureFabric* instance() {
+    [[nodiscard]] static FigureFabric* instance() noexcept {
         static FigureFabric INSTANCE;
         return &INSTANCE;
     }
 
-    Figure* create(const Pos, const Color, const FigureType);
+    [[nodiscard]] Figure* create(const Pos, const Color, const FigureType);
     Figure* create(const Pos, const Color, const FigureType, const Id, Figure* = nullptr);
-    Figure* create(const Figure*, const bool = true);
-    Figure* get_default_fig() const;
-    std::unique_ptr<Figure> submit_on(const Figure* who, const Pos on) {
+    [[nodiscard]] Figure* create(const Figure*, const bool = true);
+    [[nodiscard]] Figure* get_default_fig() const;
+    
+    [[nodiscard]] std::unique_ptr<Figure> submit_on(const Figure* who, const Pos on) {
         std::unique_ptr<Figure> tmp(FigureFabric::instance()->create(who, true));
         tmp->move_to(on);
         return tmp;
     }
+    
     ~FigureFabric() {
         delete DEFAULT;
     }

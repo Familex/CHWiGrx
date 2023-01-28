@@ -1,41 +1,7 @@
 #include "move_rec.h"
 
-// Преобразование в строку
-std::string MoveRec::as_string() {
-    std::string result{ "" };
-    result += std::format("{}.{}.{}.{}.{}.{}.{}.{{",
-        who_went.as_string(),
-        input.from.x,
-        input.from.y,
-        input.target.x,
-        input.target.y,
-        to_string(ms.main_ev),
-        figure_type_to_char(promotion_choice)
-    );
-    for (SideEvent& side_ev : ms.side_evs) {
-        result += to_string(side_ev) + ",";
-    }
-    result += "}.{";
-    for (Id& to_eat : ms.to_eat) {
-        result += std::format("{},", to_eat);
-    }
-    result += "}.{";
-    for (auto& [to_move, p] : ms.to_move) {
-        result += std::format("{},{},{},{},{}",
-            to_move, p.from.x, p.from.y, p.target.x, p.target.y
-        );
-    }
-    result += "}.{";
-    for (Id& cb : ms.what_castling_breaks) {
-        result += std::format("{},", cb);
-    }
-    result += "}";
-
-    return result;
-}
-
 // Коструктор из строки
-MoveRec::MoveRec(std::string map) {
+MoveRec::MoveRec(const std::string& map) {
     if (map.empty()) throw std::invalid_argument("Empty map");
     auto data = split(map, ".");
     // Возможно нижнюю конструкцию стоит вставить в фабрику
@@ -116,4 +82,38 @@ MoveRec::MoveRec(std::string map) {
                 ms.what_castling_breaks.push_back(std::stoi(curr));
         }
     }
+}
+
+// Преобразование в строку
+std::string MoveRec::as_string() const {
+    std::string result{ "" };
+    result += std::format("{}.{}.{}.{}.{}.{}.{}.{{",
+        who_went.as_string(),
+        input.from.x,
+        input.from.y,
+        input.target.x,
+        input.target.y,
+        to_string(ms.main_ev),
+        figure_type_to_char(promotion_choice)
+    );
+    for (const SideEvent& side_ev : ms.side_evs) {
+        result += to_string(side_ev) + ",";
+    }
+    result += "}.{";
+    for (const Id to_eat : ms.to_eat) {
+        result += std::format("{},", to_eat);
+    }
+    result += "}.{";
+    for (const auto& [to_move, p] : ms.to_move) {
+        result += std::format("{},{},{},{},{}",
+            to_move, p.from.x, p.from.y, p.target.x, p.target.y
+        );
+    }
+    result += "}.{";
+    for (const Id cb : ms.what_castling_breaks) {
+        result += std::format("{},", cb);
+    }
+    result += "}";
+
+    return result;
 }

@@ -158,7 +158,6 @@
     <ClCompile Include="stuff\board_repr.cpp" />
     <ClCompile Include="stuff\figure.cpp" />
     <ClCompile Include="stuff\figure_fabric.cpp" />
-    <ClCompile Include="stuff\move_logger.cpp" />
     <ClCompile Include="stuff\move_rec.cpp" />
     <ClCompile Include="stuff\stuff.cpp" />
   </ItemGroup>
@@ -168,7 +167,7 @@
     <ClInclude Include="stuff\board_repr.h" />
     <ClInclude Include="stuff\figure.h" />
     <ClInclude Include="stuff\figure_fabric.h" />
-    <ClInclude Include="stuff\move_logger.h" />
+    <ClInclude Include="stuff\move_logger.hpp" />
     <ClInclude Include="stuff\move_rec.h" />
     <ClInclude Include="stuff\stuff.h" />
   </ItemGroup>

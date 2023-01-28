@@ -15,7 +15,7 @@ BoardRepr::BoardRepr(const BoardRepr& other) noexcept
     }
 }
 
-std::string BoardRepr::as_string() noexcept {
+std::string BoardRepr::as_string() const noexcept {
     std::string result{ "" };
     for (const auto& fig : figures) {
         auto pos = fig->get_pos();
@@ -24,19 +24,19 @@ std::string BoardRepr::as_string() noexcept {
         );
     }
     result += std::format("[{}{}", get_idw_char(), get_turn_char());
-    for (Id& castle_id : can_castle) {
+    for (const Id castle_id : can_castle) {
         result += std::format("{};", castle_id);
     }
     result += "]<";
-    for (auto& mr : past) {
+    for (const auto& mr : past) {
         result += mr.as_string() + "$";
     }
     result += "><";
-    for (auto& mr : future) {
+    for (const auto& mr : future) {
         result += mr.as_string() + "$";
     }
     result += ">~";
-    for (auto& fig : captured_figures) {
+    for (const auto& fig : captured_figures) {
         result += std::format("{},{},{},{},{},",
             fig->get_id(), fig->get_pos().x, fig->get_pos().y, col_to_char(fig->get_col()), figure_type_to_char(fig->get_type())
         );
@@ -44,7 +44,7 @@ std::string BoardRepr::as_string() noexcept {
     return result;
 }
 
-char BoardRepr::get_turn_char() const noexcept {
+constexpr char BoardRepr::get_turn_char() const noexcept {
     return 
           turn == Color::White ? 'W' 
         : turn == Color::Black ? 'B' 

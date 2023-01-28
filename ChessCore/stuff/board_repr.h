@@ -16,9 +16,9 @@ struct BoardRepr {
     std::vector<Id> can_castle;
     
     /* ---- Methods ---- */
-    explicit BoardRepr(const BoardRepr&) noexcept;    
-    explicit BoardRepr(std::string) noexcept;
-    explicit BoardRepr(
+    [[nodiscard]] explicit BoardRepr(const BoardRepr&) noexcept;    
+    [[nodiscard]] explicit BoardRepr(std::string) noexcept;
+    [[nodiscard]] explicit BoardRepr(
                 std::vector<Figure*>&& figures, 
                 Color turn, 
                 bool idw, 
@@ -37,7 +37,7 @@ struct BoardRepr {
     };
     
     /* Without castling (automatically set all to true) */
-    explicit BoardRepr(
+    [[nodiscard]] explicit BoardRepr(
                 std::vector<Figure*>&& figures, 
                 Color turn, 
                 bool idw,
@@ -57,11 +57,21 @@ struct BoardRepr {
             }
         }
     };
-    BoardRepr(BoardRepr&&) noexcept;
+    
+    [[nodiscard]] BoardRepr(BoardRepr&&) noexcept;
+    
     BoardRepr* operator =(const BoardRepr& other) noexcept;
+    
     void clear() noexcept;
-    std::string as_string() noexcept;
-    char get_idw_char() const noexcept { return idw ? 'T' : 'F'; }
-    char get_turn_char() const noexcept;
-    bool empty() const noexcept { return figures.empty(); }
+    
+    [[nodiscard]] std::string as_string() const noexcept;
+    
+    [[nodiscard]] constexpr char get_idw_char() const noexcept 
+        { return idw ? 'T' : 'F'; }
+    
+    [[nodiscard]] constexpr char get_turn_char() const noexcept;
+    
+    [[nodiscard]] bool empty() const noexcept 
+        { return figures.empty(); }
+    
 };

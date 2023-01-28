@@ -1,75 +1,97 @@
 #pragma once
 
 #include "stuff/board_repr.h"
-#include "stuff/move_logger.h"
+#include "stuff/move_logger.hpp"
 #include <variant>
 
 class FigureBoard {
     /*  x-axis from top to bottom (↓)  **
     **  y-axis from left to right (→)  */
+    using shift_broom = std::vector<std::vector<Pos>>;
+
+    bool idw{ true };
+    Id curr_id{ };
+    MoveLogger move_logger{ };
+    std::map<Pos, Figure*> figures;
+    std::vector<Figure*> captured_figures;
+    std::map<Id, bool> castling;
+    std::map<FigureType, shift_broom> moves;
+    std::map<FigureType, shift_broom> eats;
+    
 public:
-    FigureBoard(BoardRepr&&);
-    void reset(BoardRepr&&);
-    void operator =(BoardRepr&&);
+    [[nodiscard]] FigureBoard(BoardRepr&&) noexcept;
+    void reset(BoardRepr&&) noexcept;
+    void operator =(BoardRepr&&) noexcept;
     void operator =(const BoardRepr&) = delete;
+    void apply_map(BoardRepr&&) noexcept;
     FigureBoard(const FigureBoard&) = delete;
-    Figure* get_fig(Pos) const;
-    Figure* get_fig(Id) const;
-    bool cont_fig(Pos) const;
-    bool is_empty(Pos) const;
-    bool is_empty() const { return figures.size() <= 1; }
-    bool capture_figure(Figure*);
+    [[nodiscard]] Figure* const get_fig(const Pos) const noexcept;
+    [[nodiscard]] Figure* const get_fig(const Id) const noexcept;
+    [[nodiscard]] bool cont_fig(const Pos) const noexcept;
+    [[nodiscard]] bool is_empty(const Pos) const noexcept;
+    
+    [[nodiscard]] bool is_empty() const noexcept 
+        { return figures.size() <= 1ull; }
+    
+    bool capture_figure(Figure* const);
     bool capture_figure(const Id);
     void uncapture_figure(const Id);
-    void delete_fig(Pos);
-    void place_fig(Figure*);
-    Figure* find_king(Color) const;
-    std::vector<Figure*> get_figures_of(Color) const;
-    std::vector<std::pair<bool, Pos>> expand_broom(const Figure*, 
-                                                   const std::vector<Pos> & = {},
-                                                   const std::vector<Pos> & = {}, 
-                                                   const std::vector<Pos> & = {}) const;
-    std::vector<std::pair<bool, Pos>> get_all_moves(const Figure*, 
-                                                    const std::vector<Pos> & = {},
-                                                    const std::vector<Pos> & = {},
-                                                    const std::vector<Pos> & = {}) const;
-    std::vector<std::pair<bool, Pos>> get_all_possible_moves(const Figure*,
-                                                             const std::vector<Pos> & = {},
-                                                             const std::vector<Pos> & = {},
-                                                             const std::vector<Pos> & = {}) const;
-    bool checkmate_for(Color, 
-                       const std::vector<Pos>& = {}, 
-                       Pos = {}) const;
-    bool stalemate_for(Color,
-                       const std::vector<Pos>& = {}, 
-                       Pos = {}) const;
-    bool check_for_when(Color, 
-                        const std::vector<Pos>& = {},
-                        Pos = {}, 
-                        const std::vector<Figure*>& = {}, 
-                        const std::vector<Figure*>& = {}) const;
-    std::variant<ErrorEvent, MoveMessage> move_check(Figure*, 
-                                                     Input) const;
-    std::tuple<bool, MoveMessage, Figure*, Figure*> castling_check(MoveMessage, 
-                                                                   Figure*, 
-                                                                   const Input&, 
-                                                                   int,  
-                                                                   int) const;
-    void reset_castling(bool=true);
-    void reset_castling(const BoardRepr&);
-    Figure* get_default_fig() const { return FigureFabric::instance()->get_default_fig(); }
-    inline bool get_idw() const { return idw; }
-    inline void set_idw(bool new_idw) {
+    void delete_fig(const Pos);
+    void place_fig(Figure* const);
+    [[nodiscard]] const Figure* const find_king(const Color) const noexcept;
+    [[nodiscard]] std::vector<Figure*> get_figures_of(const Color) const noexcept;
+    [[nodiscard]] std::vector<std::pair<bool, Pos>> expand_broom(const Figure*, 
+                                                                        const std::vector<Pos> & = {},
+                                                                        const std::vector<Pos> & = {}, 
+                                                                        const std::vector<Pos> & = {}) const noexcept;
+    [[nodiscard]] std::vector<std::pair<bool, Pos>> get_all_moves(const Figure*,
+                                                                         const std::vector<Pos> & = {},
+                                                                         const std::vector<Pos> & = {},
+                                                                         const std::vector<Pos> & = {}) const noexcept;
+    [[nodiscard]] std::vector<std::pair<bool, Pos>> get_all_possible_moves(const Figure*,
+                                                                                  const std::vector<Pos> & = {},
+                                                                                  const std::vector<Pos> & = {},
+                                                                                  const std::vector<Pos> & = {}) const noexcept;
+    [[nodiscard]] bool checkmate_for(const Color,
+                                     const std::vector<Pos>& = {}, 
+                                     const Pos = {}) const noexcept;
+    [[nodiscard]] bool stalemate_for(const Color,
+                                     const std::vector<Pos>& = {}, 
+                                     Pos = {}) const noexcept;
+    [[nodiscard]] bool check_for_when(const Color,
+                                      const std::vector<Pos>& = {},
+                                      const Pos = {}, 
+                                      const std::vector<Figure*>& = {}, 
+                                      const std::vector<Figure*>& = {}) const noexcept;
+    [[nodiscard]] std::variant<ErrorEvent, MoveMessage> move_check(const Figure* const,
+                                                                          const Input&) const noexcept;
+    [[nodiscard]] std::tuple<bool, MoveMessage, const Figure*, const Figure*> castling_check(MoveMessage,
+                                                                                                    const Figure*, 
+                                                                                                    const Input&, 
+                                                                                                    const int,  
+                                                                                                    const int) const noexcept;
+    void reset_castling(const bool=true) noexcept;
+    void reset_castling(const BoardRepr&) noexcept;
+    
+    [[nodiscard]] Figure* get_default_fig() const noexcept
+        { return FigureFabric::instance()->get_default_fig(); }
+    
+    [[nodiscard]] inline bool get_idw() const noexcept
+        { return idw; }
+    
+    [[nodiscard]] inline void set_idw(const bool new_idw) noexcept {
         idw = new_idw;
         init_figures_moves();
     }
-    std::vector<Figure*> get_all_figures() const {
+    
+    [[nodiscard]] std::vector<Figure*> get_all_figures() const {
         std::vector<Figure*> tmp;
         for (const auto& [_, fig] : figures) {
             tmp.push_back(fig);
         }
         return tmp;
     }
+    
     void move_fig(Figure* fig, Pos to, bool capture=true) {
         Figure* maybe_eat = get_fig(to);
         if (not maybe_eat->empty()) {
@@ -85,35 +107,58 @@ public:
         fig->move_to(to);
         figures[fig->get_pos()] = fig;
     }
+    
     void move_fig(Input input, bool capture=true) {
         move_fig(get_fig(input.from), input.target, capture);
     }
-    bool has_castling(Id id) const { 
+    
+    [[nodiscard]] bool has_castling(Id id) const noexcept {
         if (castling.contains(id))
             return castling.at(id); 
         return false;
     }
-    void off_castling(Id id) { castling[id] = false; }
-    void on_castling(Id id)  { castling[id] = true; }
-    std::vector<MoveRec> get_last_moves() const { return move_logger.get_past(); }
-    std::vector<MoveRec> get_future_moves() const { return move_logger.get_future(); }
-    MoveRec get_last_move() const { return move_logger.get_last_move(); }
-    void set_last_move(const MoveRec& move_rec) { this->move_logger.add(move_rec); }
+    
+    void off_castling(Id id) noexcept
+        { castling[id] = false; }
+    
+    void on_castling(Id id) noexcept
+        { castling[id] = true; }
+    
+    [[nodiscard]] const std::vector<MoveRec>& get_last_moves() const noexcept
+        { return move_logger.get_past(); }
+    
+    [[nodiscard]] const std::vector<MoveRec>& get_future_moves() const noexcept
+        { return move_logger.get_future(); }
+    
+    [[nodiscard]] const MoveRec& get_last_move() const noexcept
+        { return move_logger.get_last_move(); }
+    
+    void set_last_move(const MoveRec& move_rec) noexcept
+        { this->move_logger.add(move_rec); }
+    
     template <typename Func> 
         requires std::is_invocable_v<Func>&& std::is_same_v<std::invoke_result_t<Func>, FigureType>
-    std::pair<bool, MoveRec> provide_move(Figure*, const Input&, Color turn, const Func&);
+    [[nodiscard]] std::pair<bool, MoveRec> provide_move(Figure*, const Input&, Color turn, const Func&);
+    
     bool provide_move(const MoveRec&);
+    
     bool undo_move();
     bool restore_move();
-    void apply_map(BoardRepr&&);
-    void place_figure(Figure* fig) { figures[fig->get_pos()] = fig; }
-    void init_figures_moves();
-    GameEndType game_end_check(Color) const;
-    void promotion_fig(Figure*, FigureType);
-    size_t cnt_of_figures() const { return figures.size(); }
-    bool insufficient_material() const;
-    BoardRepr get_repr(Color, bool) const;
-    ~FigureBoard() {
+
+    void place_figure(Figure* const fig) noexcept
+        { figures[fig->get_pos()] = fig; }
+    
+    void init_figures_moves() noexcept;
+    [[nodiscard]] GameEndType game_end_check(const Color) const noexcept;
+    void promotion_fig(Figure* , const FigureType);
+    
+    [[nodiscard]] size_t cnt_of_figures() const noexcept
+        { return figures.size(); }
+    
+    [[nodiscard]] bool insufficient_material() const noexcept;
+    [[nodiscard]] const BoardRepr& get_repr(const Color, const bool) const noexcept;
+    
+    ~FigureBoard() noexcept {
         for (auto& [_, fig] : figures) {
             if (not fig->empty())
                 delete fig;
@@ -123,19 +168,7 @@ public:
                 delete fig;
         }
     }
-private:
-    using shift_broom = std::vector<std::vector<Pos>>;
-
-    bool idw{true};
-
-    Id curr_id{};
-    MoveLogger move_logger{};
-    std::map<Pos, Figure*> figures;
-    std::vector<Figure*> captured_figures;
-    std::map<Id, bool> castling;
-    std::map<FigureType, shift_broom> moves;
-    std::map<FigureType, shift_broom> eats;
-
+    
 };
 
 /// <summary>
@@ -165,4 +198,10 @@ std::pair<bool, MoveRec> FigureBoard::provide_move(Figure* in_hand, const Input&
     return { true, curr_move };
 }
 
-bool is_valid_coords(Pos);
+[[nodiscard]] constexpr bool is_valid_coords(const Pos position) noexcept
+{
+    const int x = position.x;   // use of constexpr?
+    const int y = position.y;
+    return ((x >= 0) && (x < HEIGHT) &&
+        (y >= 0) && (y < WIDTH));
+}

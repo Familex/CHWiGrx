@@ -1,12 +1,6 @@
 #include "Stuff.h"
 
-/// <summary>
-/// Делит строку на подстроки
-/// по разделителю
-/// </summary>
-/// <param name="str">Строка</param>
-/// <param name="delimiter">Разделитель</param>
-/// <returns>Вектор подстрок</returns>
+/// @todo fix this
 std::vector<std::string> split(std::string str, const std::string&& delimiter) {
     size_t token_end{};
     std::vector<std::string> tokens{};
@@ -24,74 +18,14 @@ std::vector<std::string> split(std::string str, const std::string&& delimiter) {
     return tokens;
 }
 
-void remove_first_occurrence(std::string& str, char c) {
+void remove_first_occurrence(std::string& str, const char c) {
     auto p = str.find(c);
     if (p != std::string::npos) {
         str.erase(p, p + 1);
     }
 }
 
-FigureType char_to_figure_type(char ch) {
-    switch (ch)
-    {
-    case 'K': case 'k': return FigureType::King;  
-    case 'H': case 'h': return FigureType::Knight;
-    case 'P': case 'p': return FigureType::Pawn;  
-    case 'B': case 'b': return FigureType::Bishop;
-    case 'Q': case 'q': return FigureType::Queen; 
-    case 'R': case 'r': return FigureType::Rook;  
-    case 'N': case 'n': return FigureType::None;  
-    default:
-        throw std::invalid_argument("Can't parse '" + std::string(ch, 1) + "' - figure type");
-    }
-}
-
-Color char_to_col(char ch) {
-    switch (ch) {
-    case 'w': case 'W': return Color::White;
-    case 'B': case 'b': return Color::Black;
-    case 'N': case 'n': return Color::None;
-    default:
-        throw std::invalid_argument("Can't parse '" + std::string(ch, 1) + "' - color");
-    }
-}
-
-Color what_next(Color col) {
-    switch (col) {
-    case Color::Black:
-        return Color::White;
-    case Color::White:
-        return Color::Black;
-    default:
-        throw std::invalid_argument("unaccepted color");
-    }
-}
-
-char figure_type_to_char(FigureType type) {
-    switch (type) {
-    case FigureType::Pawn: return 'P';
-    case FigureType::Rook: return 'R';
-    case FigureType::Knight: return 'H';
-    case FigureType::Bishop: return 'B';
-    case FigureType::Queen: return 'Q';
-    case FigureType::King: return 'K';
-    case FigureType::None: return 'N';
-    default:
-        return 'e';
-    }
-}
-
-char col_to_char(Color col) {
-    switch (col) {
-    case Color::Black: return 'B';
-    case Color::White: return 'W';
-    case Color::None: return 'N';
-    default:
-        return 'e';
-    }
-}
-
-// Конструктор ввода
+// Конструктор ввода    /// @todo fix this
 Input::Input(std::string str) {
     /* "from.first from.second target.first target.second" */
     str += " ";
@@ -115,121 +49,121 @@ Input::Input(std::string str) {
 }
 
 // Преобразование в строку (только один символ)
-std::string to_string(SideEvent side_event) {
+std::string to_string(SideEvent side_event) noexcept {
     switch (side_event)
     {
-    case SideEvent::E:
-        return "E";
-    case SideEvent::CHECK:
-        return "C";
-    case SideEvent::PROMOTION:
-        return "P";
-    case SideEvent::CASTLING_BREAK:
-        return "B";
-    default:
-        return "N";
+        case SideEvent::E:
+            return "E";
+        case SideEvent::CHECK:
+            return "C";
+        case SideEvent::PROMOTION:
+            return "P";
+        case SideEvent::CASTLING_BREAK:
+            return "B";
+        default:
+            return "N";
     }
 }
 
-std::wstring to_wstring(SideEvent side_event) {
+std::wstring to_wstring(SideEvent side_event) noexcept {
     switch (side_event)
     {
-    case SideEvent::E:
-        return L"E";
-    case SideEvent::CHECK:
-        return L"C";
-    case SideEvent::PROMOTION:
-        return L"P";
-    case SideEvent::CASTLING_BREAK:
-        return L"B";
-    default:
-        return L"N";
+        case SideEvent::E:
+            return L"E";
+        case SideEvent::CHECK:
+            return L"C";
+        case SideEvent::PROMOTION:
+            return L"P";
+        case SideEvent::CASTLING_BREAK:
+            return L"B";
+        default:
+            return L"N";
     }
 }
 
 // Преобразование в строку (только один символ)
-std::string to_string(MainEvent main_event) {
+std::string to_string(MainEvent main_event) noexcept {
     switch (main_event)
     {
-    case MainEvent::E:
-        return "E";
-    case MainEvent::EAT:
-        return "T";
-    case MainEvent::MOVE:
-        return "M";
-    case MainEvent::LMOVE:
-        return "L";
-    case MainEvent::CASTLING:
-        return "C";
-    case MainEvent::EN_PASSANT:
-        return "P";
-    default:
-        return "N";
+        case MainEvent::E:
+            return "E";
+        case MainEvent::EAT:
+            return "T";
+        case MainEvent::MOVE:
+            return "M";
+        case MainEvent::LMOVE:
+            return "L";
+        case MainEvent::CASTLING:
+            return "C";
+        case MainEvent::EN_PASSANT:
+            return "P";
+        default:
+            return "N";
     }
 }
 
-std::wstring to_wstring(MainEvent main_event) {
+std::wstring to_wstring(MainEvent main_event) noexcept {
     switch (main_event)
     {
-    case MainEvent::E:
-        return L"E";
-    case MainEvent::EAT:
-        return L"T";
-    case MainEvent::MOVE:
-        return L"M";
-    case MainEvent::LMOVE:
-        return L"L";
-    case MainEvent::CASTLING:
-        return L"C";
-    case MainEvent::EN_PASSANT:
-        return L"P";
-    default:
-        return L"N";
+        case MainEvent::E:
+            return L"E";
+        case MainEvent::EAT:
+            return L"T";
+        case MainEvent::MOVE:
+            return L"M";
+        case MainEvent::LMOVE:
+            return L"L";
+        case MainEvent::CASTLING:
+            return L"C";
+        case MainEvent::EN_PASSANT:
+            return L"P";
+        default:
+            return L"N";
     }
 }
 
-std::string to_string(FigureType figure_type)
+std::string to_string(FigureType figure_type) noexcept
 {
     switch (figure_type)
     {
-    case FigureType::Pawn:
-        return "Pawn";
-    case FigureType::Rook:
-        return "Rook";
-    case FigureType::Knight:
-        return "Knight";
-    case FigureType::Bishop:
-        return "Bishop";
-    case FigureType::Queen:
-        return "Queen";
-    case FigureType::King:
-        return "King";
-    case FigureType::None:
-        return "None";
-    default:
-        return "Error";
+        case FigureType::Pawn:
+            return "Pawn";
+        case FigureType::Rook:
+            return "Rook";
+        case FigureType::Knight:
+            return "Knight";
+        case FigureType::Bishop:
+            return "Bishop";
+        case FigureType::Queen:
+            return "Queen";
+        case FigureType::King:
+            return "King";
+        case FigureType::None:
+            return "None";
+        default:
+            return "Error";
     }
 }
 
-std::wstring to_wstring(FigureType figure_type)
+std::wstring to_wstring(FigureType figure_type) noexcept
 {
     switch (figure_type)
     {
-    case FigureType::Pawn:
-        return L"Pawn";
-    case FigureType::Rook:
-        return L"Rook";
-    case FigureType::Knight:
-        return L"Knight";
-    case FigureType::Bishop:
-        return L"Bishop";
-    case FigureType::Queen:
-        return L"Queen";
-    case FigureType::King:
-        return L"King";
-    case FigureType::None:
-        return L"None";
-    default:
-        return L"Error";
+        case FigureType::Pawn:
+            return L"Pawn";
+        case FigureType::Rook:
+            return L"Rook";
+        case FigureType::Knight:
+            return L"Knight";
+        case FigureType::Bishop:
+            return L"Bishop";
+        case FigureType::Queen:
+            return L"Queen";
+        case FigureType::King:
+            return L"King";
+        case FigureType::None:
+            return L"None";
+        default:
+            return L"Error";
     }
 }

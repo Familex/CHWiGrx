@@ -36,9 +36,6 @@
     <ClCompile Include="stuff\figure_fabric.cpp">
       <Filter>stuff\src</Filter>
     </ClCompile>
-    <ClCompile Include="stuff\move_logger.cpp">
-      <Filter>stuff\src</Filter>
-    </ClCompile>
     <ClCompile Include="stuff\figure.cpp">
       <Filter>stuff\src</Filter>
     </ClCompile>
@@ -59,7 +56,7 @@
     <ClInclude Include="stuff\figure_fabric.h">
       <Filter>stuff\h</Filter>
     </ClInclude>
-    <ClInclude Include="stuff\move_logger.h">
+    <ClInclude Include="stuff\move_logger.hpp">
       <Filter>stuff\h</Filter>
     </ClInclude>
     <ClInclude Include="stuff\stuff.h">
