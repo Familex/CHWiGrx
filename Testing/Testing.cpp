@@ -24,59 +24,165 @@ namespace Microsoft::VisualStudio::CppUnitTestFramework
 namespace FigureBoardTesting
 {
 
-    Id operator""_id(unsigned long long int id) {
-        return static_cast<Id>(id);
-    }
+    namespace {
+        
+        Id operator""_id(unsigned long long int id) {
+            return static_cast<Id>(id);
+        }
 
-    template <typename C>
-    concept HasBeginEnd = requires(C c) {
-        std::begin(c);
-        std::end(c);
-    };
+        template <typename C>
+        concept HasBeginEnd = requires(C c) {
+            std::begin(c);
+            std::end(c);
+        };
 
-    template <typename C, typename F>
-        requires requires(C c, F f) {
+        template <typename C, typename F>
+            requires requires(C c, F f) {
             HasBeginEnd<C>;
             { f(c[0]) } -> std::same_as<bool>;
         }
-    bool contains(const C& c, const F& f)
-    {
-        return std::find_if(std::begin(c), std::end(c), f) != std::end(c);
-    }
+        bool contains(const C& c, const F& f)
+        {
+            return std::find_if(std::begin(c), std::end(c), f) != std::end(c);
+        }
 
-    template<class C, class T>
-        requires HasBeginEnd<C> 
-            && std::same_as<T, std::remove_reference_t<decltype(std::declval<C>()[0])>>
-    bool contains(const C& v, const T& x)
-    {
-        return std::find(std::begin(v), std::end(v), x) != std::end(v);
-    }
-    
-    const BoardRepr base{
-            "1;0;0;B;R;2;0;1;B;H;3;0;2;B;B;4;0;3;B;Q;5;0;4;B;K;6;0;5;B;B;7;0;6;B;H;8;0;7;B;R;"
-            "9;1;0;B;P;10;1;1;B;P;11;1;2;B;P;12;1;3;B;P;13;1;4;B;P;14;1;5;B;P;15;1;6;B;P;16;1;7;B;P;"
+        template<class C, class T>
+            requires HasBeginEnd<C>
+        && std::same_as<T, std::remove_reference_t<decltype(std::declval<C>()[0])>>
+            bool contains(const C& v, const T& x)
+        {
+            return std::find(std::begin(v), std::end(v), x) != std::end(v);
+        }
 
-            "17;6;0;W;P;18;6;1;W;P;19;6;2;W;P;20;6;3;W;P;21;6;4;W;P;22;6;5;W;P;23;6;6;W;P;24;6;7;W;P;"
-            "25;7;0;W;R;26;7;1;W;H;27;7;2;W;B;28;7;3;W;Q;29;7;4;W;K;30;7;5;W;B;31;7;6;W;H;32;7;7;W;R;"
+        const BoardRepr base{
+                "1;0;0;B;R;2;0;1;B;H;3;0;2;B;B;4;0;3;B;Q;5;0;4;B;K;6;0;5;B;B;7;0;6;B;H;8;0;7;B;R;"
+                "9;1;0;B;P;10;1;1;B;P;11;1;2;B;P;12;1;3;B;P;13;1;4;B;P;14;1;5;B;P;15;1;6;B;P;16;1;7;B;P;"
 
-            "[TW1;8;25;32;]<><>~"
-    };
+                "17;6;0;W;P;18;6;1;W;P;19;6;2;W;P;20;6;3;W;P;21;6;4;W;P;22;6;5;W;P;23;6;6;W;P;24;6;7;W;P;"
+                "25;7;0;W;R;26;7;1;W;H;27;7;2;W;B;28;7;3;W;Q;29;7;4;W;K;30;7;5;W;B;31;7;6;W;H;32;7;7;W;R;"
 
-    const BoardRepr baseReversed{
-        "1;0;0;W;R;2;0;1;W;H;3;0;2;W;B;4;0;3;W;Q;5;0;4;W;K;6;0;5;W;B;7;0;6;W;H;8;0;7;W;R;"
-        "9;1;0;W;P;10;1;1;W;P;11;1;2;W;P;12;1;3;W;P;13;1;4;W;P;14;1;5;W;P;15;1;6;W;P;16;1;7;W;P;"
+                "[TW1;8;25;32;]<><>~"
+        };
 
-        "17;6;0;B;P;18;6;1;B;P;19;6;2;B;P;20;6;3;B;P;21;6;4;B;P;22;6;5;B;P;23;6;6;B;P;24;6;7;B;P;"
-        "25;7;0;B;R;26;7;1;B;H;27;7;2;B;B;28;7;3;B;Q;29;7;4;B;K;30;7;5;B;B;31;7;6;B;H;32;7;7;B;R;"
+        const BoardRepr baseReversed{
+            "1;0;0;W;R;2;0;1;W;H;3;0;2;W;B;4;0;3;W;Q;5;0;4;W;K;6;0;5;W;B;7;0;6;W;H;8;0;7;W;R;"
+            "9;1;0;W;P;10;1;1;W;P;11;1;2;W;P;12;1;3;W;P;13;1;4;W;P;14;1;5;W;P;15;1;6;W;P;16;1;7;W;P;"
 
-        "[FW1;8;25;32;]<><>~"
-    };
+            "17;6;0;B;P;18;6;1;B;P;19;6;2;B;P;20;6;3;B;P;21;6;4;B;P;22;6;5;B;P;23;6;6;B;P;24;6;7;B;P;"
+            "25;7;0;B;R;26;7;1;B;H;27;7;2;B;B;28;7;3;B;Q;29;7;4;B;K;30;7;5;B;B;31;7;6;B;H;32;7;7;B;R;"
 
-    const BoardRepr baseEmpty{ {}, Color::White, true };
+            "[FW1;8;25;32;]<><>~"
+        };
 
-    const auto standard_provider = [] { return FigureType::Queen; };
-    
-    namespace Moves {
+        const BoardRepr baseEmpty{ {}, Color::White, true };
+
+        const auto standard_provider = [] { return FigureType::Queen; };
+
+        bool move_check(const std::array<const char[9], 8>& table, 
+                        const Color col,
+                        const FigureType ft,
+                        const bool idw) {
+            /* ---- function constants ---- */
+            const Color enemy_col = what_next(col);
+            const FigureType placeholder_figure_type = FigureType::None;
+
+            /* ---- table constants ---- */
+            constexpr char move = 'm';
+            constexpr char enemy_which_cant_be_eaten = 'e';
+            constexpr char enemy_which_can_be_eaten = 'k';
+            constexpr char figure = 'f';
+            constexpr char figure_which_cant_be_eaten = 'F';
+
+            /*
+             {"________",
+              "________",
+              "________",
+              "________",
+              "________",
+              "________",
+              "________",
+              "________"},
+            */
+
+            /* ---- table parse ---- */
+            std::vector<Pos> moves;
+            std::vector<Pos> eats;
+            std::vector<Pos> enemies;
+            std::vector<Pos> figures_which_cant_be_eaten;
+            Pos figure_pos;
+            
+            for (int i = 0; i < HEIGHT; ++i) {
+                std::string_view line{ table[i] };
+                
+                for (int j = 0; j < line.size(); ++j) {
+                    if (line[j] == move) {
+                        moves.emplace_back(i, j);
+                    }
+                    else if (line[j] == enemy_which_can_be_eaten) {
+                        eats.emplace_back(i, j);
+                        enemies.emplace_back(i, j);
+                    }
+                    else if (line[j] == enemy_which_cant_be_eaten) {
+                        enemies.emplace_back(i, j);
+                    }
+                    else if (line[j] == figure) {
+                        figure_pos = { i, j };
+                    }
+                    else if (line[j] == figure_which_cant_be_eaten) {
+                        figures_which_cant_be_eaten.emplace_back(i, j);
+                    }
+                }
+            }
+
+            /* ---- board setup ---- */
+            
+            Id id_tmp{ 0_id };
+            FigureBoard b{ BoardRepr{ {}, col, idw } };
+            
+            // main figure
+            b.place_fig(new Figure{ id_tmp++, figure_pos, col, ft });
+            // enemies
+            for (const auto& p : enemies) {
+                b.place_fig(new Figure{ id_tmp++, p, enemy_col, placeholder_figure_type });
+            }
+            // figure which can't be eaten
+            for (const auto& p : figures_which_cant_be_eaten) {
+                b.place_fig(new Figure{ id_tmp++, p, col, placeholder_figure_type });
+            }
+            
+            /* ---- move_check ---- */
+            auto figure_moves = b.get_all_moves(b.get_fig(0_id));
+
+            const auto is_move = [](std::pair<bool, Pos> p) { return !p.first; };
+            const auto is_eat = [](std::pair<bool, Pos> p) { return p.first; };
+
+            return std::all_of(figure_moves.begin(), figure_moves.end(), [&](const auto& p) {
+                return (is_move(p) && contains(moves, p.second))
+                    || (is_eat(p) && contains(eats, p.second)); }
+            ) && moves.size() + eats.size() == figure_moves.size();
+            // last condition is for checking if there are no extra moves
+        }
+
+        void move_check_assert(
+            const std::array<const char[9], 8>& table,
+            const Color col,
+            const FigureType ft,
+            const bool idw)
+        {
+            Assert::IsTrue(move_check(table, col, ft, idw));
+        }
+
+        void move_check_assert(const std::array<const char[9], 8>& table, 
+                               const FigureType ft)
+        {
+            for (auto col : { Color::White, Color::Black })
+            {
+                for (auto idw : { false, true })
+                {
+                    move_check_assert(table, col, ft, idw);
+                }
+            }
+        }
 
         bool is_legal_move(Input&& move, FigureType ft) {
             FigureBoard b{ BoardRepr{baseEmpty} };
@@ -85,7 +191,7 @@ namespace FigureBoardTesting
             return std::find_if(moves.begin(), moves.end(),
                 [&](auto p) { return p.second == move.target; }) != moves.end();
         }
-        
+
         template <bool idw>
         std::size_t moves_count(Pos&& pos, FigureType ft) {
             FigureBoard b{ BoardRepr{baseEmpty } };
@@ -93,6 +199,11 @@ namespace FigureBoardTesting
             b.place_fig(new Figure{ 0_id, pos, Color::White, ft });
             return b.get_all_moves(b.get_fig(0_id)).size();
         }
+
+
+    }   // detail namespace
+    
+    namespace Moves {
 
         /*
          *   0 1 2 3 4 5 6 7 ->
@@ -109,9 +220,79 @@ namespace FigureBoardTesting
          */
 
         TEST_CLASS(PawnMoves)
-        {
-        public:
+        { public:
             TEST_METHOD(Basic)
+            {
+                for (auto [c, idw]
+                    : std::initializer_list<std::pair<Color, bool>>{
+                        { Color::White, true  },
+                        { Color::Black, false } })
+                {
+                    move_check_assert(
+                        {
+                            "________",
+                            "________",
+                            "________",
+                            "___kmk__", // 2 enemies and 1 move
+                            "____f___", // current figure
+                            "________",
+                            "________",
+                            "________"
+                        },
+                        c, FigureType::Pawn, idw
+                    );
+
+                    move_check_assert(
+                        { "________",
+                          "________",
+                          "________",
+                          "_e______",
+                          "_me_____",
+                          "kmke____",
+                          "efee____",
+                          "eee_____" },
+                        c, FigureType::Pawn, idw
+                    );
+
+                    move_check_assert(
+                        { "________",
+                          "________",
+                          "________",
+                          "________",
+                          "_e______",
+                          "_mk_____",
+                          "_f______",
+                          "________" },
+                        c, FigureType::Pawn, idw
+                    );
+
+                    move_check_assert(
+                        { "________",
+                          "________",
+                          "________",
+                          "________",
+                          "__eee___",
+                          "__kek___",
+                          "__efe___",
+                          "__eee___" },
+                        c, FigureType::Pawn, idw
+                    );
+
+                    move_check_assert(
+                        { "________",
+                          "________",
+                          "________",
+                          "________",
+                          "________",
+                          "__FFF___",
+                          "___f____",
+                          "________" },
+                        c, FigureType::Pawn, idw
+                    );
+                }
+            }
+
+            TEST_METHOD(LongMoves)
             {
                 FigureBoard board{ BoardRepr{base} };
 
@@ -126,7 +307,7 @@ namespace FigureBoardTesting
                 }
             }	// TEST_METHOD(Basic)
 
-            TEST_METHOD(BasicReversed)
+            TEST_METHOD(LongMovesReversed)
             {
                 FigureBoard board{ BoardRepr{baseReversed} };
 
@@ -403,85 +584,11 @@ namespace FigureBoardTesting
                 }
 
             }   // TEST_METHOD(PromotionReversed)
-            
-            TEST_METHOD(EnemyBounds)
-            {
-                FigureBoard board{ BoardRepr {
-                    "9;5;0;B;P;10;5;1;B;P;11;5;2;B;P;12;5;3;B;P;13;5;4;B;P;14;5;5;B;P;15;5;6;B;P;16;5;7;B;P;"
-                    "17;6;0;W;P;18;6;1;W;P;45;6;2;W;P;20;6;3;W;P;21;6;4;W;P;22;6;5;W;P;23;6;6;W;P;24;6;7;W;P;"
-                    
-                    "[TW]<><>~"
-                } };
 
-                for (const auto& fig : board.get_all_figures())
-                {
-                    const auto moves = board.get_all_moves(fig);
-                    Assert::IsTrue(moves[0].first);
-                    Assert::IsFalse(contains(moves, [](auto p) { return !p.first; }));
-                }
-            }
-
-            TEST_METHOD(EatMoves)
-            {
-                FigureBoard board{ BoardRepr {
-                                 "48;1;3;B;P;"
-                    "49;2;1;B;P;" "47;2;4;W;P;" "54;2;7;W;P;"
-                     "50;3;2;W;P;"            "53;3;6;B;P;"
-                                            "52;4;5;W;P;"
-                     "46;5;3;B;P;"            "51;5;6;B;P;"
-                    "45;6;2;W;P;"
-                    
-                    "[TW]<><>~"
-                } };
-
-                auto gf = [&](Id id) { return board.get_fig(id); };
-                auto gam = [&](Id id) { return board.get_all_moves(gf(id)); };
-                
-                Assert::AreEqual(gam(45_id).size(), 3ull);
-                Assert::AreEqual(gam(46_id).size(), 2ull);
-                Assert::AreEqual(gam(47_id).size(), 2ull);
-                Assert::AreEqual(gam(48_id).size(), 3ull);
-                Assert::AreEqual(gam(49_id).size(), 2ull);
-                Assert::AreEqual(gam(50_id).size(), 2ull);
-                Assert::AreEqual(gam(51_id).size(), 1ull);
-                Assert::AreEqual(gam(52_id).size(), 2ull);
-                Assert::AreEqual(gam(53_id).size(), 2ull);
-                Assert::AreEqual(gam(54_id).size(), 1ull);
-            }
-
-            TEST_METHOD(EatMovesReversed)
-            {
-                FigureBoard board{ BoardRepr {
-                                 "48;1;3;W;P;"
-                    "49;2;1;W;P;" "47;2;4;B;P;" "54;2;7;B;P;"
-                     "50;3;2;B;P;"            "53;3;6;W;P;"
-                                            "52;4;5;B;P;"
-                     "46;5;3;W;P;"            "51;5;6;W;P;"
-                    "45;6;2;B;P;"
-
-                    "[FB]<><>~"
-                } };
-
-                auto gf = [&](Id id) { return board.get_fig(id); };
-                auto gam = [&](Id id) { return board.get_all_moves(gf(id)); };
-
-                Assert::AreEqual(gam(45_id).size(), 3ull);
-                Assert::AreEqual(gam(46_id).size(), 2ull);
-                Assert::AreEqual(gam(47_id).size(), 2ull);
-                Assert::AreEqual(gam(48_id).size(), 3ull);
-                Assert::AreEqual(gam(49_id).size(), 2ull);
-                Assert::AreEqual(gam(50_id).size(), 2ull);
-                Assert::AreEqual(gam(51_id).size(), 1ull);
-                Assert::AreEqual(gam(52_id).size(), 2ull);
-                Assert::AreEqual(gam(53_id).size(), 2ull);
-                Assert::AreEqual(gam(54_id).size(), 1ull);
-            }
-            
-        };
+        };  // TEST_CLASS(PawnMoves)
 
         TEST_CLASS(KnightMoves)
-        {
-        public:
+        { public:
             TEST_METHOD(Basic)
             {
                 const std::size_t moves[][8]{
@@ -511,87 +618,423 @@ namespace FigureBoardTesting
                 }
             }
             
-            TEST_METHOD(SelfColorEat)
+            TEST_METHOD(EatMoves)
             {
-                /*
-                     W   W  
-                   W       W
-                       K    
-                   W       W
-                     W   W
-                */
-                FigureBoard board{ BoardRepr {
-                    "51;2;3;W;H;52;2;5;W;H;46;3;2;W;H;47;3;6;W;H;45;4;4;W;H;53;5;2;W;H;48;5;6;W;H;50;6;3;W;H;49;6;5;W;H;"
-                    "[TW]<><>~"
-                } };
+                move_check_assert(
+                    { "________",
+                      "__F_F___",
+                      "_F___F__",
+                      "___f____",
+                      "_F___F__",
+                      "__F_F___",
+                      "________",
+                      "________" },
+                    FigureType::Knight);
 
-                auto gf = [&](Id id) { return board.get_fig(id); };
-                auto gam = [&](Id id) { return board.get_all_moves(gf(id)); };
+                move_check_assert(
+                    { "________",
+                      "________",
+                      "_FmFmF__",
+                      "_mFFFm__",
+                      "_FFfFF__",
+                      "_mFFFm__",
+                      "_FmFmF__",
+                      "________" },
+                    FigureType::Knight);
 
-                Assert::AreEqual(gam(45_id).size(), 0ull);
-
-                /*
-                   W   W   W
-                     W W W
-                   W W K W W
-                     W W W
-                   W   W   W
-                */
-                board = BoardRepr{
-                    "61;2;2;W;H;"  "54;2;4;W;H;"  "55;2;6;W;H;"
-                      "52;3;3;W;H;53;3;4;W;H;46;3;5;W;H;"
-                    "60;4;2;W;H;51;4;3;W;H;45;4;4;W;H;47;4;5;W;H;56;4;6;W;H;"
-                      "50;5;3;W;H;49;5;4;W;H;48;5;5;W;H;"
-                    "59;6;2;W;H;"  "58;6;4;W;H;"  "57;6;6;W;H;"
-
-                    "[TW]<><>~"
-                };
-
-                Assert::AreEqual(gam(45_id).size(), 8ull);
-            }
-
-            TEST_METHOD(EnemyColorEat)
-            {
-                /*
-                     B   B
-                   B       B
-                       K
-                   B       B
-                     B   B
-                */
-                FigureBoard board{ BoardRepr {
-                    "51;2;3;B;H;52;2;5;B;H;46;3;2;B;H;47;3;6;B;H;45;4;4;W;H;53;5;2;B;H;48;5;6;B;H;50;6;3;B;H;49;6;5;B;H;"
-                    "[TW]<><>~"
-                } };
-
-                auto gf = [&](Id id) { return board.get_fig(id); };
-                auto gam = [&](Id id) { return board.get_all_moves(gf(id)); };
-
-                Assert::AreEqual(gam(45_id).size(), 8ull);
-
-                /*
-                   B   B   B
-                     B B B
-                   B B K B B
-                     B B B
-                   B   B   B
-                */
-                board = BoardRepr{
-                    "61;2;2;B;H;"  "54;2;4;B;H;"  "55;2;6;B;H;"
-                      "52;3;3;B;H;53;3;4;B;H;46;3;5;B;H;"
-                    "60;4;2;B;H;51;4;3;B;H;45;4;4;W;H;47;4;5;B;H;56;4;6;B;H;"
-                      "50;5;3;B;H;49;5;4;B;H;48;5;5;B;H;"
-                    "59;6;2;B;H;"  "58;6;4;B;H;"  "57;6;6;B;H;"
-
-                    "[TW]<><>~"
-                };
-
-                Assert::AreEqual(gam(45_id).size(), 8ull);
+                move_check_assert(
+                    { "________",
+                      "________",
+                      "_FkFkF__",
+                      "_kFFFk__",
+                      "_FFfFF__",
+                      "_kFFFk__",
+                      "_FkFkF__",
+                      "________" },
+                    FigureType::Knight);
             }
             
-            
-        };
+        };  // TEST_CLASS(KnightMoves)
 
+        TEST_CLASS(BishopMoves)
+        { public:
+            TEST_METHOD(Basic)
+            {
+                move_check_assert(
+                    { "_______m",
+                      "m_____m_",
+                      "_m___m__",
+                      "__m_m___",
+                      "___f____",
+                      "__m_m___",
+                      "_m___m__",
+                      "m_____m_" },
+                    FigureType::Bishop
+                );
+            }
+            
+            TEST_METHOD(EnemyBlock)
+            {
+                move_check_assert(
+                    { "________",
+                      "k_______",
+                      "_m___k__",
+                      "__m_m___",
+                      "___f____",
+                      "__m_k___",
+                      "_m______",
+                      "k_______" },
+                    FigureType::Bishop);
+
+                move_check_assert(
+                    { "___m____",
+                      "____m___",
+                      "_____m_m",
+                      "______f_",
+                      "_____m_m",
+                      "____k___",
+                      "________",
+                      "________" },
+                    FigureType::Bishop);
+            }
+
+            TEST_METHOD(OwnBlock)
+            {
+                move_check_assert(
+                    { "________",
+                      "F_____F_",
+                      "_m___m__",
+                      "__m_m___",
+                      "___f____",
+                      "__m_m___",
+                      "_F___m__",
+                      "______m_" },
+                    FigureType::Bishop);
+
+                move_check_assert(
+                    { "f_______",
+                      "_m______",
+                      "__F_____",
+                      "________",
+                      "________",
+                      "________",
+                      "________",
+                      "________" },
+                    FigureType::Bishop);
+            }
+            
+        };  // TEST_CLASS(BishopMoves)
+
+        TEST_CLASS(RookMoves)
+        { public:
+            TEST_METHOD(Basic)
+            {
+                move_check_assert(
+                    { "___m____",
+                      "___m____",
+                      "mmmfmmmm",
+                      "___m____",
+                      "___m____",
+                      "___m____",
+                      "___m____",
+                      "___m____" },
+                    FigureType::Rook);
+
+                move_check_assert(
+                    { "__m_____",
+                      "__m_____",
+                      "__m_____",
+                      "__m_____",
+                      "__m_____",
+                      "__m_____",
+                      "mmfmmmmm",
+                      "__m_____" },
+                    FigureType::Rook
+                );
+            }
+
+            TEST_METHOD(EnemyBlock)
+            {
+                move_check_assert(
+                    { "________",
+                      "__k_____",
+                      "__m_____",
+                      "_kfmmk__",
+                      "__m_____",
+                      "__m_____",
+                      "__k_____",
+                      "________" },
+                    FigureType::Rook);
+
+                move_check_assert(
+                    { "________",
+                      "________",
+                      "________",
+                      "________",
+                      "________",
+                      "________",
+                      "k_______",
+                      "fmmmmmmk" },
+                    FigureType::Rook);
+            }
+
+            TEST_METHOD(OwnBlock)
+            {
+                move_check_assert(
+                    { "________",
+                      "__F_____",
+                      "__m_____",
+                      "__m_____",
+                      "FmfF____",
+                      "__m_____",
+                      "__F_____",
+                      "________" },
+                    FigureType::Rook);
+
+                move_check_assert(
+                    { "________",
+                      "________",
+                      "________",
+                      "________",
+                      "________",
+                      "________",
+                      "F_______",
+                      "fmmmmmmF" },
+                    FigureType::Rook);
+            }
+
+            // castling tests are in the KingMoves test class
+        };  // TEST_CLASS(RookMoves)
+
+        TEST_CLASS(QueenMoves)
+        {
+            TEST_METHOD(Basic)
+            {
+                move_check_assert(
+                    { "_m_m_m__",
+                      "__mmm___",
+                      "mmmfmmmm",
+                      "__mmm___",
+                      "_m_m_m__",
+                      "m__m__m_",
+                      "___m___m",
+                      "___m____" },
+                    FigureType::Queen);
+
+                move_check_assert(
+                    { "___m____",
+                      "___m____",
+                      "___m___m",
+                      "m__m__m_",
+                      "_m_m_m__",
+                      "__mmm___",
+                      "mmmfmmmm",
+                      "__mmm___" },
+                    FigureType::Queen);
+
+                move_check_assert(
+                    { "mmmfmmmm",
+                      "__mmm___",
+                      "_m_m_m__",
+                      "m__m__m_",
+                      "___m___m",
+                      "___m____",
+                      "___m____",
+                      "___m____" },
+                    FigureType::Queen);
+
+                move_check_assert(
+                    { "___m____",
+                      "___m____",
+                      "___m____",
+                      "___m___m",
+                      "m__m__m_",
+                      "_m_m_m__",
+                      "__mmm___",
+                      "mmmfmmmm" },
+                    FigureType::Queen);
+            }
+
+            TEST_METHOD(EnemyBlock)
+            {
+                move_check_assert(
+                    { "_m_k_e__",
+                      "kmm__e__",
+                      "mfmmmkee",
+                      "kmm__e__",
+                      "_m_k_e__",
+                      "_m___e__",
+                      "ekeeee__",
+                      "_e______" },
+                    FigureType::Queen);
+
+                move_check_assert(
+                    { "e______e",
+                      "___e____",
+                      "__k_____",
+                      "___m___k",
+                      "_e__m__m",
+                      "_____m_m",
+                      "___e__mm",
+                      "__kmmmmf" },
+                    FigureType::Queen);
+
+                move_check_assert(
+                    { "_e___kfk",
+                      "_____mmm",
+                      "___em_m_",
+                      "___m__m_",
+                      "__m___m_",
+                      "_k____m_",
+                      "e_____m_",
+                      "______k_" },
+                    FigureType::Queen);
+            }
+            
+            TEST_METHOD(OwnBlock)
+            {
+                move_check_assert(
+                    { "_m_F_e__",
+                      "Fmm__e__",
+                      "mfmmmFee",
+                      "Fmm__e__",
+                      "_m_F_e__",
+                      "_m___e__",
+                      "eFeeee__",
+                      "_e______" },
+                    FigureType::Queen);
+
+                move_check_assert(
+                    { "e______e",
+                      "___e____",
+                      "__F_____",
+                      "___m___F",
+                      "_e__m__m",
+                      "_____m_m",
+                      "___e__mm",
+                      "__Fmmmmf" },
+                    FigureType::Queen);
+
+                move_check_assert(
+                    { "_e___Ffk",
+                      "_____mmm",
+                      "___em_m_",
+                      "___m__m_",
+                      "__m___m_",
+                      "_F____m_",
+                      "e_____m_",
+                      "______F_" },
+                    FigureType::Queen);
+            }
+            
+        };  // TEST_CLASS(QueenMoves)
+
+        TEST_CLASS(KingMoves)
+        { public:
+            TEST_METHOD(Basic)
+            {
+                move_check_assert(
+                    { "________",
+                      "________",
+                      "___mmm__",
+                      "___mfm__",
+                      "___mmm__",
+                      "________",
+                      "________",
+                      "________" },
+                    FigureType::King);
+
+                move_check_assert(
+                    { "________",
+                      "________",
+                      "mm______",
+                      "fm______",
+                      "mm______",
+                      "________",
+                      "________",
+                      "________" },
+                    FigureType::King);
+            }
+
+            TEST_METHOD(Eat)
+            {
+                move_check_assert(
+                    { "________",
+                      "________",
+                      "___kkk__",
+                      "___kfk__",
+                      "___kkk__",
+                      "________",
+                      "________",
+                      "________" },
+                    FigureType::King);
+
+                move_check_assert(
+                    { "________",
+                      "________",
+                      "kk______",
+                      "fk______",
+                      "kk______",
+                      "________",
+                      "________",
+                      "________" },
+                    FigureType::King);
+            }
+
+            TEST_METHOD(SelfEat)
+            {
+                move_check_assert(
+                    { "________",
+                      "________",
+                      "___FFF__",
+                      "___FfF__",
+                      "___FFF__",
+                      "________",
+                      "________",
+                      "________" },
+                    FigureType::King);
+
+                move_check_assert(
+                    { "________",
+                      "________",
+                      "FF______",
+                      "fF______",
+                      "FF______",
+                      "________",
+                      "________",
+                      "________" },
+                    FigureType::King);
+            }
+
+            TEST_METHOD(Castling)
+            {
+                for (const char* br
+                    : { 
+                        /* R___K__R */
+                        "46;7;0;W;R;45;7;4;W;K;47;7;7;W;R;[TW46;47;]<><>~",
+                        /* _R__K__R */
+                        "46;7;1;W;R;45;7;4;W;K;47;7;7;W;R;[TW46;47;]<><>~",
+                    })
+                {
+                    FigureBoard b{ BoardRepr{ br } };
+
+                    auto king = b.get_fig(45_id);
+                    auto moves = b.get_all_moves(king);
+
+                    Assert::AreEqual(moves.size(), 7ull);
+
+                    Assert::AreEqual(
+                        std::count_if(moves.begin(), moves.end(), [&](const auto& p) {
+                            MoveMessage mm =
+                                std::get<MoveMessage>(
+                                    b.move_check(king, { king->get_pos(), p.second }));
+                            return mm.main_ev == MainEvent::CASTLING; }
+                    ), 2ll);
+                }
+            }
+            
+        };  // TEST_CLASS(KingMoves)
+        
     }	// namespace Moves
     
 }    // namespace FigureBoardTesting
