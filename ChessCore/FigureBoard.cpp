@@ -87,7 +87,7 @@ void FigureBoard::apply_map(BoardRepr&& board_repr) noexcept {
     board_repr.figures.clear();  /* delete ownership */
 }
 
-const BoardRepr& FigureBoard::get_repr(const Color turn, const bool save_all_moves) const noexcept {
+BoardRepr FigureBoard::get_repr(const Color turn, const bool save_all_moves) const noexcept {
     std::vector<Figure*> fig_vec;
     for (auto& [_, fig] : figures)
         fig_vec.push_back(fig);

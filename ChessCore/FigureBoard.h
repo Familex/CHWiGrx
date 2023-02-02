@@ -156,7 +156,7 @@ public:
         { return figures.size(); }
     
     [[nodiscard]] bool insufficient_material() const noexcept;
-    [[nodiscard]] const BoardRepr& get_repr(const Color, const bool) const noexcept;
+    [[nodiscard]] BoardRepr get_repr(const Color, const bool) const noexcept;
     
     ~FigureBoard() noexcept {
         for (auto& [_, fig] : figures) {
