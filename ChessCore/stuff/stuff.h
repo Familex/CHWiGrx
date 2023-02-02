@@ -18,9 +18,10 @@ template <class T>
 }
 
 template <class T>
-[[nodiscard]] std::vector<T> operator +(std::vector<T> l, std::vector<T> r) {
-    l.insert(l.end(), r.begin(), r.end());
-    return l;
+[[nodiscard]] std::vector<T> operator +(const std::vector<T>& l, const std::vector<T>& r) {
+    auto tmp = l;
+    tmp.insert(tmp.end(), r.begin(), r.end());
+    return tmp;
 }
 
 std::vector<std::string> split(std::string, const std::string&&);

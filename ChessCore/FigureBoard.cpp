@@ -188,7 +188,7 @@ void FigureBoard::delete_fig(Pos pos) {
 }
 
 void FigureBoard::place_fig(Figure* const fig) {
-    if (fig->empty()) throw std::logic_error("trying to place empty figure");
+    if (fig->empty()) assert(!"trying to place empty figure");
     if (cont_fig(fig->get_pos())) delete_fig(fig->get_pos());
     figures[fig->get_pos()] = fig;
 }
@@ -854,7 +854,7 @@ bool FigureBoard::undo_move() {
         }
         break;
     case MainEvent::E:
-        throw std::invalid_argument("MainEvent::E");
+        assert(!"MainEvent::E");
     }
     for (const auto& s_ev : ms.side_evs) {
         switch (s_ev)
@@ -874,7 +874,7 @@ bool FigureBoard::undo_move() {
         case SideEvent::CHECK:
             break;
         case SideEvent::E:
-            throw std::invalid_argument("SideEvent::E");
+            assert(!"SideEvent::E");
         }
     }
     return true;
@@ -916,7 +916,7 @@ bool FigureBoard::provide_move(const MoveRec& move_rec) {
         }
         break;
     case MainEvent::E:
-        throw std::invalid_argument("MainEvent::E");
+        assert(!"MainEvent::E");
     }
     for (const auto& s_ev : ms.side_evs) {
         switch (s_ev)
@@ -936,7 +936,7 @@ bool FigureBoard::provide_move(const MoveRec& move_rec) {
         case SideEvent::CHECK:
             break;
         case SideEvent::E:
-            throw std::invalid_argument("SideEvent::E");
+            assert(!"SideEvent::E");
         }
     }
 
@@ -968,8 +968,9 @@ void FigureBoard::uncapture_figure(const Id id) {
         captured_figures.begin(), captured_figures.end(),
         [&id] (auto&& val) { return id == val->get_id(); }
     );
-    if (to_resurrect_id == captured_figures.end())
-        throw std::invalid_argument(std::format("Fig with id->{} can't be resurrected", id));
+    if (to_resurrect_id == captured_figures.end()) {
+        assert(!"This figure can't be resurrected");
+    }
     Figure* to_resurrect = *to_resurrect_id;
     place_figure(to_resurrect);
     captured_figures.erase(to_resurrect_id);

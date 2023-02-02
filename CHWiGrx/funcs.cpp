@@ -189,9 +189,7 @@ void make_move(HWND hWnd, std::optional<Input> input_) {
                 break;
                 
             default:
-                #ifdef _DEBUG
-                    throw std::runtime_error("unexpected game end");
-                #endif
+                assert(!"unexpected game end");
                 break;
         }
         auto result = MessageBox(hWnd, (body + L"\nCopy board to clip?").c_str(), head.c_str(), MB_YESNO);

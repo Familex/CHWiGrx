@@ -40,7 +40,9 @@ Input::Input(std::string str) {
             acc.push_back(std::stoi(token));
             str.erase(0, pos + delimiter_len);
         }
-        else { throw std::invalid_argument("unexpected end of line"); }
+        else { 
+            assert(!"unexpected end of line"); 
+        }
     }
     from.x = acc[0];
     from.y = acc[1];

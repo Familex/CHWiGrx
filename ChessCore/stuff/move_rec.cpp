@@ -2,7 +2,7 @@
 
 // Коструктор из строки
 MoveRec::MoveRec(const std::string& map) {
-    if (map.empty()) throw std::invalid_argument("Empty map");
+    if (map.empty()) assert(!"Empty map");
     auto data = split(map, ".");
     // Возможно нижнюю конструкцию стоит вставить в фабрику
     Id new_id = std::stoi(data[0]);
