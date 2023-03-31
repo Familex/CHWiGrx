@@ -41,7 +41,7 @@ x64/
 *.user
 
 # my files
-/TODO.txt
+**/TODO*
 psd/
 *.claudiaideconfig
 
