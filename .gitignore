@@ -44,3 +44,7 @@ x64/
 /TODO.txt
 psd/
 *.claudiaideconfig
+
+# vtune
+**/GPUCache/
+**/VTune Profiler Results/
