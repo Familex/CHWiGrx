@@ -130,6 +130,11 @@ std::optional<Figure*> const FigureBoard::get_fig(Pos position) const noexcept {
     }
 }
 
+Figure* const FigureBoard::get_fig_unsafe(Pos position) const noexcept {
+    auto out = get_fig(position);
+    return out.has_value() ? out.value() : nullptr;
+}
+
 std::optional<Figure*> const FigureBoard::get_fig(Id id) const noexcept {
     for (const auto& [_, fig] : figures) {
         if (fig->is(id)) {
@@ -137,6 +142,11 @@ std::optional<Figure*> const FigureBoard::get_fig(Id id) const noexcept {
         }
     }
     return std::nullopt;
+}
+
+Figure* const FigureBoard::get_fig_unsafe(Id id) const noexcept {
+    auto out = get_fig(id);
+    return out.has_value() ? out.value() : nullptr;
 }
 
 /// <summary>
@@ -865,7 +875,7 @@ bool FigureBoard::undo_move() {
         case MainEvent::CASTLING:
             move_fig(in_hand, input.from);
             for (const auto& [who, frominto] : ms.to_move) {
-                auto who_it = get_fig(who).value();
+                auto who_it = get_fig_unsafe(who);
                 move_fig(who_it, frominto.from);
             }
             break;
@@ -903,7 +913,7 @@ bool FigureBoard::undo_move() {
 /// <returns>Удалось ли совершить ход</returns>
 bool FigureBoard::provide_move(const moverec::MoveRec& move_rec) {
     const auto& choice = move_rec.promotion_choice;
-    const auto& in_hand = get_fig(move_rec.who_went.get_id()).value();
+    const auto& in_hand = get_fig_unsafe(move_rec.who_went.get_id());
     const auto& ms = move_rec.ms;
     const auto& turn = move_rec.turn;
     const auto& input = move_rec.input;
@@ -922,7 +932,7 @@ bool FigureBoard::provide_move(const moverec::MoveRec& move_rec) {
     case MainEvent::CASTLING:
         if (has_castling(ms.to_move.back().first)) {
             for (const auto& [who, frominto] : ms.to_move) {
-                auto who_it = get_fig(who).value();
+                auto who_it = get_fig_unsafe(who);
                 move_fig(who_it, frominto.target);
             }
             move_fig(in_hand, input.target);

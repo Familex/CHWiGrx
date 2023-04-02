@@ -149,6 +149,9 @@ template <class T>
 
 #pragma endregion
 
+#define FN [[nodiscard]] constexpr auto
+#define CTOR [[nodiscard]] constexpr explicit
+
 constexpr int EN_PASSANT_INDENT = 4;
 
 enum class GameEndType {

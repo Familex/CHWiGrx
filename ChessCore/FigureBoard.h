@@ -27,6 +27,8 @@ public:
     FigureBoard(const FigureBoard&) = delete;
     [[nodiscard]] std::optional<Figure*> const get_fig(const Pos) const noexcept;
     [[nodiscard]] std::optional<Figure*> const get_fig(const Id) const noexcept;
+    [[nodiscard]] Figure* const get_fig_unsafe(const Pos) const noexcept;
+    [[nodiscard]] Figure* const get_fig_unsafe(const Id) const noexcept;
     [[nodiscard]] bool cont_fig(const Pos) const noexcept;
     [[nodiscard]] bool is_empty(const Pos) const noexcept;
     

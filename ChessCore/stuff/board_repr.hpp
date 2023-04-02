@@ -35,8 +35,7 @@ namespace board_repr {
         std::vector<Id> can_castle;
 
         /* ---- Methods ---- */
-        [[nodiscard]] constexpr explicit
-            BoardRepr(const BoardRepr& other) noexcept 
+        CTOR BoardRepr(const BoardRepr& other) noexcept
             : turn(other.turn)
             , idw(other.idw)
             , past(other.past)
@@ -51,8 +50,7 @@ namespace board_repr {
             }
         }
         
-        [[nodiscard]] constexpr explicit
-            BoardRepr(
+        CTOR BoardRepr(
                  std::vector<Figure*>&& figures,
                  Color turn,
                  bool idw,
@@ -71,8 +69,7 @@ namespace board_repr {
         };
 
         /* Without castling (automatically set all to true) */
-        [[nodiscard]] constexpr explicit
-            BoardRepr(
+        CTOR BoardRepr(
                   std::vector<Figure*>&& figures,
                   Color turn,
                   bool idw,
@@ -94,18 +91,16 @@ namespace board_repr {
             }
         };
         
-        [[nodiscard]] constexpr
-            BoardRepr() noexcept = default;
+        CTOR BoardRepr() noexcept = default;
         
-        [[nodiscard]] constexpr
-            BoardRepr(BoardRepr&& br) noexcept
+        CTOR BoardRepr(BoardRepr&& br) noexcept
         {
             clear();
             *this = std::move(br);
         }
 
-        constexpr auto
-            operator =(const BoardRepr& other) noexcept -> BoardRepr*
+        constexpr BoardRepr*
+            operator =(const BoardRepr& other) noexcept
         {
             this->clear();
             for (const auto& fig : other.figures) {
@@ -122,8 +117,7 @@ namespace board_repr {
             return this;
         }
 
-        constexpr auto
-            clear() noexcept -> void
+        FN clear() noexcept -> void
         {
             for (auto fig : figures) {
                 delete fig;
@@ -138,7 +132,7 @@ namespace board_repr {
             future.clear();
         }
 
-        [[nodiscard]] static constexpr auto
+        FN static
             from_string(const std::string_view board_repr) noexcept -> std::expected<BoardRepr, ParseError>
         {
             BoardRepr result{};
@@ -231,11 +225,10 @@ namespace board_repr {
                 result.figures.push_back(new_fig);
             }
 #endif
-            return result;
+            return std::expected<BoardRepr, ParseError>{ result };
         }
 
-        [[nodiscard]] constexpr auto 
-            as_string() const noexcept -> std::string
+        FN as_string() const noexcept -> std::string
         {
             std::string result{ "" };
             for (const auto& fig : figures) {
@@ -269,14 +262,12 @@ namespace board_repr {
             return result;
         }
 
-        [[nodiscard]] constexpr auto
-            get_idw_char() const noexcept -> char
+        FN get_idw_char() const noexcept -> char
         {
             return idw ? 'T' : 'F';
         }
 
-        [[nodiscard]] constexpr auto
-            get_turn_char() const noexcept -> char
+        FN get_turn_char() const noexcept -> char
         {
             return
                 turn == Color::White ? 'W'
@@ -284,8 +275,7 @@ namespace board_repr {
                 : 'E';
         }
 
-        [[nodiscard]] constexpr auto
-            empty() const noexcept -> bool
+        FN empty() const noexcept -> bool
         {
             return figures.empty();
         }
