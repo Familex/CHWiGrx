@@ -1,6 +1,6 @@
 #pragma once
 
-#include "move_rec.h"
+#include "move_rec.hpp"
 
 class MoveLogger {
     std::vector<moverec::MoveRec> prev_moves;
@@ -10,7 +10,7 @@ public:
     [[nodiscard]] constexpr moverec::MoveRec get_last_move() const noexcept
     {
         if (prev_moves.empty())
-            return {};
+            return moverec::MoveRec{};
         return prev_moves.back();
     }
     
@@ -31,7 +31,7 @@ public:
     
     constexpr moverec::MoveRec pop_future_move() noexcept
     {
-        if (future_moves.empty()) return {};
+        if (future_moves.empty()) return moverec::MoveRec{};
         moverec::MoveRec future = future_moves.back();
         future_moves.pop_back();
         return future;
@@ -39,7 +39,7 @@ public:
     
     constexpr moverec::MoveRec move_last_to_future() noexcept
     {
-        if (prev_moves.empty()) return {};
+        if (prev_moves.empty()) return moverec::MoveRec{};
         moverec::MoveRec last = get_last_move();
         prev_moves.pop_back();
         future_moves.push_back(last);

@@ -139,8 +139,28 @@ public:
         { this->move_logger.add(move_rec); }
     
     template <typename Func> 
-        requires std::is_invocable_v<Func>&& std::is_same_v<std::invoke_result_t<Func>, FigureType>
-    [[nodiscard]] std::pair<bool, moverec::MoveRec> provide_move(Figure*, const Input&, Color turn, const Func&);
+        requires requires(Func func) {
+            { func() } -> std::same_as<FigureType>;
+        }
+    FN provide_move(Figure* in_hand,
+                    const Input& input,
+                    Color turn,
+                    Func&& get_choice) noexcept -> std::pair<bool, moverec::MoveRec>
+    {
+        auto choice = get_choice();
+        auto ms = move_check(in_hand, input);
+        if (std::holds_alternative<ErrorEvent>(ms)) {
+            return { false, moverec::MoveRec{} };
+        }
+
+        moverec::MoveRec curr_move{ in_hand, input, turn, std::get<1>(ms), choice };
+
+        if (!provide_move(curr_move)) {
+            return { false, moverec::MoveRec{} };
+        }
+
+        return { true, curr_move };
+    }
     
     bool provide_move(const moverec::MoveRec&);
     
@@ -172,33 +192,6 @@ public:
     }
     
 };
-
-/// <summary>
-/// Производит ход
-/// </summary>
-/// <typeparam name="Func">Тип функции, возвращающей тип фигуры</typeparam>
-/// <param name="in_hand">Текущая фигура</param>
-/// <param name="input">Ввод</param>
-/// <param name="turn">Текущий ход</param>
-/// <param name="get_choise">Функция, возвращающая тип фигуры для превращения</param>
-/// <returns></returns>
-template <typename Func>
-    requires std::is_invocable_v<Func>&& std::is_same_v<std::invoke_result_t<Func>, FigureType>
-std::pair<bool, moverec::MoveRec> FigureBoard::provide_move(Figure* in_hand, const Input& input, Color turn, const Func& get_choise) {
-    auto choice = get_choise();
-    auto ms = move_check(in_hand, input);
-    if (std::holds_alternative<ErrorEvent>(ms)) {
-        return { false, {} };
-    }
-
-    moverec::MoveRec curr_move{ in_hand, input, turn, std::get<1>(ms), choice };
-
-    if (!provide_move(curr_move)) {
-        return { false, {} };
-    }
-
-    return { true, curr_move };
-}
 
 [[nodiscard]] constexpr bool is_valid_coords(const Pos position) noexcept
 {

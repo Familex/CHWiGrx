@@ -154,7 +154,7 @@ void make_move(HWND hWnd, std::optional<Input> input_) {
 
     debug_print("Curr move was:", move_rec.as_string());
 
-    board.set_last_move({ in_hand.value(), input, turn, move_rec.ms, move_rec.promotion_choice});  // why not just move_rec?
+    board.set_last_move(move_rec);
     turn = what_next(turn);
     InvalidateRect(hWnd, NULL, NULL);
     UpdateWindow(hWnd);

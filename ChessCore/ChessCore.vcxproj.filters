@@ -30,12 +30,6 @@
     <ClCompile Include="stuff\stuff.cpp">
       <Filter>stuff\src</Filter>
     </ClCompile>
-    <ClCompile Include="stuff\figure_fabric.cpp">
-      <Filter>stuff\src</Filter>
-    </ClCompile>
-    <ClCompile Include="stuff\move_rec.cpp">
-      <Filter>stuff\src</Filter>
-    </ClCompile>
     <ClCompile Include="bot.cpp">
       <Filter>stuff\src</Filter>
     </ClCompile>
@@ -47,7 +41,7 @@
     <ClInclude Include="stuff\board_repr.hpp">
       <Filter>stuff\h</Filter>
     </ClInclude>
-    <ClInclude Include="stuff\figure_fabric.h">
+    <ClInclude Include="stuff\figure_fabric.hpp">
       <Filter>stuff\h</Filter>
     </ClInclude>
     <ClInclude Include="stuff\move_logger.hpp">
@@ -59,7 +53,7 @@
     <ClInclude Include="stuff\figure.hpp">
       <Filter>stuff\h</Filter>
     </ClInclude>
-    <ClInclude Include="stuff\move_rec.h">
+    <ClInclude Include="stuff\move_rec.hpp">
       <Filter>stuff\h</Filter>
     </ClInclude>
     <ClInclude Include="bot.h">

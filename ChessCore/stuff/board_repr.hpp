@@ -2,7 +2,7 @@
 
 #include "stuff.h"
 #include "figure.hpp"
-#include "move_rec.h"
+#include "move_rec.hpp"
 
 #include <expected>
 
