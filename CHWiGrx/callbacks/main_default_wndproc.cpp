@@ -14,11 +14,15 @@ LRESULT CALLBACK main_default_wndproc(HWND hWnd, UINT message, WPARAM wParam, LP
                 case IDM_PASTE_MAP:
                 {
                     std::string board_repr_str = take_str_from_clip();
-                    if (!is_legal_board_repr(board_repr_str)) break;
-                    BoardRepr board_repr(board_repr_str);
-                    turn = board_repr.turn;
-                    board.reset(std::move(board_repr));
-                    motion_input.clear();
+                    auto board_repr_sus = board_repr::BoardRepr::from_string(board_repr_str);
+                    if (board_repr_sus.has_value()) {
+                        turn = board_repr_sus.value().turn;
+                        board.reset(std::move(board_repr_sus.value()));
+                        motion_input.clear();
+                    }
+                    else {
+                        MessageBox(hWnd, L"Invalid board representation", L"Error", MB_OK);
+                    }
                 }
                     InvalidateRect(hWnd, NULL, NULL);
                     break;

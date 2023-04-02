@@ -31,7 +31,7 @@ LRESULT CALLBACK mainproc::main_edit_state_wndproc(HWND hWnd, UINT message, WPAR
 
                 case IDM_CLEAR_BOARD:
                 {
-                    board.reset(BoardRepr({}, turn, board.get_idw()));
+                    board.reset(board_repr::BoardRepr({}, turn, board.get_idw()));
                     motion_input.clear();
                     InvalidateRect(hWnd, NULL, NULL);
                 }

@@ -7,7 +7,7 @@ LRESULT CALLBACK figures_list_wndproc(HWND hWnd, UINT message, WPARAM wParam, LP
     static HGDIOBJ hOld;
     static HDC hdcMem;
     static HDC hdc;
-    static std::map<Color, std::vector<Figure*>> figures_prototypes;
+    static std::map<Color, std::vector<std::unique_ptr<Figure>>> figures_prototypes;
     static Color curr_color{ Color::White };
     static bool is_resizes = true;  // also to horizontal scrollbar
     static bool is_scrolls = false;
@@ -18,7 +18,7 @@ LRESULT CALLBACK figures_list_wndproc(HWND hWnd, UINT message, WPARAM wParam, LP
             for (Color col : PLAYABLE_COLORS) {
                 for (FigureType type : PLAYABLE_FIGURES) {
                     figures_prototypes[col].push_back(
-                        FigureFabric::instance()->create({}, col, type)
+                        figfab::FigureFabric::instance().create({}, col, type)
                     );
                 }
             }
@@ -150,8 +150,8 @@ LRESULT CALLBACK figures_list_wndproc(HWND hWnd, UINT message, WPARAM wParam, LP
             for (int index = 0; index < figures_prototypes[curr_color].size(); ++index) {
                 int x = static_cast<int>(index / figures_list.get_figures_in_row());
                 int y = static_cast<int>(index % figures_list.get_figures_in_row());
-                Figure* fig_to_draw = figures_prototypes[curr_color][index];
-                draw_figure(hdcMem, fig_to_draw, { x, y },
+                const auto& fig_to_draw = figures_prototypes[curr_color][index];
+                draw_figure(hdcMem, fig_to_draw.get(), {x, y},
                     true, static_cast<int>(figures_list.get_cell_height()), static_cast<int>(figures_list.get_cell_width()));
             }
 
@@ -201,7 +201,7 @@ LRESULT CALLBACK figures_list_wndproc(HWND hWnd, UINT message, WPARAM wParam, LP
             ).change_axes();
             size_t index = figure_to_drag.x * figures_list.get_figures_in_row() + figure_to_drag.y;
             if (index >= figures_prototypes[curr_color].size()) break;  // there was a click in a non-standard part of the window => ignore
-            motion_input.set_in_hand(FigureFabric::instance()->create(figures_prototypes[curr_color][index], false));
+            motion_input.set_in_hand(figfab::FigureFabric::instance().create(figures_prototypes[curr_color][index].get(), false).release());
         }
             break;
         case WM_RBUTTONUP:
@@ -219,11 +219,6 @@ LRESULT CALLBACK figures_list_wndproc(HWND hWnd, UINT message, WPARAM wParam, LP
             break;
         case WM_DESTROY:
         {
-            for (Color col : PLAYABLE_COLORS) {
-                for (Figure* figure : figures_prototypes[col]) {
-                    delete figure;
-                }
-            }
             figures_prototypes.clear();
             figures_list_window = NULL;
             HWND owner = GetWindow(hWnd, GW_OWNER); // это должен быть GetParent, но оный возвращает NULL

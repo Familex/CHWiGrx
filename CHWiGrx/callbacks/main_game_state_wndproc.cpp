@@ -32,7 +32,10 @@ LRESULT CALLBACK mainproc::main_game_state_wndproc(HWND hWnd, UINT message, WPAR
                 {
                     std::string board_repr_aspt = take_str_from_clip();
                     if (!is_legal_board_repr(board_repr_aspt)) break;
-                    start_board_repr = BoardRepr{ board_repr_aspt };
+                    auto board_repr_sus = board_repr::BoardRepr::from_string( board_repr_aspt );
+                    if (board_repr_sus.has_value()) {
+                        start_board_repr = board_repr_sus.value();
+                    }
                 }
                     break;
                     

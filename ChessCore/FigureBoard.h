@@ -19,14 +19,14 @@ class FigureBoard {
     std::map<FigureType, shift_broom> eats;
     
 public:
-    [[nodiscard]] FigureBoard(BoardRepr&&) noexcept;
-    void reset(BoardRepr&&) noexcept;
-    void operator =(BoardRepr&&) noexcept;
-    void operator =(const BoardRepr&) = delete;
-    void apply_map(BoardRepr&&) noexcept;
+    [[nodiscard]] FigureBoard(board_repr::BoardRepr&&) noexcept;
+    void reset(board_repr::BoardRepr&&) noexcept;
+    void operator =(board_repr::BoardRepr&&) noexcept;
+    void operator =(const board_repr::BoardRepr&) = delete;
+    void apply_map(board_repr::BoardRepr&&) noexcept;
     FigureBoard(const FigureBoard&) = delete;
-    [[nodiscard]] Figure* const get_fig(const Pos) const noexcept;
-    [[nodiscard]] Figure* const get_fig(const Id) const noexcept;
+    [[nodiscard]] std::optional<Figure*> const get_fig(const Pos) const noexcept;
+    [[nodiscard]] std::optional<Figure*> const get_fig(const Id) const noexcept;
     [[nodiscard]] bool cont_fig(const Pos) const noexcept;
     [[nodiscard]] bool is_empty(const Pos) const noexcept;
     
@@ -38,7 +38,7 @@ public:
     void uncapture_figure(const Id);
     void delete_fig(const Pos);
     void place_fig(Figure* const);
-    [[nodiscard]] const Figure* const find_king(const Color) const noexcept;
+    [[nodiscard]] std::optional<const Figure*> const find_king(const Color) const noexcept;
     [[nodiscard]] std::vector<Figure*> get_figures_of(const Color) const noexcept;
     [[nodiscard]] std::vector<std::pair<bool, Pos>> expand_broom(const Figure*, 
                                                                         const std::vector<Pos> & = {},
@@ -65,16 +65,13 @@ public:
                                       const std::vector<Figure*>& = {}) const noexcept;
     [[nodiscard]] std::variant<ErrorEvent, MoveMessage> move_check(const Figure* const,
                                                                           const Input&) const noexcept;
-    [[nodiscard]] std::tuple<bool, MoveMessage, const Figure*, const Figure*> castling_check(MoveMessage,
+    [[nodiscard]] std::optional<std::tuple<MoveMessage, const Figure*, const Figure*>> castling_check(MoveMessage,
                                                                                                     const Figure*, 
                                                                                                     const Input&, 
                                                                                                     const int,  
                                                                                                     const int) const noexcept;
     void reset_castling(const bool=true) noexcept;
-    void reset_castling(const BoardRepr&) noexcept;
-    
-    [[nodiscard]] Figure* get_default_fig() const noexcept
-        { return FigureFabric::instance()->get_default_fig(); }
+    void reset_castling(const board_repr::BoardRepr&) noexcept;
     
     [[nodiscard]] inline bool get_idw() const noexcept
         { return idw; }
@@ -93,14 +90,14 @@ public:
     }
     
     void move_fig(Figure* fig, Pos to, bool capture=true) {
-        Figure* maybe_eat = get_fig(to);
-        if (not maybe_eat->empty()) {
+        if (auto maybe_eat = get_fig(to); 
+              maybe_eat.has_value()) {
             if (capture) {
-                capture_figure(maybe_eat);
+                capture_figure(maybe_eat.value());
             }
             else {
-                figures.erase(maybe_eat->get_pos());
-                delete maybe_eat;
+                figures.erase(maybe_eat.value()->get_pos());
+                delete maybe_eat.value();
             }
         }
         figures.erase(fig->get_pos());
@@ -109,7 +106,10 @@ public:
     }
     
     void move_fig(Input input, bool capture=true) {
-        move_fig(get_fig(input.from), input.target, capture);
+        auto fig = get_fig(input.from);
+        if (fig.has_value()) {
+            move_fig(fig.value(), input.target, capture);
+        }
     }
     
     [[nodiscard]] bool has_castling(Id id) const noexcept {
@@ -124,23 +124,23 @@ public:
     void on_castling(Id id) noexcept
         { castling[id] = true; }
     
-    [[nodiscard]] const std::vector<MoveRec>& get_last_moves() const noexcept
+    [[nodiscard]] const std::vector<moverec::MoveRec>& get_last_moves() const noexcept
         { return move_logger.get_past(); }
     
-    [[nodiscard]] const std::vector<MoveRec>& get_future_moves() const noexcept
+    [[nodiscard]] const std::vector<moverec::MoveRec>& get_future_moves() const noexcept
         { return move_logger.get_future(); }
     
-    [[nodiscard]] const MoveRec& get_last_move() const noexcept
+    [[nodiscard]] const moverec::MoveRec& get_last_move() const noexcept
         { return move_logger.get_last_move(); }
     
-    void set_last_move(const MoveRec& move_rec) noexcept
+    void set_last_move(const moverec::MoveRec& move_rec) noexcept
         { this->move_logger.add(move_rec); }
     
     template <typename Func> 
         requires std::is_invocable_v<Func>&& std::is_same_v<std::invoke_result_t<Func>, FigureType>
-    [[nodiscard]] std::pair<bool, MoveRec> provide_move(Figure*, const Input&, Color turn, const Func&);
+    [[nodiscard]] std::pair<bool, moverec::MoveRec> provide_move(Figure*, const Input&, Color turn, const Func&);
     
-    bool provide_move(const MoveRec&);
+    bool provide_move(const moverec::MoveRec&);
     
     bool undo_move();
     bool restore_move();
@@ -156,7 +156,7 @@ public:
         { return figures.size(); }
     
     [[nodiscard]] bool insufficient_material() const noexcept;
-    [[nodiscard]] BoardRepr get_repr(const Color, const bool) const noexcept;
+    [[nodiscard]] board_repr::BoardRepr get_repr(const Color, const bool) const noexcept;
     
     ~FigureBoard() noexcept {
         for (auto& [_, fig] : figures) {
@@ -182,14 +182,14 @@ public:
 /// <returns></returns>
 template <typename Func>
     requires std::is_invocable_v<Func>&& std::is_same_v<std::invoke_result_t<Func>, FigureType>
-std::pair<bool, MoveRec> FigureBoard::provide_move(Figure* in_hand, const Input& input, Color turn, const Func& get_choise) {
+std::pair<bool, moverec::MoveRec> FigureBoard::provide_move(Figure* in_hand, const Input& input, Color turn, const Func& get_choise) {
     auto choice = get_choise();
     auto ms = move_check(in_hand, input);
     if (std::holds_alternative<ErrorEvent>(ms)) {
         return { false, {} };
     }
 
-    MoveRec curr_move{ in_hand, input, turn, std::get<1>(ms), choice };
+    moverec::MoveRec curr_move{ in_hand, input, turn, std::get<1>(ms), choice };
 
     if (!provide_move(curr_move)) {
         return { false, {} };

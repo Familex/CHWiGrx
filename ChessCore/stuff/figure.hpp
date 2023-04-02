@@ -66,4 +66,10 @@ public:
         { return position == p; }
 };
 
-[[nodiscard]] std::vector<Pos> to_pos_vector(const std::vector<Figure*>&) noexcept;
+[[nodiscard]] constexpr auto to_pos_vector(const std::vector<Figure*>& lst) noexcept -> std::vector<Pos> {
+    std::vector<Pos> acc{};
+    for (const auto& fig : lst) {
+        acc.emplace_back(fig->get_pos());
+    }
+    return acc;
+}

@@ -24,6 +24,8 @@ namespace Microsoft::VisualStudio::CppUnitTestFramework
 namespace FigureBoardTesting
 {
 
+    using board_repr::BoardRepr;
+
     namespace {
         
         Id operator""_id(unsigned long long int id) {
@@ -54,7 +56,7 @@ namespace FigureBoardTesting
             return std::find(std::begin(v), std::end(v), x) != std::end(v);
         }
 
-        const BoardRepr base{
+        const auto base = BoardRepr::from_string(
                 "1;0;0;B;R;2;0;1;B;H;3;0;2;B;B;4;0;3;B;Q;5;0;4;B;K;6;0;5;B;B;7;0;6;B;H;8;0;7;B;R;"
                 "9;1;0;B;P;10;1;1;B;P;11;1;2;B;P;12;1;3;B;P;13;1;4;B;P;14;1;5;B;P;15;1;6;B;P;16;1;7;B;P;"
 
@@ -62,9 +64,9 @@ namespace FigureBoardTesting
                 "25;7;0;W;R;26;7;1;W;H;27;7;2;W;B;28;7;3;W;Q;29;7;4;W;K;30;7;5;W;B;31;7;6;W;H;32;7;7;W;R;"
 
                 "[TW1;8;25;32;]<><>~"
-        };
+        ).value();
 
-        const BoardRepr baseReversed{
+        const auto baseReversed = BoardRepr::from_string(
             "1;0;0;W;R;2;0;1;W;H;3;0;2;W;B;4;0;3;W;Q;5;0;4;W;K;6;0;5;W;B;7;0;6;W;H;8;0;7;W;R;"
             "9;1;0;W;P;10;1;1;W;P;11;1;2;W;P;12;1;3;W;P;13;1;4;W;P;14;1;5;W;P;15;1;6;W;P;16;1;7;W;P;"
 
@@ -72,7 +74,7 @@ namespace FigureBoardTesting
             "25;7;0;B;R;26;7;1;B;H;27;7;2;B;B;28;7;3;B;Q;29;7;4;B;K;30;7;5;B;B;31;7;6;B;H;32;7;7;B;R;"
 
             "[FW1;8;25;32;]<><>~"
-        };
+        ).value();
 
         const BoardRepr baseEmpty{ {}, Color::White, true };
 
@@ -151,7 +153,7 @@ namespace FigureBoardTesting
             }
             
             /* ---- move_check ---- */
-            auto figure_moves = b.get_all_moves(b.get_fig(0_id));
+            auto figure_moves = b.get_all_moves(b.get_fig(0_id).value());
 
             const auto is_move = [](std::pair<bool, Pos> p) { return !p.first; };
             const auto is_eat = [](std::pair<bool, Pos> p) { return p.first; };
@@ -187,7 +189,7 @@ namespace FigureBoardTesting
         bool is_legal_move(Input&& move, FigureType ft) {
             FigureBoard b{ BoardRepr{baseEmpty} };
             b.place_fig(new Figure{ 0_id, move.from, Color::White, ft });
-            auto moves = b.get_all_moves(b.get_fig(0_id));
+            auto moves = b.get_all_moves(b.get_fig(0_id).value());
             return std::find_if(moves.begin(), moves.end(),
                 [&](auto p) { return p.second == move.target; }) != moves.end();
         }
@@ -197,10 +199,9 @@ namespace FigureBoardTesting
             FigureBoard b{ BoardRepr{baseEmpty } };
             b.set_idw(idw);
             b.place_fig(new Figure{ 0_id, pos, Color::White, ft });
-            return b.get_all_moves(b.get_fig(0_id)).size();
+            return b.get_all_moves(b.get_fig(0_id).value()).size();
         }
-
-
+        
     }   // detail namespace
     
     namespace Moves {
@@ -298,12 +299,12 @@ namespace FigureBoardTesting
 
                 // white first moves
                 for (Id id = 17_id; id <= 24_id; ++id) {
-                    Assert::AreEqual(board.get_all_possible_moves(board.get_fig(id)).size(), 2ull);
+                    Assert::AreEqual(board.get_all_possible_moves(board.get_fig(id).value()).size(), 2ull);
                 }
 
                 // black first moves
                 for (Id id = 9_id; id <= 16_id; ++id) {
-                    Assert::AreEqual(board.get_all_possible_moves(board.get_fig(id)).size(), 2ull);
+                    Assert::AreEqual(board.get_all_possible_moves(board.get_fig(id).value()).size(), 2ull);
                 }
             }	// TEST_METHOD(Basic)
 
@@ -313,12 +314,12 @@ namespace FigureBoardTesting
 
                 // white first moves
                 for (Id id = 17_id; id <= 24_id; ++id) {
-                    Assert::AreEqual(board.get_all_moves(board.get_fig(id)).size(), 2ull);
+                    Assert::AreEqual(board.get_all_moves(board.get_fig(id).value()).size(), 2ull);
                 }
 
                 // black first moves
                 for (Id id = 9_id; id <= 16_id; ++id) {
-                    Assert::AreEqual(board.get_all_moves(board.get_fig(id)).size(), 2ull);
+                    Assert::AreEqual(board.get_all_moves(board.get_fig(id).value()).size(), 2ull);
                 }
 
             }	// TEST_METHOD(Basic)
@@ -327,7 +328,7 @@ namespace FigureBoardTesting
             {
                 FigureBoard board{ BoardRepr{base} };
 
-                auto p_17 = board.get_fig(17_id);
+                auto p_17 = board.get_fig(17_id).value();
                 auto p_17_moves = board.get_all_possible_moves(p_17);
                 Assert::AreEqual(p_17_moves.size(), 2ull);
                 Assert::IsTrue(contains(p_17_moves, std::pair{ false, Pos{ 4, 0 } }));
@@ -340,7 +341,7 @@ namespace FigureBoardTesting
                 Assert::IsTrue(ms.to_move.empty());
                 Assert::IsTrue(ms.what_castling_breaks.empty());
                 
-                auto p_18 = board.get_fig(18_id);
+                auto p_18 = board.get_fig(18_id).value();
                 auto p_18_moves = board.get_all_possible_moves(p_18);
                 Assert::AreEqual(p_18_moves.size(), 2ull);
                 Assert::IsTrue(contains(p_18_moves, std::pair{ false, Pos{ 4, 1 } }));
@@ -366,7 +367,7 @@ namespace FigureBoardTesting
             {
                 FigureBoard board{ BoardRepr{baseReversed} };
 
-                auto p_17 = board.get_fig(17_id);
+                auto p_17 = board.get_fig(17_id).value();
                 auto p_17_moves = board.get_all_possible_moves(p_17);
                 Assert::AreEqual(p_17_moves.size(), 2ull);
                 Assert::IsTrue(contains(p_17_moves, std::pair{ false, Pos{ 4, 0 } }));
@@ -379,7 +380,7 @@ namespace FigureBoardTesting
                 Assert::IsTrue(ms.to_move.empty());
                 Assert::IsTrue(ms.what_castling_breaks.empty());
 
-                auto p_18 = board.get_fig(18_id);
+                auto p_18 = board.get_fig(18_id).value();
                 auto p_18_moves = board.get_all_possible_moves(p_18);
                 Assert::AreEqual(p_18_moves.size(), 2ull);
                 Assert::IsTrue(contains(p_18_moves, std::pair{ false, Pos{ 4, 1 } }));
@@ -410,7 +411,7 @@ namespace FigureBoardTesting
                      true
                 } };
                 
-                auto black_pawn = board.get_fig(1_id);
+                auto black_pawn = board.get_fig(1_id).value();
 
                 {
                     auto [conducted, msg] =
@@ -424,7 +425,7 @@ namespace FigureBoardTesting
                     board.set_last_move(msg);
                 }
 
-                auto white_pawn = board.get_fig(0_id);
+                auto white_pawn = board.get_fig(0_id).value();
 
                 auto moves = board.get_all_moves(white_pawn);
                 Assert::IsTrue(
@@ -464,7 +465,7 @@ namespace FigureBoardTesting
                      false
                 } };
 
-                auto white_pawn = board.get_fig(1_id);
+                auto white_pawn = board.get_fig(1_id).value();
 
                 {
                     auto [conducted, msg] =
@@ -478,7 +479,7 @@ namespace FigureBoardTesting
                     board.set_last_move(msg);
                 }
 
-                auto black_pawn = board.get_fig(0_id);
+                auto black_pawn = board.get_fig(0_id).value();
 
                 auto moves = board.get_all_moves(black_pawn);
                 Assert::IsTrue(
@@ -517,7 +518,7 @@ namespace FigureBoardTesting
                      true
                 } };
 
-                auto white_pawn = board.get_fig(0_id);
+                auto white_pawn = board.get_fig(0_id).value();
                 Assert::AreEqual(board.get_all_moves(white_pawn).size(), 1ull);
                 
                 MoveMessage ms = std::get<MoveMessage>(board.move_check(white_pawn, Input{ white_pawn->get_pos(), Pos{0, 5} }));
@@ -555,7 +556,7 @@ namespace FigureBoardTesting
                      false
                 } };
 
-                auto black_pawn = board.get_fig(0_id);
+                auto black_pawn = board.get_fig(0_id).value();
                 Assert::AreEqual(board.get_all_moves(black_pawn).size(), 1ull);
 
                 MoveMessage ms = std::get<MoveMessage>(board.move_check(black_pawn, Input{ black_pawn->get_pos(), Pos{0, 5} }));
@@ -1016,9 +1017,9 @@ namespace FigureBoardTesting
                         "46;7;1;W;R;45;7;4;W;K;47;7;7;W;R;[TW46;47;]<><>~",
                     })
                 {
-                    FigureBoard b{ BoardRepr{ br } };
+                    FigureBoard b{ BoardRepr::from_string( br ).value() };
 
-                    auto king = b.get_fig(45_id);
+                    auto king = b.get_fig(45_id).value();
                     auto moves = b.get_all_moves(king);
 
                     Assert::AreEqual(moves.size(), 7ull);

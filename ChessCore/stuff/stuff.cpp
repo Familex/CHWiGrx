@@ -1,29 +1,6 @@
 #include "Stuff.h"
 
-/// @todo fix this
-std::vector<std::string> split(std::string str, const std::string&& delimiter) {
-    size_t token_end{};
-    std::vector<std::string> tokens{};
-    while ((token_end = str.find(delimiter)) != str.npos) {
-        tokens.emplace_back(str.substr(0, token_end));
-        str.erase(0, token_end + delimiter.length());
-    }
-    for (char c : str) {
-        if (c == ' ' || delimiter.find(c) != std::string::npos) {
-            return tokens;
-        }
-    }
-    if (!str.empty())
-        tokens.push_back(str);
-    return tokens;
-}
-
-void remove_first_occurrence(std::string& str, const char c) {
-    auto p = str.find(c);
-    if (p != std::string::npos) {
-        str.erase(p, p + 1);
-    }
-}
+#include <string>
 
 // Конструктор ввода    /// @todo fix this
 Input::Input(std::string str) {

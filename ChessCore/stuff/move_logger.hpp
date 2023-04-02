@@ -3,24 +3,24 @@
 #include "move_rec.h"
 
 class MoveLogger {
-    std::vector<MoveRec> prev_moves;
-    std::vector<MoveRec> future_moves;
+    std::vector<moverec::MoveRec> prev_moves;
+    std::vector<moverec::MoveRec> future_moves;
     
 public:
-    [[nodiscard]] constexpr MoveRec get_last_move() const noexcept
+    [[nodiscard]] constexpr moverec::MoveRec get_last_move() const noexcept
     {
         if (prev_moves.empty())
             return {};
         return prev_moves.back();
     }
     
-    constexpr void add(const MoveRec& move_rec) noexcept
+    constexpr void add(const moverec::MoveRec& move_rec) noexcept
     {
         prev_moves.push_back(move_rec);
         future_moves.clear();
     }
     
-    constexpr void add_without_reset(const MoveRec& move_rec) noexcept
+    constexpr void add_without_reset(const moverec::MoveRec& move_rec) noexcept
         { prev_moves.push_back(move_rec); }
     
     void constexpr reset() noexcept
@@ -29,15 +29,15 @@ public:
         future_moves.clear();
     }
     
-    constexpr MoveRec pop_future_move() noexcept
+    constexpr moverec::MoveRec pop_future_move() noexcept
     {
         if (future_moves.empty()) return {};
-        MoveRec future = future_moves.back();
+        moverec::MoveRec future = future_moves.back();
         future_moves.pop_back();
         return future;
     }
     
-    constexpr MoveRec move_last_to_future() noexcept
+    constexpr moverec::MoveRec move_last_to_future() noexcept
     {
         if (prev_moves.empty()) return {};
         auto last = get_last_move();
@@ -52,16 +52,16 @@ public:
     [[nodiscard]] constexpr bool future_empty() const noexcept
         { return future_moves.empty(); }
     
-    [[nodiscard]] constexpr const std::vector<MoveRec>& get_past() const noexcept
+    [[nodiscard]] constexpr const std::vector<moverec::MoveRec>& get_past() const noexcept
         { return prev_moves; }
     
-    [[nodiscard]] constexpr const std::vector<MoveRec>& get_future() const noexcept
+    [[nodiscard]] constexpr const std::vector<moverec::MoveRec>& get_future() const noexcept
         { return future_moves; }
     
-    constexpr void set_past(const std::vector<MoveRec>& past) noexcept
+    constexpr void set_past(const std::vector<moverec::MoveRec>& past) noexcept
         { prev_moves = past; }
     
-    constexpr void set_future(const std::vector<MoveRec>& future) noexcept
+    constexpr void set_future(const std::vector<moverec::MoveRec>& future) noexcept
         { future_moves = future; }
     
     [[nodiscard]] constexpr bool is_fifty_move_rule_was_triggered() const noexcept

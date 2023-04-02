@@ -128,7 +128,7 @@ void make_move(HWND hWnd, std::optional<Input> input_) {
     if (!is_bot_move() && !motion_input.is_current_turn(turn))
         return;     // Запрет хода вне очереди
 
-    Figure* in_hand = motion_input.get_in_hand();
+    auto in_hand = motion_input.get_in_hand();
     Input input = motion_input.get_input();
     
     if (is_bot_move())
@@ -137,8 +137,13 @@ void make_move(HWND hWnd, std::optional<Input> input_) {
         in_hand = board.get_fig(input.from);
     }
 
+    if (!in_hand.has_value()) {
+        InvalidateRect(hWnd, NULL, NULL);
+        return;
+    }
+    
     auto [is_legal_move, move_rec] = board.provide_move(
-        in_hand, input,
+        in_hand.value(), input,
         turn, [c = chose] { return c; }
     );
 
@@ -148,8 +153,8 @@ void make_move(HWND hWnd, std::optional<Input> input_) {
     }
 
     debug_print("Curr move was:", move_rec.as_string());
-        
-    board.set_last_move({ in_hand, input, turn, move_rec.ms, move_rec.promotion_choice });  // why not just move_rec?
+
+    board.set_last_move({ in_hand.value(), input, turn, move_rec.ms, move_rec.promotion_choice});  // why not just move_rec?
     turn = what_next(turn);
     InvalidateRect(hWnd, NULL, NULL);
     UpdateWindow(hWnd);
@@ -214,7 +219,7 @@ bool is_bot_move()
 }
 
 void restart() {
-    BoardRepr start_board_repr_copy{ start_board_repr }; // explicit copy constructor
+    board_repr::BoardRepr start_board_repr_copy{ start_board_repr }; // explicit copy constructor
     board.reset(std::move(start_board_repr_copy));
     motion_input.clear();
     turn = start_board_repr.turn;
@@ -326,7 +331,7 @@ void on_lbutton_up(HWND hWnd, WPARAM wParam, LPARAM lParam, Pos where_fig, bool 
             InvalidateRect(hWnd, NULL, NULL);
         }
         else {
-            if (!motion_input.get_in_hand()->empty()) {
+            if (motion_input.get_in_hand().has_value()) {
                 if (use_move_check_and_log) {
                     make_move(hWnd);
                 }
@@ -383,10 +388,12 @@ void set_menu_checkbox(HWND hWnd, UINT menu_item, bool state) {
 
 // Создаёт окно c выбранной фигурой и привязывает к мыши
 void MotionInput::init_curr_choice_window(HWND hWnd, WNDPROC callback) {
+    if (!in_hand.has_value()) return;
+    
     is_curr_choice_moving = true;
     POINT mouse{};
     GetCursorPos(&mouse);
-    curr_chose_window = create_curr_choice_window(hWnd, in_hand, mouse,
+    curr_chose_window = create_curr_choice_window(hWnd, in_hand.value(), mouse,
         main_window.get_cell_width(), main_window.get_cell_height(),
         callback);
     RedrawWindow(hWnd, NULL, NULL, RDW_INVALIDATE | RDW_UPDATENOW);  // Форсирую перерисовку, т.к. появляется артефакт
@@ -395,7 +402,9 @@ void MotionInput::init_curr_choice_window(HWND hWnd, WNDPROC callback) {
 
 // Заполняет поле возможных ходов для текущей фигуры
 void MotionInput::calculate_possible_moves() {
-    all_moves = board->get_all_possible_moves(in_hand);
+    if (in_hand.has_value()) {
+        all_moves = board->get_all_possible_moves(in_hand.value());
+    }
 }
 
 void MotionInput::clear() {
@@ -404,7 +413,7 @@ void MotionInput::clear() {
     is_curr_choice_moving = false;
     deactivate_by_click();
     deactivate_by_pos();
-    in_hand = board->get_default_fig();
+    in_hand = std::nullopt;
     input = { {0, -1}, {-1, -1} };
     all_moves.clear();
 }
@@ -412,7 +421,7 @@ void MotionInput::clear() {
 void MotionInput::prepare(Color turn) {
     in_hand = board->get_fig(input.from);
     input.target = input.from;
-    if (not in_hand->empty() && in_hand->get_col() == turn) {
+    if (in_hand.has_value() && in_hand.value()->get_col() == turn) {
         calculate_possible_moves();
     }
 }
@@ -461,7 +470,7 @@ void update_main_window_title(HWND hWnd) {
 }
 
 void copy_repr_to_clip() {
-    BoardRepr board_repr{ board.get_repr(turn, save_all_moves) };
+    board_repr::BoardRepr board_repr{ board.get_repr(turn, save_all_moves) };
     std::string board_repr_str = board_repr.as_string();
     cpy_str_to_clip(
         board_repr_str

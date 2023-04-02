@@ -40,7 +40,7 @@ LRESULT CALLBACK curr_choice_figures_list_wndproc(HWND hWnd, UINT uMsg, WPARAM w
         else {
             delete reinterpret_cast<Figure*>(GetWindowLongPtr(hWnd, GWLP_USERDATA));
         }
-        motion_input.set_in_hand(FigureFabric::instance()->get_default_fig());
+        motion_input.clear_hand();
         motion_input.clear();
         DestroyWindow(hWnd);
     }

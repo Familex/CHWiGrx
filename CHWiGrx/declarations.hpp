@@ -16,12 +16,14 @@ using namespace std::string_literals;
 #endif // _DEBUG
 
 template <typename ...Ts>
-void debug_print(Ts ...args)
+void debug_print([[maybe_unused]] Ts ...args)
 {
     #ifdef _DEBUG
         ((std::cout << args << " "), ...);
         std::cout << std::endl;
-    #endif
+    #else
+        (void)args;
+    #endif // _DEBUG
 }
 
 /* virtual keys for numbers */
@@ -42,9 +44,9 @@ enum class WindowState { GAME, EDIT };
 inline HINSTANCE hInst;
 inline const HBRUSH CHECKERBOARD_DARK { CreateSolidBrush(RGB(0x32, 0x32, 0x32)) };
 inline const HBRUSH CHECKERBOARD_BRIGHT { CreateSolidBrush(RGB(0x80, 0x80, 0x80)) };
-inline const BoardRepr DEFAULT_CHESS_BOARD_IDW = BoardRepr("1;0;0;B;R;2;0;1;B;H;3;0;2;B;B;4;0;3;B;Q;5;0;4;B;K;6;0;5;B;B;7;0;6;B;H;8;0;7;B;R;9;1;0;B;P;10;1;1;B;P;11;1;2;B;P;12;1;3;B;P;13;1;4;B;P;14;1;5;B;P;15;1;6;B;P;16;1;7;B;P;17;6;0;W;P;18;6;1;W;P;19;6;2;W;P;20;6;3;W;P;21;6;4;W;P;22;6;5;W;P;23;6;6;W;P;24;6;7;W;P;25;7;0;W;R;26;7;1;W;H;27;7;2;W;B;28;7;3;W;Q;29;7;4;W;K;30;7;5;W;B;31;7;6;W;H;32;7;7;W;R;[TW1;8;25;32;]<><>~");
-inline const BoardRepr DEFAULT_CHESS_BOARD_NIDW = BoardRepr("1;0;0;W;R;2;0;1;W;H;3;0;2;W;B;4;0;3;W;Q;5;0;4;W;K;6;0;5;W;B;7;0;6;W;H;8;0;7;W;R;9;1;0;W;P;10;1;1;W;P;11;1;2;W;P;12;1;3;W;P;13;1;4;W;P;14;1;5;W;P;15;1;6;W;P;16;1;7;W;P;17;6;0;B;P;18;6;1;B;P;19;6;2;B;P;20;6;3;B;P;21;6;4;B;P;22;6;5;B;P;23;6;6;B;P;24;6;7;B;P;25;7;0;B;R;26;7;1;B;H;27;7;2;B;B;28;7;3;B;Q;29;7;4;B;K;30;7;5;B;B;31;7;6;B;H;32;7;7;B;R;[FW1;8;25;32;]<><>~");
-inline const BoardRepr EMPTY_REPR = BoardRepr({}, Color::White, true);
+inline const auto DEFAULT_CHESS_BOARD_IDW = board_repr::BoardRepr::from_string("1;0;0;B;R;2;0;1;B;H;3;0;2;B;B;4;0;3;B;Q;5;0;4;B;K;6;0;5;B;B;7;0;6;B;H;8;0;7;B;R;9;1;0;B;P;10;1;1;B;P;11;1;2;B;P;12;1;3;B;P;13;1;4;B;P;14;1;5;B;P;15;1;6;B;P;16;1;7;B;P;17;6;0;W;P;18;6;1;W;P;19;6;2;W;P;20;6;3;W;P;21;6;4;W;P;22;6;5;W;P;23;6;6;W;P;24;6;7;W;P;25;7;0;W;R;26;7;1;W;H;27;7;2;W;B;28;7;3;W;Q;29;7;4;W;K;30;7;5;W;B;31;7;6;W;H;32;7;7;W;R;[TW1;8;25;32;]<><>~").value();
+inline const auto DEFAULT_CHESS_BOARD_NIDW = board_repr::BoardRepr::from_string("1;0;0;W;R;2;0;1;W;H;3;0;2;W;B;4;0;3;W;Q;5;0;4;W;K;6;0;5;W;B;7;0;6;W;H;8;0;7;W;R;9;1;0;W;P;10;1;1;W;P;11;1;2;W;P;12;1;3;W;P;13;1;4;W;P;14;1;5;W;P;15;1;6;W;P;16;1;7;W;P;17;6;0;B;P;18;6;1;B;P;19;6;2;B;P;20;6;3;B;P;21;6;4;B;P;22;6;5;B;P;23;6;6;B;P;24;6;7;B;P;25;7;0;B;R;26;7;1;B;H;27;7;2;B;B;28;7;3;B;Q;29;7;4;B;K;30;7;5;B;B;31;7;6;B;H;32;7;7;B;R;[FW1;8;25;32;]<><>~").value();
+inline const auto EMPTY_REPR = board_repr::BoardRepr({}, Color::White, true);
 inline const int HEADER_HEIGHT = GetSystemMetrics(SM_CXPADDEDBORDER) +
                                  GetSystemMetrics(SM_CYMENUSIZE)     +
                                  GetSystemMetrics(SM_CYCAPTION)      +
@@ -62,8 +64,8 @@ inline constexpr COLORREF TRANSPARENCY_PLACEHOLDER = RGB(0xFF, 0x0, 0x0);
 
 /* single mutable globals */
 inline WindowState window_state = WindowState::GAME;
-inline BoardRepr start_board_repr{ DEFAULT_CHESS_BOARD_IDW };
-inline FigureBoard board{ BoardRepr{ start_board_repr } /* <- explicit copy */ };
+inline board_repr::BoardRepr start_board_repr{ DEFAULT_CHESS_BOARD_IDW };
+inline FigureBoard board{ board_repr::BoardRepr{ start_board_repr } /* <- explicit copy */ };
 inline Color turn{ Color::White };
 inline FigureType chose{ FigureType::Queen };
 inline std::map<char, std::map<char, HBITMAP>> pieces_bitmaps;
@@ -270,11 +272,12 @@ public:
     inline void set_target(int x, int y) { input.target = {x, y}; }
     inline void set_from(Pos from) { input.from = from; }
     inline void set_in_hand(Figure* in_hand) { this->in_hand = in_hand; }
+    inline void clear_hand() { this->in_hand = std::nullopt; }
     inline bool is_target_at_input() { return input.from == input.target; }
     inline void set_lbutton_up() { is_lbutton_down = false; }
     inline void set_lbutton_down() { is_lbutton_down = true; }
     inline bool is_active_by_click() { return input_order_by_two; }
-    inline bool is_current_turn(Color turn) { return in_hand->is_col(turn); }
+    inline bool is_current_turn(Color turn) { return in_hand.has_value() && in_hand.value()->is_col(turn); }
     inline auto get_in_hand() { return in_hand; }
     inline auto get_input() { return input; }
     inline void shift_from(Pos shift, int max_x, int max_y) { input.from.loop_add(shift, max_x, max_y); }
@@ -285,9 +288,9 @@ public:
     inline void set_target_x(int val) { input.target.x = val; }
     inline void set_target_y(int val) { input.target.y = val; }
     inline auto get_state_by_pos() { return input_order_by_one; }
-    inline bool is_drags() { return !is_curr_choice_moving && is_lbutton_down && not in_hand->empty(); }
+    inline bool is_drags() { return !is_curr_choice_moving && is_lbutton_down && in_hand.has_value(); }
     inline auto get_possible_moves() { return all_moves; }
-    inline bool is_figure_dragged(Id id) { return in_hand->is(id) && is_curr_choice_moving && !input_order_by_two; }
+    inline bool is_figure_dragged(Id id) { return in_hand.has_value() && in_hand.value()->is(id) && is_curr_choice_moving && !input_order_by_two; }
 private:
     FigureBoard* board;
     const Pos DEFAULT_INPUT_FROM{ 0, -1 };
@@ -297,6 +300,6 @@ private:
     bool is_lbutton_down{ false };
     HWND curr_chose_window{};
     bool is_curr_choice_moving{ false };
-    Figure* in_hand = board->get_default_fig();
+    std::optional<Figure*> in_hand = std::nullopt;
     std::vector<std::pair<bool, Pos>> all_moves{};
 } inline motion_input{ &board };
