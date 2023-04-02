@@ -155,7 +155,6 @@
   <ItemGroup>
     <ClCompile Include="bot.cpp" />
     <ClCompile Include="FigureBoard.cpp" />
-    <ClCompile Include="stuff\board_repr.cpp" />
     <ClCompile Include="stuff\figure_fabric.cpp" />
     <ClCompile Include="stuff\move_rec.cpp" />
     <ClCompile Include="stuff\stuff.cpp" />
@@ -163,7 +162,7 @@
   <ItemGroup>
     <ClInclude Include="bot.h" />
     <ClInclude Include="FigureBoard.h" />
-    <ClInclude Include="stuff\board_repr.h" />
+    <ClInclude Include="stuff\board_repr.hpp" />
     <ClInclude Include="stuff\figure.hpp" />
     <ClInclude Include="stuff\figure_fabric.h" />
     <ClInclude Include="stuff\move_logger.hpp" />

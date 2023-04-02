@@ -30,9 +30,6 @@
     <ClCompile Include="stuff\stuff.cpp">
       <Filter>stuff\src</Filter>
     </ClCompile>
-    <ClCompile Include="stuff\board_repr.cpp">
-      <Filter>stuff\src</Filter>
-    </ClCompile>
     <ClCompile Include="stuff\figure_fabric.cpp">
       <Filter>stuff\src</Filter>
     </ClCompile>
@@ -47,7 +44,7 @@
     <ClInclude Include="FigureBoard.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
-    <ClInclude Include="stuff\board_repr.h">
+    <ClInclude Include="stuff\board_repr.hpp">
       <Filter>stuff\h</Filter>
     </ClInclude>
     <ClInclude Include="stuff\figure_fabric.h">

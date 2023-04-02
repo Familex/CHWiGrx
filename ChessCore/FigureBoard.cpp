@@ -666,7 +666,8 @@ std::variant<ErrorEvent, MoveMessage> FigureBoard::move_check(const Figure* cons
     if (!(is_valid_coords(input.from) && is_valid_coords(input.target)) 
         || input.from == input.target
         || !cont_fig(input.from)
-        || get_fig(input.target).value()->is_col(in_hand->get_col())) {
+        || get_fig(input.target).has_value()
+            && get_fig(input.target).value()->is_col(in_hand->get_col())) {
         return ErrorEvent::INVALID_MOVE;
     }
 
@@ -843,31 +844,33 @@ std::variant<ErrorEvent, MoveMessage> FigureBoard::move_check(const Figure* cons
 bool FigureBoard::undo_move() {
     if (move_logger.prev_empty()) return false;
     auto last = move_logger.move_last_to_future();
-    auto in_hand = get_fig(last.who_went.get_id()).value();
+    auto in_hand_sus = get_fig(last.who_went.get_id());
+    if (!in_hand_sus.has_value()) return false;
+    auto in_hand = in_hand_sus.value();
     FigureType chose = last.promotion_choice;
     auto turn = last.turn;
     auto input = last.input;
     MoveMessage ms = last.ms;
     switch (ms.main_ev)
     {
-    case MainEvent::MOVE: case MainEvent::LMOVE:
-        move_fig(in_hand, input.from);
-        break;
-    case MainEvent::EN_PASSANT: case MainEvent::EAT:
-        move_fig(in_hand, input.from);
-        for (const auto& it : ms.to_eat) {
-            uncapture_figure(it);
-        }
-        break;
-    case MainEvent::CASTLING:
-        move_fig(in_hand, input.from);
-        for (const auto& [who, frominto] : ms.to_move) {
-            auto who_it = get_fig(who).value();
-            move_fig(who_it, frominto.from);
-        }
-        break;
-    case MainEvent::E:
-        assert(!"MainEvent::E");
+        case MainEvent::MOVE: case MainEvent::LMOVE:
+            move_fig(in_hand, input.from);
+            break;
+        case MainEvent::EN_PASSANT: case MainEvent::EAT:
+            move_fig(in_hand, input.from);
+            for (const auto& it : ms.to_eat) {
+                uncapture_figure(it);
+            }
+            break;
+        case MainEvent::CASTLING:
+            move_fig(in_hand, input.from);
+            for (const auto& [who, frominto] : ms.to_move) {
+                auto who_it = get_fig(who).value();
+                move_fig(who_it, frominto.from);
+            }
+            break;
+        case MainEvent::E:
+            assert(!"MainEvent::E");
     }
     for (const auto& s_ev : ms.side_evs) {
         switch (s_ev)

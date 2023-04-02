@@ -1,6 +1,6 @@
 #pragma once
 
-#include "stuff/board_repr.h"
+#include "stuff/board_repr.hpp"
 #include "stuff/move_logger.hpp"
 #include <variant>
 

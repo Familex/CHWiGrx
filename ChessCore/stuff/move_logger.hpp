@@ -40,7 +40,7 @@ public:
     constexpr moverec::MoveRec move_last_to_future() noexcept
     {
         if (prev_moves.empty()) return {};
-        auto last = get_last_move();
+        moverec::MoveRec last = get_last_move();
         prev_moves.pop_back();
         future_moves.push_back(last);
         return last;
