@@ -2,6 +2,7 @@
 
 #include "stuff/board_repr.hpp"
 #include "stuff/move_logger.hpp"
+
 #include <variant>
 
 class FigureBoard {
@@ -25,8 +26,29 @@ public:
     void operator =(const board_repr::BoardRepr&) = delete;
     void apply_map(board_repr::BoardRepr&&) noexcept;
     FigureBoard(const FigureBoard&) = delete;
-    [[nodiscard]] std::optional<Figure*> const get_fig(const Pos) const noexcept;
-    [[nodiscard]] std::optional<Figure*> const get_fig(const Id) const noexcept;
+    
+    [[nodiscard]] auto
+        get_fig(Pos position) const noexcept -> std::optional<Figure*>
+    {
+        if (figures.find(position) != figures.end()) {
+            return figures.at(position);
+        }
+        else {
+            return std::nullopt;
+        }
+    }
+    
+    [[nodiscard]] auto
+        get_fig(Id id) const noexcept -> std::optional<Figure*>
+    {
+        for (const auto& [_, fig] : figures) {
+            if (fig->is(id)) {
+                return fig;
+            }
+        }
+        return std::nullopt;
+    }
+    
     [[nodiscard]] Figure* const get_fig_unsafe(const Pos) const noexcept;
     [[nodiscard]] Figure* const get_fig_unsafe(const Id) const noexcept;
     [[nodiscard]] bool cont_fig(const Pos) const noexcept;
@@ -42,48 +64,60 @@ public:
     void place_fig(Figure* const);
     [[nodiscard]] std::optional<const Figure*> const find_king(const Color) const noexcept;
     [[nodiscard]] std::vector<Figure*> get_figures_of(const Color) const noexcept;
-    [[nodiscard]] std::vector<std::pair<bool, Pos>> expand_broom(const Figure*, 
-                                                                        const std::vector<Pos> & = {},
-                                                                        const std::vector<Pos> & = {}, 
-                                                                        const std::vector<Pos> & = {}) const noexcept;
-    [[nodiscard]] std::vector<std::pair<bool, Pos>> get_all_moves(const Figure*,
-                                                                         const std::vector<Pos> & = {},
-                                                                         const std::vector<Pos> & = {},
-                                                                         const std::vector<Pos> & = {}) const noexcept;
-    [[nodiscard]] std::vector<std::pair<bool, Pos>> get_all_possible_moves(const Figure*,
-                                                                                  const std::vector<Pos> & = {},
-                                                                                  const std::vector<Pos> & = {},
-                                                                                  const std::vector<Pos> & = {}) const noexcept;
-    [[nodiscard]] bool checkmate_for(const Color,
-                                     const std::vector<Pos>& = {}, 
-                                     const Pos = {}) const noexcept;
-    [[nodiscard]] bool stalemate_for(const Color,
-                                     const std::vector<Pos>& = {}, 
-                                     Pos = {}) const noexcept;
-    [[nodiscard]] bool check_for_when(const Color,
-                                      const std::vector<Pos>& = {},
-                                      const Pos = {}, 
-                                      const std::vector<Figure*>& = {}, 
-                                      const std::vector<Figure*>& = {}) const noexcept;
-    [[nodiscard]] std::variant<ErrorEvent, MoveMessage> move_check(const Figure* const,
-                                                                          const Input&) const noexcept;
-    [[nodiscard]] std::optional<std::tuple<MoveMessage, const Figure*, const Figure*>> castling_check(MoveMessage,
-                                                                                                    const Figure*, 
-                                                                                                    const Input&, 
-                                                                                                    const int,  
-                                                                                                    const int) const noexcept;
-    void reset_castling(const bool=true) noexcept;
-    void reset_castling(const board_repr::BoardRepr&) noexcept;
     
-    [[nodiscard]] inline bool get_idw() const noexcept
-        { return idw; }
+    [[nodiscard]] auto
+        expand_broom(const Figure*, const std::vector<Pos> & = {},
+                       const std::vector<Pos> & = {},
+                         const std::vector<Pos> & = {}) const noexcept -> std::vector<std::pair<bool, Pos>>;
     
-    [[nodiscard]] inline void set_idw(const bool new_idw) noexcept {
+    [[nodiscard]] auto
+        get_all_moves(const Figure*, const std::vector<Pos> & = {},
+                        const std::vector<Pos> & = {},
+                          const std::vector<Pos> & = {}) const noexcept -> std::vector<std::pair<bool, Pos>>;
+    
+    [[nodiscard]] auto
+        get_all_possible_moves(const Figure*, const std::vector<Pos> & = {},
+                                 const std::vector<Pos> & = {},
+                                   const std::vector<Pos> & = {}) const noexcept -> std::vector<std::pair<bool, Pos>>;
+    
+    [[nodiscard]] auto
+        checkmate_for(const Color, const std::vector<Pos>& = {}, const Pos = {}) const noexcept -> bool;
+    
+    [[nodiscard]] auto
+        stalemate_for(const Color, const std::vector<Pos>& = {}, Pos = {}) const noexcept -> bool;
+    
+    [[nodiscard]] auto
+        check_for_when(const Color, const std::vector<Pos>& = {},
+                         const Pos = {}, const std::vector<Figure*>& = {}, 
+                           const std::vector<Figure*>& = {}) const noexcept -> bool;
+    
+    [[nodiscard]] auto
+        move_check(const Figure* const, const Input&) const noexcept -> std::expected<MoveMessage, ErrorEvent>;
+    
+    [[nodiscard]] auto
+        castling_check(MoveMessage, const Figure*, const Input&, const int, const int) const noexcept
+                           -> std::optional<std::tuple<MoveMessage, const Figure*, const Figure*>>;
+    
+    [[nodiscard]] auto
+        reset_castling(const bool=true) noexcept -> void;
+    
+    [[nodiscard]] auto
+        reset_castling(const board_repr::BoardRepr&) noexcept -> void;
+    
+    FN get_idw() const noexcept -> bool {
+        return idw;
+    }
+    
+    [[nodiscard]] inline auto
+        set_idw(const bool new_idw) noexcept -> void
+    {
         idw = new_idw;
         init_figures_moves();
     }
     
-    [[nodiscard]] std::vector<Figure*> get_all_figures() const {
+    [[nodiscard]] auto
+        get_all_figures() const -> std::vector<Figure*>
+    {
         std::vector<Figure*> tmp;
         for (const auto& [_, fig] : figures) {
             tmp.push_back(fig);
@@ -91,7 +125,9 @@ public:
         return tmp;
     }
     
-    void move_fig(Figure* fig, Pos to, bool capture=true) {
+    [[nodiscard]] auto
+        move_fig(Figure* fig, Pos to, bool capture = true) -> void
+    {
         if (auto maybe_eat = get_fig(to); 
               maybe_eat.has_value()) {
             if (capture) {
@@ -107,36 +143,46 @@ public:
         figures[fig->get_pos()] = fig;
     }
     
-    void move_fig(Input input, bool capture=true) {
+    [[nodiscard]] auto
+        move_fig(Input input, bool capture = true) -> void
+    {
         auto fig = get_fig(input.from);
         if (fig.has_value()) {
             move_fig(fig.value(), input.target, capture);
         }
     }
     
-    [[nodiscard]] bool has_castling(Id id) const noexcept {
+    [[nodiscard]] auto
+        has_castling(Id id) const noexcept -> bool
+    {
         if (castling.contains(id))
             return castling.at(id); 
         return false;
     }
     
-    void off_castling(Id id) noexcept
-        { castling[id] = false; }
+    void off_castling(Id id) noexcept {
+        castling[id] = false;
+    }
     
-    void on_castling(Id id) noexcept
-        { castling[id] = true; }
+    void on_castling(Id id) noexcept {
+        castling[id] = true;
+    }
     
-    [[nodiscard]] const std::vector<moverec::MoveRec>& get_last_moves() const noexcept
-        { return move_logger.get_past(); }
+    FN get_last_moves() const noexcept -> const std::vector<moverec::MoveRec>& {
+        return move_logger.get_past();
+    }
     
-    [[nodiscard]] const std::vector<moverec::MoveRec>& get_future_moves() const noexcept
-        { return move_logger.get_future(); }
+    FN get_future_moves() const noexcept -> const std::vector<moverec::MoveRec>& {
+        return move_logger.get_future();
+    }
     
-    [[nodiscard]] const moverec::MoveRec& get_last_move() const noexcept
-        { return move_logger.get_last_move(); }
+    FN get_last_move() const noexcept -> std::optional<moverec::MoveRec> {
+        return move_logger.get_last_move();
+    }
     
-    void set_last_move(const moverec::MoveRec& move_rec) noexcept
-        { this->move_logger.add(move_rec); }
+    FN set_last_move(const moverec::MoveRec& move_rec) noexcept -> void {
+        this->move_logger.add(move_rec);
+    }
     
     template <typename Func> 
         requires requires(Func func) {
@@ -149,11 +195,11 @@ public:
     {
         auto choice = get_choice();
         auto ms = move_check(in_hand, input);
-        if (std::holds_alternative<ErrorEvent>(ms)) {
+        if (!ms.has_value()) {
             return { false, moverec::MoveRec{} };
         }
 
-        moverec::MoveRec curr_move{ in_hand, input, turn, std::get<1>(ms), choice };
+        moverec::MoveRec curr_move{ in_hand, input, turn, ms.value(), choice };
 
         if (!provide_move(curr_move)) {
             return { false, moverec::MoveRec{} };
@@ -165,20 +211,26 @@ public:
     bool provide_move(const moverec::MoveRec&);
     
     bool undo_move();
+    
     bool restore_move();
 
-    void place_figure(Figure* const fig) noexcept
-        { figures[fig->get_pos()] = fig; }
+    void place_figure(Figure* const fig) noexcept {
+        figures[fig->get_pos()] = fig;
+    }
     
     void init_figures_moves() noexcept;
+    
     [[nodiscard]] GameEndType game_end_check(const Color) const noexcept;
-    void promotion_fig(Figure* , const FigureType);
     
-    [[nodiscard]] size_t cnt_of_figures() const noexcept
-        { return figures.size(); }
+    void promotion_fig(Figure*, const FigureType);
     
-    [[nodiscard]] bool insufficient_material() const noexcept;
-    [[nodiscard]] board_repr::BoardRepr get_repr(const Color, const bool) const noexcept;
+    [[nodiscard]] size_t cnt_of_figures() const noexcept {
+        return figures.size();
+    }
+    
+    [[nodiscard]] auto insufficient_material() const noexcept -> bool;
+    
+    [[nodiscard]] auto get_repr(const Color, const bool) const noexcept -> board_repr::BoardRepr;
     
     ~FigureBoard() noexcept {
         for (auto& [_, fig] : figures) {
@@ -190,12 +242,11 @@ public:
                 delete fig;
         }
     }
-    
 };
 
-[[nodiscard]] constexpr bool is_valid_coords(const Pos position) noexcept
+FN is_valid_coords(const Pos position) noexcept -> bool
 {
-    const int x = position.x;   // use of constexpr?
+    const int x = position.x;
     const int y = position.y;
     return ((x >= 0) && (x < HEIGHT) &&
         (y >= 0) && (y < WIDTH));

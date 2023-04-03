@@ -334,7 +334,7 @@ namespace FigureBoardTesting
                 Assert::IsTrue(contains(p_17_moves, std::pair{ false, Pos{ 4, 0 } }));
                 Assert::IsTrue(contains(p_17_moves, std::pair{ false, Pos{ 5, 0 } }));
 
-                MoveMessage ms = std::get<MoveMessage>(board.move_check(p_17, Input{ p_17->get_pos(), Pos{4, 0} }));
+                MoveMessage ms = board.move_check(p_17, Input{ p_17->get_pos(), Pos{4, 0} }).value();
                 Assert::AreEqual(ms.main_ev, MainEvent::LMOVE);
                 Assert::IsTrue(ms.side_evs.empty());
                 Assert::IsTrue(ms.to_eat.empty());
@@ -347,14 +347,14 @@ namespace FigureBoardTesting
                 Assert::IsTrue(contains(p_18_moves, std::pair{ false, Pos{ 4, 1 } }));
                 Assert::IsTrue(contains(p_18_moves, std::pair{ false, Pos{ 5, 1 } }));
                 
-                ms = std::get<MoveMessage>(board.move_check(p_18, Input{ p_18->get_pos(), Pos{4, 1} }));
+                ms = board.move_check(p_18, Input{ p_18->get_pos(), Pos{4, 1} }).value();
                 Assert::AreEqual(ms.main_ev, MainEvent::LMOVE);
                 Assert::IsTrue(ms.side_evs.empty());
                 Assert::IsTrue(ms.to_eat.empty());
                 Assert::IsTrue(ms.to_move.empty());
                 Assert::IsTrue(ms.what_castling_breaks.empty());
                 
-                ms = std::get<MoveMessage>(board.move_check(p_18, Input{ p_18->get_pos(), Pos{5, 1} }));
+                ms = board.move_check(p_18, Input{ p_18->get_pos(), Pos{5, 1} }).value();
                 Assert::AreEqual(ms.main_ev, MainEvent::MOVE);
                 Assert::IsTrue(ms.side_evs.empty());
                 Assert::IsTrue(ms.to_eat.empty());
@@ -373,7 +373,7 @@ namespace FigureBoardTesting
                 Assert::IsTrue(contains(p_17_moves, std::pair{ false, Pos{ 4, 0 } }));
                 Assert::IsTrue(contains(p_17_moves, std::pair{ false, Pos{ 5, 0 } }));
 
-                MoveMessage ms = std::get<MoveMessage>(board.move_check(p_17, Input{ p_17->get_pos(), Pos{4, 0} }));
+                MoveMessage ms = board.move_check(p_17, Input{ p_17->get_pos(), Pos{4, 0} }).value();
                 Assert::AreEqual(ms.main_ev, MainEvent::LMOVE);
                 Assert::IsTrue(ms.side_evs.empty());
                 Assert::IsTrue(ms.to_eat.empty());
@@ -386,14 +386,14 @@ namespace FigureBoardTesting
                 Assert::IsTrue(contains(p_18_moves, std::pair{ false, Pos{ 4, 1 } }));
                 Assert::IsTrue(contains(p_18_moves, std::pair{ false, Pos{ 5, 1 } }));
 
-                ms = std::get<MoveMessage>(board.move_check(p_18, Input{ p_18->get_pos(), Pos{4, 1} }));
+                ms = board.move_check(p_18, Input{ p_18->get_pos(), Pos{4, 1} }).value();
                 Assert::AreEqual(ms.main_ev, MainEvent::LMOVE);
                 Assert::IsTrue(ms.side_evs.empty());
                 Assert::IsTrue(ms.to_eat.empty());
                 Assert::IsTrue(ms.to_move.empty());
                 Assert::IsTrue(ms.what_castling_breaks.empty());
 
-                ms = std::get<MoveMessage>(board.move_check(p_18, Input{ p_18->get_pos(), Pos{5, 1} }));
+                ms = board.move_check(p_18, Input{ p_18->get_pos(), Pos{5, 1} }).value();
                 Assert::AreEqual(ms.main_ev, MainEvent::MOVE);
                 Assert::IsTrue(ms.side_evs.empty());
                 Assert::IsTrue(ms.to_eat.empty());
@@ -434,8 +434,7 @@ namespace FigureBoardTesting
                     != moves.end()
                 );
 
-                MoveMessage ms = 
-                    std::get<MoveMessage>(board.move_check(white_pawn, Input{ white_pawn->get_pos(), Pos{2, 3} }));
+                MoveMessage ms = board.move_check(white_pawn, Input{ white_pawn->get_pos(), Pos{2, 3} }).value();
                 Assert::AreEqual(ms.main_ev, MainEvent::EN_PASSANT);
                 Assert::IsFalse(ms.to_eat.empty());
                 Assert::IsTrue(ms.to_move.empty() && ms.what_castling_breaks.empty());
@@ -488,8 +487,7 @@ namespace FigureBoardTesting
                     != moves.end()
                 );
 
-                MoveMessage ms =
-                    std::get<MoveMessage>(board.move_check(black_pawn, Input{ black_pawn->get_pos(), Pos{2, 3} }));
+                MoveMessage ms = board.move_check(black_pawn, Input{ black_pawn->get_pos(), Pos{2, 3} }).value();
                 Assert::AreEqual(ms.main_ev, MainEvent::EN_PASSANT);
                 Assert::IsFalse(ms.to_eat.empty());
                 Assert::IsTrue(ms.to_move.empty() && ms.what_castling_breaks.empty());
@@ -521,7 +519,7 @@ namespace FigureBoardTesting
                 auto white_pawn = board.get_fig_unsafe(0_id);
                 Assert::AreEqual(board.get_all_moves(white_pawn).size(), 1ull);
                 
-                MoveMessage ms = std::get<MoveMessage>(board.move_check(white_pawn, Input{ white_pawn->get_pos(), Pos{0, 5} }));
+                MoveMessage ms = board.move_check(white_pawn, Input{ white_pawn->get_pos(), Pos{0, 5} }).value();
                 Assert::AreEqual(ms.main_ev, MainEvent::MOVE);
                 Assert::IsTrue(contains(ms.side_evs, SideEvent::PROMOTION));
                 Assert::IsTrue(
@@ -559,7 +557,7 @@ namespace FigureBoardTesting
                 auto black_pawn = board.get_fig_unsafe(0_id);
                 Assert::AreEqual(board.get_all_moves(black_pawn).size(), 1ull);
 
-                MoveMessage ms = std::get<MoveMessage>(board.move_check(black_pawn, Input{ black_pawn->get_pos(), Pos{0, 5} }));
+                MoveMessage ms = board.move_check(black_pawn, Input{ black_pawn->get_pos(), Pos{0, 5} }).value();
                 Assert::AreEqual(ms.main_ev, MainEvent::MOVE);
                 Assert::IsTrue(contains(ms.side_evs, SideEvent::PROMOTION));
                 Assert::IsTrue(
@@ -1026,9 +1024,7 @@ namespace FigureBoardTesting
 
                     Assert::AreEqual(
                         std::count_if(moves.begin(), moves.end(), [&](const auto& p) {
-                            MoveMessage mm =
-                                std::get<MoveMessage>(
-                                    b.move_check(king, { king->get_pos(), p.second }));
+                            MoveMessage mm = b.move_check(king, { king->get_pos(), p.second }).value();
                             return mm.main_ev == MainEvent::CASTLING; }
                     ), 2ll);
                 }

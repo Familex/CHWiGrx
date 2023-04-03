@@ -91,13 +91,16 @@ board_repr::BoardRepr FigureBoard::get_repr(const Color turn, const bool save_al
     std::vector<Figure*> fig_vec;
     for (auto& [_, fig] : figures)
         fig_vec.push_back(fig);
+    const auto& prev_moves = move_logger.get_past();
     return board_repr::BoardRepr{
         std::move(fig_vec),
         turn,
         idw,
         save_all_moves 
-            ? move_logger.get_past() 
-            : std::vector<moverec::MoveRec>{ move_logger.get_last_move() },
+            ? prev_moves
+            : prev_moves.empty()
+                ? std::vector<moverec::MoveRec>{}
+                : std::vector<moverec::MoveRec>{ prev_moves.back() },
         move_logger.get_future(),
         captured_figures
     };
@@ -121,27 +124,9 @@ void FigureBoard::reset_castling(const board_repr::BoardRepr& board_repr) noexce
     }
 }
 
-std::optional<Figure*> const FigureBoard::get_fig(Pos position) const noexcept {
-    if (figures.find(position) != figures.end()) {
-        return figures.at(position);
-    }
-    else {
-        return std::nullopt;
-    }
-}
-
 Figure* const FigureBoard::get_fig_unsafe(Pos position) const noexcept {
     auto out = get_fig(position);
     return out.has_value() ? out.value() : nullptr;
-}
-
-std::optional<Figure*> const FigureBoard::get_fig(Id id) const noexcept {
-    for (const auto& [_, fig] : figures) {
-        if (fig->is(id)) {
-            return fig;
-        }
-    }
-    return std::nullopt;
 }
 
 Figure* const FigureBoard::get_fig_unsafe(Id id) const noexcept {
@@ -244,10 +229,10 @@ std::optional<const Figure*> const FigureBoard::find_king(Color col) const noexc
 /// <param name="ours">Фигуры, в которые врезаемся, но не можем съесть</param>
 /// <param name="enemies">Фигуры, в которые врезаемся и можем съесть</param>
 /// <returns>Серия из пар ест ли фигура и куда попадает</returns>
-std::vector<std::pair<bool, Pos>> FigureBoard::expand_broom(const Figure* in_hand, 
-                                                                   const std::vector<Pos>& to_ignore, 
-                                                                   const std::vector<Pos>& ours, 
-                                                                   const std::vector<Pos>& enemies) const noexcept {
+auto FigureBoard::
+    expand_broom(const Figure* in_hand, const std::vector<Pos>& to_ignore, const std::vector<Pos>& ours, 
+                       const std::vector<Pos>& enemies) const noexcept -> std::vector<std::pair<bool, Pos>>
+{
     std::vector<std::pair<bool, Pos>> possible_moves{}; // list { pair{ is_eat, targ }, ... }
     const auto in_hand_pos = in_hand->get_pos();
     const auto in_hand_type = in_hand->get_type();
@@ -298,10 +283,11 @@ std::vector<std::pair<bool, Pos>> FigureBoard::expand_broom(const Figure* in_han
 /// <param name="ours">Фигуры, в которые врезаемся, но не можем съесть</param>
 /// <param name="enemies">Фигуры, в которые врезаемся и можем съесть</param>
 /// <returns>Серия из пар ест ли фигура и куда попадает</returns>
-std::vector<std::pair<bool, Pos>> FigureBoard::get_all_moves(const Figure* in_hand, 
-                                                                    const std::vector<Pos>& to_ignore, 
-                                                                    const std::vector<Pos>& ours, 
-                                                                    const std::vector<Pos>&enemies) const noexcept {
+auto FigureBoard::
+    get_all_moves(const Figure* in_hand, const std::vector<Pos>& to_ignore, 
+                    const std::vector<Pos>& ours,
+                      const std::vector<Pos>&enemies) const noexcept -> std::vector<std::pair<bool, Pos>>
+{
     std::vector<std::pair<bool, Pos>> all_moves{ expand_broom(in_hand, to_ignore, ours, enemies) };
     Pos in_hand_pos = in_hand->get_pos();
     if (in_hand->get_type() == FigureType::Pawn) {
@@ -328,24 +314,26 @@ std::vector<std::pair<bool, Pos>> FigureBoard::get_all_moves(const Figure* in_ha
         }
 
         // Взятие на проходе
-        const auto& last_move = move_logger.get_last_move();
-        const Pos& who_went_at_last_move_pos = last_move.who_went.get_pos();
-        if (last_move.ms.main_ev == MainEvent::LMOVE && std::abs(who_went_at_last_move_pos.y - in_hand_pos.y) == 1) {
-            int shift_y = who_went_at_last_move_pos.y - in_hand_pos.y;
-            if (in_hand->is_col(Color::White)) {
-                if (in_hand_pos.x == (EN_PASSANT_INDENT - 1) && idw && cont_fig(in_hand_pos + Pos(0, shift_y)) && is_empty(in_hand_pos + Pos(-1, shift_y))) {
-                    all_moves.push_back({ true, in_hand_pos + Pos(-1, shift_y) });
+        if (const auto& last_move_sus = move_logger.get_last_move(); last_move_sus.has_value()) {
+            const auto& last_move = last_move_sus.value();
+            const Pos& who_went_at_last_move_pos = last_move.who_went.get_pos();
+            if (last_move.ms.main_ev == MainEvent::LMOVE && std::abs(who_went_at_last_move_pos.y - in_hand_pos.y) == 1) {
+                int shift_y = who_went_at_last_move_pos.y - in_hand_pos.y;
+                if (in_hand->is_col(Color::White)) {
+                    if (in_hand_pos.x == (EN_PASSANT_INDENT - 1) && idw && cont_fig(in_hand_pos + Pos(0, shift_y)) && is_empty(in_hand_pos + Pos(-1, shift_y))) {
+                        all_moves.push_back({ true, in_hand_pos + Pos(-1, shift_y) });
+                    }
+                    if (in_hand_pos.x == (HEIGHT - EN_PASSANT_INDENT) && not idw && cont_fig(in_hand_pos + Pos(0, shift_y)) && is_empty(in_hand_pos + Pos(1, shift_y))) {
+                        all_moves.push_back({ true, in_hand_pos + Pos(1, shift_y) });
+                    }
                 }
-                if (in_hand_pos.x == (HEIGHT - EN_PASSANT_INDENT) && not idw && cont_fig(in_hand_pos + Pos(0, shift_y)) && is_empty(in_hand_pos + Pos(1, shift_y))) {
-                    all_moves.push_back({ true, in_hand_pos + Pos(1, shift_y) });
-                }
-            }
-            if (in_hand->is_col(Color::Black)) {
-                if (in_hand_pos.x == (HEIGHT - EN_PASSANT_INDENT) && idw && cont_fig(in_hand_pos + Pos(0, shift_y)) && is_empty(in_hand_pos + Pos(1, shift_y))) {
-                    all_moves.push_back({ true, in_hand_pos + Pos(1, shift_y) });
-                }
-                if (in_hand_pos.x == (EN_PASSANT_INDENT - 1) && not idw && cont_fig(in_hand_pos + Pos(0, shift_y)) && is_empty(in_hand_pos + Pos(-1, shift_y))) {
-                    all_moves.push_back({ true, in_hand_pos + Pos(-1, shift_y) });
+                if (in_hand->is_col(Color::Black)) {
+                    if (in_hand_pos.x == (HEIGHT - EN_PASSANT_INDENT) && idw && cont_fig(in_hand_pos + Pos(0, shift_y)) && is_empty(in_hand_pos + Pos(1, shift_y))) {
+                        all_moves.push_back({ true, in_hand_pos + Pos(1, shift_y) });
+                    }
+                    if (in_hand_pos.x == (EN_PASSANT_INDENT - 1) && not idw && cont_fig(in_hand_pos + Pos(0, shift_y)) && is_empty(in_hand_pos + Pos(-1, shift_y))) {
+                        all_moves.push_back({ true, in_hand_pos + Pos(-1, shift_y) });
+                    }
                 }
             }
         }
@@ -668,8 +656,8 @@ GameEndType FigureBoard::game_end_check(Color col) const noexcept
 /// <param name="in_hand">Фигура, которой собираются ходить</param>
 /// <param name="input">Ввод</param>
 /// <returns>Сообщение хода</returns>
-std::variant<ErrorEvent, MoveMessage> FigureBoard::move_check(const Figure* const in_hand, 
-                                                                     const Input& input) const noexcept
+auto FigureBoard::
+    move_check(const Figure* const in_hand, const Input& input) const noexcept -> std::expected<MoveMessage, ErrorEvent>
 {
     MoveMessage move_message{ MainEvent::E, {} };
 
@@ -678,7 +666,7 @@ std::variant<ErrorEvent, MoveMessage> FigureBoard::move_check(const Figure* cons
         || !cont_fig(input.from)
         || get_fig(input.target).has_value()
             && get_fig(input.target).value()->is_col(in_hand->get_col())) {
-        return ErrorEvent::INVALID_MOVE;
+        return std::unexpected{ ErrorEvent::INVALID_MOVE };
     }
 
     if (in_hand->get_type() == FigureType::Rook) {
@@ -740,12 +728,12 @@ std::variant<ErrorEvent, MoveMessage> FigureBoard::move_check(const Figure* cons
             }
             if (in_hand->get_type() == FigureType::King) {
                 if (check_for_when(in_hand->get_col(), { input.from }, input.target)) {
-                    return ErrorEvent::CHECK_IN_THAT_TILE;
+                    return std::unexpected{ ErrorEvent::CHECK_IN_THAT_TILE };
                 }
             }
             else {
                 if (check_for_when(in_hand->get_col(), { input.from }, {}, { in_hand_in_targ_tmp.get()}, {})) {
-                    return ErrorEvent::UNDER_CHECK;
+                    return std::unexpected{ ErrorEvent::UNDER_CHECK };
                 }
             }
             move_message.main_ev = MainEvent::LMOVE;
@@ -754,47 +742,49 @@ std::variant<ErrorEvent, MoveMessage> FigureBoard::move_check(const Figure* cons
 
         // Взятие на проходе (смотрю чужие фигуры на 4 линии)
         // А ещё проверяю прошлый ход
-        const moverec::MoveRec& last_move = move_logger.get_last_move();
-        const Pos& who_went_at_last_move_pos = last_move.who_went.get_pos();
-        if (std::abs(shift.y) == 1 && is_empty(input.target) &&
-            last_move.ms.main_ev == MainEvent::LMOVE && who_went_at_last_move_pos.y == input.target.y &&
-            (
-                // maybe can be simplified into one condition
-                in_hand->get_col() == Color::White && (
-                    input.from.x == (EN_PASSANT_INDENT - 1) && idw && shift.x == -1 && cont_fig(input.from + Pos(0, shift.y)) ||
-                    input.from.x == (HEIGHT - EN_PASSANT_INDENT) && !idw && shift.x == 1 && cont_fig(input.from + Pos(0, shift.y))
-                    ) ||
-                in_hand->get_col() == Color::Black && (
-                    input.from.x == (HEIGHT - EN_PASSANT_INDENT) && idw && shift.x == 1 && cont_fig(input.from + Pos(0, shift.y)) ||
-                    input.from.x == (EN_PASSANT_INDENT - 1) && !idw && shift.x == -1 && cont_fig(input.from + Pos(0, shift.y))
-                    )
-                )) {
-            auto in_hand_in_targ_tmp = figfab::FigureFabric::instance().submit_on(in_hand, input.target);
-            if (check_for_when(what_next(in_hand->get_col()), { input.from, {input.from.x, input.target.y}, input.target }, {}, {}, { in_hand_in_targ_tmp.get() })) {
-                move_message.side_evs.push_back(SideEvent::CHECK);
-            }
-            if (in_hand->get_type() == FigureType::King) {
-                // Фигура на которой сейчас стоим всё ещё учитывается!
-                if (check_for_when(in_hand->get_col(), { input.from, {input.from.x, input.target.y}, input.target }, input.target)) {
-                    return ErrorEvent::CHECK_IN_THAT_TILE;
+        if (const auto& last_move_sus = move_logger.get_last_move(); last_move_sus.has_value()) {
+            const auto& last_move = last_move_sus.value();
+            const Pos & who_went_at_last_move_pos = last_move.who_went.get_pos();
+            if (std::abs(shift.y) == 1 && is_empty(input.target) &&
+                last_move.ms.main_ev == MainEvent::LMOVE && who_went_at_last_move_pos.y == input.target.y &&
+                (
+                    // maybe can be simplified into one condition
+                    in_hand->get_col() == Color::White && (
+                        input.from.x == (EN_PASSANT_INDENT - 1) && idw && shift.x == -1 && cont_fig(input.from + Pos(0, shift.y)) ||
+                        input.from.x == (HEIGHT - EN_PASSANT_INDENT) && !idw && shift.x == 1 && cont_fig(input.from + Pos(0, shift.y))
+                        ) ||
+                    in_hand->get_col() == Color::Black && (
+                        input.from.x == (HEIGHT - EN_PASSANT_INDENT) && idw && shift.x == 1 && cont_fig(input.from + Pos(0, shift.y)) ||
+                        input.from.x == (EN_PASSANT_INDENT - 1) && !idw && shift.x == -1 && cont_fig(input.from + Pos(0, shift.y))
+                        )
+                    )) {
+                auto in_hand_in_targ_tmp = figfab::FigureFabric::instance().submit_on(in_hand, input.target);
+                if (check_for_when(what_next(in_hand->get_col()), { input.from, {input.from.x, input.target.y}, input.target }, {}, {}, { in_hand_in_targ_tmp.get() })) {
+                    move_message.side_evs.push_back(SideEvent::CHECK);
                 }
-            }
-            else {
-                // Фигура на которой сейчас стоим всё ещё учитывается!
-                if (check_for_when(in_hand->get_col(), { input.from, {input.from.x, input.target.y}, input.target }, {}, { in_hand_in_targ_tmp.get() }, {})) {
-                    return ErrorEvent::UNDER_CHECK;
+                if (in_hand->get_type() == FigureType::King) {
+                    // Фигура на которой сейчас стоим всё ещё учитывается!
+                    if (check_for_when(in_hand->get_col(), { input.from, {input.from.x, input.target.y}, input.target }, input.target)) {
+                        return std::unexpected{ ErrorEvent::CHECK_IN_THAT_TILE };
+                    }
                 }
-            }
-            move_message.main_ev = MainEvent::EN_PASSANT;
-            if (const auto to_eat_sus = get_fig({ input.from.x, input.target.y });
+                else {
+                    // Фигура на которой сейчас стоим всё ещё учитывается!
+                    if (check_for_when(in_hand->get_col(), { input.from, {input.from.x, input.target.y}, input.target }, {}, { in_hand_in_targ_tmp.get() }, {})) {
+                        return std::unexpected{ ErrorEvent::UNDER_CHECK };
+                    }
+                }
+                move_message.main_ev = MainEvent::EN_PASSANT;
+                if (const auto to_eat_sus = get_fig({ input.from.x, input.target.y });
                     to_eat_sus.has_value()) {
-                move_message.to_eat.push_back(to_eat_sus.value()->get_id());
-            }
-            if (const auto to_eat_sus = get_fig(input.target);
+                    move_message.to_eat.push_back(to_eat_sus.value()->get_id());
+                }
+                if (const auto to_eat_sus = get_fig(input.target);
                     to_eat_sus.has_value()) {
-                move_message.to_eat.push_back(to_eat_sus.value()->get_id());
+                    move_message.to_eat.push_back(to_eat_sus.value()->get_id());
+                }
+                return move_message;
             }
-            return move_message;
         }
     }
 
@@ -810,13 +800,13 @@ std::variant<ErrorEvent, MoveMessage> FigureBoard::move_check(const Figure* cons
             if (in_hand->get_type() == FigureType::King) {
                 // Фигура на которой сейчас стоим всё ещё учитывается!
                 if (check_for_when(in_hand->get_col(), {input.from, input.target}, curr)) {
-                    return ErrorEvent::CHECK_IN_THAT_TILE;
+                    return std::unexpected{ ErrorEvent::CHECK_IN_THAT_TILE };
                 }
             }
             else {
                 // Фигура на которой сейчас стоим всё ещё учитывается!
                 if (check_for_when(in_hand->get_col(), {input.from, input.target}, {}, { in_hand_in_curr_tmp.get() }, {})) {
-                    return ErrorEvent::UNDER_CHECK;
+                    return std::unexpected{ ErrorEvent::UNDER_CHECK };
                 }
             }
             move_message.main_ev = MainEvent::EAT;
@@ -830,19 +820,19 @@ std::variant<ErrorEvent, MoveMessage> FigureBoard::move_check(const Figure* cons
             }
             if (in_hand->get_type() == FigureType::King) {
                 if (check_for_when(in_hand->get_col(), {input.from}, curr)) {
-                    return ErrorEvent::CHECK_IN_THAT_TILE;
+                    return std::unexpected{ ErrorEvent::CHECK_IN_THAT_TILE };
                 }
             }
             else {
                 if (check_for_when(in_hand->get_col(), {input.from}, {}, { in_hand_in_curr_tmp.get() }, {})) {
-                    return ErrorEvent::UNDER_CHECK;
+                    return std::unexpected{ ErrorEvent::UNDER_CHECK };
                 }
             }
             move_message.main_ev = MainEvent::MOVE;
             return move_message;
         }
     }
-    return ErrorEvent::UNFORESEEN;
+    return std::unexpected{ ErrorEvent::UNFORESEEN };
 }
 
 /// <summary>
@@ -853,14 +843,14 @@ std::variant<ErrorEvent, MoveMessage> FigureBoard::move_check(const Figure* cons
 /// <returns>Удалось ли отменить ход</returns>
 bool FigureBoard::undo_move() {
     if (move_logger.prev_empty()) return false;
-    auto last = move_logger.move_last_to_future();
-    auto in_hand_sus = get_fig(last.who_went.get_id());
+    const auto& last = move_logger.move_last_to_future().value();
+    const auto in_hand_sus = get_fig(last.who_went.get_id());
     if (!in_hand_sus.has_value()) return false;
-    auto in_hand = in_hand_sus.value();
-    FigureType chose = last.promotion_choice;
-    auto turn = last.turn;
-    auto input = last.input;
-    MoveMessage ms = last.ms;
+    const auto in_hand = in_hand_sus.value();
+    const FigureType chose = last.promotion_choice;
+    const auto turn = last.turn;
+    const auto input = last.input;
+    const MoveMessage ms = last.ms;
     switch (ms.main_ev)
     {
         case MainEvent::MOVE: case MainEvent::LMOVE:
@@ -886,7 +876,7 @@ bool FigureBoard::undo_move() {
         switch (s_ev)
         {
         case SideEvent::CASTLING_BREAK:
-            if (not ms.what_castling_breaks.empty() &&
+            if (!ms.what_castling_breaks.empty() &&
                 !has_castling(ms.what_castling_breaks.back())
                 ) {
                 for (const Id& id : ms.what_castling_breaks) {
@@ -974,11 +964,14 @@ bool FigureBoard::provide_move(const moverec::MoveRec& move_rec) {
 /// </summary>
 /// <returns>Удалось ли совершить ход</returns>
 bool FigureBoard::restore_move() {
-    if (move_logger.future_empty()) return false;
-    auto future = move_logger.pop_future_move();
-    provide_move(future);
-    move_logger.add_without_reset(future);
-    return true;
+    if (auto future_sus = move_logger.pop_future_move(); future_sus.has_value()) {
+        provide_move(future_sus.value());
+        move_logger.add_without_reset(future_sus.value());
+        return true;
+    }
+    else {
+        return false;
+    }
 }
 
 /// <summary>

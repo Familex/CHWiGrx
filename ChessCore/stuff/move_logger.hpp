@@ -7,64 +7,80 @@ class MoveLogger {
     std::vector<moverec::MoveRec> future_moves;
     
 public:
-    [[nodiscard]] constexpr moverec::MoveRec get_last_move() const noexcept
+    FN get_last_move() const noexcept -> std::optional<moverec::MoveRec>
     {
-        if (prev_moves.empty())
-            return moverec::MoveRec{};
+        if (prev_moves.empty()) {
+            return std::nullopt;
+        }
         return prev_moves.back();
     }
     
-    constexpr void add(const moverec::MoveRec& move_rec) noexcept
+    FN add(const moverec::MoveRec& move_rec) noexcept -> void
     {
         prev_moves.push_back(move_rec);
         future_moves.clear();
     }
     
-    constexpr void add_without_reset(const moverec::MoveRec& move_rec) noexcept
-        { prev_moves.push_back(move_rec); }
+    FN add_without_reset(const moverec::MoveRec& move_rec) noexcept -> void {
+        prev_moves.push_back(move_rec);
+    }
     
-    void constexpr reset() noexcept
+    FN reset() noexcept -> void
     {
         prev_moves.clear();
         future_moves.clear();
     }
     
-    constexpr moverec::MoveRec pop_future_move() noexcept
+    FN pop_future_move() noexcept -> std::optional<moverec::MoveRec>
     {
-        if (future_moves.empty()) return moverec::MoveRec{};
+        if (future_moves.empty()) {
+            return std::nullopt;
+        }
         moverec::MoveRec future = future_moves.back();
         future_moves.pop_back();
         return future;
     }
     
-    constexpr moverec::MoveRec move_last_to_future() noexcept
+    FN move_last_to_future() noexcept -> std::optional<moverec::MoveRec>
     {
-        if (prev_moves.empty()) return moverec::MoveRec{};
-        moverec::MoveRec last = get_last_move();
-        prev_moves.pop_back();
-        future_moves.push_back(last);
-        return last;
+        if (prev_moves.empty()) {
+            return std::nullopt;
+        }
+        else if (auto last = get_last_move(); last.has_value()) {
+            prev_moves.pop_back();
+            future_moves.push_back(last.value());
+            return last.value();
+        }
+        else {
+            return std::nullopt;
+        }
     }
     
-    [[nodiscard]] constexpr bool prev_empty() const noexcept
-        { return prev_moves.empty(); }
+    FN prev_empty() const noexcept -> bool {
+        return prev_moves.empty();
+    }
     
-    [[nodiscard]] constexpr bool future_empty() const noexcept
-        { return future_moves.empty(); }
+    FN future_empty() const noexcept -> bool {
+        return future_moves.empty();
+    }
     
-    [[nodiscard]] constexpr const std::vector<moverec::MoveRec>& get_past() const noexcept
-        { return prev_moves; }
+    FN get_past() const noexcept -> const std::vector<moverec::MoveRec>& {
+        return prev_moves;
+    }
     
-    [[nodiscard]] constexpr const std::vector<moverec::MoveRec>& get_future() const noexcept
-        { return future_moves; }
+    FN get_future() const noexcept -> const std::vector<moverec::MoveRec>& {
+        return future_moves;
+    }
     
-    constexpr void set_past(const std::vector<moverec::MoveRec>& past) noexcept
-        { prev_moves = past; }
+    FN set_past(const std::vector<moverec::MoveRec>& past) noexcept -> void {
+        prev_moves = past;
+    }
     
-    constexpr void set_future(const std::vector<moverec::MoveRec>& future) noexcept
-        { future_moves = future; }
+    FN set_future(const std::vector<moverec::MoveRec>& future) noexcept {
+        future_moves = future;
+    }
     
-    [[nodiscard]] constexpr bool is_fifty_move_rule_was_triggered() const noexcept
+    FN is_fifty_move_rule_was_triggered() const noexcept -> bool
     {
         size_t without_eat_and_pawnmoves = 0;
         for (auto move{ prev_moves.rbegin() }; move != prev_moves.rend(); ++move) {
@@ -79,6 +95,7 @@ public:
     }
     
     /// @todo
-    [[nodiscard]] constexpr bool is_moves_repeat_rule_was_triggered() const noexcept
-        {  return false; }
+    FN is_moves_repeat_rule_was_triggered() const noexcept -> bool {
+        return false;
+    }
 };
