@@ -87,7 +87,9 @@ void FigureBoard::apply_map(board_repr::BoardRepr&& board_repr) noexcept {
     board_repr.figures.clear();  /* delete ownership */
 }
 
-board_repr::BoardRepr FigureBoard::get_repr(const Color turn, const bool save_all_moves) const noexcept {
+auto FigureBoard::
+    get_repr(const Color turn, const bool save_all_moves) const noexcept -> board_repr::BoardRepr
+{
     std::vector<Figure*> fig_vec;
     for (auto& [_, fig] : figures)
         fig_vec.push_back(fig);
@@ -106,7 +108,9 @@ board_repr::BoardRepr FigureBoard::get_repr(const Color turn, const bool save_al
     };
 }
 
-void FigureBoard::reset_castling(const bool castle_state) noexcept {
+void FigureBoard::
+    reset_castling(const bool castle_state) noexcept
+{
     castling.clear();
     for (const Color& col : { Color::Black, Color::White }) {
         for (const auto& aspt_to_rook : get_figures_of(col)) {
@@ -117,19 +121,25 @@ void FigureBoard::reset_castling(const bool castle_state) noexcept {
     }
 }
 
-void FigureBoard::reset_castling(const board_repr::BoardRepr& board_repr) noexcept {
+void FigureBoard::
+    reset_castling(const board_repr::BoardRepr& board_repr) noexcept
+{
     reset_castling(false);
     for (Id castle_id : board_repr.can_castle) {
         castling[castle_id] = true;
     }
 }
 
-Figure* const FigureBoard::get_fig_unsafe(Pos position) const noexcept {
+auto FigureBoard::
+    get_fig_unsafe(Pos position) const noexcept -> Figure*
+{
     auto out = get_fig(position);
     return out.has_value() ? out.value() : nullptr;
 }
 
-Figure* const FigureBoard::get_fig_unsafe(Id id) const noexcept {
+auto FigureBoard::
+    get_fig_unsafe(Id id) const noexcept -> Figure*
+{
     auto out = get_fig(id);
     return out.has_value() ? out.value() : nullptr;
 }
@@ -195,7 +205,9 @@ void FigureBoard::place_fig(Figure* const fig) {
 
 /// <param name="col">Цвет фигур</param>
 /// <returns>Все фигуры определённого цвета</returns>
-std::vector<Figure*> FigureBoard::get_figures_of(Color col) const noexcept {
+auto FigureBoard::
+    get_figures_of(Color col) const noexcept -> std::vector<Figure*>
+{
     std::vector<Figure*> acc{};
     for (const auto& [_, fig] : figures) {
         if (fig->is_col(col)) {
@@ -205,7 +217,9 @@ std::vector<Figure*> FigureBoard::get_figures_of(Color col) const noexcept {
     return acc;
 }
 
-std::optional<const Figure*> const FigureBoard::find_king(Color col) const noexcept {
+auto FigureBoard::
+    find_king(Color col) const noexcept -> std::optional<const Figure*>
+{
     auto map_ptr = std::find_if(
         figures.begin(),
         figures.end(),
@@ -366,11 +380,10 @@ auto FigureBoard::
 }
 
 // get_all_moves with check for check
-std::vector<std::pair<bool, Pos>> FigureBoard::get_all_possible_moves(
-                                                         const Figure* in_hand,
-                                                         const std::vector<Pos>& to_ignore,
-                                                         const std::vector<Pos>& ours,
-                                                         const std::vector<Pos>& enemies) const noexcept
+auto FigureBoard::
+    get_all_possible_moves(const Figure* in_hand, const std::vector<Pos>& to_ignore,
+                             const std::vector<Pos>& ours, const std::vector<Pos>& enemies) const noexcept
+                               -> std::vector<std::pair<bool, Pos>>
 {
     std::vector<std::pair<bool, Pos>> all_possible_moves;
 
@@ -402,9 +415,9 @@ std::vector<std::pair<bool, Pos>> FigureBoard::get_all_possible_moves(
 /// <param name="to_ignore">Фигуры, которые нужно игнорировать</param>
 /// <param name="to_defend">Позиция короля или фигуры, которой можно поставить шах (мат)</param>
 /// <returns>Наличие мата</returns>
-bool FigureBoard::checkmate_for(const Color col,
-                                const std::vector<Pos>& to_ignore,
-                                Pos to_defend /*тут, возможно, не король*/) const noexcept
+auto FigureBoard::
+    checkmate_for(const Color col, const std::vector<Pos>& to_ignore,
+                    Pos to_defend /*тут, возможно, не король*/) const noexcept -> bool
 {
     auto king = find_king(col);
     if (to_defend == Pos()) {
@@ -447,9 +460,10 @@ bool FigureBoard::checkmate_for(const Color col,
 /// <param name="to_ignore">Фигуры, которые нужно игнорировать</param>
 /// <param name="to_defend">Позиция короля или фигуры, которой можно поставить шах</param>
 /// <returns>Наличие пата</returns>
-bool FigureBoard::stalemate_for(const Color col, 
-                                const std::vector<Pos>& to_ignore, 
-                                Pos to_defend) const noexcept {
+auto FigureBoard::
+    stalemate_for(const Color col, const std::vector<Pos>& to_ignore,
+                    Pos to_defend) const noexcept -> bool
+{
     auto king_sus = find_king(col);
     if (!king_sus.has_value()) {
         return false; // Нет короля
@@ -490,11 +504,10 @@ bool FigureBoard::stalemate_for(const Color col,
 /// <param name="ours">Фигуры, которые предотвращают шах</param>
 /// <param name="enemies">Фигуры, которые шах могут поставить</param>
 /// <returns>Наличие шаха</returns>
-bool FigureBoard::check_for_when(const Color col,
-                                 const std::vector<Pos>& to_ignore,
-                                 Pos to_defend,
-                                 const std::vector<Figure*>& ours,
-                                 const std::vector<Figure*>& enemies) const noexcept
+auto FigureBoard::
+    check_for_when(const Color col, const std::vector<Pos>& to_ignore, Pos to_defend,
+                     const std::vector<Figure*>& ours, const std::vector<Figure*>& enemies) const noexcept
+                       -> bool
 {
     auto king_sus = find_king(col);
     if (to_defend == Pos()) {
@@ -536,11 +549,10 @@ bool FigureBoard::check_for_when(const Color col,
 /// <param name="king_end_col">Целевой столбец для короля</param>
 /// <param name="rook_end_col">Целевой столбец для ладьи</param>
 /// <returns>Если рокировка валидна, возвращает сообщение хода, фигуру короля и ладьи</returns>
-std::optional<std::tuple<MoveMessage, const Figure*, const Figure*>> FigureBoard::castling_check(MoveMessage move_message, 
-                                                                                               const Figure* in_hand,
-                                                                                               const Input& input,  
-                                                                                               const int king_end_col, 
-                                                                                               const int rook_end_col) const noexcept 
+auto FigureBoard::
+    castling_check(MoveMessage move_message, const Figure* in_hand, const Input& input,  
+                     const int king_end_col, const int rook_end_col) const noexcept
+                       -> std::optional<std::tuple<MoveMessage, const Figure*, const Figure*>>
 {
     // Рокировка на g-фланг
     bool castling_can_be_done = true;
@@ -613,7 +625,8 @@ std::optional<std::tuple<MoveMessage, const Figure*, const Figure*>> FigureBoard
 /// <para>Король и слон против короля и слонов, где все слоны на одном цвете</para>
 /// </summary>
 /// <returns>Не хватает ли материала для мата</returns>
-bool FigureBoard::insufficient_material() const noexcept 
+auto FigureBoard::
+    insufficient_material() const noexcept -> bool
 {
     size_t size = cnt_of_figures();
     if (size <= 2) return true;
@@ -639,7 +652,8 @@ bool FigureBoard::insufficient_material() const noexcept
     return not (b_cell_bishops_cnt && w_cell_bishops_cnt);
 }
 
-GameEndType FigureBoard::game_end_check(Color col) const noexcept 
+auto FigureBoard::
+    game_end_check(Color col) const noexcept -> GameEndType
 {
     if (checkmate_for(col)) return GameEndType::Checkmate;
     if (stalemate_for(col)) return GameEndType::Stalemate;
@@ -657,7 +671,8 @@ GameEndType FigureBoard::game_end_check(Color col) const noexcept
 /// <param name="input">Ввод</param>
 /// <returns>Сообщение хода</returns>
 auto FigureBoard::
-    move_check(const Figure* const in_hand, const Input& input) const noexcept -> std::expected<MoveMessage, ErrorEvent>
+    move_check(const Figure* const in_hand, const Input& input) const noexcept
+        -> std::expected<MoveMessage, ErrorEvent>
 {
     MoveMessage move_message{ MainEvent::E, {} };
 
@@ -841,7 +856,9 @@ auto FigureBoard::
 /// порядке
 /// </summary>
 /// <returns>Удалось ли отменить ход</returns>
-bool FigureBoard::undo_move() {
+auto FigureBoard::
+    undo_move() -> bool
+{
     if (move_logger.prev_empty()) return false;
     const auto& last = move_logger.move_last_to_future().value();
     const auto in_hand_sus = get_fig(last.who_went.get_id());
@@ -901,7 +918,9 @@ bool FigureBoard::undo_move() {
 /// </summary>
 /// <param name="move_rec">Ход</param>
 /// <returns>Удалось ли совершить ход</returns>
-bool FigureBoard::provide_move(const moverec::MoveRec& move_rec) {
+auto FigureBoard::
+    provide_move(const moverec::MoveRec& move_rec) -> bool
+{
     const auto& choice = move_rec.promotion_choice;
     const auto& in_hand = get_fig_unsafe(move_rec.who_went.get_id());
     const auto& ms = move_rec.ms;
@@ -963,7 +982,9 @@ bool FigureBoard::provide_move(const moverec::MoveRec& move_rec) {
 /// Совершает отменённый ход
 /// </summary>
 /// <returns>Удалось ли совершить ход</returns>
-bool FigureBoard::restore_move() {
+auto FigureBoard::
+    restore_move() -> bool
+{
     if (auto future_sus = move_logger.pop_future_move(); future_sus.has_value()) {
         provide_move(future_sus.value());
         move_logger.add_without_reset(future_sus.value());
@@ -981,7 +1002,9 @@ bool FigureBoard::restore_move() {
 /// Фигуры с полученным идендификатором не было в съеденных
 /// </exception>
 /// <param name="id">Идентификатор фигуры</param>
-void FigureBoard::uncapture_figure(const Id id) {
+void FigureBoard::
+    uncapture_figure(const Id id)
+{
     if (id == ERR_ID) return;
     auto to_resurrect_id = std::find_if(
         captured_figures.begin(), captured_figures.end(),
@@ -995,7 +1018,9 @@ void FigureBoard::uncapture_figure(const Id id) {
     captured_figures.erase(to_resurrect_id);
 }
 
-void FigureBoard::promotion_fig(Figure* to_promote, FigureType new_type) {
+void FigureBoard::
+    promotion_fig(Figure* to_promote, FigureType new_type)
+{
     Id id = to_promote->get_id();
     Color color = to_promote->get_col();
     Pos position = to_promote->get_pos();

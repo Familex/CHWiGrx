@@ -21,10 +21,15 @@ class FigureBoard {
     
 public:
     [[nodiscard]] FigureBoard(board_repr::BoardRepr&&) noexcept;
+    
     void reset(board_repr::BoardRepr&&) noexcept;
+
     void operator =(board_repr::BoardRepr&&) noexcept;
+
     void operator =(const board_repr::BoardRepr&) = delete;
+    
     void apply_map(board_repr::BoardRepr&&) noexcept;
+    
     FigureBoard(const FigureBoard&) = delete;
     
     [[nodiscard]] auto
@@ -49,20 +54,29 @@ public:
         return std::nullopt;
     }
     
-    [[nodiscard]] Figure* const get_fig_unsafe(const Pos) const noexcept;
-    [[nodiscard]] Figure* const get_fig_unsafe(const Id) const noexcept;
+    [[nodiscard]] Figure* get_fig_unsafe(const Pos) const noexcept;
+    
+    [[nodiscard]] Figure* get_fig_unsafe(const Id) const noexcept;
+
     [[nodiscard]] bool cont_fig(const Pos) const noexcept;
+
     [[nodiscard]] bool is_empty(const Pos) const noexcept;
     
     [[nodiscard]] bool is_empty() const noexcept 
         { return figures.size() <= 1ull; }
     
     bool capture_figure(Figure* const);
+    
     bool capture_figure(const Id);
+
     void uncapture_figure(const Id);
+
     void delete_fig(const Pos);
+
     void place_fig(Figure* const);
-    [[nodiscard]] std::optional<const Figure*> const find_king(const Color) const noexcept;
+    
+    [[nodiscard]] std::optional<const Figure*> find_king(const Color) const noexcept;
+    
     [[nodiscard]] std::vector<Figure*> get_figures_of(const Color) const noexcept;
     
     [[nodiscard]] auto
