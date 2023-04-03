@@ -3,6 +3,7 @@
 #include "figure.hpp"
 
 #include <expected>
+#include <memory>
 
 namespace figfab {
 
@@ -31,7 +32,7 @@ namespace figfab {
             std::vector<std::string_view> data = split(str, ".");
             Id new_id = svtoi(data[0]).value();
             Color new_col = char_to_col(data[3][0]);
-            Pos new_pos = { svtoi(data[1]).value(), svtoi(data[2]).value() };
+            auto new_pos = Pos{ svtoi(data[1]).value(), svtoi(data[2]).value() };
             FigureType new_type = char_to_figure_type(data[4][0]);
             return instance().create(new_pos, new_col, new_type, new_id);
         }

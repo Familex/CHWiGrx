@@ -47,20 +47,20 @@ inline const HBRUSH CHECKERBOARD_BRIGHT { CreateSolidBrush(RGB(0x80, 0x80, 0x80)
 inline const auto DEFAULT_CHESS_BOARD_IDW { board_repr::BoardRepr::from_string("1;0;0;B;R;2;0;1;B;H;3;0;2;B;B;4;0;3;B;Q;5;0;4;B;K;6;0;5;B;B;7;0;6;B;H;8;0;7;B;R;9;1;0;B;P;10;1;1;B;P;11;1;2;B;P;12;1;3;B;P;13;1;4;B;P;14;1;5;B;P;15;1;6;B;P;16;1;7;B;P;17;6;0;W;P;18;6;1;W;P;19;6;2;W;P;20;6;3;W;P;21;6;4;W;P;22;6;5;W;P;23;6;6;W;P;24;6;7;W;P;25;7;0;W;R;26;7;1;W;H;27;7;2;W;B;28;7;3;W;Q;29;7;4;W;K;30;7;5;W;B;31;7;6;W;H;32;7;7;W;R;[TW1;8;25;32;]<><>~").value() };
 inline const auto DEFAULT_CHESS_BOARD_NIDW { board_repr::BoardRepr::from_string("1;0;0;W;R;2;0;1;W;H;3;0;2;W;B;4;0;3;W;Q;5;0;4;W;K;6;0;5;W;B;7;0;6;W;H;8;0;7;W;R;9;1;0;W;P;10;1;1;W;P;11;1;2;W;P;12;1;3;W;P;13;1;4;W;P;14;1;5;W;P;15;1;6;W;P;16;1;7;W;P;17;6;0;B;P;18;6;1;B;P;19;6;2;B;P;20;6;3;B;P;21;6;4;B;P;22;6;5;B;P;23;6;6;B;P;24;6;7;B;P;25;7;0;B;R;26;7;1;B;H;27;7;2;B;B;28;7;3;B;Q;29;7;4;B;K;30;7;5;B;B;31;7;6;B;H;32;7;7;B;R;[FW1;8;25;32;]<><>~").value() };
 inline const auto EMPTY_REPR = board_repr::BoardRepr({}, Color::White, true);
-inline const int HEADER_HEIGHT = GetSystemMetrics(SM_CXPADDEDBORDER) +
-                                 GetSystemMetrics(SM_CYMENUSIZE)     +
-                                 GetSystemMetrics(SM_CYCAPTION)      +
-                                 GetSystemMetrics(SM_CYFRAME);
-inline const int SCROLLBAR_THICKNESS = GetSystemMetrics(SM_CXVSCROLL);
-inline const LPCTSTR FIGURES_LIST_WINDOW_CLASS_NAME = L"CHWIGRX:LIST";
-inline const LPCTSTR FIGURES_LIST_WINDOW_TITLE = L"Figures list";
-inline const LPCTSTR CURR_CHOICE_WINDOW_CLASS_NAME = L"CHWIGRX:CHOICE";
-inline const Pos FIGURES_LIST_WINDOW_DEFAULT_POS = { CW_USEDEFAULT, CW_USEDEFAULT };
-inline const Pos FIGURES_LIST_WINDOW_DEFAULT_DIMENTIONS = { 300, 300 };
-inline constexpr auto MAIN_WINDOW_CHOICE_TO_DESTROY_TIMER_ID = 1;
-inline constexpr auto FIGURES_LIST_CHOICE_TO_DESTROY_TIMER_ID = 2;
-inline constexpr auto TO_DESTROY_ELAPSE_DEFAULT_IN_MS = 5;
-inline constexpr COLORREF TRANSPARENCY_PLACEHOLDER = RGB(0xFF, 0x0, 0x0);
+inline const int HEADER_HEIGHT{ GetSystemMetrics(SM_CXPADDEDBORDER) +
+                                GetSystemMetrics(SM_CYMENUSIZE) +
+                                GetSystemMetrics(SM_CYCAPTION) +
+                                GetSystemMetrics(SM_CYFRAME) };
+inline const int SCROLLBAR_THICKNESS{ GetSystemMetrics(SM_CXVSCROLL) };
+inline const LPCTSTR FIGURES_LIST_WINDOW_CLASS_NAME{ L"CHWIGRX:LIST" };
+inline const LPCTSTR FIGURES_LIST_WINDOW_TITLE{ L"Figures list" };
+inline const LPCTSTR CURR_CHOICE_WINDOW_CLASS_NAME{ L"CHWIGRX:CHOICE" };
+inline const Pos FIGURES_LIST_WINDOW_DEFAULT_POS{ CW_USEDEFAULT, CW_USEDEFAULT };
+inline const Pos FIGURES_LIST_WINDOW_DEFAULT_DIMENTIONS{ 300, 300 };
+inline constexpr auto MAIN_WINDOW_CHOICE_TO_DESTROY_TIMER_ID{ 1 };
+inline constexpr auto FIGURES_LIST_CHOICE_TO_DESTROY_TIMER_ID{ 2 };
+inline constexpr auto TO_DESTROY_ELAPSE_DEFAULT_IN_MS{ 5 };
+inline constexpr COLORREF TRANSPARENCY_PLACEHOLDER{ RGB(0xFF, 0x0, 0x0) };
 
 /* single mutable globals */
 inline WindowState window_state = WindowState::GAME;
@@ -131,16 +131,16 @@ class WindowStats {
 public:
     WindowStats(Pos window_pos, Pos window_size) : window_pos(window_pos), window_size(window_size) {};
     void virtual recalculate_cell_size() {
-        cell_size = { window_size.x / WIDTH, window_size.y / HEIGHT };
+        cell_size = Pos{ window_size.x / WIDTH, window_size.y / HEIGHT };
     }
     void virtual set_size(int x /* LOWORD */, int y /* HIWORD */) {
-        this->window_size = { x, y };
+        this->window_size = Pos{ x, y };
         recalculate_cell_size();
     }
     void set_size(Pos new_window_size) { set_size(new_window_size.x, new_window_size.y); }
     void set_size(LPARAM lParam) { set_size(LOWORD(lParam), HIWORD(lParam)); }
     inline void set_rect(RECT rect) {
-        set_pos({ rect.left, rect.top });
+        set_pos(rect.left, rect.top);
         set_size(rect.right - rect.left, rect.bottom - rect.top);
     }
     inline int get_width() { return window_size.x; }
@@ -158,14 +158,15 @@ public:
     inline int get_window_pos_y() { return window_pos.y; }
     inline bool is_mouse_moved_enough(Pos mouse) {
         /* не используется */
-        Pos shift = { abs(mouse.x - prev_lbutton_click.x),
-                      abs(mouse.y - prev_lbutton_click.y)
+        auto shift = Pos{
+            abs(mouse.x - prev_lbutton_click.x),
+            abs(mouse.y - prev_lbutton_click.y)
         };
         return shift.x >= UNITS_TO_MOVE_ENOUGH &&
                shift.y >= UNITS_TO_MOVE_ENOUGH;
     }
     inline Pos divide_by_cell_size(int x, int y) {
-        return {x / cell_size.x, y / cell_size.y};
+        return Pos{ x / cell_size.x, y / cell_size.y };
     }
     inline Pos divide_by_cell_size(LPARAM lParam) { return divide_by_cell_size(LOWORD(lParam), HIWORD(lParam)); }
     inline RECT get_cell(Pos start) {
@@ -176,7 +177,7 @@ public:
             .bottom = (start.y + 1) * cell_size.y - INDENTATION_FROM_EDGES * 2
         };
     }
-    inline RECT get_cell(int i, int j) { return get_cell({ i, j }); }
+    inline RECT get_cell(int i, int j) { return get_cell(Pos{ i, j }); }
     inline Pos get_figure_under_mouse(POINT mouse) {
         return divide_by_cell_size(
             mouse.x - window_pos.x,
@@ -185,14 +186,14 @@ public:
     }
     virtual ~WindowStats() {};
 protected:
-    const int UNITS_TO_MOVE_ENOUGH = { 2 };
-    const Pos EXTRA_WINDOW_SIZE = { 0, HEADER_HEIGHT };
+    const int UNITS_TO_MOVE_ENOUGH{ 2 };
+    const Pos EXTRA_WINDOW_SIZE{ 0, HEADER_HEIGHT };
     Pos window_pos;
     Pos prev_lbutton_click{};
     Pos window_size;
-    Pos cell_size = { window_size.x / WIDTH, window_size.y / HEIGHT };
+    Pos cell_size{ window_size.x / WIDTH, window_size.y / HEIGHT };
     const int INDENTATION_FROM_EDGES{ 0 };
-} inline main_window{ { 300, 300 }, { 498, 498 } };
+} inline main_window{ Pos{ 300, 300 }, Pos{ 498, 498 } };
 
 class FiguresListStats : public WindowStats {
 public:
@@ -269,7 +270,7 @@ public:
     inline void deactivate_by_click() { input_order_by_two = false; }
     inline void deactivate_by_pos() { input_order_by_one = 0; }
     inline void set_target(Pos target) { input.target = target; }
-    inline void set_target(int x, int y) { input.target = {x, y}; }
+    inline void set_target(int x, int y) { input.target = Pos{x, y}; }
     inline void set_from(Pos from) { input.from = from; }
     inline void set_in_hand(Figure* in_hand) { this->in_hand = in_hand; }
     inline void clear_hand() { this->in_hand = std::nullopt; }
@@ -294,12 +295,12 @@ public:
 private:
     FigureBoard* board;
     const Pos DEFAULT_INPUT_FROM{ 0, -1 };
-    Input input{ DEFAULT_INPUT_FROM, {-1, -1} };
+    Input input{ DEFAULT_INPUT_FROM, Pos{-1, -1} };
     int  input_order_by_one{ 0 };
     bool input_order_by_two{ false };
     bool is_lbutton_down{ false };
-    HWND curr_chose_window{};
+    HWND curr_chose_window{ };
     bool is_curr_choice_moving{ false };
-    std::optional<Figure*> in_hand = std::nullopt;
+    std::optional<Figure*> in_hand{ std::nullopt };
     std::vector<std::pair<bool, Pos>> all_moves{};
 } inline motion_input{ &board };

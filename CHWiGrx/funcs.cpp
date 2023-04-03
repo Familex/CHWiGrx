@@ -349,9 +349,9 @@ void on_lbutton_down(HWND hWnd, LPARAM lParam) {
     if (window_state == WindowState::GAME && bot_type != bot::Type::None && turn == bot_turn) {
         return;
     }
-
+    
     motion_input.set_lbutton_down();
-    main_window.set_prev_lbutton_click({ LOWORD(lParam), HIWORD(lParam) });
+    main_window.set_prev_lbutton_click( Pos{ LOWORD(lParam), HIWORD(lParam) });
     motion_input.deactivate_by_pos();
     if (motion_input.is_active_by_click()) {
         motion_input.set_target(main_window.divide_by_cell_size(lParam).change_axes());
@@ -414,7 +414,7 @@ void MotionInput::clear() {
     deactivate_by_click();
     deactivate_by_pos();
     in_hand = std::nullopt;
-    input = { {0, -1}, {-1, -1} };
+    input = Input{ Pos{0, -1}, Pos{-1, -1} };
     all_moves.clear();
 }
 

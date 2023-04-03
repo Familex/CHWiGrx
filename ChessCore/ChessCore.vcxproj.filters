@@ -27,9 +27,6 @@
     <ClCompile Include="FigureBoard.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
-    <ClCompile Include="stuff\stuff.cpp">
-      <Filter>stuff\src</Filter>
-    </ClCompile>
     <ClCompile Include="bot.cpp">
       <Filter>stuff\src</Filter>
     </ClCompile>
@@ -47,7 +44,7 @@
     <ClInclude Include="stuff\move_logger.hpp">
       <Filter>stuff\h</Filter>
     </ClInclude>
-    <ClInclude Include="stuff\stuff.h">
+    <ClInclude Include="stuff\stuff.hpp">
       <Filter>stuff\h</Filter>
     </ClInclude>
     <ClInclude Include="stuff\figure.hpp">
@@ -57,6 +54,21 @@
       <Filter>stuff\h</Filter>
     </ClInclude>
     <ClInclude Include="bot.h">
+      <Filter>stuff\h</Filter>
+    </ClInclude>
+    <ClInclude Include="input.hpp">
+      <Filter>stuff\h</Filter>
+    </ClInclude>
+    <ClInclude Include="pos.hpp">
+      <Filter>stuff\h</Filter>
+    </ClInclude>
+    <ClInclude Include="cexau.h">
+      <Filter>stuff\h</Filter>
+    </ClInclude>
+    <ClInclude Include="macro.h">
+      <Filter>stuff\h</Filter>
+    </ClInclude>
+    <ClInclude Include="enums.hpp">
       <Filter>stuff\h</Filter>
     </ClInclude>
   </ItemGroup>

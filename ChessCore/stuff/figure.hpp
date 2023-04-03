@@ -1,6 +1,9 @@
 #pragma once
 
-#include "stuff.h"
+#include "macro.h"
+#include "stuff.hpp"
+
+#include <format>
 
 class Figure {
     Id id{ ERR_ID };
@@ -9,64 +12,75 @@ class Figure {
     FigureType type{ FigureType::None };
     
 public:
-    [[nodiscard]] constexpr Figure() noexcept
-        {};
-        
-    [[nodiscard]] constexpr Figure(const Id id, 
-                                   const Pos& position,      
-                                   const Color color, 
-                                   const FigureType type) noexcept
+    CTOR Figure() noexcept {};
+
+    CTOR Figure(const Id id, const Pos& position, const Color color, const FigureType type) noexcept
         : id{ id }
         , position{ position }
         , color{ color }
         , type{ type } {};
         
-    constexpr void move_to(const Pos& p) noexcept 
-        { position = p; }
-    
-    constexpr void move_to(const int x, const int y) noexcept
-        { position.x = x; position.y = y; }
-    
-    [[nodiscard]] constexpr bool operator ==(const Figure& r) const
-        { return this->id == r.id; }
-    
-    [[nodiscard]] std::string as_string() const {
-        return std::format("{}.{}.{}.{}.{}",
-            id, position.x, position.y, col_to_char(color), figure_type_to_char(type));
+    FN move_to(const Pos& p) noexcept {
+        position = p;
     }
     
-    [[nodiscard]] constexpr Id get_id() const noexcept
-        { return id; }
+    FN move_to(const int x, const int y) noexcept {
+        position.x = x; position.y = y;
+    }
     
-    [[nodiscard]] constexpr Pos get_pos() const noexcept
-        { return position; }
+    FN operator <=>(const Figure& r) const noexcept {
+        return this->id <=> r.id;
+    }
     
-    [[nodiscard]] constexpr Color get_col() const noexcept
-        { return color; }
+    [[nodiscard]] auto
+        as_string() const noexcept -> std::string
+    {
+        // x-axis from top  to bottom (↓)
+        // y-axis from left to right  (→)
+        return std::format("{}{}{}{}",
+            id, position.as_string(),
+            col_to_char(color), figure_type_to_char(type)
+        );
+    }
     
-    [[nodiscard]] constexpr FigureType get_type() const noexcept
-        { return type; }
+    FN get_id() const noexcept -> Id {
+        return id;
+    }
     
-    [[nodiscard]] constexpr bool is_col(const Color col) const noexcept
-        { return color == col; }
+    FN get_pos() const noexcept -> Pos {
+        return position;
+    }
     
-    [[nodiscard]] constexpr bool is_col(const Figure* const fig) const noexcept
-        { return color == fig->get_col(); }
+    FN get_col() const noexcept -> Color {
+        return color;
+    }
     
-    [[nodiscard]] constexpr bool empty() const noexcept
-        { return id == ERR_ID; }
+    FN get_type() const noexcept -> FigureType {
+        return type;
+    }
     
-    [[nodiscard]] constexpr bool is(const Id id) const noexcept
-        { return this->id == id; }
+    FN is_col(const Color col) const noexcept -> bool {
+        return color == col;
+    }
     
-    [[nodiscard]] constexpr bool is(FigureType type) const noexcept
-        { return this->type == type; }
+    FN is_col(const Figure* const fig) const noexcept -> bool {
+        return color == fig->get_col();
+    }
+
+    FN is(const Id id) const noexcept -> bool {
+        return this->id == id;
+    }
     
-    [[nodiscard]] constexpr bool at(Pos p) const noexcept
-        { return position == p; }
+    FN is(FigureType type) const noexcept -> bool {
+        return this->type == type;
+    }
+    
+    FN at(Pos p) const noexcept -> bool {
+        return position == p;
+    }
 };
 
-[[nodiscard]] constexpr auto to_pos_vector(const std::vector<Figure*>& lst) noexcept -> std::vector<Pos> {
+FN to_pos_vector(const std::vector<Figure*>& lst) noexcept -> std::vector<Pos> {
     std::vector<Pos> acc{};
     for (const auto& fig : lst) {
         acc.emplace_back(fig->get_pos());

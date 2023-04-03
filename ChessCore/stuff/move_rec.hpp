@@ -1,6 +1,6 @@
 #pragma once
 
-#include "stuff.h"
+#include "stuff.hpp"
 #include "figure.hpp"
 #include "figure_fabric.hpp"
 
@@ -106,7 +106,7 @@ namespace moverec {
                 }
             }
             for (size_t i{}; i < tmp.size(); i += 5) {
-                std::pair<Id, Input> to_move{ tmp[i], {{tmp[i + 1], tmp[i + 2]}, {tmp[i + 3], tmp[i + 4]}} };
+                std::pair<Id, Input> to_move{ tmp[i], Input{Pos{tmp[i + 1], tmp[i + 2]}, Pos{tmp[i + 3], tmp[i + 4]}} };
                 result.ms.to_move.push_back(to_move);
             }
             if (data[14].length() >= 5) { // 2 extra spaces from split...
@@ -122,17 +122,15 @@ namespace moverec {
         FN as_string() const noexcept -> std::string
         {
             std::string result{ "" };
-            result += std::format("{}.{}.{}.{}.{}.{}.{}.{{",
+            result += std::format("{}.{}.{}.{}.{}.{{",
                 who_went.as_string(),
-                input.from.x,
-                input.from.y,
-                input.target.x,
-                input.target.y,
-                to_string(ms.main_ev),
+                input.from.as_string(),
+                input.target.as_string(),
+                ::as_string(ms.main_ev),
                 figure_type_to_char(promotion_choice)
             );
             for (const SideEvent& side_ev : ms.side_evs) {
-                result += to_string(side_ev) + ",";
+                result += ::as_string(side_ev) + ",";
             }
             result += "}.{";
             for (const Id to_eat : ms.to_eat) {

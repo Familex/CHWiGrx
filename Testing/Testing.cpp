@@ -13,11 +13,11 @@ namespace Microsoft::VisualStudio::CppUnitTestFramework
 {
     template <>
     std::wstring ToString<MainEvent>(const MainEvent& me) {
-        return to_wstring(me);
+        return as_wstring(me);
     }
     template <>
     std::wstring ToString<FigureType>(const FigureType& ft) {
-        return to_wstring(ft);
+        return as_wstring(ft);
     }
 }
 
@@ -128,7 +128,7 @@ namespace FigureBoardTesting
                         enemies.emplace_back(i, j);
                     }
                     else if (line[j] == figure) {
-                        figure_pos = { i, j };
+                        figure_pos = Pos{ i, j };
                     }
                     else if (line[j] == figure_which_cant_be_eaten) {
                         figures_which_cant_be_eaten.emplace_back(i, j);
@@ -405,8 +405,8 @@ namespace FigureBoardTesting
             TEST_METHOD(EnPassant)
             {
                 FigureBoard board{ BoardRepr{
-                    {new Figure(0_id, {3, 2}, Color::White, FigureType::Pawn),
-                     new Figure(1_id, {1, 3}, Color::Black, FigureType::Pawn)},
+                    {new Figure(0_id, Pos{3, 2}, Color::White, FigureType::Pawn),
+                     new Figure(1_id, Pos{1, 3}, Color::Black, FigureType::Pawn)},
                      Color::Black,
                      true
                 } };
@@ -458,8 +458,8 @@ namespace FigureBoardTesting
             TEST_METHOD(EnPassantReversed)
             {
                 FigureBoard board{ BoardRepr{
-                    {new Figure(0_id, {3, 2}, Color::Black, FigureType::Pawn),
-                     new Figure(1_id, {1, 3}, Color::White, FigureType::Pawn)},
+                    {new Figure(0_id, Pos{3, 2}, Color::Black, FigureType::Pawn),
+                     new Figure(1_id, Pos{1, 3}, Color::White, FigureType::Pawn)},
                      Color::White,
                      false
                 } };
@@ -511,7 +511,7 @@ namespace FigureBoardTesting
             TEST_METHOD(Promotion)
             {
                 FigureBoard board{ BoardRepr{
-                    {new Figure(0_id, {1, 5}, Color::White, FigureType::Pawn)},
+                    {new Figure(0_id, Pos{1, 5}, Color::White, FigureType::Pawn)},
                      Color::White,
                      true
                 } };
@@ -549,7 +549,7 @@ namespace FigureBoardTesting
             TEST_METHOD(PromotionReversed)
             {
                 FigureBoard board{ BoardRepr{
-                    {new Figure(0_id, {1, 5}, Color::Black, FigureType::Pawn)},
+                    {new Figure(0_id, Pos{1, 5}, Color::Black, FigureType::Pawn)},
                      Color::Black,
                      false
                 } };
@@ -606,11 +606,11 @@ namespace FigureBoardTesting
                     for (int y = 0; y < 8; ++y)
                     {
                         Assert::AreEqual(
-                            moves_count<true>({ x, y }, FigureType::Knight), 
+                            moves_count<true>(Pos{ x, y }, FigureType::Knight), 
                             moves[x][y]
                         );
                         Assert::AreEqual(
-                            moves_count<false>({ x, y }, FigureType::Knight),
+                            moves_count<false>(Pos{ x, y }, FigureType::Knight),
                             moves[x][y]
                         );
                     }
@@ -1024,7 +1024,7 @@ namespace FigureBoardTesting
 
                     Assert::AreEqual(
                         std::count_if(moves.begin(), moves.end(), [&](const auto& p) {
-                            MoveMessage mm = b.move_check(king, { king->get_pos(), p.second }).value();
+                            MoveMessage mm = b.move_check(king, Input{ king->get_pos(), p.second }).value();
                             return mm.main_ev == MainEvent::CASTLING; }
                     ), 2ll);
                 }

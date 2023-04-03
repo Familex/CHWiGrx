@@ -1,6 +1,6 @@
 #pragma once
 
-#include "stuff/stuff.h"
+#include "stuff/stuff.hpp"
 #include "stuff/figure.hpp"
 #include "FigureBoard.h"
 

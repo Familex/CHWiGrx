@@ -1,5 +1,7 @@
 #include "../declarations.hpp"
 
+#include <map>
+
 LRESULT CALLBACK figures_list_wndproc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) {
     SCROLLINFO si{.cbSize=sizeof(SCROLLINFO)};
     static PAINTSTRUCT ps;
@@ -18,7 +20,7 @@ LRESULT CALLBACK figures_list_wndproc(HWND hWnd, UINT message, WPARAM wParam, LP
             for (Color col : PLAYABLE_COLORS) {
                 for (FigureType type : PLAYABLE_FIGURES) {
                     figures_prototypes[col].push_back(
-                        figfab::FigureFabric::instance().create({}, col, type)
+                        figfab::FigureFabric::instance().create(Pos{}, col, type)
                     );
                 }
             }
@@ -151,7 +153,7 @@ LRESULT CALLBACK figures_list_wndproc(HWND hWnd, UINT message, WPARAM wParam, LP
                 int x = static_cast<int>(index / figures_list.get_figures_in_row());
                 int y = static_cast<int>(index % figures_list.get_figures_in_row());
                 const auto& fig_to_draw = figures_prototypes[curr_color][index];
-                draw_figure(hdcMem, fig_to_draw.get(), {x, y},
+                draw_figure(hdcMem, fig_to_draw.get(), Pos{x, y},
                     true, static_cast<int>(figures_list.get_cell_height()), static_cast<int>(figures_list.get_cell_width()));
             }
 

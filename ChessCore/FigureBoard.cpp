@@ -8,13 +8,11 @@ void FigureBoard::reset(board_repr::BoardRepr&& map) noexcept {
     move_logger.reset();
     curr_id = 0;
     for (auto& [_, fig] : figures) {
-        if (not fig->empty())
-            delete fig;
+        delete fig;
     }
     figures.clear();
     for (auto& fig : captured_figures) {
-        if (not fig->empty())
-            delete fig;
+        delete fig;
     }
     captured_figures.clear();
     reset_castling(map);
@@ -33,28 +31,30 @@ void FigureBoard::init_figures_moves() noexcept {
     std::vector<Pos>temp_down;
     
     for (int ij = 1; ij < std::min(WIDTH, HEIGHT); ++ij) {
-        temp_left_up.push_back({ -ij, -ij });
-        temp_left_down.push_back({ ij, -ij });
-        temp_right_up.push_back({ -ij, ij });
-        temp_right_down.push_back({ ij, ij });
-        temp_left.push_back({ 0, -ij });
-        temp_right.push_back({ 0, ij });
-        temp_up.push_back({ -ij, 0 });
-        temp_down.push_back({ ij, 0 });
+        temp_left_up.emplace_back(-ij, -ij);
+        temp_left_down.emplace_back(ij, -ij);
+        temp_right_up.emplace_back(-ij, ij);
+        temp_right_down.emplace_back(ij, ij);
+        temp_left.emplace_back(0, -ij);
+        temp_right.emplace_back(0, ij);
+        temp_up.emplace_back(-ij, 0);
+        temp_down.emplace_back(ij, 0);
     }
 
     // Задаётся относительно белых через idw
-    moves[FigureType::Pawn] = { {{ (idw ? -1 : 1), 0}} };
-    eats[FigureType::Pawn] = { {{ (idw ? -1 : 1), -1}}, {{ (idw ? -1 : 1), 1}} };
+    moves[FigureType::Pawn] = { { Pos{ (idw ? -1 : 1), 0}} };
+    eats[FigureType::Pawn] = { { Pos{ (idw ? -1 : 1), -1}}, { Pos{ (idw ? -1 : 1), 1}} };
 
-    moves[FigureType::Knight] = { {{-1, 2}}, {{-1, -2}},
-        {{1, -2}}, {{1, 2}}, {{2, -1}}, {{-2, -1}},
-        {{2, 1}}, {{-2, 1}}, };
+    moves[FigureType::Knight] = { { Pos{-1, 2} }, { Pos{-1, -2} },
+        { Pos{1, -2} }, { Pos{1, 2} }, { Pos{2, -1} }, { Pos{-2, -1} },
+        { Pos{2, 1} }, { Pos{-2, 1} }, 
+    };
     eats[FigureType::Knight] = moves[FigureType::Knight];
 
-    moves[FigureType::King] = { {{-1, -1}}, {{-1, 1}}, {{-1, 0}},
-        {{0, -1}}, {{0, 1}}, {{1, 1}}, {{1, -1}},
-        {{1, 0}} };
+    moves[FigureType::King] = { { Pos{-1, -1} }, { Pos{-1, 1} }, { Pos{-1, 0} },
+        { Pos{0, -1} }, { Pos{0, 1} }, { Pos{1, 1} }, { Pos{1, -1} },
+        { Pos{1, 0} }
+    };
     eats[FigureType::King] = moves[FigureType::King];
 
     moves[FigureType::Bishop] = { temp_left_up, temp_left_down, temp_right_up, temp_right_down };
@@ -164,9 +164,6 @@ bool FigureBoard::is_empty(Pos position) const noexcept {
 /// <param name="it">Итератор на фигуру</param>
 /// <returns>Получилось ли съесть</returns>
 bool FigureBoard::capture_figure(Figure* const it) {
-    if (it->empty()) {
-        return false;
-    }
     captured_figures.push_back(it);
     figures.erase(it->get_pos());
     return true;
@@ -198,7 +195,6 @@ void FigureBoard::delete_fig(Pos pos) {
 }
 
 void FigureBoard::place_fig(Figure* const fig) {
-    if (fig->empty()) assert(!"trying to place empty figure");
     if (cont_fig(fig->get_pos())) delete_fig(fig->get_pos());
     figures[fig->get_pos()] = fig;
 }
@@ -355,22 +351,22 @@ auto FigureBoard::
     if (in_hand->get_type() == FigureType::King) {
         for (auto [king_end_col, rook_end_col] : { std::pair(6, 5), std::pair(2, 3) } ) {
             const auto pack = 
-                castling_check({}, in_hand, { in_hand_pos, {in_hand_pos.x, king_end_col} }, king_end_col, rook_end_col);
+                castling_check({}, in_hand, Input{ in_hand_pos, Pos{in_hand_pos.x, king_end_col} }, king_end_col, rook_end_col);
             if (pack.has_value()) {
                 const auto& [mm, king, rook] = pack.value();
                     if (has_castling(rook->get_id())) {
-                        all_moves.push_back({ false, {in_hand_pos.x, king_end_col} });
+                        all_moves.push_back({ false, Pos{in_hand_pos.x, king_end_col} });
                     }
             }
         }
     }
     if (in_hand->get_type() == FigureType::Rook) {
         for (auto [king_end_col, rook_end_col] : { std::pair(6, 5), std::pair(2, 3) }) {
-            const auto pack = castling_check({}, in_hand, { in_hand_pos, {in_hand_pos.x, rook_end_col} }, king_end_col, rook_end_col);
+            const auto pack = castling_check({}, in_hand, Input{ in_hand_pos, Pos{in_hand_pos.x, rook_end_col} }, king_end_col, rook_end_col);
             if (pack.has_value()) {
                 const auto& [mm, king, rook] = pack.value();
                 if (has_castling(rook->get_id())) {
-                    all_moves.push_back({ false, {in_hand_pos.x, rook_end_col} });
+                    all_moves.push_back({ false, Pos{in_hand_pos.x, rook_end_col} });
                 }
             }
         }
@@ -596,8 +592,8 @@ auto FigureBoard::
         }
         // FIXME can this be done in loop body?
         castling_can_be_done &= 
-            !check_for_when(in_hand->get_col(), { king_pos, rook_pos }, { king_pos.x, king_end_col });
-        auto cell_sus = get_fig({ king_pos.x, rook_end_col });
+            !check_for_when(in_hand->get_col(), { king_pos, rook_pos }, Pos{ king_pos.x, king_end_col });
+        auto cell_sus = get_fig(Pos{ king_pos.x, rook_end_col });
         castling_can_be_done &= 
             !cell_sus.has_value()
             || cell_sus.value()->get_id() == king->get_id() 
@@ -605,10 +601,10 @@ auto FigureBoard::
         if (castling_can_be_done) {
             move_message.main_ev = MainEvent::CASTLING;
             if (in_hand->get_type() == FigureType::King) {
-                move_message.to_move.push_back({ rook->get_id(), {rook_pos, {rook_pos.x, rook_end_col}} });
+                move_message.to_move.push_back({ rook->get_id(), Input{rook_pos, Pos{rook_pos.x, rook_end_col}} });
             }
             else {
-                move_message.to_move.push_back({ king->get_id(), {king_pos, {king_pos.x, king_end_col}} });
+                move_message.to_move.push_back({ king->get_id(), Input{king_pos, Pos{king_pos.x, king_end_col}} });
             }
             return std::make_tuple(move_message, king, rook);
         }
@@ -703,10 +699,10 @@ auto FigureBoard::
             if (pack.has_value()) {
                 const auto& [mm, king, rook] = pack.value();
                 if (has_castling(rook->get_id())) {
-                    auto king_tmp = figfab::FigureFabric::instance().submit_on(king, { in_hand->get_pos().x, king_end_col });
-                    auto rook_tmp = figfab::FigureFabric::instance().submit_on(rook, { rook->get_pos().x, rook_end_col });
+                    auto king_tmp = figfab::FigureFabric::instance().submit_on(king, Pos{ in_hand->get_pos().x, king_end_col });
+                    auto rook_tmp = figfab::FigureFabric::instance().submit_on(rook, Pos{ rook->get_pos().x, rook_end_col });
                     if (check_for_when(what_next(in_hand->get_col()),
-                        { input.from, king->get_pos(), rook->get_pos() }, {}, {},
+                        { input.from, king->get_pos(), rook->get_pos() }, Pos{}, {},
                         { king_tmp.get(), rook_tmp.get() })) {
                         move_message.side_evs.push_back(SideEvent::CHECK);
                     }
@@ -718,9 +714,9 @@ auto FigureBoard::
 
     if (in_hand->get_type() == FigureType::Pawn) {
         if (in_hand->is_col(Color::White) &&
-                (idw && input.target.x == 0 || not idw && input.target.x == (HEIGHT - 1)) ||
+                (idw && input.target.x == 0 || !idw && input.target.x == (HEIGHT - 1)) ||
                 in_hand->get_col() == Color::Black &&
-                (not idw && input.target.x == 0 || idw && input.target.x == (HEIGHT - 1))
+                (!idw && input.target.x == 0 || idw && input.target.x == (HEIGHT - 1))
                 ) {
             move_message.side_evs.push_back(SideEvent::PROMOTION);
         }
@@ -730,15 +726,15 @@ auto FigureBoard::
         if (shift.y == 0 && is_empty(input.target) && (
             in_hand->get_col() == Color::White && (
                 input.from.x == (HEIGHT - 2) && idw && shift.x == -2 && is_empty(input.from + Pos(-1, 0)) ||
-                input.from.x == 1 && not idw && shift.x == 2 && is_empty(input.from + Pos(1, 0))
+                input.from.x == 1 && !idw && shift.x == 2 && is_empty(input.from + Pos(1, 0))
                 ) ||
             in_hand->is_col(Color::Black) && (
                 input.from.x == 1 && idw && shift.x == 2 && is_empty(input.from + Pos(1, 0)) ||
-                input.from.x == (HEIGHT - 2) && not idw && shift.x == -2 && is_empty(input.from + Pos(-1, 0))
+                input.from.x == (HEIGHT - 2) && !idw && shift.x == -2 && is_empty(input.from + Pos(-1, 0))
                 )
             )) {
             auto in_hand_in_targ_tmp = figfab::FigureFabric::instance().submit_on(in_hand, input.target);
-            if (check_for_when(what_next(in_hand->get_col()), { input.from }, {}, {}, { in_hand_in_targ_tmp.get()})) {
+            if (check_for_when(what_next(in_hand->get_col()), { input.from }, Pos{}, {}, { in_hand_in_targ_tmp.get()})) {
                 move_message.side_evs.push_back(SideEvent::CHECK);
             }
             if (in_hand->get_type() == FigureType::King) {
@@ -747,7 +743,7 @@ auto FigureBoard::
                 }
             }
             else {
-                if (check_for_when(in_hand->get_col(), { input.from }, {}, { in_hand_in_targ_tmp.get()}, {})) {
+                if (check_for_when(in_hand->get_col(), { input.from }, Pos{}, { in_hand_in_targ_tmp.get()}, {})) {
                     return std::unexpected{ ErrorEvent::UNDER_CHECK };
                 }
             }
@@ -774,28 +770,28 @@ auto FigureBoard::
                         )
                     )) {
                 auto in_hand_in_targ_tmp = figfab::FigureFabric::instance().submit_on(in_hand, input.target);
-                if (check_for_when(what_next(in_hand->get_col()), { input.from, {input.from.x, input.target.y}, input.target }, {}, {}, { in_hand_in_targ_tmp.get() })) {
+                if (check_for_when(what_next(in_hand->get_col()), { input.from, Pos{input.from.x, input.target.y}, input.target }, Pos{}, {}, { in_hand_in_targ_tmp.get() })) {
                     move_message.side_evs.push_back(SideEvent::CHECK);
                 }
                 if (in_hand->get_type() == FigureType::King) {
                     // Фигура на которой сейчас стоим всё ещё учитывается!
-                    if (check_for_when(in_hand->get_col(), { input.from, {input.from.x, input.target.y}, input.target }, input.target)) {
+                    if (check_for_when(in_hand->get_col(), { input.from, Pos{input.from.x, input.target.y}, input.target }, input.target)) {
                         return std::unexpected{ ErrorEvent::CHECK_IN_THAT_TILE };
                     }
                 }
                 else {
                     // Фигура на которой сейчас стоим всё ещё учитывается!
-                    if (check_for_when(in_hand->get_col(), { input.from, {input.from.x, input.target.y}, input.target }, {}, { in_hand_in_targ_tmp.get() }, {})) {
+                    if (check_for_when(in_hand->get_col(), { input.from, Pos{input.from.x, input.target.y}, input.target }, Pos{}, { in_hand_in_targ_tmp.get() }, {})) {
                         return std::unexpected{ ErrorEvent::UNDER_CHECK };
                     }
                 }
                 move_message.main_ev = MainEvent::EN_PASSANT;
-                if (const auto to_eat_sus = get_fig({ input.from.x, input.target.y });
-                    to_eat_sus.has_value()) {
+                if (const auto to_eat_sus = get_fig(Pos{ input.from.x, input.target.y });
+                        to_eat_sus.has_value()) {
                     move_message.to_eat.push_back(to_eat_sus.value()->get_id());
                 }
                 if (const auto to_eat_sus = get_fig(input.target);
-                    to_eat_sus.has_value()) {
+                        to_eat_sus.has_value()) {
                     move_message.to_eat.push_back(to_eat_sus.value()->get_id());
                 }
                 return move_message;
@@ -809,7 +805,7 @@ auto FigureBoard::
         if (is_eat && targ_sus.has_value()) {
             auto in_hand_in_curr_tmp = figfab::FigureFabric::instance().submit_on(in_hand, curr);
             // Фигура на которой сейчас стоим всё ещё учитывается!
-            if (check_for_when(what_next(in_hand->get_col()), {input.from, input.target}, {}, {}, { in_hand_in_curr_tmp.get() })) {
+            if (check_for_when(what_next(in_hand->get_col()), {input.from, input.target}, Pos{}, {}, { in_hand_in_curr_tmp.get() })) {
                 move_message.side_evs.push_back(SideEvent::CHECK);
             }
             if (in_hand->get_type() == FigureType::King) {
@@ -820,7 +816,7 @@ auto FigureBoard::
             }
             else {
                 // Фигура на которой сейчас стоим всё ещё учитывается!
-                if (check_for_when(in_hand->get_col(), {input.from, input.target}, {}, { in_hand_in_curr_tmp.get() }, {})) {
+                if (check_for_when(in_hand->get_col(), {input.from, input.target}, Pos{}, { in_hand_in_curr_tmp.get() }, {})) {
                     return std::unexpected{ ErrorEvent::UNDER_CHECK };
                 }
             }
@@ -830,7 +826,7 @@ auto FigureBoard::
         }
         else if (!is_eat && !targ_sus.has_value()) {
             auto in_hand_in_curr_tmp = figfab::FigureFabric::instance().submit_on(in_hand, curr);
-            if (check_for_when(what_next(in_hand->get_col()), {input.from}, {}, {}, { in_hand_in_curr_tmp.get() })) {
+            if (check_for_when(what_next(in_hand->get_col()), {input.from}, Pos{}, {}, { in_hand_in_curr_tmp.get() })) {
                 move_message.side_evs.push_back(SideEvent::CHECK);
             }
             if (in_hand->get_type() == FigureType::King) {
@@ -839,7 +835,7 @@ auto FigureBoard::
                 }
             }
             else {
-                if (check_for_when(in_hand->get_col(), {input.from}, {}, { in_hand_in_curr_tmp.get() }, {})) {
+                if (check_for_when(in_hand->get_col(), {input.from}, Pos{}, { in_hand_in_curr_tmp.get() }, {})) {
                     return std::unexpected{ ErrorEvent::UNDER_CHECK };
                 }
             }
@@ -860,7 +856,7 @@ auto FigureBoard::
     undo_move() -> bool
 {
     if (move_logger.prev_empty()) return false;
-    const auto& last = move_logger.move_last_to_future().value();
+    const moverec::MoveRec last = move_logger.move_last_to_future().value();
     const auto in_hand_sus = get_fig(last.who_went.get_id());
     if (!in_hand_sus.has_value()) return false;
     const auto in_hand = in_hand_sus.value();
@@ -933,8 +929,11 @@ auto FigureBoard::
         break;
     case MainEvent::EN_PASSANT: case MainEvent::EAT:
         for (const Id& it : ms.to_eat) {
-            if (it != ERR_ID && get_fig(it).value()->get_pos() != input.target)
-                capture_figure(it);
+            if (auto to_capture_sus = get_fig(it);
+                    to_capture_sus.has_value() && to_capture_sus.value()->get_pos() != input.target)
+            {
+                capture_figure(to_capture_sus.value());
+            }
         }
         move_fig(in_hand, input.target);
         break;

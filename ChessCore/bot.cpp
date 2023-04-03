@@ -38,7 +38,7 @@ Input bot::impl::random_move(const FigureBoard& board, const Color turn) noexcep
         return Input();
     }
     const auto& [fig, move] = possible_figure_moves[rand() % possible_figure_moves.size()];
-    return { fig->get_pos(), move.second };
+    return Input{ fig->get_pos(), move.second };
 }
 
 Input bot::impl::minimax_move(const FigureBoard& board, const Color turn) noexcept {

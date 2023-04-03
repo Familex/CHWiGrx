@@ -1,9 +1,11 @@
 #pragma once
 
+#include "stuff/stuff.hpp"
 #include "stuff/board_repr.hpp"
 #include "stuff/move_logger.hpp"
 
 #include <variant>
+#include <map>
 
 class FigureBoard {
     /*  x-axis from top to bottom (↓)  **
@@ -95,14 +97,14 @@ public:
                                    const std::vector<Pos> & = {}) const noexcept -> std::vector<std::pair<bool, Pos>>;
     
     [[nodiscard]] auto
-        checkmate_for(const Color, const std::vector<Pos>& = {}, const Pos = {}) const noexcept -> bool;
+        checkmate_for(const Color, const std::vector<Pos>& = {}, const Pos = Pos{}) const noexcept -> bool;
     
     [[nodiscard]] auto
-        stalemate_for(const Color, const std::vector<Pos>& = {}, Pos = {}) const noexcept -> bool;
+        stalemate_for(const Color, const std::vector<Pos>& = {}, Pos = Pos{}) const noexcept -> bool;
     
     [[nodiscard]] auto
         check_for_when(const Color, const std::vector<Pos>& = {},
-                         const Pos = {}, const std::vector<Figure*>& = {}, 
+                         const Pos = Pos{}, const std::vector<Figure*>& = {}, 
                            const std::vector<Figure*>& = {}) const noexcept -> bool;
     
     [[nodiscard]] auto
@@ -248,12 +250,10 @@ public:
     
     ~FigureBoard() noexcept {
         for (auto& [_, fig] : figures) {
-            if (not fig->empty())
-                delete fig;
+            delete fig;
         }
         for (auto& fig : captured_figures) {
-            if (not fig->empty())
-                delete fig;
+            delete fig;
         }
     }
 };
