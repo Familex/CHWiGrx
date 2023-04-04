@@ -1,6 +1,6 @@
 #pragma once
 
-#include "input.hpp"
+#include "../structs/input.hpp"
 #include "enums.hpp"
 
 #include <charconv>
@@ -42,11 +42,3 @@ template <class T>
 using Id = int;
 constexpr Id ERR_ID{ -1 };
 constexpr int EN_PASSANT_INDENT = 4;
-
-struct MoveMessage {
-    MainEvent main_ev{ MainEvent::E };
-    std::vector<SideEvent> side_evs;
-    std::vector<Id> to_eat;
-    std::vector<std::pair<Id, Input>> to_move;
-    std::vector<Id> what_castling_breaks;
-};

@@ -1,5 +1,10 @@
 #include "FigureBoard.h"
 
+#include "structs/pos.hpp"
+#include "structs/input.hpp"
+#include "structs/move_message.hpp"
+#include "structs/board_repr.hpp"
+
 FigureBoard::FigureBoard(board_repr::BoardRepr&& board_repr) noexcept {
     reset(std::move(board_repr));
 }
@@ -670,7 +675,7 @@ auto FigureBoard::
     move_check(const Figure* const in_hand, const Input& input) const noexcept
         -> std::expected<MoveMessage, ErrorEvent>
 {
-    MoveMessage move_message{ MainEvent::E, {} };
+    MoveMessage move_message{ {}, {} };
 
     if (!(is_valid_coords(input.from) && is_valid_coords(input.target)) 
         || input.from == input.target
@@ -680,11 +685,13 @@ auto FigureBoard::
         return std::unexpected{ ErrorEvent::INVALID_MOVE };
     }
 
+    // Castling break by rook
     if (in_hand->get_type() == FigureType::Rook) {
         move_message.side_evs.push_back(SideEvent::CASTLING_BREAK);
         move_message.what_castling_breaks.push_back(in_hand->get_id());
     }
 
+    // Castling and castling break by king
     if ((in_hand->get_type() == FigureType::King || in_hand->get_type() == FigureType::Rook) &&
         WIDTH == 8) {
         move_message.side_evs.push_back(SideEvent::CASTLING_BREAK);
@@ -701,6 +708,7 @@ auto FigureBoard::
                 if (has_castling(rook->get_id())) {
                     auto king_tmp = figfab::FigureFabric::instance().submit_on(king, Pos{ in_hand->get_pos().x, king_end_col });
                     auto rook_tmp = figfab::FigureFabric::instance().submit_on(rook, Pos{ rook->get_pos().x, rook_end_col });
+                    // FIXME debug this branch (move_message.push and check after success castling)
                     if (check_for_when(what_next(in_hand->get_col()),
                         { input.from, king->get_pos(), rook->get_pos() }, Pos{}, {},
                         { king_tmp.get(), rook_tmp.get() })) {
@@ -712,7 +720,9 @@ auto FigureBoard::
         }
     }
 
+    // Pawn
     if (in_hand->get_type() == FigureType::Pawn) {
+        // Promotion
         if (in_hand->is_col(Color::White) &&
                 (idw && input.target.x == 0 || !idw && input.target.x == (HEIGHT - 1)) ||
                 in_hand->get_col() == Color::Black &&
@@ -721,6 +731,7 @@ auto FigureBoard::
             move_message.side_evs.push_back(SideEvent::PROMOTION);
         }
 
+        // Long move
         Pos shift{ input.target - input.from };
         // Ход пешки на 2 (смотрю свои фигуры на 2 линии)
         if (shift.y == 0 && is_empty(input.target) && (
@@ -872,6 +883,7 @@ auto FigureBoard::
         case MainEvent::EN_PASSANT: case MainEvent::EAT:
             move_fig(in_hand, input.from);
             for (const auto& it : ms.to_eat) {
+                // FIXME debug on rook with castling
                 uncapture_figure(it);
             }
             break;
@@ -882,8 +894,6 @@ auto FigureBoard::
                 move_fig(who_it, frominto.from);
             }
             break;
-        case MainEvent::E:
-            assert(!"MainEvent::E");
     }
     for (const auto& s_ev : ms.side_evs) {
         switch (s_ev)
@@ -902,8 +912,6 @@ auto FigureBoard::
             break;
         case SideEvent::CHECK:
             break;
-        case SideEvent::E:
-            assert(!"SideEvent::E");
         }
     }
     return true;
@@ -949,8 +957,6 @@ auto FigureBoard::
             return false;
         }
         break;
-    case MainEvent::E:
-        assert(!"MainEvent::E");
     }
     for (const auto& s_ev : ms.side_evs) {
         switch (s_ev)
@@ -969,8 +975,6 @@ auto FigureBoard::
             break;
         case SideEvent::CHECK:
             break;
-        case SideEvent::E:
-            assert(!"SideEvent::E");
         }
     }
 

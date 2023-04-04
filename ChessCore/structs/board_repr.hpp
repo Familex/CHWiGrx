@@ -1,12 +1,14 @@
 #pragma once
 
-#include "stuff.hpp"
+#include "../stuff/stuff.hpp"
 #include "figure.hpp"
 #include "move_rec.hpp"
 
 #include <expected>
 
 namespace board_repr {
+
+    constexpr auto TO_STRING_VERSION = "02";
 
     enum class ParseError {
         InvalidFormat,
@@ -136,7 +138,7 @@ namespace board_repr {
             from_string(const std::string_view board_repr) noexcept -> std::expected<BoardRepr, ParseError>
         {
             const auto _2 =
-                "H8W8CTW!"
+                "02H8W8CTW!"
                 "1626WH1529BH1349WK1454BK"
                 "<1609WH.09.26.M.Q.{}.{}.{}.{}$"
                     "1514BH.14.29.T.Q.{}.{17,}.{}.{}$>"
@@ -157,7 +159,7 @@ namespace board_repr {
             std::string result{ ""s };
             // Header
             {
-                result += std::format("H{}W{}C", HEIGHT, WIDTH);
+                result += std::format("{}H{}W{}C", TO_STRING_VERSION, HEIGHT, WIDTH);
                 for (const Id castle_id : can_castle) {
                     result += std::format("{},", castle_id);
                 }

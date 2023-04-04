@@ -158,17 +158,17 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="bot.h" />
-    <ClInclude Include="cexau.h" />
-    <ClInclude Include="enums.hpp" />
     <ClInclude Include="FigureBoard.h" />
-    <ClInclude Include="input.hpp" />
-    <ClInclude Include="macro.h" />
-    <ClInclude Include="pos.hpp" />
-    <ClInclude Include="stuff\board_repr.hpp" />
-    <ClInclude Include="stuff\figure.hpp" />
-    <ClInclude Include="stuff\figure_fabric.hpp" />
-    <ClInclude Include="stuff\move_logger.hpp" />
-    <ClInclude Include="stuff\move_rec.hpp" />
+    <ClInclude Include="structs\board_repr.hpp" />
+    <ClInclude Include="structs\figure.hpp" />
+    <ClInclude Include="structs\figure_fabric.hpp" />
+    <ClInclude Include="structs\input.hpp" />
+    <ClInclude Include="structs\move_logger.hpp" />
+    <ClInclude Include="structs\move_message.hpp" />
+    <ClInclude Include="structs\pos.hpp" />
+    <ClInclude Include="stuff\cexau.h" />
+    <ClInclude Include="stuff\enums.hpp" />
+    <ClInclude Include="stuff\macro.h" />
     <ClInclude Include="stuff\stuff.hpp" />
   </ItemGroup>
   <ItemGroup>

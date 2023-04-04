@@ -2,7 +2,6 @@
 
 #include "macro.h"
 
-#include <cassert>
 #include <set>
 #include <string>
 
@@ -18,7 +17,6 @@ enum class GameEndType {
 #pragma region Color
 
 enum class Color {
-    None,
     Black,
     White
 };
@@ -26,35 +24,37 @@ enum class Color {
 FN char_to_col(const char ch) noexcept -> Color
 {
     switch (ch) {
-    case 'W': case 'w': return Color::White;
-    case 'B': case 'b': return Color::Black;
-    case 'N': case 'n': return Color::None;
+        case 'W': case 'w':
+            return Color::White;
+        case 'B': case 'b':
+            return Color::Black;
+        default:
+            std::unreachable();
     }
-    assert(!"char_to_col: invalid character");
-    return Color::None;
 }
 
 FN col_to_char(const Color col) noexcept -> char
 {
     switch (col) {
-    case Color::Black: return 'B';
-    case Color::White: return 'W';
-    case Color::None: return 'N';
+        case Color::Black:
+            return 'B';
+        case Color::White:
+            return 'W';
+        default:
+            std::unreachable();
     }
-    assert(!"col_to_char: invalid color");
-    return 'E';
 }
 
 FN what_next(const Color col) noexcept -> Color
 {
     switch (col) {
-    case Color::Black:
-        return Color::White;
-    case Color::White:
-        return Color::Black;
+        case Color::Black:
+            return Color::White;
+        case Color::White:
+            return Color::Black;
+        default:
+            std::unreachable();
     }
-    assert(!"what_next: invalid color");
-    return Color::None; // Perhaps there is a better way
 }
 
 inline const std::set<Color> PLAYABLE_COLORS{
@@ -62,12 +62,11 @@ inline const std::set<Color> PLAYABLE_COLORS{
     Color::Black,
 };
 
-#pragma endregion
+#pragma endregion   // Color
 
 #pragma region FigureType
 
 enum class FigureType {
-    None,
     Pawn,
     Knight,
     Rook,
@@ -79,32 +78,40 @@ enum class FigureType {
 FN char_to_figure_type(const char ch) noexcept -> FigureType
 {
     switch (ch) {
-        case 'K': case 'k': return FigureType::King;
-        case 'H': case 'h': return FigureType::Knight;
-        case 'P': case 'p': return FigureType::Pawn;
-        case 'B': case 'b': return FigureType::Bishop;
-        case 'Q': case 'q': return FigureType::Queen;
-        case 'R': case 'r': return FigureType::Rook;
-        case 'N': case 'n': return FigureType::None;
+        case 'K': case 'k':
+            return FigureType::King;
+        case 'H': case 'h':
+            return FigureType::Knight;
+        case 'P': case 'p':
+            return FigureType::Pawn;
+        case 'B': case 'b':
+            return FigureType::Bishop;
+        case 'Q': case 'q':
+            return FigureType::Queen;
+        case 'R': case 'r':
+            return FigureType::Rook;
         default:
-            assert(!"char_to_figure_type: invalid character");
-            return FigureType::None;
+            std::unreachable();
     }
 }
 
 FN figure_type_to_char(const FigureType ft) noexcept -> char
 {
     switch (ft) {
-        case FigureType::Pawn: return 'P';
-        case FigureType::Rook: return 'R';
-        case FigureType::Knight: return 'H';
-        case FigureType::Bishop: return 'B';
-        case FigureType::Queen: return 'Q';
-        case FigureType::King: return 'K';
-        case FigureType::None: return 'N';
+        case FigureType::Pawn:
+            return 'P';
+        case FigureType::Rook:
+            return 'R';
+        case FigureType::Knight:
+            return 'H';
+        case FigureType::Bishop:
+            return 'B';
+        case FigureType::Queen:
+            return 'Q';
+        case FigureType::King:
+            return 'K';
         default:
-            assert(!"figure_type_to_char: invalid figure type");
-            return 'E';
+            std::unreachable();
     }
 }
 
@@ -138,10 +145,8 @@ FN as_string(FigureType figure_type) noexcept -> std::string {
             return "Queen";
         case FigureType::King:
             return "King";
-        case FigureType::None:
-            return "None";
         default:
-            return "Error";
+            std::unreachable();
     }
 }
 
@@ -159,25 +164,38 @@ FN as_wstring(FigureType figure_type) noexcept -> std::wstring {
             return L"Queen";
         case FigureType::King:
             return L"King";
-        case FigureType::None:
-            return L"None";
         default:
-            return L"Error";
+            std::unreachable();
     }
 }
 
-#pragma endregion
+#pragma endregion   // FigureType
 
 #pragma region Events
 
-enum class ErrorEvent { INVALID_MOVE, UNDER_CHECK, CHECK_IN_THAT_TILE, UNFORESEEN };
-enum class MainEvent { E, EAT, MOVE, LMOVE, CASTLING, EN_PASSANT };
-enum class SideEvent { E, CHECK, PROMOTION, CASTLING_BREAK };
+enum class ErrorEvent {
+    INVALID_MOVE,
+    UNDER_CHECK,
+    CHECK_IN_THAT_TILE,
+    UNFORESEEN
+};
+
+enum class MainEvent {
+    EAT,
+    MOVE,
+    LMOVE,
+    CASTLING,
+    EN_PASSANT
+};
+
+enum class SideEvent {
+    CHECK,
+    PROMOTION,
+    CASTLING_BREAK
+};
 
 FN as_string(SideEvent side_event) noexcept -> std::string {
     switch (side_event) {
-        case SideEvent::E:
-            return "E";
         case SideEvent::CHECK:
             return "C";
         case SideEvent::PROMOTION:
@@ -185,14 +203,12 @@ FN as_string(SideEvent side_event) noexcept -> std::string {
         case SideEvent::CASTLING_BREAK:
             return "B";
         default:
-            return "N";
+            std::unreachable();
     }
 }
 
 FN as_wstring(SideEvent side_event) noexcept -> std::wstring {
     switch (side_event) {
-        case SideEvent::E:
-            return L"E";
         case SideEvent::CHECK:
             return L"C";
         case SideEvent::PROMOTION:
@@ -200,14 +216,12 @@ FN as_wstring(SideEvent side_event) noexcept -> std::wstring {
         case SideEvent::CASTLING_BREAK:
             return L"B";
         default:
-            return L"N";
+            std::unreachable();
     }
 }
 
 FN as_string(MainEvent main_event) noexcept -> std::string {
     switch (main_event) {
-        case MainEvent::E:
-            return "E";
         case MainEvent::EAT:
             return "T";
         case MainEvent::MOVE:
@@ -219,14 +233,12 @@ FN as_string(MainEvent main_event) noexcept -> std::string {
         case MainEvent::EN_PASSANT:
             return "P";
         default:
-            return "N";
+            std::unreachable();
     }
 }
 
 FN as_wstring(MainEvent main_event) noexcept -> std::wstring {
     switch (main_event) {
-        case MainEvent::E:
-            return L"E";
         case MainEvent::EAT:
             return L"T";
         case MainEvent::MOVE:
@@ -238,9 +250,9 @@ FN as_wstring(MainEvent main_event) noexcept -> std::wstring {
         case MainEvent::EN_PASSANT:
             return L"P";
         default:
-            return L"N";
+            std::unreachable();
     }
 }
 
-#pragma endregion
+#pragma endregion   // Events
 

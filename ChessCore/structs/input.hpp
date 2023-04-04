@@ -1,7 +1,7 @@
 #pragma once
 
 #include "pos.hpp"
-#include "macro.h"
+#include "../stuff/macro.h"
 
 #include <string>
 #include <cassert>

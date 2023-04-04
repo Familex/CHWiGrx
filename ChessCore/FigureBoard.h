@@ -1,8 +1,8 @@
 #pragma once
 
 #include "stuff/stuff.hpp"
-#include "stuff/board_repr.hpp"
-#include "stuff/move_logger.hpp"
+#include "structs/board_repr.hpp"
+#include "structs/move_logger.hpp"
 
 #include <variant>
 #include <map>

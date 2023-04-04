@@ -1,7 +1,7 @@
 #pragma once
 
-#include "macro.h"
-#include "stuff.hpp"
+#include "../stuff/macro.h"
+#include "../stuff/stuff.hpp"
 
 #include <format>
 
