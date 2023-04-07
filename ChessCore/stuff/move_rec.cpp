@@ -1,5 +1,7 @@
 #include "move_rec.h"
 
+#include <string>
+
 // Коструктор из строки
 MoveRec::MoveRec(const std::string& map) {
     if (map.empty()) assert(!"Empty map");

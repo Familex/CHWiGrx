@@ -1,5 +1,7 @@
 #include "Stuff.h"
 
+#include <string>
+
 /// @todo fix this
 std::vector<std::string> split(std::string str, const std::string&& delimiter) {
     size_t token_end{};

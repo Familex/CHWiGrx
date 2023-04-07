@@ -1,5 +1,7 @@
 #include "board_repr.h"
 
+#include <string>
+
 BoardRepr::BoardRepr(const BoardRepr& other) noexcept 
     : turn(other.turn)
     , idw(other.idw)
