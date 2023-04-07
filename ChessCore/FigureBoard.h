@@ -108,12 +108,21 @@ public:
                            const std::vector<Figure*>& = {}) const noexcept -> bool;
     
     [[nodiscard]] auto
-        move_check(const Figure* const, const Input&) const noexcept
+        move_check(const Figure* const, const Input&, const FigureType) const noexcept
                 -> std::expected<mvmsg::MoveMessage, ErrorEvent>;
     
+    /// <summary>
+    /// Helper type for FigureBoard::castling_check
+    /// </summary>
+    struct CastlingCheckResult {
+        const Figure* rook;
+        const Figure* king;
+        Input second_figure_to_move;    // for rook or king
+    };
+
     [[nodiscard]] auto
-        castling_check(mvmsg::MoveMessage, const Figure*, const Input&, const int, const int) const noexcept
-                -> std::optional<std::tuple<mvmsg::MoveMessage, const Figure*, const Figure*>>;
+        castling_check(const Figure*, const Input&, const int, const int) const noexcept
+                -> std::optional<CastlingCheckResult>;
     
     auto
         reset_castling(const bool=true) noexcept -> void;
@@ -223,7 +232,7 @@ public:
             return std::nullopt;
         }
         
-        return { true, curr_move };
+        return { true, curr_move }; // FIXME clang diag fix
     }
     
     bool provide_move(const mvmsg::MoveMessage&);

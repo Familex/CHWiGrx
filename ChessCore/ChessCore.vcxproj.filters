@@ -67,7 +67,7 @@
     <ClInclude Include="structs\id.hpp">
       <Filter>structs</Filter>
     </ClInclude>
-    <ClInclude Include="stuff\overload.h">
+    <ClInclude Include="stuff\visit.h">
       <Filter>stuff</Filter>
     </ClInclude>
   </ItemGroup>

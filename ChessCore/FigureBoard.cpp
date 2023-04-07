@@ -353,24 +353,26 @@ auto FigureBoard::
             }
         }
     }
+    // FIXME use Figure::is
     if (in_hand->get_type() == FigureType::King) {
         for (auto [king_end_col, rook_end_col] : { std::pair(6, 5), std::pair(2, 3) } ) {
-            const auto pack = 
-                castling_check({}, in_hand, Input{ in_hand_pos, Pos{in_hand_pos.x, king_end_col} }, king_end_col, rook_end_col);
-            if (pack.has_value()) {
-                const auto& [mm, king, rook] = pack.value();
-                    if (has_castling(rook->get_id())) {
-                        all_moves.push_back({ false, Pos{in_hand_pos.x, king_end_col} });
-                    }
+            const auto check_result_sus = 
+                castling_check(in_hand, Input{ in_hand_pos, Pos{in_hand_pos.x, king_end_col} }, king_end_col, rook_end_col);
+            if (check_result_sus.has_value()) {
+                const auto& check_result = check_result_sus.value();
+                if (has_castling(check_result.rook->get_id())) {
+                    all_moves.push_back({ false, Pos{in_hand_pos.x, king_end_col} });
+                }
             }
         }
     }
     if (in_hand->get_type() == FigureType::Rook) {
         for (auto [king_end_col, rook_end_col] : { std::pair(6, 5), std::pair(2, 3) }) {
-            const auto pack = castling_check({}, in_hand, Input{ in_hand_pos, Pos{in_hand_pos.x, rook_end_col} }, king_end_col, rook_end_col);
-            if (pack.has_value()) {
-                const auto& [mm, king, rook] = pack.value();
-                if (has_castling(rook->get_id())) {
+            const auto check_result_sus =
+                castling_check(in_hand, Input{ in_hand_pos, Pos{in_hand_pos.x, rook_end_col} }, king_end_col, rook_end_col);
+            if (check_result_sus.has_value()) {
+                const auto& check_result = check_result_sus.value();
+                if (has_castling(check_result.rook->get_id())) {
                     all_moves.push_back({ false, Pos{in_hand_pos.x, rook_end_col} });
                 }
             }
@@ -553,7 +555,7 @@ auto FigureBoard::
 auto FigureBoard::
     castling_check(const Figure* in_hand, const Input& input,  
                      const int king_end_col, const int rook_end_col) const noexcept
-                       -> std::optional<std::tuple<const Figure*, const Figure*>>
+                       -> std::optional<CastlingCheckResult>
 {
     // Рокировка на g-фланг
     bool castling_can_be_done = true;
@@ -604,14 +606,13 @@ auto FigureBoard::
             || cell_sus.value()->get_id() == king->get_id() 
             || cell_sus.value()->get_id() == rook->get_id();
         if (castling_can_be_done) {
-            move_message.main_ev = MainEvent::CASTLING;
-            if (in_hand->get_type() == FigureType::King) {
-                move_message.to_move.push_back({ rook->get_id(), Input{rook_pos, Pos{rook_pos.x, rook_end_col}} });
-            }
-            else {
-                move_message.to_move.push_back({ king->get_id(), Input{king_pos, Pos{king_pos.x, king_end_col}} });
-            }
-            return std::make_tuple(move_message, king, rook);
+            return CastlingCheckResult{
+                rook,
+                king,
+                in_hand->is(FigureType::King)
+                    ? Input{ rook_pos, Pos{rook_pos.x, rook_end_col} }
+                    : Input{ king_pos, Pos{king_pos.x, king_end_col} }
+            };
         }
     }
     return std::nullopt;
@@ -671,64 +672,84 @@ auto FigureBoard::
 /// <param name="in_hand">Фигура, которой собираются ходить</param>
 /// <param name="input">Ввод</param>
 /// <returns>Сообщение хода</returns>
-auto FigureBoard::
-    move_check(const Figure* const in_hand, const Input& input) const noexcept
-        -> std::expected<MoveMessage, ErrorEvent>
+auto FigureBoard::  // FIXME move check and undercheck checks to separate function
+    move_check(const Figure* const in_hand, const Input& input, const FigureType promotion_choice) const noexcept
+        -> std::expected<mvmsg::MoveMessage, ErrorEvent>
 {
-    MoveMessage move_message{ {}, {} };
-
+    std::vector<mvmsg::SideEvent> side_events;
+    
     if (!(is_valid_coords(input.from) && is_valid_coords(input.target)) 
         || input.from == input.target
         || !cont_fig(input.from)
-        || get_fig(input.target).has_value()
-            && get_fig(input.target).value()->is_col(in_hand->get_col())) {
+        || (get_fig(input.target).has_value()
+            && get_fig(input.target).value()->is_col(in_hand->get_col()))
+        ) {
         return std::unexpected{ ErrorEvent::INVALID_MOVE };
     }
 
-    // Castling break by rook
+    // Castling breaks
     if (in_hand->get_type() == FigureType::Rook) {
-        move_message.side_evs.push_back(SideEvent::CASTLING_BREAK);
-        move_message.what_castling_breaks.push_back(in_hand->get_id());
+        side_events.push_back(
+            mvmsg::CastlingBreak{ in_hand->get_id() }
+        );
     }
-
-    // Castling and castling break by king
-    if ((in_hand->get_type() == FigureType::King || in_hand->get_type() == FigureType::Rook) &&
-        WIDTH == 8) {
-        move_message.side_evs.push_back(SideEvent::CASTLING_BREAK);
+    else if (in_hand->is(FigureType::King)) {
         for (const auto& fig : get_figures_of(in_hand->get_col())) {
-            if (fig->get_type() == FigureType::Rook) {
-                // Заполняется в любом случае, но MainEvent::BREAK это отменит, если что
-                move_message.what_castling_breaks.push_back(fig->get_id());
+            if (fig->is(FigureType::Rook)) {
+                side_events.push_back(
+                    mvmsg::CastlingBreak{ fig->get_id() }
+                );
             }
         }
-        for (auto [king_end_col, rook_end_col] : std::initializer_list<std::pair<int, int>>{ {6, 5}, {2, 3} }) {
-            const auto pack = castling_check(move_message, in_hand, input, king_end_col, rook_end_col);
-            if (pack.has_value()) {
-                const auto& [mm, king, rook] = pack.value();
-                if (has_castling(rook->get_id())) {
-                    auto king_tmp = figfab::FigureFabric::instance().submit_on(king, Pos{ in_hand->get_pos().x, king_end_col });
-                    auto rook_tmp = figfab::FigureFabric::instance().submit_on(rook, Pos{ rook->get_pos().x, rook_end_col });
+    }
+
+    // Castling
+    if ((in_hand->is(FigureType::King) || in_hand->is(FigureType::Rook)) && WIDTH == 8) {
+        using PairInt = std::pair<int, int>;
+        
+        for (auto [king_end_col, rook_end_col] : { PairInt{6, 5}, PairInt{2, 3} }) {
+            const auto check_result_sus = castling_check(in_hand, input, king_end_col, rook_end_col);
+            if (check_result_sus.has_value()) {
+                const auto& check_result = check_result_sus.value();
+                if (has_castling(check_result.rook->get_id())) {
+                    auto king_tmp = figfab::FigureFabric::instance().submit_on(check_result.king, Pos{ in_hand->get_pos().x, king_end_col });
+                    auto rook_tmp = figfab::FigureFabric::instance().submit_on(check_result.rook, Pos{ check_result.rook->get_pos().x, rook_end_col });
                     // FIXME debug this branch (move_message.push and check after success castling)
-                    if (check_for_when(what_next(in_hand->get_col()),
-                        { input.from, king->get_pos(), rook->get_pos() }, Pos{}, {},
-                        { king_tmp.get(), rook_tmp.get() })) {
-                        move_message.side_evs.push_back(SideEvent::CHECK);
+                    if (check_for_when(
+                            what_next(in_hand->get_col()),
+                            { input.from, check_result.king->get_pos(), check_result.rook->get_pos() }, 
+                            Pos{}, 
+                            {},
+                            { king_tmp.get(), rook_tmp.get() })
+                        ) {
+                        side_events.push_back(mvmsg::Check{ });
                     }
-                    return mm;
+                    return mvmsg::MoveMessage{ 
+                        in_hand,
+                        input,
+                        in_hand->get_col(),
+                        promotion_choice,
+                        mvmsg::Castling{
+                            (in_hand->is(FigureType::King) 
+                                ? check_result.king
+                                : check_result.rook)->get_id(),
+                            check_result.second_figure_to_move
+                        }, 
+                        side_events};
                 }
             }
         }
     }
 
     // Pawn
-    if (in_hand->get_type() == FigureType::Pawn) {
+    if (in_hand->is(FigureType::Pawn)) {
         // Promotion
         if (in_hand->is_col(Color::White) &&
                 (idw && input.target.x == 0 || !idw && input.target.x == (HEIGHT - 1)) ||
                 in_hand->get_col() == Color::Black &&
                 (!idw && input.target.x == 0 || idw && input.target.x == (HEIGHT - 1))
                 ) {
-            move_message.side_evs.push_back(SideEvent::PROMOTION);
+            side_events.push_back(mvmsg::Promotion{ });
         }
 
         // Long move
@@ -746,7 +767,7 @@ auto FigureBoard::
             )) {
             auto in_hand_in_targ_tmp = figfab::FigureFabric::instance().submit_on(in_hand, input.target);
             if (check_for_when(what_next(in_hand->get_col()), { input.from }, Pos{}, {}, { in_hand_in_targ_tmp.get()})) {
-                move_message.side_evs.push_back(SideEvent::CHECK);
+                side_events.push_back(mvmsg::Check{ });
             }
             if (in_hand->get_type() == FigureType::King) {
                 if (check_for_when(in_hand->get_col(), { input.from }, input.target)) {
@@ -758,31 +779,38 @@ auto FigureBoard::
                     return std::unexpected{ ErrorEvent::UNDER_CHECK };
                 }
             }
-            move_message.main_ev = MainEvent::LMOVE;
-            return move_message;
+            return mvmsg::MoveMessage{
+                in_hand,
+                input,
+                in_hand->get_col(),
+                promotion_choice,
+                mvmsg::LongMove{ },
+                side_events
+            };
         }
 
         // Взятие на проходе (смотрю чужие фигуры на 4 линии)
         // А ещё проверяю прошлый ход
         if (const auto& last_move_sus = move_logger.get_last_move(); last_move_sus.has_value()) {
             const auto& last_move = last_move_sus.value();
-            const Pos & who_went_at_last_move_pos = last_move.who_went.get_pos();
-            if (std::abs(shift.y) == 1 && is_empty(input.target) &&
-                last_move.ms.main_ev == MainEvent::LMOVE && who_went_at_last_move_pos.y == input.target.y &&
+            const Pos& who_went_at_last_move_pos = last_move.first.get_pos();
+            if (std::abs(shift.y) == 1 && is_empty(input.target)
+                && std::holds_alternative<mvmsg::LongMove>(last_move.main_event)
+                && who_went_at_last_move_pos.y == input.target.y &&
                 (
                     // maybe can be simplified into one condition
-                    in_hand->get_col() == Color::White && (
+                    in_hand->is_col(Color::White) && (
                         input.from.x == (EN_PASSANT_INDENT - 1) && idw && shift.x == -1 && cont_fig(input.from + Pos(0, shift.y)) ||
                         input.from.x == (HEIGHT - EN_PASSANT_INDENT) && !idw && shift.x == 1 && cont_fig(input.from + Pos(0, shift.y))
                         ) ||
-                    in_hand->get_col() == Color::Black && (
+                    in_hand->is_col(Color::Black) && (
                         input.from.x == (HEIGHT - EN_PASSANT_INDENT) && idw && shift.x == 1 && cont_fig(input.from + Pos(0, shift.y)) ||
                         input.from.x == (EN_PASSANT_INDENT - 1) && !idw && shift.x == -1 && cont_fig(input.from + Pos(0, shift.y))
                         )
                     )) {
                 auto in_hand_in_targ_tmp = figfab::FigureFabric::instance().submit_on(in_hand, input.target);
                 if (check_for_when(what_next(in_hand->get_col()), { input.from, Pos{input.from.x, input.target.y}, input.target }, Pos{}, {}, { in_hand_in_targ_tmp.get() })) {
-                    move_message.side_evs.push_back(SideEvent::CHECK);
+                    side_events.push_back(mvmsg::Check{ });
                 }
                 if (in_hand->get_type() == FigureType::King) {
                     // Фигура на которой сейчас стоим всё ещё учитывается!
@@ -796,16 +824,17 @@ auto FigureBoard::
                         return std::unexpected{ ErrorEvent::UNDER_CHECK };
                     }
                 }
-                move_message.main_ev = MainEvent::EN_PASSANT;
-                if (const auto to_eat_sus = get_fig(Pos{ input.from.x, input.target.y });
-                        to_eat_sus.has_value()) {
-                    move_message.to_eat.push_back(to_eat_sus.value()->get_id());
-                }
-                if (const auto to_eat_sus = get_fig(input.target);
-                        to_eat_sus.has_value()) {
-                    move_message.to_eat.push_back(to_eat_sus.value()->get_id());
-                }
-                return move_message;
+                auto const& to_eat_sus = get_fig(Pos{ input.from.x, input.target.y });
+                return mvmsg::MoveMessage{
+                    in_hand,
+                    input,
+                    in_hand->get_col(),
+                    promotion_choice,
+                    mvmsg::EnPassant{
+                        to_eat_sus.value()->get_id()
+                    },
+                    side_events
+                };
             }
         }
     }
@@ -817,7 +846,7 @@ auto FigureBoard::
             auto in_hand_in_curr_tmp = figfab::FigureFabric::instance().submit_on(in_hand, curr);
             // Фигура на которой сейчас стоим всё ещё учитывается!
             if (check_for_when(what_next(in_hand->get_col()), {input.from, input.target}, Pos{}, {}, { in_hand_in_curr_tmp.get() })) {
-                move_message.side_evs.push_back(SideEvent::CHECK);
+                side_events.push_back(mvmsg::Check{ });
             }
             if (in_hand->get_type() == FigureType::King) {
                 // Фигура на которой сейчас стоим всё ещё учитывается!
@@ -831,14 +860,22 @@ auto FigureBoard::
                     return std::unexpected{ ErrorEvent::UNDER_CHECK };
                 }
             }
-            move_message.main_ev = MainEvent::EAT;
-            move_message.to_eat.push_back(targ_sus.value()->get_id());
-            return move_message;
+            return mvmsg::MoveMessage{
+                in_hand,
+                input,
+                in_hand->get_col(),
+                promotion_choice,
+                mvmsg::Eat{
+                    targ_sus.value()->get_id()
+                },
+                side_events
+            };
         }
         else if (!is_eat && !targ_sus.has_value()) {
             auto in_hand_in_curr_tmp = figfab::FigureFabric::instance().submit_on(in_hand, curr);
+            // FIXME {input.from} without input.target?? see prev check_for_when
             if (check_for_when(what_next(in_hand->get_col()), {input.from}, Pos{}, {}, { in_hand_in_curr_tmp.get() })) {
-                move_message.side_evs.push_back(SideEvent::CHECK);
+                side_events.push_back(mvmsg::Check{ });
             }
             if (in_hand->get_type() == FigureType::King) {
                 if (check_for_when(in_hand->get_col(), {input.from}, curr)) {
@@ -850,8 +887,14 @@ auto FigureBoard::
                     return std::unexpected{ ErrorEvent::UNDER_CHECK };
                 }
             }
-            move_message.main_ev = MainEvent::MOVE;
-            return move_message;
+            return mvmsg::MoveMessage{
+                in_hand,
+                input,
+                in_hand->get_col(),
+                promotion_choice,
+                mvmsg::Move{ },
+                side_events
+            };
         }
     }
     return std::unexpected{ ErrorEvent::UNFORESEEN };
@@ -867,110 +910,101 @@ auto FigureBoard::
     undo_move() -> bool
 {
     if (move_logger.prev_empty()) return false;
-    const mvmsg::MoveMessage last = move_logger.move_last_to_future().value();
-    const auto in_hand_sus = get_fig(last.who_went.get_id());
+    const mvmsg::MoveMessage move_message = move_logger.move_last_to_future().value();
+    const auto in_hand_sus = get_fig(move_message.first.get_id());
     if (!in_hand_sus.has_value()) return false;
     const auto in_hand = in_hand_sus.value();
-    const FigureType chose = last.promotion_choice;
-    const auto turn = last.turn;
-    const auto input = last.input;
-    const MoveMessage ms = last.ms;
-    switch (ms.main_ev)
-    {
-        case MainEvent::MOVE: case MainEvent::LMOVE:
-            move_fig(in_hand, input.from);
-            break;
-        case MainEvent::EN_PASSANT: case MainEvent::EAT:
-            move_fig(in_hand, input.from);
-            for (const auto& it : ms.to_eat) {
-                // FIXME debug on rook with castling
-                uncapture_figure(it);
-            }
-            break;
-        case MainEvent::CASTLING:
-            move_fig(in_hand, input.from);
-            for (const auto& [who, frominto] : ms.to_move) {
-                auto who_it = get_fig_unsafe(who);
-                move_fig(who_it, frominto.from);
-            }
-            break;
-    }
-    for (const auto& s_ev : ms.side_evs) {
-        switch (s_ev)
-        {
-        case SideEvent::CASTLING_BREAK:
-            if (!ms.what_castling_breaks.empty() &&
-                !has_castling(ms.what_castling_breaks.back())
-                ) {
-                for (const Id& id : ms.what_castling_breaks) {
-                    on_castling(id);
-                }
-            }
-            break;
-        case SideEvent::PROMOTION:
-            promotion_fig(in_hand, FigureType::Pawn);
-            break;
-        case SideEvent::CHECK:
-            break;
+    
+    VISIT(move_message.main_event,
+        [&](const mvmsg::Move&) {
+            move_fig(in_hand, move_message.input.from);
+        },
+        [&](const mvmsg::LongMove&) {
+            move_fig(in_hand, move_message.input.from);
+        },
+        [&](const mvmsg::Eat& eat) {
+            move_fig(in_hand, move_message.input.from);
+            const auto to_eat = get_fig_unsafe(eat.eaten);
+            uncapture_figure(to_eat->get_id());
+        },
+        [&](const mvmsg::EnPassant& en_passant) {
+            // FIXME debug on rook with castling
+            move_fig(in_hand, move_message.input.from);
+            const auto to_eat = get_fig_unsafe(en_passant.eaten);
+            uncapture_figure(to_eat->get_id());
+        },
+        [&](const mvmsg::Castling& castling) {
+            move_fig(in_hand, move_message.input.from);
+            const auto who = get_fig_unsafe(castling.second_to_move);
+            move_fig(who, castling.second_input.from);
         }
+    );
+    for (const auto& side_event : move_message.side_evs) {
+        VISIT(side_event,
+            [&](const mvmsg::Promotion& promotion) {
+                promotion_fig(in_hand, FigureType::Pawn);
+            },
+            [&](const mvmsg::Check&) {
+                // do nothing
+            },
+            /* !ms.what_castling_breaks.empty() && !has_castling(ms.what_castling_breaks.back())
+            * This check was in the original code, but it seems to be redundant
+            * FIXME check it */
+            [&](const mvmsg::CastlingBreak& castling_break) {
+                on_castling(castling_break.whose);
+            }
+        );
     }
     return true;
 }
 
-/// <summary>
-/// Производит ход
-/// </summary>
-/// <param name="move_rec">Ход</param>
-/// <returns>Удалось ли совершить ход</returns>
 auto FigureBoard::
-    provide_move(const mvmsg::MoveMessage& move_rec) -> bool
+    provide_move(const mvmsg::MoveMessage& move_message) -> bool
 {
-    switch (ms.main_ev)
-    {
-    case MainEvent::MOVE: case MainEvent::LMOVE:
-        move_fig(in_hand, input.target);
-        break;
-    case MainEvent::EN_PASSANT: case MainEvent::EAT:
-        for (const Id& it : ms.to_eat) {
-            if (auto to_capture_sus = get_fig(it);
-                    to_capture_sus.has_value() && to_capture_sus.value()->get_pos() != input.target)
-            {
-                capture_figure(to_capture_sus.value());
+    const auto in_hand_sus = get_fig(move_message.first.get_id());
+    if (!in_hand_sus.has_value()) return false;
+    const auto in_hand = in_hand_sus.value();
+    
+    VISIT(move_message.main_event,
+        [&](const mvmsg::Move&) {
+            move_fig(in_hand, move_message.input.target);
+        },
+        [&](const mvmsg::LongMove&) {
+            move_fig(in_hand, move_message.input.target);
+        },
+        /* (auto to_capture_sus = get_fig(it);
+        * to_capture_sus.has_value() && to_capture_sus.value()->get_pos() != input.target)
+        * Was in Eat and EnPassant events */
+        [&](const mvmsg::Eat& eat) {
+            move_fig(in_hand, move_message.input.target);
+            const auto to_eat = get_fig_unsafe(eat.eaten);
+            capture_figure(to_eat);
+        },
+        [&](const mvmsg::EnPassant& en_passant) {
+            move_fig(in_hand, move_message.input.target);
+            const auto to_eat = get_fig_unsafe(en_passant.eaten);
+            capture_figure(to_eat);
+        },
+        /* (has_castling(ms.to_move.back().first)) */
+        [&](const mvmsg::Castling& castling) {
+            move_fig(in_hand, move_message.input.target);
+            const auto who = get_fig_unsafe(castling.second_to_move);
+            move_fig(who, castling.second_input.target);
+        }
+    );
+    for (const auto& side_event : move_message.side_evs) {
+        VISIT(side_event,
+            [&](const mvmsg::Promotion& promotion) {
+                promotion_fig(in_hand, move_message.promotion_choice);
+            },
+            [&](const mvmsg::Check&) {
+                // do nothing
+            },
+            /* (!ms.what_castling_breaks.empty() && has_castling(ms.what_castling_breaks.back()) */
+            [&](const mvmsg::CastlingBreak& castling_break) {
+                off_castling(castling_break.whose);
             }
-        }
-        move_fig(in_hand, input.target);
-        break;
-    case MainEvent::CASTLING:
-        if (has_castling(ms.to_move.back().first)) {
-            for (const auto& [who, frominto] : ms.to_move) {
-                auto who_it = get_fig_unsafe(who);
-                move_fig(who_it, frominto.target);
-            }
-            move_fig(in_hand, input.target);
-        }
-        else {
-            return false;
-        }
-        break;
-    }
-    for (const auto& s_ev : ms.side_evs) {
-        switch (s_ev)
-        {
-        case SideEvent::CASTLING_BREAK:
-            if (not ms.what_castling_breaks.empty() &&
-                has_castling(ms.what_castling_breaks.back())
-                ) {
-                for (const Id& id : ms.what_castling_breaks) {
-                    off_castling(id);
-                }
-            }
-            break;
-        case SideEvent::PROMOTION:
-            promotion_fig(in_hand, choice);
-            break;
-        case SideEvent::CHECK:
-            break;
-        }
+        );
     }
 
     return true;

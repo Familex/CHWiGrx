@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../stuff/overload.h"
+#include "../stuff/visit.h"
 #include "../stuff/stuff.hpp"
 #include "input.hpp"
 #include "figure.hpp"
@@ -15,8 +15,13 @@ namespace mvmsg /* move_message */ {
         EmptyMap,
     };
 
-    struct Check {};
-    struct Promotion {};
+    // Side Event
+    struct Check { };
+
+    // Side Event
+    struct Promotion { };
+
+    // Side Event
     struct CastlingBreak {
         Id whose;
     };
@@ -28,19 +33,24 @@ namespace mvmsg /* move_message */ {
             CastlingBreak
         >;
 
+    // Main Event
     struct Eat {
         Id eaten;
     };
 
+    // Main Event
     struct Move { };
     
+    // Main Event
     struct LongMove { };
     
+    // Main Event
     struct Castling {
         Id second_to_move;
         Input second_input;
     };
     
+    // Main Event
     struct EnPassant {
         Id eaten;
     };
@@ -79,7 +89,7 @@ namespace mvmsg /* move_message */ {
     };
 
     FN as_string(const SideEvent& side_event) noexcept -> std::string {
-        return OVERLOAD(side_event,
+        return VISIT(side_event,
             [](const Check&) {
                 return "CH"s;
             },
@@ -110,7 +120,7 @@ namespace mvmsg /* move_message */ {
             USING_END
         };
         
-        result += OVERLOAD(move_message.main_event,
+        result += VISIT(move_message.main_event,
             [&](const Eat& eat) constexpr {
                 return "E"s
                     + as_string(eat.eaten);

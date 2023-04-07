@@ -138,23 +138,16 @@ namespace board_repr {
         FN static
             from_string(const std::string_view board_repr) noexcept -> std::expected<BoardRepr, ParseError>
         {
-            const auto _2 =
-                "02H8W8CTW!"
-                "1626WH1529BH1349WK1454BK"
-                "<1609WH.09.26.M.Q.{}.{}.{}.{}$"
-                    "1514BH.14.29.T.Q.{}.{17,}.{}.{}$>"
-                "<1349WK.49.42.M.Q.{B,}.{}.{}.{}$>"
-                    "1729WR";
-            
             BoardRepr result{};
 
-
+            // FIXME inplement
 
             return std::expected<BoardRepr, ParseError>{ result };
         }
 
         FN as_string() const noexcept -> std::string
         {
+            // FIXME castlings
             using namespace std::literals::string_literals;
 
             std::string result{ ""s };
@@ -168,7 +161,6 @@ namespace board_repr {
             }
             // Figures
             for (const auto& fig : figures) {
-                auto pos = fig->get_pos();
                 result += fig->as_string();
             }
             // Prev moves
