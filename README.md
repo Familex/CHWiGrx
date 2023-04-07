@@ -8,15 +8,15 @@ A chessboard simulator written in __C++__ using __winapi__.
 
 1. Open [Chess.sln](./Chess.sln) with Visual Studio 2022.
 
-1. Go to solution properties.
+2. Go to solution properties.
 
 ![](Screenshots/setup1.png)
 
-1. Choose CHWiGrx project as single startup project.
+3. Choose CHWiGrx project as single startup project.
 
 ![](Screenshots/setup2.jpg)
 
-1. Project ready for build and launch
+4. Project ready for build and launch.
 
 ![](Screenshots/setup3.jpg)
 
