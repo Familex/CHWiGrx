@@ -72,15 +72,18 @@
 /// </example>
 #define CEXAU inline constexpr auto
 #define CEXAU_CONSTEVAL_EXECUTE_ONE_LINE(return_line) \
-    ([&]{ return (return_line); })()
+    ([&]() constexpr -> auto {                        \
+        return (return_line);                         \
+    })()
 #define CEXAU_CONSTEVAL_EXECUTE_MULTI_LINE(...)  \
-    ([&] {                                       \
+    ([&]() constexpr -> auto {                   \
         CEXAU_MAP_LINES_EXCEPT_LAST(__VA_ARGS__) \
         return CEXAU_GET_LAST(__VA_ARGS__);      \
     })()
 /// macro overload
 #define CEXAU_EXPAND(x) x
-#define CEXAU_GET_MACRO(_1, _2, _3, _4, _5, _6, _7, _8, _9, _10, NAME, ...) NAME
+#define CEXAU_GET_MACRO( \
+    _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, NAME, ...) NAME
 #define CEXAUQKT(...)                           \
     CEXAU_EXPAND(                               \
         CEXAU_GET_MACRO(                        \

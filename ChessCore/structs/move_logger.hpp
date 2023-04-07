@@ -1,13 +1,13 @@
 #pragma once
 
-#include "move_rec.hpp"
+#include "move_message.hpp"
 
 class MoveLogger {
-    std::vector<moverec::MoveRec> prev_moves;
-    std::vector<moverec::MoveRec> future_moves;
+    std::vector<mvmsg::MoveMessage> prev_moves;
+    std::vector<mvmsg::MoveMessage> future_moves;
     
 public:
-    FN get_last_move() const noexcept -> std::optional<moverec::MoveRec>
+    FN get_last_move() const noexcept -> std::optional<mvmsg::MoveMessage>
     {
         if (prev_moves.empty()) {
             return std::nullopt;
@@ -15,13 +15,13 @@ public:
         return prev_moves.back();
     }
     
-    FN add(const moverec::MoveRec& move_rec) noexcept -> void
+    FN add(const mvmsg::MoveMessage& move_rec) noexcept -> void
     {
         prev_moves.push_back(move_rec);
         future_moves.clear();
     }
     
-    FN add_without_reset(const moverec::MoveRec& move_rec) noexcept -> void {
+    FN add_without_reset(const mvmsg::MoveMessage& move_rec) noexcept -> void {
         prev_moves.push_back(move_rec);
     }
     
@@ -31,17 +31,17 @@ public:
         future_moves.clear();
     }
     
-    FN pop_future_move() noexcept -> std::optional<moverec::MoveRec>
+    FN pop_future_move() noexcept -> std::optional<mvmsg::MoveMessage>
     {
         if (future_moves.empty()) {
             return std::nullopt;
         }
-        moverec::MoveRec future = future_moves.back();
+        mvmsg::MoveMessage future = future_moves.back();
         future_moves.pop_back();
         return future;
     }
     
-    FN move_last_to_future() noexcept -> std::optional<moverec::MoveRec>
+    FN move_last_to_future() noexcept -> std::optional<mvmsg::MoveMessage>
     {
         if (prev_moves.empty()) {
             return std::nullopt;
@@ -64,19 +64,19 @@ public:
         return future_moves.empty();
     }
     
-    FN get_past() const noexcept -> const std::vector<moverec::MoveRec>& {
+    FN get_past() const noexcept -> const std::vector<mvmsg::MoveMessage>& {
         return prev_moves;
     }
     
-    FN get_future() const noexcept -> const std::vector<moverec::MoveRec>& {
+    FN get_future() const noexcept -> const std::vector<mvmsg::MoveMessage>& {
         return future_moves;
     }
     
-    FN set_past(const std::vector<moverec::MoveRec>& past) noexcept -> void {
+    FN set_past(const std::vector<mvmsg::MoveMessage>& past) noexcept -> void {
         prev_moves = past;
     }
     
-    FN set_future(const std::vector<moverec::MoveRec>& future) noexcept {
+    FN set_future(const std::vector<mvmsg::MoveMessage>& future) noexcept {
         future_moves = future;
     }
     
@@ -84,7 +84,9 @@ public:
     {
         size_t without_eat_and_pawnmoves = 0;
         for (auto move{ prev_moves.rbegin() }; move != prev_moves.rend(); ++move) {
-            if (move->who_went.get_type() == FigureType::Pawn || move->ms.main_ev == MainEvent::EAT) {
+            if (move->first.get_type() == FigureType::Pawn
+                || std::holds_alternative<mvmsg::Eat>(move->main_event))
+            {
                 break;
             }
             else {

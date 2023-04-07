@@ -108,23 +108,24 @@ public:
                            const std::vector<Figure*>& = {}) const noexcept -> bool;
     
     [[nodiscard]] auto
-        move_check(const Figure* const, const Input&) const noexcept -> std::expected<MoveMessage, ErrorEvent>;
+        move_check(const Figure* const, const Input&) const noexcept
+                -> std::expected<mvmsg::MoveMessage, ErrorEvent>;
     
     [[nodiscard]] auto
-        castling_check(MoveMessage, const Figure*, const Input&, const int, const int) const noexcept
-                           -> std::optional<std::tuple<MoveMessage, const Figure*, const Figure*>>;
+        castling_check(mvmsg::MoveMessage, const Figure*, const Input&, const int, const int) const noexcept
+                -> std::optional<std::tuple<mvmsg::MoveMessage, const Figure*, const Figure*>>;
     
-    [[nodiscard]] auto
+    auto
         reset_castling(const bool=true) noexcept -> void;
     
-    [[nodiscard]] auto
+    auto
         reset_castling(const board_repr::BoardRepr&) noexcept -> void;
     
     FN get_idw() const noexcept -> bool {
         return idw;
     }
     
-    [[nodiscard]] inline auto
+    inline auto
         set_idw(const bool new_idw) noexcept -> void
     {
         idw = new_idw;
@@ -141,7 +142,7 @@ public:
         return tmp;
     }
     
-    [[nodiscard]] auto
+    auto
         move_fig(Figure* fig, Pos to, bool capture = true) -> void
     {
         if (auto maybe_eat = get_fig(to); 
@@ -159,7 +160,7 @@ public:
         figures[fig->get_pos()] = fig;
     }
     
-    [[nodiscard]] auto
+    auto
         move_fig(Input input, bool capture = true) -> void
     {
         auto fig = get_fig(input.from);
@@ -184,19 +185,19 @@ public:
         castling[id] = true;
     }
     
-    FN get_last_moves() const noexcept -> const std::vector<moverec::MoveRec>& {
+    FN get_last_moves() const noexcept -> const std::vector<mvmsg::MoveMessage>& {
         return move_logger.get_past();
     }
     
-    FN get_future_moves() const noexcept -> const std::vector<moverec::MoveRec>& {
+    FN get_future_moves() const noexcept -> const std::vector<mvmsg::MoveMessage>& {
         return move_logger.get_future();
     }
     
-    FN get_last_move() const noexcept -> std::optional<moverec::MoveRec> {
+    FN get_last_move() const noexcept -> std::optional<mvmsg::MoveMessage> {
         return move_logger.get_last_move();
     }
     
-    FN set_last_move(const moverec::MoveRec& move_rec) noexcept -> void {
+    FN set_last_move(const mvmsg::MoveMessage& move_rec) noexcept -> void {
         this->move_logger.add(move_rec);
     }
     
@@ -207,24 +208,25 @@ public:
     FN provide_move(Figure* in_hand,
                     const Input& input,
                     Color turn,
-                    Func&& get_choice) noexcept -> std::pair<bool, moverec::MoveRec>
+                    Func&& get_choice) noexcept
+        -> std::optional<std::pair<bool, mvmsg::MoveMessage>>
     {
         auto choice = get_choice();
         auto ms = move_check(in_hand, input);
         if (!ms.has_value()) {
-            return { false, moverec::MoveRec{} };
+            return std::nullopt;
         }
 
-        moverec::MoveRec curr_move{ in_hand, input, turn, ms.value(), choice };
+        mvmsg::MoveMessage curr_move{ in_hand, input, turn, ms.value(), choice };
 
         if (!provide_move(curr_move)) {
-            return { false, moverec::MoveRec{} };
+            return std::nullopt;
         }
-
+        
         return { true, curr_move };
     }
     
-    bool provide_move(const moverec::MoveRec&);
+    bool provide_move(const mvmsg::MoveMessage&);
     
     bool undo_move();
     

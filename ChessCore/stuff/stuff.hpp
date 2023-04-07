@@ -1,21 +1,25 @@
 #pragma once
 
 #include "../structs/input.hpp"
+#include "../structs/id.hpp"
 #include "enums.hpp"
 
 #include <charconv>
 #include <vector>
 #include <optional>
 
+using namespace std::string_literals;
+using namespace std::string_view_literals;
+
 template <class T>
-[[nodiscard]] std::vector<T> operator +(std::vector<T> vec, T val) {
+FN operator +(std::vector<T> vec, T val) noexcept -> std::vector<T> {
     vec.push_back(val);
     return vec;
 }
 
 template <class T>
-[[nodiscard]] std::vector<T> operator +(const std::vector<T>& l, const std::vector<T>& r) {
-    auto tmp = l;
+FN operator +(const std::vector<T>& l, const std::vector<T>& r) noexcept -> std::vector<T> {
+    std::vector<T> tmp = l;
     tmp.insert(tmp.end(), r.begin(), r.end());
     return tmp;
 }
@@ -39,6 +43,5 @@ template <class T>
         return std::nullopt;
 };
 
-using Id = int;
 constexpr Id ERR_ID{ -1 };
 constexpr int EN_PASSANT_INDENT = 4;

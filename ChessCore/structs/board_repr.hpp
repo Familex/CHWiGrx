@@ -1,8 +1,9 @@
 #pragma once
 
-#include "../stuff/stuff.hpp"
 #include "figure.hpp"
-#include "move_rec.hpp"
+#include "../stuff/stuff.hpp"
+#include "move_message.hpp"
+#include "figure_fabric.hpp"
 
 #include <expected>
 
@@ -31,8 +32,8 @@ namespace board_repr {
         std::vector<Figure*> figures;
         Color turn{ Color::White };
         bool idw{ true };
-        std::vector<moverec::MoveRec> past;
-        std::vector<moverec::MoveRec> future;
+        std::vector<mvmsg::MoveMessage> past;
+        std::vector<mvmsg::MoveMessage> future;
         std::vector<Figure*> captured_figures;
         std::vector<Id> can_castle;
 
@@ -57,8 +58,8 @@ namespace board_repr {
                  Color turn,
                  bool idw,
                  const std::vector<Id>& can_castle,
-                 const std::vector<moverec::MoveRec>& past = {},
-                 const std::vector<moverec::MoveRec>& future = {},
+                 const std::vector<mvmsg::MoveMessage>& past = {},
+                 const std::vector<mvmsg::MoveMessage>& future = {},
                  const std::vector<Figure*>& captured_figures = {}) noexcept
             : figures(figures)
             , turn(turn)
@@ -75,8 +76,8 @@ namespace board_repr {
                   std::vector<Figure*>&& figures,
                   Color turn,
                   bool idw,
-                  const std::vector<moverec::MoveRec>& past = {},
-                  const std::vector<moverec::MoveRec>& future = {},
+                  const std::vector<mvmsg::MoveMessage>& past = {},
+                  const std::vector<mvmsg::MoveMessage>& future = {},
                   const std::vector<Figure*>& captured_figures = {}) noexcept
             : figures(figures)
             , turn(turn)
@@ -172,13 +173,13 @@ namespace board_repr {
             }
             // Prev moves
             result += "<"s;
-            for (const auto& mr : past) {
-                result += mr.as_string() + "$"s;
+            for (const auto& mm : past) {
+                result += mvmsg::as_string(mm) + "$"s;
             }
             // Future moves
             result += "><"s;
-            for (const auto& mr : future) {
-                result += mr.as_string() + "$"s;
+            for (const auto& mm : future) {
+                result += mvmsg::as_string(mm) + "$"s;
             }
             // Captured figures
             result += ">"s;

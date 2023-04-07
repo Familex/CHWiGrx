@@ -11,7 +11,7 @@ FigureBoard::FigureBoard(board_repr::BoardRepr&& board_repr) noexcept {
 
 void FigureBoard::reset(board_repr::BoardRepr&& map) noexcept {
     move_logger.reset();
-    curr_id = 0;
+    curr_id = 0_id;
     for (auto& [_, fig] : figures) {
         delete fig;
     }
@@ -106,8 +106,8 @@ auto FigureBoard::
         save_all_moves 
             ? prev_moves
             : prev_moves.empty()
-                ? std::vector<moverec::MoveRec>{}
-                : std::vector<moverec::MoveRec>{ prev_moves.back() },
+                ? std::vector<mvmsg::MoveMessage>{}
+                : std::vector<mvmsg::MoveMessage>{ prev_moves.back() },
         move_logger.get_future(),
         captured_figures
     };
@@ -331,8 +331,8 @@ auto FigureBoard::
         // Взятие на проходе
         if (const auto& last_move_sus = move_logger.get_last_move(); last_move_sus.has_value()) {
             const auto& last_move = last_move_sus.value();
-            const Pos& who_went_at_last_move_pos = last_move.who_went.get_pos();
-            if (last_move.ms.main_ev == MainEvent::LMOVE && std::abs(who_went_at_last_move_pos.y - in_hand_pos.y) == 1) {
+            const Pos& who_went_at_last_move_pos = last_move.first.get_pos();
+            if (std::holds_alternative<mvmsg::LongMove>(last_move.main_event) && std::abs(who_went_at_last_move_pos.y - in_hand_pos.y) == 1) {
                 int shift_y = who_went_at_last_move_pos.y - in_hand_pos.y;
                 if (in_hand->is_col(Color::White)) {
                     if (in_hand_pos.x == (EN_PASSANT_INDENT - 1) && idw && cont_fig(in_hand_pos + Pos(0, shift_y)) && is_empty(in_hand_pos + Pos(-1, shift_y))) {
@@ -549,11 +549,11 @@ auto FigureBoard::
 /// <param name="input">Ввод для проверки</param>
 /// <param name="king_end_col">Целевой столбец для короля</param>
 /// <param name="rook_end_col">Целевой столбец для ладьи</param>
-/// <returns>Если рокировка валидна, возвращает сообщение хода, фигуру короля и ладьи</returns>
+/// <returns>Если рокировка валидна, возвращает фигуру короля и ладьи</returns>
 auto FigureBoard::
-    castling_check(MoveMessage move_message, const Figure* in_hand, const Input& input,  
+    castling_check(const Figure* in_hand, const Input& input,  
                      const int king_end_col, const int rook_end_col) const noexcept
-                       -> std::optional<std::tuple<MoveMessage, const Figure*, const Figure*>>
+                       -> std::optional<std::tuple<const Figure*, const Figure*>>
 {
     // Рокировка на g-фланг
     bool castling_can_be_done = true;
@@ -563,8 +563,8 @@ auto FigureBoard::
     }
     const auto king = king_sus.value();
     Pos king_pos = king->get_pos();
-    if (in_hand->get_type() == FigureType::King && input.target.y == king_end_col && in_hand->get_pos().y != king_end_col ||
-        king_pos.y == king_end_col && in_hand->get_type() == FigureType::Rook && input.target.y == rook_end_col && in_hand->get_pos().y != rook_end_col) {
+    if ((in_hand->get_type() == FigureType::King && input.target.y == king_end_col && in_hand->get_pos().y != king_end_col) ||
+        (king_pos.y == king_end_col && in_hand->get_type() == FigureType::Rook && input.target.y == rook_end_col && in_hand->get_pos().y != rook_end_col)) {
         // input правильный (король уже мог быть на g вертикали, так что доступна возможность рокировки от ладьи)
         // Нужно проверить, что все промежуточные позиции (где идёт король) не под шахом
         const Figure* rook = (*figures.begin()).second;
@@ -867,7 +867,7 @@ auto FigureBoard::
     undo_move() -> bool
 {
     if (move_logger.prev_empty()) return false;
-    const moverec::MoveRec last = move_logger.move_last_to_future().value();
+    const mvmsg::MoveMessage last = move_logger.move_last_to_future().value();
     const auto in_hand_sus = get_fig(last.who_went.get_id());
     if (!in_hand_sus.has_value()) return false;
     const auto in_hand = in_hand_sus.value();
@@ -923,13 +923,8 @@ auto FigureBoard::
 /// <param name="move_rec">Ход</param>
 /// <returns>Удалось ли совершить ход</returns>
 auto FigureBoard::
-    provide_move(const moverec::MoveRec& move_rec) -> bool
+    provide_move(const mvmsg::MoveMessage& move_rec) -> bool
 {
-    const auto& choice = move_rec.promotion_choice;
-    const auto& in_hand = get_fig_unsafe(move_rec.who_went.get_id());
-    const auto& ms = move_rec.ms;
-    const auto& turn = move_rec.turn;
-    const auto& input = move_rec.input;
     switch (ms.main_ev)
     {
     case MainEvent::MOVE: case MainEvent::LMOVE:

@@ -6,14 +6,12 @@
 #include <format>
 
 class Figure {
-    Id id{ ERR_ID };
-    Pos position{ };
-    Color color{ Color::None };
-    FigureType type{ FigureType::None };
+    Id id;
+    Pos position;
+    Color color;
+    FigureType type;
     
 public:
-    CTOR Figure() noexcept {};
-
     CTOR Figure(const Id id, const Pos& position, const Color color, const FigureType type) noexcept
         : id{ id }
         , position{ position }
@@ -35,10 +33,8 @@ public:
     [[nodiscard]] auto
         as_string() const noexcept -> std::string
     {
-        // x-axis from top  to bottom (↓)
-        // y-axis from left to right  (→)
         return std::format("{}{}{}{}",
-            id, position.as_string(),
+            ::as_string(id), position.as_string(),
             col_to_char(color), figure_type_to_char(type)
         );
     }

@@ -8,6 +8,10 @@
 constexpr int HEIGHT{ 8 };  // this definitely shouldn't be here (FIXME)
 constexpr int WIDTH{ 8 };
 
+/// <summary>
+///   x-axis from top  to bottom (↓)
+///   y-axis from left to right  (→)
+/// </summary>
 struct Pos {
     int x{ -1 };
     int y{ -1 };

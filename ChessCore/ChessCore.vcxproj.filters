@@ -61,6 +61,15 @@
     <ClInclude Include="structs\move_message.hpp">
       <Filter>structs</Filter>
     </ClInclude>
+    <ClInclude Include="stuff\strong_typedef.hpp">
+      <Filter>stuff</Filter>
+    </ClInclude>
+    <ClInclude Include="structs\id.hpp">
+      <Filter>structs</Filter>
+    </ClInclude>
+    <ClInclude Include="stuff\overload.h">
+      <Filter>stuff</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="cpp.hint" />
