@@ -8,7 +8,7 @@ LRESULT CALLBACK main_default_wndproc(HWND hWnd, UINT message, WPARAM wParam, LP
             switch (int wmId = LOWORD(wParam); wmId)
             {
                 case IDM_COPY_MAP:
-                    copy_repr_to_clip();
+                    copy_repr_to_clip(hWnd);
                     break;
                 
                 case IDM_PASTE_MAP:

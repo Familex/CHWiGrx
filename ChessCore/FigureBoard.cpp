@@ -970,6 +970,7 @@ auto FigureBoard::
         },
         [&](const mvmsg::EnPassant& en_passant) {
             move_fig(in_hand, move_message.input.target);
+            capture_figure(en_passant.eaten);
         },
         /* (has_castling(ms.to_move.back().first)) */
         [&](const mvmsg::Castling& castling) {

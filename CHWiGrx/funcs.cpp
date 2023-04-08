@@ -101,6 +101,7 @@ void draw_figure(HDC hdc, const Figure* figure, const Pos begin_paint, const boo
     }
     
     // if it's a castring rook, add a star to right top corner
+    // FIXME draws rook instead of star.
     if (board.has_castling(figure->get_id()))
     {
         HBITMAP hStarBitmap = other_bitmaps["star"];
@@ -201,7 +202,7 @@ void make_move(HWND hWnd, std::optional<Input> input_) {
         }
         auto result = MessageBox(hWnd, (body + L"\nCopy board to clip?").c_str(), head.c_str(), MB_YESNO);
         if (result == IDYES) {
-            copy_repr_to_clip();
+            copy_repr_to_clip(hWnd);
         }
         restart();
         InvalidateRect(hWnd, NULL, NULL);
@@ -227,32 +228,36 @@ void restart() {
     turn = start_board_repr.turn;
 }
 
-// Копирует строку в буффер обмена
-void cpy_str_to_clip(const std::string& buff)
-{
-    size_t len = buff.length() + 1;
-    using symbol = char;
-    size_t size = len * sizeof(symbol);
-    HGLOBAL hMem = GlobalAlloc(GMEM_MOVEABLE, size);
-    if (hMem == NULL) return;
-    LPVOID hMemLock = GlobalLock(hMem);
-    if (hMemLock == NULL) return;
-    memcpy(hMemLock, buff.c_str(), len);
-    GlobalUnlock(hMem);
-    if (OpenClipboard(NULL)) {
-        EmptyClipboard();
-        SetClipboardData(CF_TEXT, hMem);
+/// FIXME doesn't work
+bool cpy_str_to_clip(HWND hwnd, std::string_view s) {
+    OpenClipboard(hwnd);
+    EmptyClipboard();
+    HGLOBAL hg = GlobalAlloc(GMEM_MOVEABLE, s.size() + 1);
+    if (!hg) {
         CloseClipboard();
+        return false;
     }
+    LPVOID p = GlobalLock(hg);
+    if (!p) {
+        GlobalFree(hg);
+        CloseClipboard();
+        return false;
+    }
+    memcpy(p, s.data(), s.size() + 1);
+    GlobalUnlock(hg);
+    SetClipboardData(CF_TEXT, hg);
+    CloseClipboard();
+    GlobalFree(hg);
+    return true;
 }
 
 // Возвращает строку из буффера обмена
 std::string take_str_from_clip() {
-    if (!OpenClipboard(nullptr)) return "";
+    if (!OpenClipboard(NULL)) return "";
     HANDLE hData = GetClipboardData(CF_TEXT);
-    if (hData == nullptr) return "";
-    char* pszText = static_cast<char*>(GlobalLock(hData));
-    if (pszText == nullptr) return "";
+    if (!hData) return "";
+    const char* pszText = static_cast<const char*>(GlobalLock(hData));
+    if (!pszText) return "";
     std::string text(pszText);
     GlobalUnlock(hData);
     CloseClipboard();
@@ -369,14 +374,6 @@ void on_lbutton_down(HWND hWnd, LPARAM lParam) {
     InvalidateRect(hWnd, NULL, NULL);
 };
 
-bool is_legal_board_repr(const std::string& str) {
-    return (str.find('<') != str.npos &&
-        str.find('>') != str.npos &&
-        str.find('[') != str.npos &&
-        str.find(']') != str.npos &&
-        str.find('~') != str.npos);
-}
-
 void set_menu_checkbox(HWND hWnd, UINT menu_item, bool state) {
     HMENU hMenu = GetMenu(hWnd);
     MENUITEMINFO item_info;
@@ -471,10 +468,11 @@ void update_main_window_title(HWND hWnd) {
     SetWindowText(hWnd, title.c_str());
 }
 
-void copy_repr_to_clip() {
+bool copy_repr_to_clip(HWND hWnd) {
     board_repr::BoardRepr board_repr{ board.get_repr(turn, save_all_moves) };
-    std::string board_repr_str = board_repr.as_string();
-    cpy_str_to_clip(
+    auto board_repr_str = board_repr.as_string();
+    return cpy_str_to_clip(
+        hWnd,
         board_repr_str
     );
 }

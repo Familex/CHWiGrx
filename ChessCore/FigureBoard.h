@@ -196,9 +196,9 @@ namespace figboard {
             figures.erase(fig1->get_pos());
             figures.erase(fig2->get_pos());
             
-            auto tmp = fig1->get_pos();
+            Pos fig1_prev_pos = fig1->get_pos();
             fig1->move_to(fig2->get_pos());
-            fig2->move_to(tmp);
+            fig2->move_to(fig1_prev_pos);
 
             figures[fig1->get_pos()] = fig1;
             figures[fig2->get_pos()] = fig2;

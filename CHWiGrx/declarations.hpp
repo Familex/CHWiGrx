@@ -81,7 +81,7 @@ inline Color bot_turn = Color::Black;
 /* misc functions */
 bool init_instance(HINSTANCE, LPTSTR, LPTSTR, int);
 INT_PTR CALLBACK about_proc(HWND, UINT, WPARAM, LPARAM);
-void cpy_str_to_clip(const std::string&);
+bool cpy_str_to_clip(HWND hwnd, std::string_view s);
 std::string take_str_from_clip();
 HWND create_curr_choice_window(HWND, Figure*, POINT, int, int, const WNDPROC);
 bool prepare_window(HINSTANCE, int, UINT, UINT, WNDCLASSEX);
@@ -100,9 +100,8 @@ void update_main_window_title(HWND);
 void on_lbutton_up(HWND, WPARAM, LPARAM, Pos, bool=true);
 void on_lbutton_down(HWND, LPARAM);
 void restart();
-void copy_repr_to_clip();
+bool copy_repr_to_clip(HWND);
 void make_move(HWND, std::optional<Input> = std::nullopt);
-bool is_legal_board_repr(const std::string&);
 bool is_bot_move();
 
 /* draw */

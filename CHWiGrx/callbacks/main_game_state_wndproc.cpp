@@ -1,5 +1,7 @@
 #include "../declarations.hpp"
 
+#include "stuff/macro.h"
+
 LRESULT CALLBACK mainproc::main_game_state_wndproc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) {
     static PAINTSTRUCT ps{};
     static HBITMAP hbmMem{};
@@ -30,11 +32,8 @@ LRESULT CALLBACK mainproc::main_game_state_wndproc(HWND hWnd, UINT message, WPAR
                 
                 case IDM_PASTE_START_MAP:
                 {
-                    std::string board_repr_aspt = take_str_from_clip();
-                    if (!is_legal_board_repr(board_repr_aspt)) break;
-                    auto board_repr_sus = board_repr::BoardRepr::from_string( board_repr_aspt );
-                    if (board_repr_sus.has_value()) {
-                        start_board_repr = board_repr_sus.value();
+                    IF_LET(br, board_repr::BoardRepr::from_string(take_str_from_clip())) {
+                        start_board_repr = br;
                     }
                 }
                     break;
