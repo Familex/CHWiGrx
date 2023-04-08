@@ -88,8 +88,7 @@ LRESULT CALLBACK mainproc::main_game_state_wndproc(HWND hWnd, UINT message, WPAR
                     chose = wmId == IDM_SET_CHOICE_TO_QUEEN ? FigureType::Queen
                         : wmId == IDM_SET_CHOICE_TO_ROOK ? FigureType::Rook
                         : wmId == IDM_SET_CHOICE_TO_KNIGHT ? FigureType::Knight
-                        : wmId == IDM_SET_CHOICE_TO_BISHOP ? FigureType::Bishop
-                        : FigureType::None;
+                        : FigureType::Bishop;
                 }
                     break;
                     

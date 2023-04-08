@@ -20,7 +20,7 @@ namespace figfab {
         #if __cpp_constexpr >= 202211L
             FN static
         #else   // Permitting static constexpr variables in constexpr functions
-            [[nodiscard]] static auto
+            [[nodiscard]] inline static auto
         #endif 
             instance() noexcept -> FigureFabric& 
         {
@@ -30,7 +30,7 @@ namespace figfab {
 
         FN create(const std::string_view str) noexcept -> std::expected<std::unique_ptr<Figure>, ParseError> {
             std::vector<std::string_view> data = split(str, ".");
-            Id new_id = svtoi(data[0]).value();
+            auto new_id = Id{ std::max(0ull, static_cast<std::size_t>(svtoi(data[0]).value())) };
             Color new_col = char_to_col(data[3][0]);
             auto new_pos = Pos{ svtoi(data[1]).value(), svtoi(data[2]).value() };
             FigureType new_type = char_to_figure_type(data[4][0]);
@@ -40,7 +40,7 @@ namespace figfab {
         FN create(const Pos position, const Color color, const FigureType type,
                 const Id new_id) noexcept -> std::unique_ptr<Figure>
         {
-            this->id = std::max(this->id, new_id + 1);
+            this->id = std::max(this->id, new_id + 1_id);
             return std::make_unique<Figure>(new_id, position, color, type);
         }
 
@@ -52,7 +52,7 @@ namespace figfab {
         FN create_in_place(const Pos position, const Color color, const FigureType type,
             const Id new_id, Figure* const placement) noexcept -> void
         {
-            this->id = std::max(this->id, new_id + 1);
+            this->id = std::max(this->id, new_id + 1_id);
             new (placement) Figure(new_id, position, color, type);
         }
 

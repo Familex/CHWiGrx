@@ -142,23 +142,25 @@ void make_move(HWND hWnd, std::optional<Input> input_) {
         return;
     }
     
-    auto [is_legal_move, move_rec] = board.provide_move(
+    const auto move_message_sus = board.provide_move(
         in_hand.value(), input,
         turn, [c = chose] { return c; }
     );
 
-    if (!is_legal_move) {
+    if (!move_message_sus.has_value()) {
         InvalidateRect(hWnd, NULL, NULL);
         return;
     }
 
-    debug_print("Curr move was:", move_rec.as_string());
+    const auto& move_message = move_message_sus.value();
 
-    board.set_last_move(move_rec);
+    debug_print("Curr move was:", as_string(move_message));
+
+    board.set_last_move(move_message);
     turn = what_next(turn);
     InvalidateRect(hWnd, NULL, NULL);
     UpdateWindow(hWnd);
-
+    
     if (GameEndType curr_game_end_state = board.game_end_check(turn); 
             curr_game_end_state != GameEndType::NotGameEnd
         ) {

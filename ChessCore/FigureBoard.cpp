@@ -180,9 +180,6 @@ bool FigureBoard::capture_figure(Figure* const it) {
 /// <param name="it">Идентификатор фигуры</param>
 /// <returns>Получилось ли съесть</returns>
 bool FigureBoard::capture_figure(const Id id) {
-    if (id == ERR_ID) {
-        return false; 
-    }
     auto fig = get_fig(id);
     if (fig.has_value()) {
         captured_figures.push_back(fig.value());
@@ -727,7 +724,6 @@ auto FigureBoard::  // FIXME move check and undercheck checks to separate functi
                     return mvmsg::MoveMessage{ 
                         in_hand,
                         input,
-                        in_hand->get_col(),
                         promotion_choice,
                         mvmsg::Castling{
                             (in_hand->is(FigureType::King) 
@@ -782,7 +778,6 @@ auto FigureBoard::  // FIXME move check and undercheck checks to separate functi
             return mvmsg::MoveMessage{
                 in_hand,
                 input,
-                in_hand->get_col(),
                 promotion_choice,
                 mvmsg::LongMove{ },
                 side_events
@@ -828,7 +823,6 @@ auto FigureBoard::  // FIXME move check and undercheck checks to separate functi
                 return mvmsg::MoveMessage{
                     in_hand,
                     input,
-                    in_hand->get_col(),
                     promotion_choice,
                     mvmsg::EnPassant{
                         to_eat_sus.value()->get_id()
@@ -863,7 +857,6 @@ auto FigureBoard::  // FIXME move check and undercheck checks to separate functi
             return mvmsg::MoveMessage{
                 in_hand,
                 input,
-                in_hand->get_col(),
                 promotion_choice,
                 mvmsg::Eat{
                     targ_sus.value()->get_id()
@@ -890,7 +883,6 @@ auto FigureBoard::  // FIXME move check and undercheck checks to separate functi
             return mvmsg::MoveMessage{
                 in_hand,
                 input,
-                in_hand->get_col(),
                 promotion_choice,
                 mvmsg::Move{ },
                 side_events
@@ -924,14 +916,12 @@ auto FigureBoard::
         },
         [&](const mvmsg::Eat& eat) {
             move_fig(in_hand, move_message.input.from);
-            const auto to_eat = get_fig_unsafe(eat.eaten);
-            uncapture_figure(to_eat->get_id());
+            uncapture_figure(eat.eaten);
         },
         [&](const mvmsg::EnPassant& en_passant) {
             // FIXME debug on rook with castling
             move_fig(in_hand, move_message.input.from);
-            const auto to_eat = get_fig_unsafe(en_passant.eaten);
-            uncapture_figure(to_eat->get_id());
+            uncapture_figure(en_passant.eaten);
         },
         [&](const mvmsg::Castling& castling) {
             move_fig(in_hand, move_message.input.from);
@@ -977,18 +967,17 @@ auto FigureBoard::
         * Was in Eat and EnPassant events */
         [&](const mvmsg::Eat& eat) {
             move_fig(in_hand, move_message.input.target);
-            const auto to_eat = get_fig_unsafe(eat.eaten);
-            capture_figure(to_eat);
         },
         [&](const mvmsg::EnPassant& en_passant) {
             move_fig(in_hand, move_message.input.target);
-            const auto to_eat = get_fig_unsafe(en_passant.eaten);
-            capture_figure(to_eat);
         },
         /* (has_castling(ms.to_move.back().first)) */
         [&](const mvmsg::Castling& castling) {
-            move_fig(in_hand, move_message.input.target);
             const auto who = get_fig_unsafe(castling.second_to_move);
+            if (who->at(move_message.input.target)) {
+                swap_fig(in_hand, who);
+            }
+            move_fig(in_hand, move_message.input.target);
             move_fig(who, castling.second_input.target);
         }
     );
@@ -1037,7 +1026,6 @@ auto FigureBoard::
 void FigureBoard::
     uncapture_figure(const Id id)
 {
-    if (id == ERR_ID) return;
     auto to_resurrect_id = std::find_if(
         captured_figures.begin(), captured_figures.end(),
         [&id] (auto&& val) { return id == val->get_id(); }

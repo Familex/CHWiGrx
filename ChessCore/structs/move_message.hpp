@@ -67,7 +67,6 @@ namespace mvmsg /* move_message */ {
     struct MoveMessage {
         Figure first;
         Input input;
-        Color turn;
         FigureType promotion_choice;
         MainEvent main_event;
         std::vector<SideEvent> side_evs;
@@ -75,13 +74,11 @@ namespace mvmsg /* move_message */ {
         CTOR MoveMessage(
                 const Figure* first,
                 const Input& input,
-                const Color turn,
                 const FigureType p,
                 const MainEvent main_event,
                 const std::vector<SideEvent>& side_evs) noexcept
             : first{ *first }
             , input{ input }
-            , turn{ turn }
             , promotion_choice{ p }
             , main_event{ main_event }
             , side_evs{ side_evs }
@@ -110,8 +107,7 @@ namespace mvmsg /* move_message */ {
                       move_message.first.as_string()
                     + move_message.input.from.as_string()
                     + move_message.input.target.as_string()
-                    + col_to_char(move_message.turn)
-                    + as_string(move_message.promotion_choice)
+                    + figure_type_to_char(move_message.promotion_choice)
                 };
                 for (const auto& side_event : move_message.side_evs) {
                     result += as_string(side_event);

@@ -7,14 +7,13 @@
 #include <vector>
 #include <array>
 
+#ifdef REWRITE_ALL
+
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 
 namespace Microsoft::VisualStudio::CppUnitTestFramework
 {
-    template <>
-    std::wstring ToString<MainEvent>(const MainEvent& me) {
-        return as_wstring(me);
-    }
+    
     template <>
     std::wstring ToString<FigureType>(const FigureType& ft) {
         return as_wstring(ft);
@@ -27,11 +26,6 @@ namespace FigureBoardTesting
     using board_repr::BoardRepr;
 
     namespace {
-        
-        Id operator""_id(unsigned long long int id) {
-            return static_cast<Id>(id);
-        }
-
         template <typename C>
         concept HasBeginEnd = requires(C c) {
             std::begin(c);
@@ -1035,3 +1029,6 @@ namespace FigureBoardTesting
     }	// namespace Moves
     
 }    // namespace FigureBoardTesting
+
+
+#endif  // REWRITE_ALL

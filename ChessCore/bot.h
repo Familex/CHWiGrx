@@ -1,7 +1,7 @@
 #pragma once
 
 #include "stuff/stuff.hpp"
-#include "stuff/figure.hpp"
+#include "structs/figure.hpp"
 #include "FigureBoard.h"
 
 namespace bot {

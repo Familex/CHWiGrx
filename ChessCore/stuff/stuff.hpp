@@ -42,6 +42,3 @@ FN operator +(const std::vector<T>& l, const std::vector<T>& r) noexcept -> std:
     else
         return std::nullopt;
 };
-
-constexpr Id ERR_ID{ -1 };
-constexpr int EN_PASSANT_INDENT = 4;
