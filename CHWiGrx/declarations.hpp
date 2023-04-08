@@ -22,7 +22,7 @@ void debug_print([[maybe_unused]] Ts ...args)
         ((std::cout << args << " "), ...);
         std::cout << std::endl;
     #else
-        (void)args;
+        ((void)args, ...);
     #endif // _DEBUG
 }
 
