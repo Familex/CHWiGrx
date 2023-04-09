@@ -210,7 +210,7 @@ struct from_string<board_repr::BoardRepr> {
         if (meta_end == std::string_view::npos) {
             return UNEXPECTED_PARSE(ParseErrorType, CouldNotFindMeta, pos);
         }
-        const auto sv_meta = sv.substr(0, meta_end - 1);
+        const auto sv_meta = sv.substr(0, meta_end);
 
         if (const auto version = svtoi(sv_meta.substr(pos, 2))) {
             meta.version = *version;
@@ -262,34 +262,27 @@ struct from_string<board_repr::BoardRepr> {
             ? Color::Black
             : Color::White;
         pos += 1;
-        if (sv_meta.size() == pos) {
-            return UNEXPECTED_PARSE(ParseErrorType, CouldNotFindCastlings, pos);
-        }
-        if (sv_meta[pos] != 'C') {
-            return UNEXPECTED_PARSE(ParseErrorType, CouldNotFindCastlings, pos);
-        }
-        std::vector<Id> castlings{ };
-        for (const auto& castling : split(sv_meta.substr(pos + 1, sv_meta.size() - pos - 1), ",")) {
-            if (const auto id = svtoi(castling)) {
-                castlings.push_back(Id{ static_cast<Id_type>(*id) });
+        if (sv_meta.size() != pos) {
+            if (sv_meta[pos] != 'C') {
+                return UNEXPECTED_PARSE(ParseErrorType, CouldNotFindCastlings, pos);
             }
-            else {
-                return UNEXPECTED_PARSE(ParseErrorType, InvalidCastling, id.error());
+            std::vector<Id> castlings{ };
+            for (const auto& castling : split(sv_meta.substr(pos + 1, sv_meta.size() - pos - 1), ",")) {
+                if (const auto id = svtoi(castling)) {
+                    castlings.push_back(Id{ static_cast<Id_type>(*id) });
+                }
+                else {
+                    return UNEXPECTED_PARSE(ParseErrorType, InvalidCastling, id.error());
+                }
             }
+            meta.castlings = castlings;
         }
-        meta.castlings = castlings;
         
         meta.max_pos_length = std::to_string(meta.width * meta.height - 1).size();
 
         return operator()(sv, meta);
     }
 };
-
-#include "../stuff/cexau.h"
-
-CEXAU meta = "02H8W8TBC22,21,45,44!"sv;
-CEXAU w_pos = meta.find('W', 0);
-CEXAU test = meta.substr(meta.find('C') + 1, meta.size() - meta.find('C') - 1);
 
 template <>
 struct as_string<board_repr::BoardRepr> {
