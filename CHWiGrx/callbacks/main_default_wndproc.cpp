@@ -13,8 +13,7 @@ LRESULT CALLBACK main_default_wndproc(HWND hWnd, UINT message, WPARAM wParam, LP
                 
                 case IDM_PASTE_MAP:
                 {
-                    std::string board_repr_str = take_str_from_clip();
-                    auto board_repr_sus = from_string<board_repr::BoardRepr>{}(board_repr_str);
+                    auto board_repr_sus = take_repr_from_clip(hWnd);
                     if (board_repr_sus.has_value()) {
                         turn = board_repr_sus.value().turn;
                         board.reset(std::move(board_repr_sus.value()));

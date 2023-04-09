@@ -7,14 +7,6 @@
 
 namespace figfab {
 
-    enum class ParseError {
-        WrongId,
-        WrongColor,
-        WrongPosX,
-        WrongPosY,
-        WrongFigureType,
-    };
-
     class FigureFabric {
     public:
         #if __cpp_constexpr >= 202211L
@@ -40,8 +32,8 @@ namespace figfab {
             return std::make_unique<Figure>(this->id++, position, color, type);
         }
 
-        FN create_in_place(const Pos position, const Color color, const FigureType type,
-            const Id new_id, Figure* const placement) noexcept -> void
+        void create_in_place(const Pos position, const Color color, const FigureType type,
+                const Id new_id, Figure* const placement) noexcept
         {
             this->id = std::max(this->id, new_id + 1_id);
             new (placement) Figure(new_id, position, color, type);

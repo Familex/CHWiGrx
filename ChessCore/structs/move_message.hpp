@@ -113,7 +113,8 @@ struct as_string<mvmsg::SideEvent> {
 template <>
 struct from_string<mvmsg::MoveMessage> {
     enum class ParseErrorType {
-        EmptyMap,
+        EmptyMap = 0,
+        Max = 0,
     };
 
     [[nodiscard]] inline auto
@@ -147,7 +148,7 @@ struct from_string<mvmsg::MoveMessage> {
             "1900BQ";
 
         auto fig = from_string<Figure>{}(sv.substr(0, 4), meta);
-        // return UNEXPECTED_PARSE(ParseErrorType::EmptyMap, 999ull);
+        return UNEXPECTED_PARSE(ParseErrorType, EmptyMap, 999ull);
     }
 };
 

@@ -85,13 +85,14 @@ FN to_pos_vector(const std::vector<Figure*>& lst) noexcept -> std::vector<Pos> {
 template <>
 struct from_string<Figure> {
 
-    enum class ParseErrorType {
-        UnexpectedEnd,
-        IdDelimeterMissing,
-        InvalidId,
-        InvalidPos,
-        InvalidColor,
-        InvalidType,
+    enum class ParseErrorType : std::size_t {
+        UnexpectedEnd = 0,
+        IdDelimeterMissing = 1,
+        InvalidId = 2,
+        InvalidPos = 3,
+        InvalidColor = 4,
+        InvalidType = 5,
+        Max = 5,
     };
     
     [[nodiscard]] inline auto
@@ -106,6 +107,7 @@ struct from_string<Figure> {
             // return UNEXPECTED_PARSE(ParseErrorType::UnexpectedEnd, sv.size());
         }
         // FIXME todo
+        return UNEXPECTED_PARSE(ParseErrorType, UnexpectedEnd, sv.size());
     }
 };
 

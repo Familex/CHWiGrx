@@ -230,7 +230,6 @@ void restart() {
     turn = start_board_repr.turn;
 }
 
-/// FIXME doesn't work
 bool cpy_str_to_clip(HWND hwnd, std::string_view s) {
     OpenClipboard(hwnd);
     EmptyClipboard();
@@ -253,9 +252,8 @@ bool cpy_str_to_clip(HWND hwnd, std::string_view s) {
     return true;
 }
 
-// Возвращает строку из буффера обмена
-std::string take_str_from_clip() {
-    if (!OpenClipboard(NULL)) return "";
+std::string take_str_from_clip(HWND hWnd) {
+    if (!OpenClipboard(hWnd)) return "";
     HANDLE hData = GetClipboardData(CF_TEXT);
     if (!hData) return "";
     const char* pszText = static_cast<const char*>(GlobalLock(hData));
@@ -280,7 +278,9 @@ std::string take_str_from_clip() {
 HWND create_curr_choice_window(HWND parent, Figure* in_hand, POINT mouse, int w, int h, const WNDPROC callback) {
     UnregisterClass(CURR_CHOICE_WINDOW_CLASS_NAME, GetModuleHandle(nullptr));
     WNDCLASSEX wc{ sizeof(WNDCLASSEX) };
-    Figure* for_storage = in_hand;  // Возможно нужно копировать TODO
+    Figure* for_storage = in_hand;  // Нужно копировать TODO (В колбеке тоже тогда не забыть удалить)
+                                    // т.к. в основной программе тоже будет использоваться in_hand
+                                    // который может быть уничтожен.
     wc.cbClsExtra = 0;
     wc.cbWndExtra = sizeof(in_hand);
     wc.hbrBackground = NULL;
@@ -479,6 +479,13 @@ bool copy_repr_to_clip(HWND hWnd) {
         hWnd,
         board_repr_str
     );
+}
+
+auto take_repr_from_clip(HWND hWnd)
+-> std::expected<board_repr::BoardRepr,
+    ParseError<from_string<board_repr::BoardRepr>::ParseErrorType>>
+{
+    return from_string<board_repr::BoardRepr>{}(take_str_from_clip(hWnd));
 }
 
 /* Отрисовать фоновую доску */
