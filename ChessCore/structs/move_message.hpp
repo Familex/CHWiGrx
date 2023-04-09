@@ -117,9 +117,9 @@ struct from_string<mvmsg::MoveMessage> {
         Max = 0,
     };
 
-    [[nodiscard]] inline auto
-        operator()(const std::string_view sv, const FromStringMeta& meta) const noexcept
-        -> ParseResult<mvmsg::MoveMessage, ParseErrorType> {
+    FN operator()(const std::string_view sv, const FromStringMeta& meta) const noexcept
+       -> ParseResult<mvmsg::MoveMessage, ParseErrorType>
+    {
         if (true || sv.empty()) {
             // return std::unexpected{ ParseError{ ParseErrorType::EmptyMap, 0ull } };
         }
@@ -154,9 +154,8 @@ struct from_string<mvmsg::MoveMessage> {
 
 template <>
 struct as_string<mvmsg::MoveMessage> {
-    [[nodiscard]] inline auto
-        operator()(const mvmsg::MoveMessage& move_message, const AsStringMeta& meta) const noexcept
-        -> std::string
+    FN operator()(const mvmsg::MoveMessage& move_message, const AsStringMeta& meta) const noexcept
+       -> std::string
     {
         std::string result{
             USING_BEG(&)

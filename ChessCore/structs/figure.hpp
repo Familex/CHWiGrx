@@ -143,21 +143,20 @@ struct from_string<Figure> {
 
 template <>
 struct as_string<Figure> {
-    [[nodiscard]] inline auto
-        operator()(const Figure& fig, const AsStringMeta& meta) const noexcept
+    FN operator()(const Figure& fig, const AsStringMeta& meta) const noexcept
         -> std::string
     {
-        return std::format("{}.{}{}{}",
-            as_string<Id>{}(fig.id, meta.min_id), as_string<Pos>{}(fig.position, meta),
-            as_string<Color>{}(fig.color), as_string<FigureType>{}(fig.type)
-        );
+        return as_string<Id>{}(fig.id, meta.min_id)
+               + "."s
+               + as_string<Pos>{}(fig.position, meta)
+               + as_string<Color>{}(fig.color)
+               + as_string<FigureType>{}(fig.type);
     }
 };
 
 template <>
 struct as_string<const Figure*> {
-    [[nodiscard]] inline auto
-        operator()(const Figure* fig, const AsStringMeta& meta) const noexcept
+    FN operator()(const Figure* fig, const AsStringMeta& meta) const noexcept
         -> std::string
     {
         if (!fig) {

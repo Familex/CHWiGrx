@@ -183,9 +183,8 @@ struct from_string<board_repr::BoardRepr> {
         == (std::size_t)from_string<mvmsg::MoveMessage>::ParseErrorType::Max
     );
     
-    [[nodiscard]] inline auto
-        operator()(const std::string_view sv, const FromStringMeta& meta) const noexcept
-        -> ParseResult<board_repr::BoardRepr, ParseErrorType>
+    FN operator()(const std::string_view sv, const FromStringMeta& meta) const noexcept
+       -> ParseResult<board_repr::BoardRepr, ParseErrorType>
     {
         board_repr::BoardRepr result{};
 
@@ -335,9 +334,8 @@ struct from_string<board_repr::BoardRepr> {
         return result;
     }
     
-    [[nodiscard]] inline auto
-        operator()(const std::string_view sv) const noexcept
-        -> ParseResult<board_repr::BoardRepr, ParseErrorType>
+    FN operator()(const std::string_view sv) const noexcept
+       -> ParseResult<board_repr::BoardRepr, ParseErrorType>
     {
         FromStringMeta meta{ };
         std::size_t pos{ };
@@ -422,9 +420,9 @@ struct from_string<board_repr::BoardRepr> {
 
 template <>
 struct as_string<board_repr::BoardRepr> {
-    [[nodiscard]] inline auto
-        operator()(const board_repr::BoardRepr& br, const AsStringMeta& meta) const noexcept
-        -> std::string
+    FN operator()(const board_repr::BoardRepr& br,
+                  const AsStringMeta& meta) const noexcept
+       -> std::string
     {
         // FIXME castlings
         using namespace std::literals::string_literals;
@@ -477,9 +475,8 @@ struct as_string<board_repr::BoardRepr> {
         return result;
     }
 
-    [[nodiscard]] inline auto
-        operator()(const board_repr::BoardRepr& br) const noexcept
-        -> std::string
+    FN operator()(const board_repr::BoardRepr& br) const noexcept
+       -> std::string
     {
         AsStringMeta meta{ };
         

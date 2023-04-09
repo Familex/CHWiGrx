@@ -50,8 +50,7 @@ namespace std {
 
 template <>
 struct from_string<Id> {
-    [[nodiscard]] inline constexpr auto
-        operator()(const std::string_view sv) const noexcept
+    FN operator()(const std::string_view sv) const noexcept
         -> std::expected<Id, std::size_t>
     {
         auto res = svtoi(sv);
@@ -71,5 +70,6 @@ struct as_string<Id> {
         -> std::string
     {
         return std::to_string(id - min_id);
+        // FIXME    ^^^^^^^^^ is there constexpr version of this?
     }
 };
