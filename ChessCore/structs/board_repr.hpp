@@ -177,6 +177,30 @@ struct from_string<board_repr::BoardRepr> {
     {
         FromStringMeta meta{ };
 
+        auto parse_example =
+            "02H8W8TBC22,21,45,44!"
+            "6.00BR" "10.01BK" "7.02BB" "3.03BK"
+            "8.05BB" "11.06BK" "5.07BR" "12.08BP"
+            "14.10BP" "19.11BP" "18.12BP" "15.15BP"
+            "16.21BP" "30.25WB" "4.31BQ" "22.45WP"
+            "27.48WP" "26.49WP" "25.50WP" "24.51WP"
+            "21.54WP" "20.55WP" "29.56WR" "34.57WK"
+            "31.58WB" "1.59WK" "0.60WQ" "33.62WK"
+            "28.63WR"
+            "<23.52WP5236QL$"
+                "13.09BP0925QL$"
+                "23.36WP3628QM$"
+                "17.13BP1329QL$"
+                "23.28WP2821QP17$"
+                "16.14BP1421QE23$"
+                "30.61WB6125QE13$"
+                "4.04BQ0431QCHM$"
+                "22.53WP5345QM$>"
+            "<11.06BK0623QM$"
+                "21.54WP5445QE4$"
+                "4.31BQ3145QCHE22$>"
+            "17.29BP" "23.21WP" "13.25BP";
+
         // FIXME implement
         meta.max_pos_length = 2;    
 
@@ -196,11 +220,17 @@ struct as_string<board_repr::BoardRepr> {
         std::string result{ ""s };
         // Header
         {
-            result += std::format("{:0>2}H{}W{}C", meta.version, HEIGHT, WIDTH);
+            result += std::format("{:0>2}H{}W{}{}{}C",
+                meta.version,
+                HEIGHT,
+                WIDTH,
+                br.get_idw_char(),
+                br.get_turn_char()
+            );
             for (const Id castle_id : br.can_castle) {
                 result += std::format("{},", castle_id);
             }
-            result += std::format("{}{}!", br.get_idw_char(), br.get_turn_char());
+            result.back() = '!';
         }
         // Figures
         for (const auto& fig : br.figures) {
