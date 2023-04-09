@@ -8,24 +8,6 @@
 #include <expected>
 
 namespace board_repr {
-
-    constexpr auto TO_STRING_VERSION = "02";
-
-    enum class ParseError {
-        InvalidFormat,
-        InvalidFigure,
-        InvalidMove,
-        InvalidCastling,
-        InvalidCapturedFigure,
-        CouldNotFindTurn,
-        CouldNotFindIdw,
-        InvalidPast,
-        InvalidFuture,
-        InvalidCanCastle,
-        InvalidCapturedFigures,
-        InvalidBoardRepr
-    };
-
     /* Data Transfer Structure */
     struct BoardRepr {
         /* ---- Fields ---- */
@@ -99,7 +81,9 @@ namespace board_repr {
         
         CTOR BoardRepr() noexcept = default;
         
-        CTOR BoardRepr(BoardRepr&& br) noexcept
+        // implicit move constructor to easy use in std::expected
+        [[nodiscard]] constexpr
+            BoardRepr(BoardRepr&& br) noexcept
         {
             clear();
             *this = std::move(br);
@@ -137,17 +121,7 @@ namespace board_repr {
             past.clear();
             future.clear();
         }
-
-        FN static
-            from_string(const std::string_view board_repr) noexcept -> std::expected<BoardRepr, ParseError>
-        {
-            BoardRepr result{};
-
-            // FIXME inplement
-
-            return std::expected<BoardRepr, ParseError>{ result };
-        }
-
+        
         FN get_idw_char() const noexcept -> char
         {
             return idw ? 'T' : 'F';
@@ -168,6 +142,47 @@ namespace board_repr {
     };
 
 }   // namespace board_repr
+
+template <>
+struct from_string<board_repr::BoardRepr> {
+    enum class ParseErrorType {
+        InvalidFormat,
+        InvalidFigure,
+        InvalidMove,
+        InvalidCastling,
+        InvalidCapturedFigure,
+        CouldNotFindTurn,
+        CouldNotFindIdw,
+        InvalidPast,
+        InvalidFuture,
+        InvalidCanCastle,
+        InvalidCapturedFigures,
+        InvalidBoardRepr
+    };
+    
+    [[nodiscard]] inline auto
+        operator()(const std::string_view sv, const FromStringMeta& meta) const noexcept
+        -> ParseResult<board_repr::BoardRepr, ParseErrorType>
+    {
+        board_repr::BoardRepr result{};
+
+        // FIXME inplement
+
+        return result;
+    }
+
+    [[nodiscard]] inline auto
+        operator()(const std::string_view sv) const noexcept
+        -> ParseResult<board_repr::BoardRepr, ParseErrorType>
+    {
+        FromStringMeta meta{ };
+
+        // FIXME implement
+        meta.max_pos_length = 2;    
+
+        return operator()(sv, meta);
+    }
+};
 
 template <>
 struct as_string<board_repr::BoardRepr> {
@@ -226,12 +241,8 @@ struct as_string<board_repr::BoardRepr> {
                 }
             }
         }
-        else {
-            meta.min_id = 0_id;
-        }
-
-        // FIXME is this correct?
-        meta.max_pos_length = std::to_string(HEIGHT * WIDTH).length();
+        
+        meta.max_pos_length = std::to_string(HEIGHT * WIDTH - 1).length();
         
         return operator()(br, meta);
     }

@@ -32,7 +32,7 @@ LRESULT CALLBACK mainproc::main_game_state_wndproc(HWND hWnd, UINT message, WPAR
                 
                 case IDM_PASTE_START_MAP:
                 {
-                    IF_LET(br, board_repr::BoardRepr::from_string(take_str_from_clip())) {
+                    IF_LET(br, from_string<board_repr::BoardRepr>{}(take_str_from_clip())) {
                         start_board_repr = br;
                     }
                 }

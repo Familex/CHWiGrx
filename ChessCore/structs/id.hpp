@@ -3,6 +3,7 @@
 #include "../stuff/macro.h"
 #include "../stuff/strong_typedef.hpp"
 #include "../stuff/parse_typedefs.hpp"
+#include "../stuff/stuff.hpp"
 
 #include <cassert>
 #include <string>
@@ -50,7 +51,7 @@ namespace std {
 template <>
 struct from_string<Id> {
     [[nodiscard]] inline auto
-        operator()(const std::string_view sv, const FromStringMeta& meta) const noexcept
+        operator()(const std::string_view sv) const noexcept
         -> std::optional<Id>
     {
         return svtoi(sv)
@@ -61,9 +62,9 @@ struct from_string<Id> {
 template <>
 struct as_string<Id> {
     [[nodiscard]] inline auto
-        operator()(const Id id, const AsStringMeta& meta) const noexcept
+        operator()(const Id id, const Id min_id) const noexcept
         -> std::string
     {
-        return std::to_string(id - meta.min_id);
+        return std::to_string(id - min_id);
     }
 };

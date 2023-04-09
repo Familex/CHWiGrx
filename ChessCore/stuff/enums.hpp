@@ -5,6 +5,7 @@
 
 #include <set>
 #include <string>
+#include <optional>
 
 enum class GameEndType {
     Checkmate,
@@ -33,7 +34,7 @@ FN col_to_char(const Color color) noexcept -> char {
 template <>
 struct from_string<Color> {
     [[nodiscard]] inline auto
-        operator()(const std::string_view sv, const FromStringMeta& meta) const noexcept
+        operator()(const std::string_view sv) const noexcept
         -> std::optional<Color>
     {
         if (sv.empty()) {
@@ -53,7 +54,7 @@ struct from_string<Color> {
 template <>
 struct as_string<Color> {
     [[nodiscard]] inline auto
-        operator()(const Color color, const AsStringMeta&) const noexcept -> std::string
+        operator()(const Color color) const noexcept -> std::string
     {
         switch (color) {
             case Color::Black:
@@ -119,7 +120,7 @@ FN figure_type_to_char(const FigureType figure_type) noexcept -> char
 template <>
 struct from_string<FigureType> {
     [[nodiscard]] inline auto
-        operator()(const std::string_view sv, const FromStringMeta& meta) const noexcept
+        operator()(const std::string_view sv) const noexcept
         -> std::optional<FigureType>
     {
         if (sv.empty()) {
@@ -147,21 +148,21 @@ struct from_string<FigureType> {
 template <>
 struct as_string<FigureType> {
     [[nodiscard]] inline auto
-        operator()(const FigureType figure_type, const AsStringMeta&) const noexcept -> std::string
+        operator()(const FigureType figure_type) const noexcept -> std::string
     {
         switch (figure_type) {
             case FigureType::Pawn:
-                return "Pawn";
+                return "P";
             case FigureType::Rook:
-                return "Rook";
+                return "R";
             case FigureType::Knight:
-                return "Knight";
+                return "K";
             case FigureType::Bishop:
-                return "Bishop";
+                return "B";
             case FigureType::Queen:
-                return "Queen";
+                return "Q";
             case FigureType::King:
-                return "King";
+                return "K";
             default:
                 std::unreachable();
         }

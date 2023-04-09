@@ -1,9 +1,11 @@
 #pragma once
 
+#include "pos.hpp"
+#include "../stuff/enums.hpp"
 #include "../stuff/macro.h"
 #include "../stuff/stuff.hpp"
 #include "../stuff/parse_typedefs.hpp"
-#include "id.hpp"
+#include "../stuff/parse_meta.hpp"
 
 #include <format>
 
@@ -98,11 +100,12 @@ struct from_string<Figure> {
     {
         // if length less than Pos(constant) + Color(1 ch) + Type(1 ch) + Id(1+ ch) + IdDelimeter (1 ch)
         if (sv.find('.') == sv.npos) {
-            return UNEXPECTED_PARSE(ParseErrorType::IdDelimeterMissing, sv.size());
+            // return make_unexpected_parse<ParseError<ParseErrorType>>(ParseErrorType::IdDelimeterMissing, sv.size());
         }
-        if (sv.size() < meta.max_pos_length + 4) {
-            return UNEXPECTED_PARSE(ParseErrorType::UnexpectedEnd, sv.size());
+        if (true || sv.size() < meta.max_pos_length + 4) {
+            // return UNEXPECTED_PARSE(ParseErrorType::UnexpectedEnd, sv.size());
         }
+        // FIXME todo
     }
 };
 
@@ -113,8 +116,8 @@ struct as_string<Figure> {
         -> std::string
     {
         return std::format("{}.{}{}{}",
-            as_string<Id>{}(fig.id, meta), as_string<Pos>{}(fig.position, meta),
-            as_string<Color>{}(fig.color, meta), as_string<FigureType>{}(fig.type, meta)
+            as_string<Id>{}(fig.id, meta.min_id), as_string<Pos>{}(fig.position, meta),
+            as_string<Color>{}(fig.color), as_string<FigureType>{}(fig.type)
         );
     }
 };

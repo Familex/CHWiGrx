@@ -1,6 +1,7 @@
 #pragma once
 
 #include "stuff/stuff.hpp"
+#include "stuff/enums.hpp"
 #include "structs/board_repr.hpp"
 #include "structs/move_logger.hpp"
 

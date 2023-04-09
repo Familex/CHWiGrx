@@ -28,15 +28,6 @@ namespace figfab {
             return INSTANCE;
         }
 
-        FN create(const std::string_view str) noexcept -> std::expected<std::unique_ptr<Figure>, ParseError> {
-            std::vector<std::string_view> data = split(str, ".");
-            auto new_id = Id{ std::max(0ull, static_cast<std::size_t>(svtoi(data[0]).value())) };
-            Color new_col = char_to_col(data[3][0]);
-            auto new_pos = Pos{ svtoi(data[1]).value(), svtoi(data[2]).value() };
-            FigureType new_type = char_to_figure_type(data[4][0]);
-            return instance().create(new_pos, new_col, new_type, new_id);
-        }
-
         FN create(const Pos position, const Color color, const FigureType type,
                 const Id new_id) noexcept -> std::unique_ptr<Figure>
         {
