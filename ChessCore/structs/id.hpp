@@ -50,7 +50,7 @@ namespace std {
 
 template <>
 struct from_string<Id> {
-    [[nodiscard]] inline auto
+    [[nodiscard]] inline constexpr auto
         operator()(const std::string_view sv) const noexcept
         -> std::expected<Id, std::size_t>
     {

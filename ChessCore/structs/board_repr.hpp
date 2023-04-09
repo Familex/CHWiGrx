@@ -160,17 +160,17 @@ struct from_string<board_repr::BoardRepr> {
         Meta_InvalidCastling = 10,
         // Figures parse errors (Same as from_string<Figure>::ParseErrorType)
         Figure_Base = 11,
-        Figure_UnexpectedEnd = 11,
+        Figure_UnexpectedEnd = Figure_Base,
         Figure_IdDelimeterMissing = 12,
         Figure_InvalidId = 13,
         Figure_InvalidPos = 14,
         Figure_InvalidColor = 15,
         Figure_InvalidType = 16,
-        Figure_Max = 16,
+        Figure_Max = Figure_InvalidType,
         // MoveMessage parse error (Same as from_string<MoveMessage>::ParseErrorType)
         MoveMessage_Base = 17,
-        MoveMessage_EmptyMap = 17,
-        MoveMessage_Max = 17
+        MoveMessage_EmptyMap = MoveMessage_Base,
+        MoveMessage_Max = MoveMessage_EmptyMap,
     };
     
     static_assert(

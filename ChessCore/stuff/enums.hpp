@@ -33,8 +33,7 @@ FN col_to_char(const Color color) noexcept -> char {
 
 template <>
 struct from_string<Color> {
-    [[nodiscard]] inline auto
-        operator()(const std::string_view sv) const noexcept
+    FN operator()(const std::string_view sv) const noexcept
         -> std::optional<Color>
     {
         if (sv.empty()) {
@@ -53,8 +52,7 @@ struct from_string<Color> {
 
 template <>
 struct as_string<Color> {
-    [[nodiscard]] inline auto
-        operator()(const Color color) const noexcept -> std::string
+    FN operator()(const Color color) const noexcept -> std::string
     {
         switch (color) {
             case Color::Black:
@@ -119,8 +117,7 @@ FN figure_type_to_char(const FigureType figure_type) noexcept -> char
 
 template <>
 struct from_string<FigureType> {
-    [[nodiscard]] inline auto
-        operator()(const std::string_view sv) const noexcept
+    FN operator()(const std::string_view sv) const noexcept
         -> std::optional<FigureType>
     {
         if (sv.empty()) {
@@ -147,8 +144,7 @@ struct from_string<FigureType> {
 
 template <>
 struct as_string<FigureType> {
-    [[nodiscard]] inline auto
-        operator()(const FigureType figure_type) const noexcept -> std::string
+    FN operator()(const FigureType figure_type) const noexcept -> std::string
     {
         switch (figure_type) {
             case FigureType::Pawn:

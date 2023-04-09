@@ -76,7 +76,18 @@ FN inline change_axes(const Pos& val) noexcept -> Pos {
 
 template <>
 struct from_string<Pos> {
-    // TODO?
+    [[nodiscard]] inline constexpr auto
+        operator()(const std::string_view str, const FromStringMeta& meta) const noexcept
+        -> std::expected<Pos, std::size_t>
+    {
+        const auto payload_sus = svtoi(str);
+        if (!payload_sus) {
+            return std::unexpected{ payload_sus.error() };
+        };
+        const auto y = *payload_sus % meta.width;
+        const auto x = (*payload_sus - y) / meta.width;
+        return Pos{ static_cast<int>(x), static_cast<int>(y) };
+    }
 };
 
 template <>

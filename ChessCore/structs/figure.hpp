@@ -92,22 +92,52 @@ struct from_string<Figure> {
         InvalidPos = 3,
         InvalidColor = 4,
         InvalidType = 5,
-        Max = 5,
+        Max = InvalidType,
     };
     
-    [[nodiscard]] inline auto
-        operator()(const std::string_view sv, const FromStringMeta& meta) const noexcept
+    FN operator()(const std::string_view sv, const FromStringMeta& meta) const noexcept
         -> ParseResult<Figure, ParseErrorType>
     {
-        // if length less than Pos(constant) + Color(1 ch) + Type(1 ch) + Id(1+ ch) + IdDelimeter (1 ch)
-        if (sv.find('.') == sv.npos) {
-            // return make_unexpected_parse<ParseError<ParseErrorType>>(ParseErrorType::IdDelimeterMissing, sv.size());
+        Id id{ }; Pos pos{ }; Color col{ }; FigureType type{ };
+        std::size_t curr_pos{ };
+        const auto full_stop_pos = sv.find('.');
+        if (full_stop_pos == sv.npos) {
+            return UNEXPECTED_PARSE(ParseErrorType, IdDelimeterMissing, sv.size());
         }
-        if (true || sv.size() < meta.max_pos_length + 4) {
-            // return UNEXPECTED_PARSE(ParseErrorType::UnexpectedEnd, sv.size());
+        if (sv.size() - full_stop_pos - 1 < meta.max_pos_length + 1 + 1) {
+        //  expected size of pos, col, type ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        //  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ size of the rest of the string after the full stop
+            return UNEXPECTED_PARSE(ParseErrorType, UnexpectedEnd, sv.size());
         }
-        // FIXME todo
-        return UNEXPECTED_PARSE(ParseErrorType, UnexpectedEnd, sv.size());
+        if (const auto id_sus = from_string<Id>{}(sv.substr(0, full_stop_pos))) {
+            id = id_sus.value();
+            curr_pos = full_stop_pos + 1;
+        }
+        else {
+            UNEXPECTED_PARSE(ParseErrorType, InvalidId, id_sus.error());
+        }
+        if (const auto pos_sus = from_string<Pos>{}(sv.substr(curr_pos, meta.max_pos_length), meta)) {
+            pos = pos_sus.value();
+            curr_pos += meta.max_pos_length;
+        }
+        else {
+            return UNEXPECTED_PARSE(ParseErrorType, InvalidPos, curr_pos + pos_sus.error());
+        }
+        if (const auto col_sus = from_string<Color>{}(sv.substr(curr_pos, 1))) {
+            col = col_sus.value();
+            curr_pos += 1;
+        }
+        else {
+            return UNEXPECTED_PARSE(ParseErrorType, InvalidColor, curr_pos);
+        }
+        if (const auto type_sus = from_string<FigureType>{}(sv.substr(curr_pos, 1))) {
+            type = type_sus.value();
+        }
+        else {
+            return UNEXPECTED_PARSE(ParseErrorType, InvalidType, curr_pos);
+        }
+        
+        return Figure{ id, pos, col, type };
     }
 };
 
