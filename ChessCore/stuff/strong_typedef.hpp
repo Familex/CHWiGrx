@@ -54,27 +54,29 @@ namespace strong_typedef_utils {
     {
         using type = underlying_type<StrongTypedef>;
 
-        friend StrongTypedef& operator+=(StrongTypedef& lhs,
-            const StrongTypedef& rhs)
+        constexpr friend StrongTypedef&
+            operator+=(StrongTypedef& lhs, const StrongTypedef& rhs)
         {
             static_cast<type&>(lhs) += static_cast<const type&>(rhs);
             return lhs;
         }
 
-        friend StrongTypedef operator+(const StrongTypedef& lhs,
-            const StrongTypedef& rhs)
+        [[nodiscard]] constexpr friend StrongTypedef
+            operator+(const StrongTypedef& lhs, const StrongTypedef& rhs)
         {
             return StrongTypedef(static_cast<const type&>(lhs)
                 + static_cast<const type&>(rhs));
         }
 
-        friend StrongTypedef operator++(StrongTypedef& lhs)
+        constexpr friend StrongTypedef
+            operator++(StrongTypedef& lhs)
         {
             ++static_cast<type&>(lhs);
             return lhs;
         }
 
-        friend StrongTypedef operator++(StrongTypedef& lhs, int)
+        constexpr friend StrongTypedef
+            operator++(StrongTypedef& lhs, int)
         {
             auto tmp = lhs;
             ++static_cast<type&>(lhs);
@@ -87,27 +89,29 @@ namespace strong_typedef_utils {
     {
         using type = underlying_type<StrongTypedef>;
 
-        friend StrongTypedef& operator-=(StrongTypedef& lhs,
-            const StrongTypedef& rhs)
+        constexpr friend StrongTypedef&
+            operator-=(StrongTypedef& lhs, const StrongTypedef& rhs)
         {
             static_cast<type&>(lhs) -= static_cast<const type&>(rhs);
             return lhs;
         }
 
-        friend StrongTypedef operator-(const StrongTypedef& lhs,
-            const StrongTypedef& rhs)
+        [[nodiscard]] constexpr friend StrongTypedef
+            operator-(const StrongTypedef& lhs, const StrongTypedef& rhs)
         {
             return StrongTypedef(static_cast<const type&>(lhs)
                 - static_cast<const type&>(rhs));
         }
 
-        friend StrongTypedef operator--(StrongTypedef& lhs)
+        constexpr friend StrongTypedef
+            operator--(StrongTypedef& lhs)
         {
             --static_cast<type&>(lhs);
             return lhs;
         }
 
-        friend StrongTypedef operator--(StrongTypedef& lhs, int)
+        constexpr friend StrongTypedef
+            operator--(StrongTypedef& lhs, int)
         {
             auto tmp = lhs;
             --static_cast<type&>(lhs);
