@@ -32,6 +32,8 @@ FN inline make_unexpected_parse(Args&&... args) -> std::unexpected<ParseErrorT> 
 
 struct AsStringMeta {
     Id min_id;
+    std::size_t max_pos_length;
+    std::size_t version;    // from 00 to 99
 };
 
 struct FromStringMeta {
@@ -40,34 +42,35 @@ struct FromStringMeta {
 
 #pragma endregion
 
-#pragma region Stringify
-/// All macro are used to implement Stringify static methods with one signature.
-
-/// implement from_string and as_string for this struct
+#pragma region from_string, as_string
+/// implement operator() for this type with your type as template parameter
 template <typename ResultType>
-struct Stringify;
+struct from_string {
+    [[nodiscard]] inline auto
+#ifdef P1169R4
+        static
+#endif
+        operator() (const std::string_view sv,
+                    const FromStringMeta& meta) 
+#ifndef P1169R4
+        const
+#endif
+            noexcept = delete;
+};
 
-#define STRINGIFY_DECLARE_ERROR_TYPE \
-    enum class ParseErrorType
+/// implement operator() for this type with your type as template parameter
+template <typename ResultType>
+struct as_string {
+    [[nodiscard]] inline auto
+#ifdef P1169R4
+        static
+#endif
+        operator() (const ResultType result,
+                    const AsStringMeta& meta)
+#ifndef P1169R4
+        const
+#endif
+        noexcept = delete;
+};
 
-#define STRINGIFY_DECLARE_BEGIN(ResultTypeT) \
-    template <> \
-    struct Stringify<ResultTypeT> { \
-    using ResultType = ResultTypeT; \
-
-#define STRINGIFY_DECLARE_END \
-    };
-
-#define STRINGIFY_DECLARE_FROM_STRING \
-    [[nodiscard]] static inline auto \
-    from_string(const std::string_view sv, \
-                const FromStringMeta& meta) noexcept \
-    -> ParseResult<ResultType, ParseErrorType>
-
-#define STRINGIFY_DECLARE_AS_STRING \
-    [[nodiscard]] static inline auto \
-    as_string(const ResultType result, \
-              const AsStringMeta& meta) noexcept \
-    -> std::string
-
-#pragma endregion   // Stringify
+#pragma endregion   // from_string, as_string

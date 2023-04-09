@@ -37,6 +37,9 @@ namespace board_repr {
         std::vector<Figure*> captured_figures;
         std::vector<Id> can_castle;
 
+        friend from_string<BoardRepr>;
+        friend as_string<BoardRepr>;
+
         /* ---- Methods ---- */
         CTOR BoardRepr(const BoardRepr& other) noexcept
             : turn(other.turn)
@@ -145,42 +148,6 @@ namespace board_repr {
             return std::expected<BoardRepr, ParseError>{ result };
         }
 
-        FN as_string() const noexcept -> std::string
-        {
-            // FIXME castlings
-            using namespace std::literals::string_literals;
-
-            std::string result{ ""s };
-            // Header
-            {
-                result += std::format("{}H{}W{}C", TO_STRING_VERSION, HEIGHT, WIDTH);
-                for (const Id castle_id : can_castle) {
-                    result += std::format("{},", castle_id);
-                }
-                result += std::format("{}{}!", get_idw_char(), get_turn_char());
-            }
-            // Figures
-            for (const auto& fig : figures) {
-                result += fig->as_string();
-            }
-            // Prev moves
-            result += "<"s;
-            for (const auto& mm : past) {
-                result += mvmsg::as_string(mm) + "$"s;
-            }
-            // Future moves
-            result += "><"s;
-            for (const auto& mm : future) {
-                result += mvmsg::as_string(mm) + "$"s;
-            }
-            // Captured figures
-            result += ">"s;
-            for (const auto& fig : captured_figures) {
-                result += fig->as_string();
-            }
-            return result;
-        }
-
         FN get_idw_char() const noexcept -> char
         {
             return idw ? 'T' : 'F';
@@ -201,3 +168,71 @@ namespace board_repr {
     };
 
 }   // namespace board_repr
+
+template <>
+struct as_string<board_repr::BoardRepr> {
+    [[nodiscard]] inline auto
+        operator()(const board_repr::BoardRepr& br, const AsStringMeta& meta) const noexcept
+        -> std::string
+    {
+        // FIXME castlings
+        using namespace std::literals::string_literals;
+
+        std::string result{ ""s };
+        // Header
+        {
+            result += std::format("{:0>2}H{}W{}C", meta.version, HEIGHT, WIDTH);
+            for (const Id castle_id : br.can_castle) {
+                result += std::format("{},", castle_id);
+            }
+            result += std::format("{}{}!", br.get_idw_char(), br.get_turn_char());
+        }
+        // Figures
+        for (const auto& fig : br.figures) {
+            result += as_string<const Figure*>{}(fig, meta);
+        }
+        // Prev moves
+        result += "<"s;
+        for (const auto& mm : br.past) {
+            result += as_string<mvmsg::MoveMessage>{}(mm, meta) + "$"s;
+        }
+        // Future moves
+        result += "><"s;
+        for (const auto& mm : br.future) {
+            result += as_string<mvmsg::MoveMessage>{}(mm, meta) + "$"s;
+        }
+        // Captured figures
+        result += ">"s;
+        for (const auto& fig : br.captured_figures) {
+            result += as_string<const Figure*>{}(fig, meta);
+        }
+        return result;
+    }
+
+    [[nodiscard]] inline auto
+        operator()(const board_repr::BoardRepr& br) const noexcept
+        -> std::string
+    {
+        AsStringMeta meta{ };
+        
+        meta.version = 2;
+
+        // calc min id in br.figures
+        if (!br.figures.empty()) {
+            meta.min_id = br.figures.front()->get_id();
+            for (const auto& fig : br.figures) {
+                if (fig->get_id() < meta.min_id) {
+                    meta.min_id = fig->get_id();
+                }
+            }
+        }
+        else {
+            meta.min_id = 0_id;
+        }
+
+        // FIXME is this correct?
+        meta.max_pos_length = std::to_string(HEIGHT * WIDTH).length();
+        
+        return operator()(br, meta);
+    }
+};

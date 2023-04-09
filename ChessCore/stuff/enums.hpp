@@ -1,6 +1,7 @@
 #pragma once
 
 #include "macro.h"
+#include "parse_typedefs.hpp"
 
 #include <set>
 #include <string>
@@ -21,29 +22,49 @@ enum class Color {
     White
 };
 
-FN char_to_col(const char ch) noexcept -> Color
-{
-    switch (ch) {
-        case 'W': case 'w':
-            return Color::White;
-        case 'B': case 'b':
-            return Color::Black;
-        default:
-            std::unreachable();
+FN col_to_char(const Color color) noexcept -> char {
+    switch (color) {
+        case Color::Black: return 'B';
+        case Color::White: return 'W';
+        default: std::unreachable();
     }
 }
 
-FN col_to_char(const Color col) noexcept -> char
-{
-    switch (col) {
-        case Color::Black:
-            return 'B';
-        case Color::White:
-            return 'W';
-        default:
-            std::unreachable();
+template <>
+struct from_string<Color> {
+    [[nodiscard]] inline auto
+        operator()(const std::string_view sv, const FromStringMeta& meta) const noexcept
+        -> std::optional<Color>
+    {
+        if (sv.empty()) {
+            return std::nullopt;
+        }
+        switch (sv[0]) {
+            case 'W': case 'w':
+                return Color::White;
+            case 'B': case 'b':
+                return Color::Black;
+            default:
+                return std::nullopt;
+        }
     }
-}
+};
+
+template <>
+struct as_string<Color> {
+    [[nodiscard]] inline auto
+        operator()(const Color color, const AsStringMeta&) const noexcept -> std::string
+    {
+        switch (color) {
+            case Color::Black:
+                return "B";
+            case Color::White:
+                return "W";
+            default:
+                std::unreachable();
+        }
+    }
+};
 
 FN what_next(const Color col) noexcept -> Color
 {
@@ -75,35 +96,15 @@ enum class FigureType {
     King,
 };
 
-FN char_to_figure_type(const char ch) noexcept -> FigureType
+FN figure_type_to_char(const FigureType figure_type) noexcept -> char
 {
-    switch (ch) {
-        case 'K': case 'k':
-            return FigureType::King;
-        case 'H': case 'h':
-            return FigureType::Knight;
-        case 'P': case 'p':
-            return FigureType::Pawn;
-        case 'B': case 'b':
-            return FigureType::Bishop;
-        case 'Q': case 'q':
-            return FigureType::Queen;
-        case 'R': case 'r':
-            return FigureType::Rook;
-        default:
-            std::unreachable();
-    }
-}
-
-FN figure_type_to_char(const FigureType ft) noexcept -> char
-{
-    switch (ft) {
+    switch (figure_type) {
         case FigureType::Pawn:
             return 'P';
-        case FigureType::Rook:
-            return 'R';
         case FigureType::Knight:
             return 'H';
+        case FigureType::Rook:
+            return 'R';
         case FigureType::Bishop:
             return 'B';
         case FigureType::Queen:
@@ -114,6 +115,58 @@ FN figure_type_to_char(const FigureType ft) noexcept -> char
             std::unreachable();
     }
 }
+
+template <>
+struct from_string<FigureType> {
+    [[nodiscard]] inline auto
+        operator()(const std::string_view sv, const FromStringMeta& meta) const noexcept
+        -> std::optional<FigureType>
+    {
+        if (sv.empty()) {
+            return std::nullopt;
+        }
+        switch (sv[0]) {
+            case 'K': case 'k':
+                return FigureType::King;
+            case 'H': case 'h':
+                return FigureType::Knight;
+            case 'P': case 'p':
+                return FigureType::Pawn;
+            case 'B': case 'b':
+                return FigureType::Bishop;
+            case 'Q': case 'q':
+                return FigureType::Queen;
+            case 'R': case 'r':
+                return FigureType::Rook;
+            default:
+                return std::nullopt;
+        }
+    }
+};
+
+template <>
+struct as_string<FigureType> {
+    [[nodiscard]] inline auto
+        operator()(const FigureType figure_type, const AsStringMeta&) const noexcept -> std::string
+    {
+        switch (figure_type) {
+            case FigureType::Pawn:
+                return "Pawn";
+            case FigureType::Rook:
+                return "Rook";
+            case FigureType::Knight:
+                return "Knight";
+            case FigureType::Bishop:
+                return "Bishop";
+            case FigureType::Queen:
+                return "Queen";
+            case FigureType::King:
+                return "King";
+            default:
+                std::unreachable();
+        }
+    }
+};
 
 inline const std::set<FigureType> PLAYABLE_FIGURES{
     FigureType::Pawn,
@@ -130,44 +183,6 @@ inline const std::set<FigureType> PROMOTION_FIGURES{
     FigureType::Bishop,
     FigureType::Queen,
 };
-
-FN as_string(FigureType figure_type) noexcept -> std::string {
-    switch (figure_type) {
-        case FigureType::Pawn:
-            return "Pawn";
-        case FigureType::Rook:
-            return "Rook";
-        case FigureType::Knight:
-            return "Knight";
-        case FigureType::Bishop:
-            return "Bishop";
-        case FigureType::Queen:
-            return "Queen";
-        case FigureType::King:
-            return "King";
-        default:
-            std::unreachable();
-    }
-}
-
-FN as_wstring(FigureType figure_type) noexcept -> std::wstring {
-    switch (figure_type) {
-        case FigureType::Pawn:
-            return L"Pawn";
-        case FigureType::Rook:
-            return L"Rook";
-        case FigureType::Knight:
-            return L"Knight";
-        case FigureType::Bishop:
-            return L"Bishop";
-        case FigureType::Queen:
-            return L"Queen";
-        case FigureType::King:
-            return L"King";
-        default:
-            std::unreachable();
-    }
-}
 
 #pragma endregion   // FigureType
 

@@ -17,6 +17,9 @@ struct Id
     , strong_typedef_utils::subtraction<Id>
 {
     using strong_typedef::strong_typedef;
+
+    friend from_string<Id>;
+    friend as_string<Id>;
 };
 
 FN operator""_id(Id_type id) noexcept -> Id {
@@ -44,18 +47,23 @@ namespace std {
     };
 }
 
-/// <returns> Normalized id as std::string </returns>
-[[nodiscard]] inline auto
-    as_string(const Id id, const AsStringMeta& meta) noexcept 
-    -> std::string
-{
-    return std::to_string(id - meta.min_id);
-}
+template <>
+struct from_string<Id> {
+    [[nodiscard]] inline auto
+        operator()(const std::string_view sv, const FromStringMeta& meta) const noexcept
+        -> std::optional<Id>
+    {
+        return svtoi(sv)
+            .transform([](int i) {return Id{ static_cast<Id_type>(i) }; });
+    }
+};
 
-[[nodiscard]] inline auto
-    from_string(const std::string_view sv, const FromStringMeta&) noexcept
-    -> std::optional<Id>
-{
-    return svtoi(sv)
-        .transform([](int i) {return Id{ static_cast<Id_type>(i) }; });
-}
+template <>
+struct as_string<Id> {
+    [[nodiscard]] inline auto
+        operator()(const Id id, const AsStringMeta& meta) const noexcept
+        -> std::string
+    {
+        return std::to_string(id - meta.min_id);
+    }
+};

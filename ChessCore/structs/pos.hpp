@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../stuff/macro.h"
+#include "../stuff/parse_typedefs.hpp"
 
 #include <vector>
 #include <string>
@@ -15,6 +16,9 @@ constexpr int WIDTH{ 8 };   // this definitely shouldn't be here (FIXME)
 struct Pos {
     int x{ -1 };
     int y{ -1 };
+
+    friend from_string<Pos>;
+    friend as_string<Pos>;
 
     CTOR Pos() noexcept {};
 
@@ -63,16 +67,24 @@ struct Pos {
     {
         return std::find(lst.cbegin(), lst.cend(), *this) != lst.cend();
     }
-
-    [[nodiscard]] auto
-        as_string() const noexcept -> std::string
-    {
-        static const auto MAX_SIZE{ std::to_string(HEIGHT * WIDTH).length() };
-        const auto payload = std::to_string(y + x * WIDTH);
-        return std::string(MAX_SIZE - payload.length(), '0') + payload;
-    }
 };
 
 FN inline change_axes(const Pos& val) noexcept -> Pos {
     return Pos{ val.y, val.x };
 }
+
+template <>
+struct from_string<Pos> {
+    // TODO?
+};
+
+template <>
+struct as_string<Pos> {
+    [[nodiscard]] inline auto
+        operator()(const Pos& pos, const AsStringMeta& meta) const noexcept
+        -> std::string
+    {
+        const auto payload = std::to_string(pos.y + pos.x * WIDTH);
+        return std::string(meta.max_pos_length - payload.length(), '0') + payload;
+    }
+};

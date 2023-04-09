@@ -241,7 +241,7 @@ LRESULT CALLBACK mainproc::main_game_state_wndproc(HWND hWnd, UINT message, WPAR
         motion_input.clear();
         InvalidateRect(hWnd, NULL, NULL);
         
-        debug_print("Curr board:", board.get_repr(turn, true).as_string());
+        debug_print("Curr board:", as_string<board_repr::BoardRepr>{}(board.get_repr(turn, true)));
             
         break;
         

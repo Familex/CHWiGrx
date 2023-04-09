@@ -3,6 +3,7 @@
 #include "../stuff/macro.h"
 #include "../stuff/stuff.hpp"
 #include "../stuff/parse_typedefs.hpp"
+#include "id.hpp"
 
 #include <format>
 
@@ -13,6 +14,9 @@ class Figure {
     FigureType type;
     
 public:
+    friend from_string<Figure>;
+    friend as_string<Figure>;
+
     CTOR Figure(const Id id, const Pos& position, const Color color, const FigureType type) noexcept
         : id{ id }
         , position{ position }
@@ -29,15 +33,6 @@ public:
     
     FN operator <=>(const Figure& r) const noexcept {
         return this->id <=> r.id;
-    }
-    
-    [[nodiscard]] auto
-        as_string(const AsStringMeta& meta) const noexcept -> std::string
-    {
-        return std::format("{}.{}{}{}",
-            ::as_string(id, meta), position.as_string(),
-            col_to_char(color), figure_type_to_char(type)
-        );
     }
     
     FN get_id() const noexcept -> Id {
@@ -85,9 +80,10 @@ FN to_pos_vector(const std::vector<Figure*>& lst) noexcept -> std::vector<Pos> {
     return acc;
 }
 
-STRINGIFY_DECLARE_BEGIN(Figure)
+template <>
+struct from_string<Figure> {
 
-    STRINGIFY_DECLARE_ERROR_TYPE{
+    enum class ParseErrorType {
         UnexpectedEnd,
         IdDelimeterMissing,
         InvalidId,
@@ -95,8 +91,11 @@ STRINGIFY_DECLARE_BEGIN(Figure)
         InvalidColor,
         InvalidType,
     };
-
-    STRINGIFY_DECLARE_FROM_STRING {
+    
+    [[nodiscard]] inline auto
+        operator()(const std::string_view sv, const FromStringMeta& meta) const noexcept
+        -> ParseResult<Figure, ParseErrorType>
+    {
         // if length less than Pos(constant) + Color(1 ch) + Type(1 ch) + Id(1+ ch) + IdDelimeter (1 ch)
         if (sv.find('.') == sv.npos) {
             return UNEXPECTED_PARSE(ParseErrorType::IdDelimeterMissing, sv.size());
@@ -105,9 +104,30 @@ STRINGIFY_DECLARE_BEGIN(Figure)
             return UNEXPECTED_PARSE(ParseErrorType::UnexpectedEnd, sv.size());
         }
     }
+};
 
-    STRINGIFY_DECLARE_AS_STRING{
-        return " ";
+template <>
+struct as_string<Figure> {
+    [[nodiscard]] inline auto
+        operator()(const Figure& fig, const AsStringMeta& meta) const noexcept
+        -> std::string
+    {
+        return std::format("{}.{}{}{}",
+            as_string<Id>{}(fig.id, meta), as_string<Pos>{}(fig.position, meta),
+            as_string<Color>{}(fig.color, meta), as_string<FigureType>{}(fig.type, meta)
+        );
     }
-        
-STRINGIFY_DECLARE_END
+};
+
+template <>
+struct as_string<const Figure*> {
+    [[nodiscard]] inline auto
+        operator()(const Figure* fig, const AsStringMeta& meta) const noexcept
+        -> std::string
+    {
+        if (!fig) {
+            return "nullptr";
+        }
+        return as_string<Figure>{}(*fig, meta);
+    }
+};

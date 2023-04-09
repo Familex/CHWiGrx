@@ -155,7 +155,9 @@ void make_move(HWND hWnd, std::optional<Input> input_) {
 
     const auto& move_message = move_message_sus.value();
 
-    debug_print("Curr move was:", as_string(move_message));
+    debug_print("Curr move was:", 
+        as_string<mvmsg::MoveMessage>{}(move_message, AsStringMeta{ 0_id, 2, 2 })
+    );
 
     board.set_last_move(move_message);
     turn = what_next(turn);
@@ -472,7 +474,7 @@ void update_main_window_title(HWND hWnd) {
 
 bool copy_repr_to_clip(HWND hWnd) {
     board_repr::BoardRepr board_repr{ board.get_repr(turn, save_all_moves) };
-    auto board_repr_str = board_repr.as_string();
+    auto board_repr_str = as_string<board_repr::BoardRepr>{}(board_repr);
     return cpy_str_to_clip(
         hWnd,
         board_repr_str
