@@ -1,5 +1,7 @@
 #pragma once
 
+#include "../stuff/itoa.hpp"
+
 #include "../stuff/macro.h"
 #include "../stuff/strong_typedef.hpp"
 #include "../stuff/parse_typedefs.hpp"
@@ -65,11 +67,11 @@ struct from_string<Id> {
 
 template <>
 struct as_string<Id> {
-    [[nodiscard]] inline auto
-        operator()(const Id id, const Id min_id) const noexcept
+    FN operator()(const Id id, const Id min_id) const noexcept
         -> std::string
     {
-        return std::to_string(id - min_id);
-        // FIXME    ^^^^^^^^^ is there constexpr version of this?
+        return std::string{
+            ce::itoa(static_cast<Id_type>(id - min_id)).c_str()
+        };
     }
 };

@@ -199,6 +199,7 @@
     <ClInclude Include="structs\pos.hpp" />
     <ClInclude Include="stuff\cexau.h" />
     <ClInclude Include="stuff\enums.hpp" />
+    <ClInclude Include="stuff\itoa.hpp" />
     <ClInclude Include="stuff\macro.h" />
     <ClInclude Include="stuff\parse_meta.hpp" />
     <ClInclude Include="stuff\parse_typedefs.hpp" />
