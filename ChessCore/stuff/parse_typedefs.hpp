@@ -16,16 +16,9 @@ struct ParseError {
 template <typename ResultType, typename ParseErrorT>
 using ParseResult = std::expected<ResultType, ParseError<ParseErrorT>>;
 
-template <typename ParseErrorT, typename ...Args>
-[[nodiscard]] auto inline
-    make_unexpected_parse(Args&&... args) -> std::unexpected<ParseErrorT>
-{
-    return std::unexpected<ParseErrorT>{ std::forward<Args>(args)... };
-}
-
-/// For usage name your parse error enum as ParseErrorType
-#define UNEXPECTED_PARSE(...) \
-    make_unexpected_parse<ParseError<ParseErrorType>>(__VA_ARGS__)
+/// Use this macro to return an parse error
+#define UNEXPECTED_PARSE(parse_error_type, type, pos) \
+    std::unexpected{ ParseError<parse_error_type>{ parse_error_type :: type, pos } }
 
 #pragma endregion   // Parse error
 

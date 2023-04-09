@@ -1,4 +1,9 @@
 #pragma once
+
+#ifndef _DEBUG
+#    pragma message ("cexau.h included here. Remove before release.")
+#endif
+
 #ifdef _MSC_VER
 
 // count arguments

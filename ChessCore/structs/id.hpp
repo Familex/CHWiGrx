@@ -52,10 +52,15 @@ template <>
 struct from_string<Id> {
     [[nodiscard]] inline auto
         operator()(const std::string_view sv) const noexcept
-        -> std::optional<Id>
+        -> std::expected<Id, std::size_t>
     {
-        return svtoi(sv)
-            .transform([](int i) {return Id{ static_cast<Id_type>(i) }; });
+        auto res = svtoi(sv);
+        if (res) {
+            return Id{ static_cast<Id_type>(*res) };
+        }
+        else {
+            return std::unexpected{ res.error() };
+        }
     }
 };
 

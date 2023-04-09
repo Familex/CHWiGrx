@@ -146,18 +146,17 @@ namespace board_repr {
 template <>
 struct from_string<board_repr::BoardRepr> {
     enum class ParseErrorType {
-        InvalidFormat,
-        InvalidFigure,
-        InvalidMove,
+        CouldNotFindMeta,
+        InvalidVersion,
+        CouldNotFindHeight,
+        InvalidHeight,
+        CouldNotFindWidth,
+        InvalidWidth,
+        CouldNotFindIDW,
+        CouldNotFindCurrentTurn,
+        InvalidCurrentTurn,
+        CouldNotFindCastlings,
         InvalidCastling,
-        InvalidCapturedFigure,
-        CouldNotFindTurn,
-        CouldNotFindIdw,
-        InvalidPast,
-        InvalidFuture,
-        InvalidCanCastle,
-        InvalidCapturedFigures,
-        InvalidBoardRepr
     };
     
     [[nodiscard]] inline auto
@@ -176,9 +175,12 @@ struct from_string<board_repr::BoardRepr> {
         -> ParseResult<board_repr::BoardRepr, ParseErrorType>
     {
         FromStringMeta meta{ };
+        std::size_t pos{ };
 
         auto parse_example =
+            // meta
             "02H8W8TBC22,21,45,44!"
+            // figures
             "6.00BR" "10.01BK" "7.02BB" "3.03BK"
             "8.05BB" "11.06BK" "5.07BR" "12.08BP"
             "14.10BP" "19.11BP" "18.12BP" "15.15BP"
@@ -187,6 +189,7 @@ struct from_string<board_repr::BoardRepr> {
             "21.54WP" "20.55WP" "29.56WR" "34.57WK"
             "31.58WB" "1.59WK" "0.60WQ" "33.62WK"
             "28.63WR"
+            // prev
             "<23.52WP5236QL$"
                 "13.09BP0925QL$"
                 "23.36WP3628QM$"
@@ -196,17 +199,97 @@ struct from_string<board_repr::BoardRepr> {
                 "30.61WB6125QE13$"
                 "4.04BQ0431QCHM$"
                 "22.53WP5345QM$>"
+            // future
             "<11.06BK0623QM$"
                 "21.54WP5445QE4$"
                 "4.31BQ3145QCHE22$>"
+            // captured
             "17.29BP" "23.21WP" "13.25BP";
 
-        // FIXME implement
-        meta.max_pos_length = 2;    
+        const auto meta_end = sv.find('!');
+        if (meta_end == std::string_view::npos) {
+            return UNEXPECTED_PARSE(ParseErrorType, CouldNotFindMeta, pos);
+        }
+        const auto sv_meta = sv.substr(0, meta_end - 1);
+
+        if (const auto version = svtoi(sv_meta.substr(pos, 2))) {
+            meta.version = *version;
+            pos += 2;
+        } else {
+            return UNEXPECTED_PARSE(ParseErrorType, InvalidVersion, version.error());
+        }
+        if (sv_meta[pos++] != 'H') {
+            return UNEXPECTED_PARSE(ParseErrorType, CouldNotFindHeight, pos - 1);
+        }
+        auto w_pos = sv_meta.find('W', pos);
+        if (w_pos == std::string_view::npos) {
+            return UNEXPECTED_PARSE(ParseErrorType, CouldNotFindWidth, pos - 1);
+        }
+        if (auto height = svtoi(sv_meta.substr(pos, w_pos - pos))) {
+            meta.height = *height;
+            pos = w_pos + 1;
+        } else {
+            return UNEXPECTED_PARSE(ParseErrorType, InvalidHeight, height.error());
+        }
+        auto idw_pos = sv_meta.find('T', pos);
+        if (idw_pos == std::string_view::npos) {
+            idw_pos = sv_meta.find('F', pos);
+            if (idw_pos == std::string_view::npos) {
+                return UNEXPECTED_PARSE(ParseErrorType, CouldNotFindIDW, pos - 1);
+            }
+            else {
+                meta.idw = false;
+            }
+        }
+        else {
+            meta.idw = true;
+        }
+        if (auto width = svtoi(sv_meta.substr(pos, idw_pos - pos))) {
+            meta.width = *width;
+            pos = idw_pos + 1;
+        }
+        else {
+            return UNEXPECTED_PARSE(ParseErrorType, InvalidWidth, pos - 1);
+        }
+        if (sv_meta.size() == pos) {
+            return UNEXPECTED_PARSE(ParseErrorType, CouldNotFindCurrentTurn, pos - 1);
+        }
+        if (sv_meta[pos] != 'B' && sv_meta[pos] != 'W') {
+            return UNEXPECTED_PARSE(ParseErrorType, InvalidCurrentTurn, pos);
+        }
+        meta.turn =
+            sv_meta[pos] == 'B'
+            ? Color::Black
+            : Color::White;
+        pos += 1;
+        if (sv_meta.size() == pos) {
+            return UNEXPECTED_PARSE(ParseErrorType, CouldNotFindCastlings, pos);
+        }
+        if (sv_meta[pos] != 'C') {
+            return UNEXPECTED_PARSE(ParseErrorType, CouldNotFindCastlings, pos);
+        }
+        std::vector<Id> castlings{ };
+        for (const auto& castling : split(sv_meta.substr(pos + 1, sv_meta.size() - pos - 1), ",")) {
+            if (const auto id = svtoi(castling)) {
+                castlings.push_back(Id{ static_cast<Id_type>(*id) });
+            }
+            else {
+                return UNEXPECTED_PARSE(ParseErrorType, InvalidCastling, id.error());
+            }
+        }
+        meta.castlings = castlings;
+        
+        meta.max_pos_length = std::to_string(meta.width * meta.height - 1).size();
 
         return operator()(sv, meta);
     }
 };
+
+#include "../stuff/cexau.h"
+
+CEXAU meta = "02H8W8TBC22,21,45,44!"sv;
+CEXAU w_pos = meta.find('W', 0);
+CEXAU test = meta.substr(meta.find('C') + 1, meta.size() - meta.find('C') - 1);
 
 template <>
 struct as_string<board_repr::BoardRepr> {
@@ -228,7 +311,7 @@ struct as_string<board_repr::BoardRepr> {
                 br.get_turn_char()
             );
             for (const Id castle_id : br.can_castle) {
-                result += std::format("{},", castle_id);
+                result += as_string<Id>{}(castle_id, meta.min_id) + ","s;
             }
             result.back() = '!';
         }

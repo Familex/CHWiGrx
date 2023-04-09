@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../structs/id.hpp"
+#include "../stuff/enums.hpp"
 
 struct AsStringMeta {
     Id min_id{ 0_id };
@@ -9,5 +10,11 @@ struct AsStringMeta {
 };
 
 struct FromStringMeta {
-    std::size_t max_pos_length;
+    bool idw{ };
+    Color turn{ };
+    std::vector<Id> castlings{ };
+    std::size_t height{ 8 };
+    std::size_t width{ 8 };
+    std::size_t max_pos_length{ 2 };
+    std::size_t version{ 2 };
 };

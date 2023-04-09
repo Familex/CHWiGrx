@@ -44,8 +44,16 @@ enum class WindowState { GAME, EDIT };
 inline HINSTANCE hInst;
 inline const HBRUSH CHECKERBOARD_DARK { CreateSolidBrush(RGB(0x32, 0x32, 0x32)) };
 inline const HBRUSH CHECKERBOARD_BRIGHT { CreateSolidBrush(RGB(0x80, 0x80, 0x80)) };
-inline const auto DEFAULT_CHESS_BOARD_IDW{ from_string<board_repr::BoardRepr>{}("1;0;0;B;R;2;0;1;B;H;3;0;2;B;B;4;0;3;B;Q;5;0;4;B;K;6;0;5;B;B;7;0;6;B;H;8;0;7;B;R;9;1;0;B;P;10;1;1;B;P;11;1;2;B;P;12;1;3;B;P;13;1;4;B;P;14;1;5;B;P;15;1;6;B;P;16;1;7;B;P;17;6;0;W;P;18;6;1;W;P;19;6;2;W;P;20;6;3;W;P;21;6;4;W;P;22;6;5;W;P;23;6;6;W;P;24;6;7;W;P;25;7;0;W;R;26;7;1;W;H;27;7;2;W;B;28;7;3;W;Q;29;7;4;W;K;30;7;5;W;B;31;7;6;W;H;32;7;7;W;R;[TW1;8;25;32;]<><>~").value() };
-inline const auto DEFAULT_CHESS_BOARD_NIDW{ from_string<board_repr::BoardRepr>{}("1;0;0;W;R;2;0;1;W;H;3;0;2;W;B;4;0;3;W;Q;5;0;4;W;K;6;0;5;W;B;7;0;6;W;H;8;0;7;W;R;9;1;0;W;P;10;1;1;W;P;11;1;2;W;P;12;1;3;W;P;13;1;4;W;P;14;1;5;W;P;15;1;6;W;P;16;1;7;W;P;17;6;0;B;P;18;6;1;B;P;19;6;2;B;P;20;6;3;B;P;21;6;4;B;P;22;6;5;B;P;23;6;6;B;P;24;6;7;B;P;25;7;0;B;R;26;7;1;B;H;27;7;2;B;B;28;7;3;B;Q;29;7;4;B;K;30;7;5;B;B;31;7;6;B;H;32;7;7;B;R;[FW1;8;25;32;]<><>~").value() };
+inline const auto DEFAULT_CHESS_BOARD_IDW{ 
+    from_string<board_repr::BoardRepr>{}(
+        "02H8W8TWC0,7,25,32!"
+        "0.00BR1.01BK2.02BB3.03BK4.04BQ5.05BB6.06BK7.07BR8.08BP9.09BP10.10BP11.11BP13.12BP14.13BP15.14BP16.15BP17.48WP18.49WP19.50WP20.51WP21.52WP22.53WP23.54WP24.55WP25.56WR26.57WK27.58WB28.59WK29.60WQ30.61WB31.62WK32.63WR<><>").value() 
+};
+inline const auto DEFAULT_CHESS_BOARD_NIDW{
+    from_string<board_repr::BoardRepr>{}(
+        "02H8W8FWC0,7,25,32!"
+        "0.00WR1.01WK2.02WB3.03WQ4.04WK5.05WB6.06WK7.07WR8.08WP9.09WP10.10WP11.11WP12.12WP13.13WP14.14WP15.15WP16.48BP17.49BP18.50BP19.51BP20.52BP21.53BP22.54BP23.55BP25.56BR26.57BK27.58BB28.59BQ29.60BK30.61BB31.62BK32.63BR<><>").value()
+};
 inline const auto EMPTY_REPR = board_repr::BoardRepr({}, Color::White, true);
 inline const int HEADER_HEIGHT{ GetSystemMetrics(SM_CXPADDEDBORDER) +
                                 GetSystemMetrics(SM_CYMENUSIZE) +

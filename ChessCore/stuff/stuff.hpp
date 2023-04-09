@@ -4,7 +4,7 @@
 
 #include <charconv>
 #include <vector>
-#include <optional>
+#include <expected>
 #include <string>
 
 using namespace std::string_literals;
@@ -23,7 +23,10 @@ FN inline operator +(const std::vector<T>& l, const std::vector<T>& r) noexcept 
     return tmp;
 }
 
-[[nodiscard]] inline constexpr auto split(const std::string_view str, const std::string_view delimiter) noexcept -> std::vector<std::string_view> {
+FN inline
+    split(const std::string_view str, const std::string_view delimiter) noexcept
+    -> std::vector<std::string_view>
+{
     std::vector<std::string_view> acc{};
     std::size_t current{}, previous{};
     while ((current = str.find(delimiter, previous)) != std::string_view::npos) {
@@ -34,10 +37,18 @@ FN inline operator +(const std::vector<T>& l, const std::vector<T>& r) noexcept 
     return acc;
 }
 
-[[nodiscard]] inline constexpr auto svtoi(const std::string_view s) noexcept -> std::optional<int>
+/// Converts a string_view to an int if all string is convertable.
+/// Returns invalid character position on error.
+FN inline
+    svtoi(const std::string_view s) noexcept
+    -> std::expected<int, std::size_t>
 {
-    if (int value; std::from_chars(s.data(), s.data() + s.size(), value).ec == std::errc{})
+    int value{ };
+    auto res = std::from_chars(s.data(), s.data() + s.size(), value);
+    if (res.ec == std::errc{} && res.ptr == s.data() + s.size()) {
         return value;
-    else
-        return std::nullopt;
+    }
+    else {
+        return std::unexpected{ res.ptr - s.data() };
+    }
 };
