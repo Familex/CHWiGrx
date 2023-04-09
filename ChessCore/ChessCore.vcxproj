@@ -200,6 +200,7 @@
     <ClInclude Include="stuff\cexau.h" />
     <ClInclude Include="stuff\enums.hpp" />
     <ClInclude Include="stuff\macro.h" />
+    <ClInclude Include="stuff\parse_typedefs.hpp" />
     <ClInclude Include="stuff\visit.h" />
     <ClInclude Include="stuff\strong_typedef.hpp" />
     <ClInclude Include="stuff\stuff.hpp" />

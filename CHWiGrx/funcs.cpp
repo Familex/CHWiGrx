@@ -278,7 +278,6 @@ std::string take_str_from_clip() {
 HWND create_curr_choice_window(HWND parent, Figure* in_hand, POINT mouse, int w, int h, const WNDPROC callback) {
     UnregisterClass(CURR_CHOICE_WINDOW_CLASS_NAME, GetModuleHandle(nullptr));
     WNDCLASSEX wc{ sizeof(WNDCLASSEX) };
-    HWND hWindow{};
     Figure* for_storage = in_hand;  // Возможно нужно копировать TODO
     wc.cbClsExtra = 0;
     wc.cbWndExtra = sizeof(in_hand);
@@ -289,18 +288,21 @@ HWND create_curr_choice_window(HWND parent, Figure* in_hand, POINT mouse, int w,
     wc.lpfnWndProc = callback;
     wc.lpszClassName = CURR_CHOICE_WINDOW_CLASS_NAME;
     wc.style = CS_VREDRAW | CS_HREDRAW;
-    const auto create_window = [&hWindow, &parent, &mouse, &w, &h, for_storage]() -> HWND {
-        if (hWindow = CreateWindow(CURR_CHOICE_WINDOW_CLASS_NAME, L"", WS_POPUP | WS_EX_TRANSPARENT | WS_EX_LAYERED,
-            mouse.x - w / 2, mouse.y - h / 2, w, h, parent, nullptr, nullptr, nullptr), !hWindow)
-            return nullptr
-        ;
-        SetWindowPos(hWindow, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
-        SetWindowLongPtr(hWindow, GWL_EXSTYLE, GetWindowLongPtr(hWindow, GWL_EXSTYLE) | WS_EX_LAYERED);
-        SetLayeredWindowAttributes(hWindow, TRANSPARENCY_PLACEHOLDER, 0xFF, LWA_COLORKEY);
-        SetWindowLongPtr(hWindow, GWLP_USERDATA, (LONG_PTR)for_storage);
-        ShowWindow(hWindow, SW_SHOWDEFAULT);
-        UpdateWindow(hWindow);
-        return hWindow;
+    const auto create_window = [&parent, &mouse, &w, &h, for_storage]() -> HWND {
+        if (HWND hWindow = CreateWindow(CURR_CHOICE_WINDOW_CLASS_NAME, L"", WS_POPUP | WS_EX_TRANSPARENT | WS_EX_LAYERED,
+            mouse.x - w / 2, mouse.y - h / 2, w, h, parent, nullptr, nullptr, nullptr);
+                hWindow) {
+            SetWindowPos(hWindow, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
+            SetWindowLongPtr(hWindow, GWL_EXSTYLE, GetWindowLongPtr(hWindow, GWL_EXSTYLE) | WS_EX_LAYERED);
+            SetLayeredWindowAttributes(hWindow, TRANSPARENCY_PLACEHOLDER, 0xFF, LWA_COLORKEY);
+            SetWindowLongPtr(hWindow, GWLP_USERDATA, (LONG_PTR)for_storage);
+            ShowWindow(hWindow, SW_SHOWDEFAULT);
+            UpdateWindow(hWindow);
+            return hWindow;
+        }
+        else {
+            return nullptr;
+        }
     };
 
     if (!RegisterClassEx(&wc))
@@ -435,13 +437,13 @@ void update_main_window_title(HWND hWnd) {
         
         switch (bot_type)
         {
-            case bot::Type::Unselected:    title += L"Unselected "; break;
-            case bot::Type::Random:        title += L"Random "; break;
-            case bot::Type::Minimax:       title += L"Minimax "; break;
-            case bot::Type::AlphaBeta:     title += L"AlphaBeta "; break;
-            case bot::Type::MonteCarlo:    title += L"MonteCarlo "; break;
+            case bot::Type::Unselected:    title += L"Unselected ";    break;
+            case bot::Type::Random:        title += L"Random ";        break;
+            case bot::Type::Minimax:       title += L"Minimax ";       break;
+            case bot::Type::AlphaBeta:     title += L"AlphaBeta ";     break;
+            case bot::Type::MonteCarlo:    title += L"MonteCarlo ";    break;
             case bot::Type::NeuralNetwork: title += L"NeuralNetwork "; break;
-            default:                       title += L"Undefined "; break;
+            default:                       title += L"Undefined ";     break;
         }
         
         title += L"bot ";

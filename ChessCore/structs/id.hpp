@@ -2,10 +2,12 @@
 
 #include "../stuff/macro.h"
 #include "../stuff/strong_typedef.hpp"
+#include "../stuff/parse_typedefs.hpp"
 
 #include <cassert>
 #include <string>
 #include <format>
+#include <algorithm>
 
 using Id_type = unsigned long long int;
 struct Id_tag { };
@@ -42,8 +44,18 @@ namespace std {
     };
 }
 
+/// <returns> Normalized id as std::string </returns>
 [[nodiscard]] inline auto
-    as_string(const Id id) noexcept -> std::string
+    as_string(const Id id, const AsStringMeta& meta) noexcept 
+    -> std::string
 {
-    return std::to_string(id);
+    return std::to_string(id - meta.min_id);
+}
+
+[[nodiscard]] inline auto
+    from_string(const std::string_view sv, const FromStringMeta&) noexcept
+    -> std::optional<Id>
+{
+    return svtoi(sv)
+        .transform([](int i) {return Id{ static_cast<Id_type>(i) }; });
 }

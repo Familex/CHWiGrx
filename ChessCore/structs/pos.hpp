@@ -6,7 +6,7 @@
 #include <string>
 
 constexpr int HEIGHT{ 8 };  // this definitely shouldn't be here (FIXME)
-constexpr int WIDTH{ 8 };
+constexpr int WIDTH{ 8 };   // this definitely shouldn't be here (FIXME)
 
 /// <summary>
 ///   x-axis from top  to bottom (↓)
@@ -73,6 +73,6 @@ struct Pos {
     }
 };
 
-inline FN change_axes(const Pos& val) noexcept -> Pos {
+FN inline change_axes(const Pos& val) noexcept -> Pos {
     return Pos{ val.y, val.x };
 }

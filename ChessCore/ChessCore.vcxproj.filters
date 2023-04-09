@@ -70,6 +70,9 @@
     <ClInclude Include="stuff\visit.h">
       <Filter>stuff</Filter>
     </ClInclude>
+    <ClInclude Include="stuff\parse_typedefs.hpp">
+      <Filter>stuff</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="cpp.hint" />

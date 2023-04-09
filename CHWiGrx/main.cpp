@@ -35,6 +35,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
         freopen_s(&tmp, "conout$", "w", stderr);
     }
     #endif // _DEBUG
+    
     if (!prepare_window(hInstance, nCmdShow, IDS_APP_TITLE, IDC_CHWIGRX,
         {
             .cbSize = sizeof(WNDCLASSEX),

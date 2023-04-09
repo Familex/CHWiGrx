@@ -2,6 +2,7 @@
 
 #include "../stuff/macro.h"
 #include "../stuff/stuff.hpp"
+#include "../stuff/parse_typedefs.hpp"
 
 #include <format>
 
@@ -31,10 +32,10 @@ public:
     }
     
     [[nodiscard]] auto
-        as_string() const noexcept -> std::string
+        as_string(const AsStringMeta& meta) const noexcept -> std::string
     {
-        return std::format("{}{}{}{}",
-            ::as_string(id), position.as_string(),
+        return std::format("{}.{}{}{}",
+            ::as_string(id, meta), position.as_string(),
             col_to_char(color), figure_type_to_char(type)
         );
     }
@@ -83,3 +84,30 @@ FN to_pos_vector(const std::vector<Figure*>& lst) noexcept -> std::vector<Pos> {
     }
     return acc;
 }
+
+STRINGIFY_DECLARE_BEGIN(Figure)
+
+    STRINGIFY_DECLARE_ERROR_TYPE{
+        UnexpectedEnd,
+        IdDelimeterMissing,
+        InvalidId,
+        InvalidPos,
+        InvalidColor,
+        InvalidType,
+    };
+
+    STRINGIFY_DECLARE_FROM_STRING {
+        // if length less than Pos(constant) + Color(1 ch) + Type(1 ch) + Id(1+ ch) + IdDelimeter (1 ch)
+        if (sv.find('.') == sv.npos) {
+            return UNEXPECTED_PARSE(ParseErrorType::IdDelimeterMissing, sv.size());
+        }
+        if (sv.size() < meta.max_pos_length + 4) {
+            return UNEXPECTED_PARSE(ParseErrorType::UnexpectedEnd, sv.size());
+        }
+    }
+
+    STRINGIFY_DECLARE_AS_STRING{
+        return " ";
+    }
+        
+STRINGIFY_DECLARE_END
