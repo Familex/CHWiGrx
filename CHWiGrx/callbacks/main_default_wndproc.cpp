@@ -20,7 +20,52 @@ LRESULT CALLBACK main_default_wndproc(HWND hWnd, UINT message, WPARAM wParam, LP
                         motion_input.clear();
                     }
                     else {
-                        MessageBox(hWnd, L"Invalid board representation", L"Error", MB_OK);
+                        std::wstring error_message{ };
+
+                        switch (board_repr_sus.error().type)
+                        {
+                            case ParseErrorType::Meta_CouldNotFindMeta:  error_message = L"Meta: Could not find meta"; break;
+                            case ParseErrorType::Meta_InvalidVersion: error_message = L"Meta: Invalid version"; break;
+                            case ParseErrorType::Meta_CouldNotFindHeight: error_message = L"Meta: Could not find height"; break;
+                            case ParseErrorType::Meta_InvalidHeight: error_message = L"Meta: Invalid height"; break;
+                            case ParseErrorType::Meta_CouldNotFindWidth: error_message = L"Meta: Could not find width"; break;
+                            case ParseErrorType::Meta_InvalidWidth: error_message = L"Meta: Invalid width"; break;
+                            case ParseErrorType::Meta_CouldNotFindIDW: error_message = L"Meta: Could not find idw"; break;
+                            case ParseErrorType::Meta_CouldNotFindCurrentTurn: error_message = L"Meta: Could not find current turn"; break;
+                            case ParseErrorType::Meta_InvalidCurrentTurn: error_message = L"Meta: Invalid current turn"; break;
+                            case ParseErrorType::Meta_CouldNotFindCastlings: error_message = L"Meta: Could not find castlings"; break;
+                            case ParseErrorType::Meta_InvalidCastling: error_message = L"Meta: Invalid castling"; break;
+                            case ParseErrorType::Figure_UnexpectedEnd: error_message = L"Figure: Unexpected end"; break;
+                            case ParseErrorType::Figure_IdDelimeterMissing: error_message = L"Figure: Id delimeter missing"; break;
+                            case ParseErrorType::Figure_InvalidId: error_message = L"Figure: Invalid id"; break;
+                            case ParseErrorType::Figure_InvalidPos: error_message = L"Figure: Invalid pos"; break;
+                            case ParseErrorType::Figure_InvalidColor: error_message = L"Figure: Invalid color"; break;
+                            case ParseErrorType::Figure_InvalidType: error_message = L"Figure: Invalid type"; break;
+                            case ParseErrorType::MoveMessage_EmptyMap: error_message = L"MoveMessage: Empty map"; break;
+                            case ParseErrorType::MoveMessage_CouldNotFindFrom: error_message = L"MoveMessage: Could not find from"; break;
+                            case ParseErrorType::MoveMessage_InvalidFrom: error_message = L"MoveMessage: Invalid from"; break;
+                            case ParseErrorType::MoveMessage_CouldNotFindTo: error_message = L"MoveMessage: Could not find to"; break;
+                            case ParseErrorType::MoveMessage_InvalidTo: error_message = L"MoveMessage: Invalid to"; break;
+                            case ParseErrorType::MoveMessage_CouldNotFindPromotionChoice: error_message = L"MoveMessage: Could not find promotion choice"; break;
+                            case ParseErrorType::MoveMessage_InvalidPromotionChoice: error_message = L"MoveMessage: Invalid promitoin choice"; break;
+                            case ParseErrorType::MoveMessage_CouldNotFindMainEvent: error_message = L"MoveMessage: Could not find main event"; break;
+                            case ParseErrorType::SideEvent_EmptyString: error_message = L"SideEvent: Empty string"; break;
+                            case ParseErrorType::SideEvent_CouldNotFindType: error_message = L"SideEvent: Could not find type"; break;
+                            case ParseErrorType::SideEvent_InvalidType: error_message = L"SideEvent: Invalid type"; break;
+                            case ParseErrorType::SideEvent_InvalidCastlingBreakId: error_message = L"SideEvent: Invalid castling break id"; break;
+                            case ParseErrorType::MainEvent_CouldNotFindType: error_message = L"MainEvent: Could not find type"; break;
+                            case ParseErrorType::MainEvent_InvalidType: error_message = L"MainEvent: Invalid type"; break;
+                            case ParseErrorType::MainEvent_CouldNotFindCastlindSecondToMoveId: error_message = L"MainEvent: Could not find castling second to move id"; break;
+                            case ParseErrorType::MainEvent_InvalidCastlingSecondToMoveId: error_message = L"MainEvent: Invalid castling second to move id"; break;
+                            case ParseErrorType::MainEvent_CouldNotFindCastlingSecondInputFrom: error_message = L"MainEvent: Could not find castling second input from"; break;
+                            case ParseErrorType::MainEvent_InvalidCastlingSecondInputFrom: error_message = L"MainEvent: Invalid castling second input from"; break;
+                            case ParseErrorType::MainEvent_CouldNotFindCastlingSecondInputTo: error_message = L"MainEvent: Could not find castling second input to"; break;
+                            case ParseErrorType::MainEvent_InvalidCastlingSecondInputTo: error_message = L"MainEvent: Invalind casling second input to"; break;
+                            case ParseErrorType::MainEvent_CouldNotFindEnPassantEatenId: error_message = L"MainEvent: Could not find en passant eaten id"; break;
+                            case ParseErrorType::MainEvent_InvalidEnPassantEatenId: error_message = L"MainEvent: Invalid en passant eaten id"; break;
+                        }
+
+                        MessageBox(hWnd, error_message.c_str(), L"Board repr parse error", MB_OK);
                     }
                 }
                     InvalidateRect(hWnd, NULL, NULL);

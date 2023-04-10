@@ -369,7 +369,6 @@ struct as_string<board_repr::BoardRepr> {
                   const AsStringMeta& meta) const noexcept
        -> std::string
     {
-        // FIXME castlings
         using namespace std::literals::string_literals;
 
         std::string result{ };

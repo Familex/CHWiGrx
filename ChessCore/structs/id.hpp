@@ -67,11 +67,10 @@ struct from_string<Id> {
 
 template <>
 struct as_string<Id> {
-    FN operator()(const Id id, const Id min_id) const noexcept
+    [[nodiscard]] auto
+        operator()(const Id id, const Id min_id) const noexcept
         -> std::string
     {
-        return std::string{
-            ce::itoa(static_cast<Id_type>(id - min_id)).c_str()
-        };
+        return std::to_string(static_cast<Id_type>(id - min_id));
     }
 };
