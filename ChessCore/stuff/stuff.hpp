@@ -34,7 +34,10 @@ FN inline
         acc.push_back(str.substr(previous, current - previous));
         previous = current + delimiter.size();
     }
-    acc.push_back(str.substr(previous, current - previous));
+    const auto last = str.substr(previous);
+    if (!last.empty()) {
+        acc.push_back(last);
+    }
     return acc;
 }
 

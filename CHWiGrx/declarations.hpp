@@ -113,7 +113,7 @@ void on_lbutton_down(HWND, LPARAM);
 void restart();
 bool copy_repr_to_clip(HWND);
 auto take_repr_from_clip(HWND)
-    -> ParseEither<board_repr::BoardRepr, from_string<board_repr::BoardRepr>::ParseErrorType>;
+    -> ParseEither<board_repr::BoardRepr, ParseErrorType>;
 void make_move(HWND, std::optional<Input> = std::nullopt);
 bool is_bot_move();
 

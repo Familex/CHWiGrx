@@ -722,7 +722,7 @@ auto FigureBoard::  // FIXME move check and undercheck checks to separate functi
                         side_events.push_back(mvmsg::Check{ });
                     }
                     return mvmsg::MoveMessage{ 
-                        in_hand,
+                        *in_hand,
                         input,
                         promotion_choice,
                         mvmsg::Castling{
@@ -776,7 +776,7 @@ auto FigureBoard::  // FIXME move check and undercheck checks to separate functi
                 }
             }
             return mvmsg::MoveMessage{
-                in_hand,
+                *in_hand,
                 input,
                 promotion_choice,
                 mvmsg::LongMove{ },
@@ -821,7 +821,7 @@ auto FigureBoard::  // FIXME move check and undercheck checks to separate functi
                 }
                 auto const& to_eat_sus = get_fig(Pos{ input.from.x, input.target.y });
                 return mvmsg::MoveMessage{
-                    in_hand,
+                    *in_hand,
                     input,
                     promotion_choice,
                     mvmsg::EnPassant{
@@ -855,7 +855,7 @@ auto FigureBoard::  // FIXME move check and undercheck checks to separate functi
                 }
             }
             return mvmsg::MoveMessage{
-                in_hand,
+                *in_hand,
                 input,
                 promotion_choice,
                 mvmsg::Eat{
@@ -881,7 +881,7 @@ auto FigureBoard::  // FIXME move check and undercheck checks to separate functi
                 }
             }
             return mvmsg::MoveMessage{
-                in_hand,
+                *in_hand,
                 input,
                 promotion_choice,
                 mvmsg::Move{ },

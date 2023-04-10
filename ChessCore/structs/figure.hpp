@@ -84,17 +84,6 @@ FN to_pos_vector(const std::vector<Figure*>& lst) noexcept -> std::vector<Pos> {
 
 template <>
 struct from_string<Figure> {
-
-    enum class ParseErrorType : std::size_t {
-        UnexpectedEnd,
-        IdDelimeterMissing,
-        InvalidId,
-        InvalidPos,
-        InvalidColor,
-        InvalidType,
-        Max = InvalidType,
-    };
-    
     FN operator()(const std::string_view sv, const FromStringMeta& meta) const noexcept
         -> ParseEither<Figure, ParseErrorType>
     {
@@ -102,12 +91,12 @@ struct from_string<Figure> {
         std::size_t curr_pos{ };
         const auto full_stop_pos = sv.find('.');
         if (full_stop_pos == sv.npos) {
-            return UNEXPECTED_PARSE(ParseErrorType, IdDelimeterMissing, sv.size());
+            return UNEXPECTED_PARSE(Figure_IdDelimeterMissing, sv.size());
         }
         if (sv.size() - full_stop_pos - 1 < meta.max_pos_length + 1 + 1) {
         //  expected size of pos, col, type ^^^^^^^^^^^^^^^^^^^^^^^^^^^
         //  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ size of the rest of the string after the full stop
-            return UNEXPECTED_PARSE(ParseErrorType, UnexpectedEnd, sv.size());
+            return UNEXPECTED_PARSE(Figure_UnexpectedEnd, sv.size());
         }
         if (const auto id_sus = from_string<Id>{}(sv.substr(0, full_stop_pos))) {
             id = id_sus.value().value;
@@ -115,7 +104,7 @@ struct from_string<Figure> {
             // full_stop_pos + 1 because we want to skip the full stop
         }
         else {
-            UNEXPECTED_PARSE(ParseErrorType, InvalidId, id_sus.error());
+            UNEXPECTED_PARSE(Figure_InvalidId, id_sus.error());
         }
         if (const auto pos_sus = from_string<Pos>{}(sv.substr(curr_pos, meta.max_pos_length), meta)) {
             pos = pos_sus.value().value;
@@ -124,21 +113,21 @@ struct from_string<Figure> {
             assert(meta.max_pos_length == pos_sus.value().position);
         }
         else {
-            return UNEXPECTED_PARSE(ParseErrorType, InvalidPos, curr_pos + pos_sus.error());
+            return UNEXPECTED_PARSE(Figure_InvalidPos, curr_pos + pos_sus.error());
         }
         if (const auto col_sus = from_string<Color>{}(sv.substr(curr_pos, 1))) {
             col = col_sus.value().value;
             curr_pos += col_sus.value().position;
         }
         else {
-            return UNEXPECTED_PARSE(ParseErrorType, InvalidColor, curr_pos);
+            return UNEXPECTED_PARSE(Figure_InvalidColor, curr_pos);
         }
         if (const auto type_sus = from_string<FigureType>{}(sv.substr(curr_pos, 1))) {
             type = type_sus.value().value;
             curr_pos += type_sus.value().position;
         }
         else {
-            return UNEXPECTED_PARSE(ParseErrorType, InvalidType, curr_pos);
+            return UNEXPECTED_PARSE(Figure_InvalidType, curr_pos);
         }
         
         return { { Figure{ id, pos, col, type }, curr_pos } };
