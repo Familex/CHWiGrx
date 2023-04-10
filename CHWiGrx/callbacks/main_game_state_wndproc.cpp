@@ -33,7 +33,7 @@ LRESULT CALLBACK mainproc::main_game_state_wndproc(HWND hWnd, UINT message, WPAR
                 case IDM_PASTE_START_MAP:
                 {
                     IF_LET(br, take_repr_from_clip(hWnd)) {
-                        start_board_repr = br;
+                        start_board_repr = std::move(br.value);
                     }
                 }
                     break;

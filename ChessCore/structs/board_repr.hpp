@@ -147,30 +147,36 @@ template <>
 struct from_string<board_repr::BoardRepr> {
     enum class ParseErrorType : std::size_t {
         // Meta parse errors
-        Meta_CouldNotFindMeta = 0,
-        Meta_InvalidVersion = 1,
-        Meta_CouldNotFindHeight = 2,
-        Meta_InvalidHeight = 3,
-        Meta_CouldNotFindWidth = 4,
-        Meta_InvalidWidth = 5,
-        Meta_CouldNotFindIDW = 6,
-        Meta_CouldNotFindCurrentTurn = 7,
-        Meta_InvalidCurrentTurn = 8,
-        Meta_CouldNotFindCastlings = 9,
-        Meta_InvalidCastling = 10,
+        Meta_CouldNotFindMeta,
+        Meta_InvalidVersion,
+        Meta_CouldNotFindHeight,
+        Meta_InvalidHeight,
+        Meta_CouldNotFindWidth,
+        Meta_InvalidWidth,
+        Meta_CouldNotFindIDW,
+        Meta_CouldNotFindCurrentTurn,
+        Meta_InvalidCurrentTurn,
+        Meta_CouldNotFindCastlings,
+        Meta_InvalidCastling,
         // Figures parse errors (Same as from_string<Figure>::ParseErrorType)
-        Figure_Base = 11,
+        Figure_Base,
         Figure_UnexpectedEnd = Figure_Base,
-        Figure_IdDelimeterMissing = 12,
-        Figure_InvalidId = 13,
-        Figure_InvalidPos = 14,
-        Figure_InvalidColor = 15,
-        Figure_InvalidType = 16,
+        Figure_IdDelimeterMissing,
+        Figure_InvalidId,
+        Figure_InvalidPos,
+        Figure_InvalidColor,
+        Figure_InvalidType,
         Figure_Max = Figure_InvalidType,
         // MoveMessage parse error (Same as from_string<MoveMessage>::ParseErrorType)
-        MoveMessage_Base = 17,
-        MoveMessage_EmptyMap = MoveMessage_Base,
-        MoveMessage_Max = MoveMessage_EmptyMap,
+        MoveMessage_Base,
+        MoveMessage_EmptyMap,
+        MoveMessage_CouldNotFindFrom,
+        MoveMessage_InvalidFrom,
+        MoveMessage_CouldNotFindTo,
+        MoveMessage_InvalidTo,
+        MoveMessage_CouldNotFindPromotionChoice,
+        MoveMessage_InvalidPromotionChoice,
+        MoveMessage_Max = MoveMessage_InvalidPromotionChoice,
     };
     
     static_assert(
@@ -184,59 +190,22 @@ struct from_string<board_repr::BoardRepr> {
     );
     
     FN operator()(const std::string_view sv, const FromStringMeta& meta) const noexcept
-       -> ParseResult<board_repr::BoardRepr, ParseErrorType>
+       -> ParseEither<board_repr::BoardRepr, ParseErrorType>
     {
         board_repr::BoardRepr result{};
 
-        auto parse_example =
-            // meta
-            "02H8W8TBC22,21,45,44!"
-            // figures
-            "6.00BR" "10.01BK" "7.02BB" "3.03BK"
-            "8.05BB" "11.06BK" "5.07BR" "12.08BP"
-            "14.10BP" "19.11BP" "18.12BP" "15.15BP"
-            "16.21BP" "30.25WB" "4.31BQ" "22.45WP"
-            "27.48WP" "26.49WP" "25.50WP" "24.51WP"
-            "21.54WP" "20.55WP" "29.56WR" "34.57WK"
-            "31.58WB" "1.59WK" "0.60WQ" "33.62WK"
-            "28.63WR"
-            // prev
-            "<23.52WP5236QL$"
-            "13.09BP0925QL$"
-            "23.36WP3628QM$"
-            "17.13BP1329QL$"
-            "23.28WP2821QP17$"
-            "16.14BP1421QE23$"
-            "30.61WB6125QE13$"
-            "4.04BQ0431QCHM$"
-            "22.53WP5345QM>"
-            // future
-            "<11.06BK0623QM$"
-            "21.54WP5445QE4$"
-            "4.31BQ3145QCHE22>"
-            // captured
-            "17.29BP" "23.21WP" "13.25BP";
-        
         auto process_figures =
             [&meta](const std::string_view sv, std::vector<Figure*>& out, std::size_t start_pos)
             -> std::optional<ParseError<ParseErrorType>>
         {
-            // full stop + max_pos_length + Color + FigureType
-            const auto figure_without_id_length = 1 + meta.max_pos_length + 1 + 1;
-
             auto fig_curr_pos = start_pos;
 
             while (fig_curr_pos < sv.size()) {
-                const auto full_stop_pos = sv.find('.', fig_curr_pos);
-                if (full_stop_pos == std::string_view::npos) {
-                    return ParseError<ParseErrorType>{ ParseErrorType::Figure_IdDelimeterMissing };
-                }
-                const auto figure_length = figure_without_id_length + (full_stop_pos - fig_curr_pos + 1);
-                const auto figure_sv = sv.substr(fig_curr_pos, figure_length);
-                if (const auto& figure_sus = from_string<Figure>{}(figure_sv, meta)) {
+                if (const auto& figure_sus = from_string<Figure>{}(sv.substr(fig_curr_pos), meta)) {
                     out.push_back(
-                        figfab::FigureFabric::instance().create(&*figure_sus, true).release()
+                        figfab::FigureFabric::instance().create(&figure_sus.value().value, true).release()
                     );
+                    fig_curr_pos += figure_sus.value().position;
                 }
                 else {
                     return ParseError<ParseErrorType>{
@@ -247,7 +216,6 @@ struct from_string<board_repr::BoardRepr> {
                         figure_sus.error().position + fig_curr_pos
                     };
                 }
-                fig_curr_pos += figure_length;
             }
             return std::nullopt;
         };
@@ -260,7 +228,9 @@ struct from_string<board_repr::BoardRepr> {
             
             for (const auto& move_message_sv : split(sv, "$"sv)) {
                 if (const auto& move_message_sus = from_string<mvmsg::MoveMessage>{}(move_message_sv, meta)) {
-                    out.push_back(*move_message_sus);
+                    out.push_back(move_message_sus.value().value);
+                    move_message_curr_pos += move_message_sus.value().position + 1;
+                    //                        + 1 because of the '$' delimiter ^^^
                 }
                 else {
                     return ParseError<ParseErrorType>{
@@ -271,24 +241,32 @@ struct from_string<board_repr::BoardRepr> {
                         move_message_sus.error().position + move_message_curr_pos
                     };
                 }
-                move_message_curr_pos += move_message_sv.size();
             }
             return std::nullopt;
         };
 
         {
+            const auto start_pos = sv.find('!') + 1;
             const auto figures = sv.substr(
-                sv.find('!') + 1,
+                start_pos,
                 sv.find('<') - sv.find('!') - 1
             );
 
-            if (const auto& error_sus = process_figures(figures, result.figures, sv.find('!') + 1)) {
+            if (const auto& error_sus =
+                    process_figures(
+                        figures,
+                        result.figures,
+                        start_pos
+                    )
+                )
+            {
                 return std::unexpected{ *error_sus };
             }
         }
         {
+            const auto start_pos = sv.find('<') + 1;
             const auto past = sv.substr(
-                sv.find('<') + 1,
+                start_pos,
                 sv.find('>') - sv.find('<') - 1
             );
             
@@ -296,14 +274,17 @@ struct from_string<board_repr::BoardRepr> {
                     process_move_message(
                         past,
                         result.past,
-                        sv.find('<') + 1))
+                        start_pos
+                    )
+                )
             {
                 return std::unexpected{ *error_sus };
             }
         }
         {
+            const auto start_pos = sv.find('<', sv.find('<') + 1) + 1;
             const auto future = sv.substr(
-                sv.find('<', sv.find('<') + 1) + 1,
+                start_pos,
                 sv.find('>', sv.find('>') + 1) - sv.find('<', sv.find('<') + 1) - 1
             );
             
@@ -311,31 +292,37 @@ struct from_string<board_repr::BoardRepr> {
                     process_move_message(
                         future,
                         result.future,
-                        sv.find('<', sv.find('<') + 1) + 1))
+                        start_pos
+                    )
+                )
             {
                 return std::unexpected{ *error_sus };
             }
         }
         {
+            const auto start_pos = sv.find('>', sv.find('>') + 1) + 1;
             const auto captured = sv.substr(
-                sv.find('>', sv.find('>') + 1) + 1,
+                start_pos,
                 sv.size() - sv.find('>', sv.find('>') + 1)
             );
 
             if (const auto& error_sus = process_figures(
                     captured, 
                     result.captured_figures,
-                    sv.find('>', sv.find('>') + 1) + 1))
+                    start_pos
+                    )
+                )
             {
                 return std::unexpected{ *error_sus };
             }
         }
         
-        return result;
+        return { { std::move(result), sv.size() } };
+        //              seems useless ^^^^^^^^^
     }
     
     FN operator()(const std::string_view sv) const noexcept
-       -> ParseResult<board_repr::BoardRepr, ParseErrorType>
+       -> ParseEither<board_repr::BoardRepr, ParseErrorType>
     {
         FromStringMeta meta{ };
         std::size_t pos{ };
@@ -347,7 +334,7 @@ struct from_string<board_repr::BoardRepr> {
         const auto sv_meta = sv.substr(0, meta_end);
 
         if (const auto version = svtoi(sv_meta.substr(pos, 2))) {
-            meta.version = *version;
+            meta.version = version.value().value;
             pos += 2;
         } else {
             return UNEXPECTED_PARSE(ParseErrorType, Meta_InvalidVersion, version.error());
@@ -360,8 +347,9 @@ struct from_string<board_repr::BoardRepr> {
             return UNEXPECTED_PARSE(ParseErrorType, Meta_CouldNotFindWidth, pos - 1);
         }
         if (auto height = svtoi(sv_meta.substr(pos, w_pos - pos))) {
-            meta.height = *height;
+            meta.height = height.value().value;
             pos = w_pos + 1;
+            //          ^^^ because of the 'W' delimiter
         } else {
             return UNEXPECTED_PARSE(ParseErrorType, Meta_InvalidHeight, height.error());
         }
@@ -379,8 +367,9 @@ struct from_string<board_repr::BoardRepr> {
             meta.idw = true;
         }
         if (auto width = svtoi(sv_meta.substr(pos, idw_pos - pos))) {
-            meta.width = *width;
+            meta.width = width.value().value;
             pos = idw_pos + 1;
+            //            ^^^ because of the 'T' or 'F' delimiter
         }
         else {
             return UNEXPECTED_PARSE(ParseErrorType, Meta_InvalidWidth, pos - 1);
@@ -404,7 +393,7 @@ struct from_string<board_repr::BoardRepr> {
                     : split(sv_meta.substr(pos + 1, sv_meta.size() - pos - 1), ","sv))
             {
                 if (const auto id = svtoi(castling)) {
-                    meta.castlings.push_back(Id{ static_cast<Id_type>(*id) });
+                    meta.castlings.push_back(Id{ static_cast<Id_type>(id.value().value) });
                 }
                 else {
                     return UNEXPECTED_PARSE(ParseErrorType, Meta_InvalidCastling, id.error());

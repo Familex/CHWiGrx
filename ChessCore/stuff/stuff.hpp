@@ -1,6 +1,7 @@
 #pragma once
 
 #include "macro.h"
+#include "parse_typedefs.hpp"
 
 #include <charconv>
 #include <vector>
@@ -38,17 +39,19 @@ FN inline
 }
 
 /// Converts a string_view to an int if all string is convertable.
+/// Returns next character position on success.
 /// Returns invalid character position on error.
 FN inline
     svtoi(const std::string_view s) noexcept
-    -> std::expected<int, std::size_t>
+    -> std::expected<ParseResult<int>, std::size_t>
 {
     int value{ };
-    auto res = std::from_chars(s.data(), s.data() + s.size(), value);
-    if (res.ec == std::errc{} && res.ptr == s.data() + s.size()) {
-        return value;
+    const auto res = std::from_chars(s.data(), s.data() + s.size(), value);
+    const auto pos = static_cast<std::size_t>(res.ptr - s.data());
+    if (res.ec == std::errc{}) {
+        return { { value, pos } };
     }
     else {
-        return std::unexpected{ res.ptr - s.data() };
+        return std::unexpected{ pos };
     }
 };

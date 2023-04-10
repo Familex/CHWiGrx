@@ -15,8 +15,8 @@ LRESULT CALLBACK main_default_wndproc(HWND hWnd, UINT message, WPARAM wParam, LP
                 {
                     auto board_repr_sus = take_repr_from_clip(hWnd);
                     if (board_repr_sus.has_value()) {
-                        turn = board_repr_sus.value().turn;
-                        board.reset(std::move(board_repr_sus.value()));
+                        turn = board_repr_sus.value().value.turn;
+                        board.reset(std::move(board_repr_sus.value().value));
                         motion_input.clear();
                     }
                     else {

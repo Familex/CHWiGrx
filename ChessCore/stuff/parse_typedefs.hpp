@@ -7,14 +7,20 @@
 
 #pragma region Parse error
 
-template <typename ParseErrorType>
+template <typename ErrorType>
 struct ParseError {
-    ParseErrorType type;
+    ErrorType type;
     std::size_t position;
 };
 
-template <typename ResultType, typename ParseErrorT>
-using ParseResult = std::expected<ResultType, ParseError<ParseErrorT>>;
+template <typename ResultType>
+struct ParseResult {
+    ResultType value;
+    std::size_t position;
+};
+
+template <typename ResultType, typename ErrorType>
+using ParseEither = std::expected<ParseResult<ResultType>, ParseError<ErrorType>>;
 
 /// Use this macro to return an parse error
 #define UNEXPECTED_PARSE(parse_error_type, type, pos) \

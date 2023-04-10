@@ -34,16 +34,16 @@ FN col_to_char(const Color color) noexcept -> char {
 template <>
 struct from_string<Color> {
     FN operator()(const std::string_view sv) const noexcept
-        -> std::optional<Color>
+        -> std::optional<ParseResult<Color>>
     {
         if (sv.empty()) {
             return std::nullopt;
         }
         switch (sv[0]) {
             case 'W': case 'w':
-                return Color::White;
+                return { { Color::White, 1ull } };
             case 'B': case 'b':
-                return Color::Black;
+                return { { Color::Black, 1ull } };
             default:
                 return std::nullopt;
         }
@@ -118,24 +118,24 @@ FN figure_type_to_char(const FigureType figure_type) noexcept -> char
 template <>
 struct from_string<FigureType> {
     FN operator()(const std::string_view sv) const noexcept
-        -> std::optional<FigureType>
+        -> std::optional<ParseResult<FigureType>>
     {
         if (sv.empty()) {
             return std::nullopt;
         }
         switch (sv[0]) {
             case 'K': case 'k':
-                return FigureType::King;
+                return { { FigureType::King, 1ull } };
             case 'H': case 'h':
-                return FigureType::Knight;
+                return { { FigureType::Knight, 1ull } };
             case 'P': case 'p':
-                return FigureType::Pawn;
+                return { { FigureType::Pawn, 1ull } };
             case 'B': case 'b':
-                return FigureType::Bishop;
+                return { { FigureType::Bishop, 1ull } };
             case 'Q': case 'q':
-                return FigureType::Queen;
+                return { { FigureType::Queen, 1ull } };
             case 'R': case 'r':
-                return FigureType::Rook;
+                return { { FigureType::Rook, 1ull } };
             default:
                 return std::nullopt;
         }

@@ -482,8 +482,7 @@ bool copy_repr_to_clip(HWND hWnd) {
 }
 
 auto take_repr_from_clip(HWND hWnd)
--> std::expected<board_repr::BoardRepr,
-    ParseError<from_string<board_repr::BoardRepr>::ParseErrorType>>
+-> ParseEither<board_repr::BoardRepr, from_string<board_repr::BoardRepr>::ParseErrorType>
 {
     return from_string<board_repr::BoardRepr>{}(take_str_from_clip(hWnd));
 }
