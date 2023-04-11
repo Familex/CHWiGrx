@@ -34,10 +34,10 @@ FN col_to_char(const Color color) noexcept -> char {
 template <>
 struct from_string<Color> {
     FN operator()(const std::string_view sv) const noexcept
-        -> std::optional<ParseResult<Color>>
+        -> ParseEither<Color, ParseErrorType>
     {
         if (sv.empty()) {
-            return std::nullopt;
+            return std::unexpected{ ParseError<ParseErrorType>{ ParseErrorType::Color_CouldNotFound, 0ull } };
         }
         switch (sv[0]) {
             case 'W': case 'w':
@@ -45,7 +45,7 @@ struct from_string<Color> {
             case 'B': case 'b':
                 return { { Color::Black, 1ull } };
             default:
-                return std::nullopt;
+                return std::unexpected{ ParseError<ParseErrorType>{ ParseErrorType::Color_Invalid, 1ull } };
         }
     }
 };
@@ -118,10 +118,10 @@ FN figure_type_to_char(const FigureType figure_type) noexcept -> char
 template <>
 struct from_string<FigureType> {
     FN operator()(const std::string_view sv) const noexcept
-        -> std::optional<ParseResult<FigureType>>
+        -> ParseEither<FigureType, ParseErrorType>
     {
         if (sv.empty()) {
-            return std::nullopt;
+            return std::unexpected { ParseError<ParseErrorType>{ ParseErrorType::FigureType_CouldNotFound, 0ull } };
         }
         switch (sv[0]) {
             case 'K': case 'k':
@@ -137,7 +137,7 @@ struct from_string<FigureType> {
             case 'R': case 'r':
                 return { { FigureType::Rook, 1ull } };
             default:
-                return std::nullopt;
+                return std::unexpected{ ParseError<ParseErrorType>{ ParseErrorType::FigureType_Invalid, 1ull } };
         }
     }
 };

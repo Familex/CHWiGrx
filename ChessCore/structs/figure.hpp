@@ -89,54 +89,18 @@ struct from_string<Figure> {
     {
         std::size_t curr_pos{ };
         
-        if (sv.empty()) {
-            return UNEXPECTED_PARSE(Figure_CouldNotFindId, curr_pos);
-        }
-        const auto id_sus = from_string<Id>{}(sv.substr(curr_pos));
-        if (id_sus) {
-            curr_pos += id_sus.value().position + 1;
-            //         cause full_stop after id ^^^
-        }
-        else {
-            return UNEXPECTED_PARSE(Figure_InvalidId, curr_pos + id_sus.error());
-        }
-        if (sv.size() < curr_pos) {
-            return UNEXPECTED_PARSE(Figure_CouldNotFindPos, curr_pos);
-        }
-        const auto pos_sus = from_string<Pos>{}(sv.substr(curr_pos, meta.max_pos_length), meta);
-        if (pos_sus) {
-            curr_pos += pos_sus.value().position;
-        }
-        else {
-            return UNEXPECTED_PARSE(Figure_InvalidPos, curr_pos + pos_sus.error());
-        }
-        if (sv.size() < curr_pos) {
-            return UNEXPECTED_PARSE(Figure_CouldNotFindColor, curr_pos);
-        }
-        const auto col_sus = from_string<Color>{}(sv.substr(curr_pos));
-        if (col_sus) {
-            curr_pos += col_sus.value().position;
-        }
-        else {
-            return UNEXPECTED_PARSE(Figure_InvalidColor, curr_pos);
-        }
-        if (sv.size() < curr_pos) {
-            return UNEXPECTED_PARSE(Figure_CouldNotFindType, curr_pos);
-        }
-        const auto type_sus = from_string<FigureType>{}(sv.substr(curr_pos));
-        if (type_sus) {
-            curr_pos += type_sus.value().position;
-        }
-        else {
-            return UNEXPECTED_PARSE(Figure_InvalidType, curr_pos);
-        }
+        PARSE_UNEXPECTED_END_GUARD(sv, Figure_CouldNotFindId, curr_pos)
+        PARSE_STEP_EX(sv, id, Id, curr_pos, ParseErrorType, Figure_InvalidId, 1)
+        PARSE_UNEXPECTED_END_GUARD(sv, Figure_CouldNotFindPos, curr_pos)
+        PARSE_STEP_WITHOUT_SUBSTR_WITH_META(sv.substr(curr_pos, meta.max_pos_length), pos, Pos, curr_pos, meta, ParseErrorType, Figure_InvalidPos)
+        PARSE_UNEXPECTED_END_GUARD(sv, Figure_CouldNotFindColor, curr_pos)
+        PARSE_STEP(sv, col, Color, curr_pos, ParseErrorType, Figure_InvalidColor)
+        PARSE_UNEXPECTED_END_GUARD(sv, Figure_CouldNotFindType, curr_pos)
+        PARSE_STEP(sv, type, FigureType, curr_pos, ParseErrorType, Figure_InvalidType)
         
-        return { { Figure { 
-                id_sus.value().value,
-                pos_sus.value().value,
-                col_sus.value().value,
-                type_sus.value().value
-            }, curr_pos
+        return { { 
+            Figure { id, pos, col, type }, 
+            curr_pos
         } };
     }
 };

@@ -78,11 +78,11 @@ template <>
 struct from_string<Pos> {
     [[nodiscard]] inline constexpr auto
         operator()(const std::string_view str, const FromStringMeta& meta) const noexcept
-        -> std::expected<ParseResult<Pos>, std::size_t>
+        -> ParseEither<Pos, ParseErrorType>
     {
         const auto payload_sus = svtoi(str);
         if (!payload_sus) {
-            return std::unexpected{ payload_sus.error() };
+            return std::unexpected{ ParseError<ParseErrorType>{ ParseErrorType::Pos_Invalid, payload_sus.error() } };
         };
         const auto y = payload_sus.value().value % meta.width;
         const auto x = (payload_sus.value().value - y) / meta.width;

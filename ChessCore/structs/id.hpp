@@ -53,14 +53,14 @@ namespace std {
 template <>
 struct from_string<Id> {
     FN operator()(const std::string_view sv) const noexcept
-        -> std::expected<ParseResult<Id>, std::size_t>
+        -> ParseEither<Id, ParseErrorType>
     {
         auto res = svtoi(sv);
         if (res) {
             return { { Id{ static_cast<Id_type>(res.value().value) }, res.value().position } };
         }
         else {
-            return std::unexpected{ res.error() };
+            return UNEXPECTED_PARSE(Id_Invalid, res.error());
         }
     }
 };

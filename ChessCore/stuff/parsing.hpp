@@ -7,6 +7,9 @@
 
 #pragma region Parse error types
 
+#define UNEXPECTED_PARSE(type, pos) \
+    std::unexpected{ ParseError<ParseErrorType>{ ParseErrorType :: type, pos } }
+
 template <typename ErrorType>
 struct ParseError {
     ErrorType type;
@@ -21,10 +24,6 @@ struct ParseResult {
 
 template <typename ResultType, typename ErrorType>
 using ParseEither = std::expected<ParseResult<ResultType>, ParseError<ErrorType>>;
-
-/// Use this macro to return an parse error
-#define UNEXPECTED_PARSE(type, pos) \
-    std::unexpected{ ParseError<ParseErrorType>{ ParseErrorType :: type, pos } }
 
 #pragma endregion   // Parse error types
 
@@ -59,6 +58,24 @@ enum class ParseErrorType {
     Meta_CouldNotFindCastlings,
     Meta_InvalidCastling,
     Meta_Max = Meta_InvalidCastling,
+    // Id parse errors
+    Id_Base,
+    Id_Invalid = Id_Base,
+    Id_Max = Id_Invalid,
+    // Pos parse errors
+    Pos_Base,
+    Pos_Invalid = Pos_Base,
+    Pos_Max = Pos_Invalid,
+    // Color parse errors
+    Color_Base,
+    Color_CouldNotFound = Color_Base,
+    Color_Invalid,
+    Color_Max = Color_Invalid,
+    // FigureType parse errors
+    FigureType_Base,
+    FigureType_CouldNotFound = FigureType_Base,
+    FigureType_Invalid,
+    FigureType_Max = FigureType_Invalid,
     // Figures parse errors
     Figure_Base,
     Figure_CouldNotFindId = Figure_Base,
@@ -104,4 +121,72 @@ enum class ParseErrorType {
 
 #pragma region Parse step types
 
-struct ParseStep { };
+#define PARSE_UNEXPECTED_END_GUARD_BASE(sv, parse_error_type, error_type, position) \
+    if (sv.size() < curr_pos) { \
+        return std::unexpected{ \
+            ParseError<parse_error_type>{ \
+                error_type, \
+                position \
+            } \
+        }; \
+    }
+
+#define PARSE_UNEXPECTED_END_GUARD(sv, error_value, position) \
+    PARSE_UNEXPECTED_END_GUARD_BASE(sv, ParseErrorType, ParseErrorType :: error_value, position)
+
+#define PARSE_STEP_MAKE_UNEXPECTED(parse_error_type, error_type, position) \
+    std::unexpected{ \
+        ParseError<parse_error_type>{ \
+            error_type, \
+            position \
+        } \
+    }
+
+#define PARSE_STEP_PACK(...) \
+    __VA_ARGS__
+
+#define PARSE_STEP_BASE(from_string_arg, error_type, error_position, value_name, type_name, curr_pos, parse_error_type, extra_pos) \
+    const auto value_name ## _sus = from_string<type_name>{}(from_string_arg); \
+    if (value_name ## _sus) { \
+        curr_pos += value_name ## _sus->position + extra_pos; \
+    } \
+    else { \
+        return PARSE_STEP_MAKE_UNEXPECTED( parse_error_type, error_type, error_position ); \
+    } \
+    const auto value_name = value_name ## _sus->value;
+
+#define PARSE_STEP_FORWARD_WITH_META_EX(sv, value_name, type_name, curr_pos, meta, parse_error_type, extra_pos) \
+    PARSE_STEP_BASE( \
+          PARSE_STEP_PACK( sv.substr(curr_pos), meta ), \
+          value_name ## _sus.error().type, curr_pos + value_name ## _sus.error().position, \
+          value_name, type_name, curr_pos, parse_error_type, extra_pos )
+
+#define PARSE_STEP_FORWARD_WITH_META(sv, value_name, type_name, curr_pos, meta, parse_error_type) \
+    PARSE_STEP_FORWARD_WITH_META_EX(sv, value_name, type_name, curr_pos, meta, parse_error_type, 0)
+
+#define PARSE_STEP_FORWARD_EX(sv, value_name, type_name, curr_pos, parse_error_type, extra_pos) \
+    PARSE_STEP_BASE( \
+          PARSE_STEP_PACK( sv.substr(curr_pos) ), \
+          value_name ## _sus.error().type, curr_pos + value_name ## _sus.error().position, \
+          value_name, type_name, curr_pos, parse_error_type, extra_pos )
+
+#define PARSE_STEP_FORWARD(sv, value_name, type_name, curr_pos, parse_error_type) \
+    PARSE_STEP_FORWARD_EX(sv, value_name, type_name, curr_pos, parse_error_type, 0)
+
+#define PARSE_STEP_WITHOUT_SUBSTR_WITH_META_EX(sv, value_name, type_name, curr_pos, meta, parse_error_type, error_value, extra_pos) \
+    PARSE_STEP_BASE( \
+          PARSE_STEP_PACK( sv, meta ), \
+          parse_error_type :: error_value, curr_pos + value_name ## _sus.error().position, \
+          value_name, type_name, curr_pos, parse_error_type, extra_pos )
+
+#define PARSE_STEP_WITHOUT_SUBSTR_WITH_META(sv, value_name, type_name, curr_pos, meta, parse_error_type, error_value) \
+    PARSE_STEP_WITHOUT_SUBSTR_WITH_META_EX(sv, value_name, type_name, curr_pos, meta, parse_error_type, error_value, 0)
+
+#define PARSE_STEP_EX(sv, value_name, type_name, curr_pos, parse_error_type, error_value, extra_pos) \
+    PARSE_STEP_BASE( \
+          PARSE_STEP_PACK( sv.substr(curr_pos) ), \
+          parse_error_type :: error_value, curr_pos + value_name ## _sus.error().position, \
+          value_name, type_name, curr_pos, parse_error_type, extra_pos )
+
+#define PARSE_STEP(sv, value_name, type_name, curr_pos, parse_error_type, error_value) \
+    PARSE_STEP_EX(sv, value_name, type_name, curr_pos, parse_error_type, error_value, 0)

@@ -169,7 +169,7 @@ struct from_string<mvmsg::MainEvent> {
                 }
                 const auto from_sus = from_string<Pos>{}(sv.substr(curr_pos, meta.max_pos_length), meta);
                 if (!from_sus) {
-                    return UNEXPECTED_PARSE(MainEvent_InvalidCastlingSecondInputFrom, curr_pos + from_sus.error());
+                    return UNEXPECTED_PARSE(MainEvent_InvalidCastlingSecondInputFrom, curr_pos + from_sus.error().position);
                 }
                 else {
                     curr_pos += from_sus.value().position;
@@ -179,7 +179,7 @@ struct from_string<mvmsg::MainEvent> {
                 }
                 const auto to_sus = from_string<Pos>{}(sv.substr(curr_pos, meta.max_pos_length), meta);
                 if (!to_sus) {
-                    return UNEXPECTED_PARSE(MainEvent_InvalidCastlingSecondInputTo, curr_pos + to_sus.error());
+                    return UNEXPECTED_PARSE(MainEvent_InvalidCastlingSecondInputTo, curr_pos + to_sus.error().position);
                 }
                 else {
                     curr_pos += to_sus.value().position;
@@ -265,7 +265,7 @@ struct from_string<mvmsg::MoveMessage> {
         }
         const auto to_sus = from_string<Pos>{}(sv.substr(curr_pos, meta.max_pos_length), meta);
         if (!to_sus) {
-            return UNEXPECTED_PARSE(MoveMessage_InvalidTo, curr_pos + to_sus.error());
+            return UNEXPECTED_PARSE(MoveMessage_InvalidTo, curr_pos + to_sus.error().position);
         }
         else {
             curr_pos += to_sus.value().position;
