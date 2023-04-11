@@ -89,6 +89,7 @@ struct from_string<Figure> {
     {
         Id id{ }; Pos pos{ }; Color col{ }; FigureType type{ };
         std::size_t curr_pos{ };
+        // FIXME use from_string<Id>::value().position intead of full_stop_pos
         const auto full_stop_pos = sv.find('.');
         if (full_stop_pos == sv.npos) {
             return UNEXPECTED_PARSE(Figure_IdDelimeterMissing, sv.size());

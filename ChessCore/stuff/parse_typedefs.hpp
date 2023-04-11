@@ -77,6 +77,7 @@ enum class ParseErrorType {
     MoveMessage_InvalidTo,
     MoveMessage_CouldNotFindPromotionChoice,
     MoveMessage_InvalidPromotionChoice,
+    MoveMessage_InvalidEnPassantToEatId,
     MoveMessage_CouldNotFindMainEvent,
     MoveMessage_Max = MoveMessage_CouldNotFindMainEvent,
     // Side events parse errors

@@ -151,6 +151,8 @@ struct from_string<board_repr::BoardRepr> {
     {
         board_repr::BoardRepr result{};
 
+        result.can_castle = meta.castlings;
+
         auto process_figures =
             [&meta](const std::string_view sv, std::vector<Figure*>& out, std::size_t start_pos)
             -> std::optional<ParseError<ParseErrorType>>
@@ -166,11 +168,10 @@ struct from_string<board_repr::BoardRepr> {
                 }
                 else {
                     return ParseError<ParseErrorType>{
-                        static_cast<ParseErrorType>(
-                            static_cast<std::size_t>(ParseErrorType::Figure_Base)
-                            + static_cast<std::size_t>(figure_sus.error().type)
-                            ),
-                            figure_sus.error().position + fig_curr_pos + start_pos
+                        figure_sus.error().type,
+                        figure_sus.error().position
+                            + fig_curr_pos
+                            + start_pos
                     };
                 }
             }
@@ -191,11 +192,10 @@ struct from_string<board_repr::BoardRepr> {
                 }
                 else {
                     return ParseError<ParseErrorType>{
-                        static_cast<ParseErrorType>(
-                            static_cast<std::size_t>(ParseErrorType::MoveMessage_Base)
-                            + static_cast<std::size_t>(move_message_sus.error().type)
-                            ),
-                            move_message_sus.error().position + move_message_curr_pos + start_pos
+                        move_message_sus.error().type,
+                        move_message_sus.error().position
+                            + move_message_curr_pos
+                            + start_pos
                     };
                 }
             }

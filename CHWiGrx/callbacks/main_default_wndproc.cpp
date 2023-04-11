@@ -1,5 +1,7 @@
 #include "../declarations.hpp"
 
+#include <codecvt>
+
 LRESULT CALLBACK main_default_wndproc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) {
     switch (message) 
     {
@@ -49,6 +51,7 @@ LRESULT CALLBACK main_default_wndproc(HWND hWnd, UINT message, WPARAM wParam, LP
                             case ParseErrorType::MoveMessage_CouldNotFindTo: error_message = L"MoveMessage: Could not find to"; break;
                             case ParseErrorType::MoveMessage_InvalidTo: error_message = L"MoveMessage: Invalid to"; break;
                             case ParseErrorType::MoveMessage_CouldNotFindPromotionChoice: error_message = L"MoveMessage: Could not find promotion choice"; break;
+                            case ParseErrorType::MoveMessage_InvalidEnPassantToEatId: error_message = L"MoveMessage: Invalid en passant to eat id"; break;
                             case ParseErrorType::MoveMessage_InvalidPromotionChoice: error_message = L"MoveMessage: Invalid promitoin choice"; break;
                             case ParseErrorType::MoveMessage_CouldNotFindMainEvent: error_message = L"MoveMessage: Could not find main event"; break;
                             case ParseErrorType::SideEvent_EmptyString: error_message = L"SideEvent: Empty string"; break;
@@ -66,8 +69,15 @@ LRESULT CALLBACK main_default_wndproc(HWND hWnd, UINT message, WPARAM wParam, LP
                             case ParseErrorType::MainEvent_CouldNotFindEnPassantEatenId: error_message = L"MainEvent: Could not find en passant eaten id"; break;
                             case ParseErrorType::MainEvent_InvalidEnPassantEatenId: error_message = L"MainEvent: Invalid en passant eaten id"; break;
                         }
-
                         MessageBox(hWnd, error_message.c_str(), L"Board repr parse error", MB_OK);
+
+                        /* Debug print */ {
+                            char error_message_utf8[1024];
+                            WideCharToMultiByte(CP_UTF8, 0, error_message.c_str(), -1, error_message_utf8, 1024, NULL, NULL);
+                            debug_print("Error:", error_message_utf8);
+                            debug_print("\tBoard:", as_string<board_repr::BoardRepr>{}(board.get_repr(turn, true)));
+                            debug_print("\tPos:", board_repr_sus.error().position);
+                        }
                     }
                 }
                     InvalidateRect(hWnd, NULL, NULL);
