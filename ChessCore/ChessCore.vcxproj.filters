@@ -70,7 +70,7 @@
     <ClInclude Include="stuff\visit.h">
       <Filter>stuff</Filter>
     </ClInclude>
-    <ClInclude Include="stuff\parse_typedefs.hpp">
+    <ClInclude Include="stuff\parsing.hpp">
       <Filter>stuff</Filter>
     </ClInclude>
     <ClInclude Include="stuff\parse_meta.hpp">

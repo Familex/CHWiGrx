@@ -5,7 +5,7 @@
 #include <cstddef>
 #include <expected>
 
-#pragma region Parse error
+#pragma region Parse error types
 
 template <typename ErrorType>
 struct ParseError {
@@ -26,9 +26,9 @@ using ParseEither = std::expected<ParseResult<ResultType>, ParseError<ErrorType>
 #define UNEXPECTED_PARSE(type, pos) \
     std::unexpected{ ParseError<ParseErrorType>{ ParseErrorType :: type, pos } }
 
-#pragma endregion   // Parse error
+#pragma endregion   // Parse error types
 
-#pragma region from_string, as_string
+#pragma region from_string, as_string declarations
 /// implement operator() for this type with your type as template parameter
 template <typename ResultType>
 struct from_string;
@@ -37,7 +37,7 @@ struct from_string;
 template <typename ResultType>
 struct as_string;
 
-#pragma endregion   // from_string, as_string
+#pragma endregion   // from_string, as_string declarations
 
 enum class ParseErrorType {
     // General parse errors
