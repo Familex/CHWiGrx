@@ -71,8 +71,6 @@ enum class ParseErrorType {
     // MoveMessage parse error
     MoveMessage_Base,
     MoveMessage_EmptyMap = MoveMessage_Base,
-    MoveMessage_CouldNotFindFrom,
-    MoveMessage_InvalidFrom,
     MoveMessage_CouldNotFindTo,
     MoveMessage_InvalidTo,
     MoveMessage_CouldNotFindPromotionChoice,

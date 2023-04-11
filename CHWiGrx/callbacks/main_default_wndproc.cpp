@@ -46,8 +46,6 @@ LRESULT CALLBACK main_default_wndproc(HWND hWnd, UINT message, WPARAM wParam, LP
                             case ParseErrorType::Figure_InvalidColor: error_message = L"Figure: Invalid color"; break;
                             case ParseErrorType::Figure_InvalidType: error_message = L"Figure: Invalid type"; break;
                             case ParseErrorType::MoveMessage_EmptyMap: error_message = L"MoveMessage: Empty map"; break;
-                            case ParseErrorType::MoveMessage_CouldNotFindFrom: error_message = L"MoveMessage: Could not find from"; break;
-                            case ParseErrorType::MoveMessage_InvalidFrom: error_message = L"MoveMessage: Invalid from"; break;
                             case ParseErrorType::MoveMessage_CouldNotFindTo: error_message = L"MoveMessage: Could not find to"; break;
                             case ParseErrorType::MoveMessage_InvalidTo: error_message = L"MoveMessage: Invalid to"; break;
                             case ParseErrorType::MoveMessage_CouldNotFindPromotionChoice: error_message = L"MoveMessage: Could not find promotion choice"; break;

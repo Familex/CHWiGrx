@@ -261,16 +261,6 @@ struct from_string<mvmsg::MoveMessage> {
             curr_pos += figure_sus.value().position;
         }
         if (sv.size() < curr_pos) {
-            return UNEXPECTED_PARSE(MoveMessage_CouldNotFindFrom, curr_pos);
-        }
-        const auto from_sus = from_string<Pos>{}(sv.substr(curr_pos, meta.max_pos_length), meta);
-        if (!from_sus) {
-            return UNEXPECTED_PARSE(MoveMessage_InvalidFrom, curr_pos + from_sus.error());
-        }
-        else {
-            curr_pos += from_sus.value().position;
-        }
-        if (sv.size() < curr_pos) {
             return UNEXPECTED_PARSE(MoveMessage_CouldNotFindTo, curr_pos);
         }
         const auto to_sus = from_string<Pos>{}(sv.substr(curr_pos, meta.max_pos_length), meta);
@@ -320,7 +310,7 @@ struct from_string<mvmsg::MoveMessage> {
         return { { mvmsg::MoveMessage {
             figure_sus.value().value,
             Input {
-                from_sus.value().value,
+                figure_sus.value().value.get_pos(),
                 to_sus.value().value
             },
             promotion_choice_sus.value().value,
@@ -338,7 +328,6 @@ struct as_string<mvmsg::MoveMessage> {
     {
         std::string result{
               as_string<Figure>{}(move_message.first, meta)
-            + as_string<Pos>{}(move_message.input.from, meta)
             + as_string<Pos>{}(move_message.input.target, meta)
             + as_string<FigureType>{}(move_message.promotion_choice)
             + as_string<mvmsg::MainEvent>{}(move_message.main_event, meta)
