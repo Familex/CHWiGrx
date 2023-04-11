@@ -152,7 +152,7 @@ struct as_string<FigureType> {
             case FigureType::Rook:
                 return "R";
             case FigureType::Knight:
-                return "K";
+                return "H";
             case FigureType::Bishop:
                 return "B";
             case FigureType::Queen:
