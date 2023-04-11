@@ -230,39 +230,84 @@ void restart() {
     turn = start_board_repr.turn;
 }
 
-bool cpy_str_to_clip(HWND hwnd, std::string_view s) {
-    OpenClipboard(hwnd);
-    EmptyClipboard();
-    HGLOBAL hg = GlobalAlloc(GMEM_MOVEABLE, s.size() + 1);
-    if (!hg) {
+bool cpy_str_to_clip(HWND hWnd, std::string_view s) {
+    if (!OpenClipboard(hWnd)) {
+        debug_print("Failed to open clipboard");
+        return false;
+    }
+
+    if (!EmptyClipboard()) {
+        debug_print("Failed to empty clipboard");
         CloseClipboard();
         return false;
     }
+
+    HGLOBAL hg = GlobalAlloc(GMEM_MOVEABLE, s.size() + 1);
+    if (!hg) {
+        debug_print("Failed to allocate memory");
+        CloseClipboard();
+        return false;
+    }
+
     LPVOID p = GlobalLock(hg);
     if (!p) {
+        debug_print("Failed to lock memory");
         GlobalFree(hg);
         CloseClipboard();
         return false;
     }
+
     memcpy(p, s.data(), s.size() + 1);
     GlobalUnlock(hg);
-    SetClipboardData(CF_TEXT, hg);
+
+    if (!SetClipboardData(CF_TEXT, hg)) {
+        debug_print("Failed to set clipboard data");
+        GlobalFree(hg);
+        CloseClipboard();
+        return false;
+    }
+
     CloseClipboard();
-    GlobalFree(hg);
     return true;
 }
 
 std::string take_str_from_clip(HWND hWnd) {
-    if (!OpenClipboard(hWnd)) return "";
+    if (!IsClipboardFormatAvailable(CF_TEXT)) {
+        debug_print("CF_TEXT format not available");
+        return "";
+    }
+
+    if (!OpenClipboard(hWnd)) {
+        debug_print("Failed to open clipboard");
+        return "";
+    }
+
     HANDLE hData = GetClipboardData(CF_TEXT);
-    if (!hData) return "";
+    if (!hData) {
+        debug_print("Failed to get clipboard data");
+        CloseClipboard();
+        return "";
+    }
+
     const char* pszText = static_cast<const char*>(GlobalLock(hData));
-    if (!pszText) return "";
+    if (!pszText) {
+        debug_print("Failed to lock memory");
+        CloseClipboard();
+        return "";
+    }
+
     std::string text(pszText);
     GlobalUnlock(hData);
-    CloseClipboard();
+
+    if (!CloseClipboard()) {
+        debug_print("Failed to close clipboard");
+        return "";
+    }
+
     return text;
 }
+
+
 
 /// <summary>
 /// Создаёт экземпляр окна для выбранной фигуры
