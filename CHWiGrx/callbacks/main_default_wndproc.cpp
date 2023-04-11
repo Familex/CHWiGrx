@@ -39,8 +39,7 @@ LRESULT CALLBACK main_default_wndproc(HWND hWnd, UINT message, WPARAM wParam, LP
                             case ParseErrorType::Meta_InvalidCurrentTurn: error_message = L"Meta: Invalid current turn"; break;
                             case ParseErrorType::Meta_CouldNotFindCastlings: error_message = L"Meta: Could not find castlings"; break;
                             case ParseErrorType::Meta_InvalidCastling: error_message = L"Meta: Invalid castling"; break;
-                            case ParseErrorType::Figure_UnexpectedEnd: error_message = L"Figure: Unexpected end"; break;
-                            case ParseErrorType::Figure_IdDelimeterMissing: error_message = L"Figure: Id delimeter missing"; break;
+                            case ParseErrorType::Figure_CouldNotFindId: error_message = L"Figure: Could not find id"; break;
                             case ParseErrorType::Figure_InvalidId: error_message = L"Figure: Invalid id"; break;
                             case ParseErrorType::Figure_InvalidPos: error_message = L"Figure: Invalid pos"; break;
                             case ParseErrorType::Figure_InvalidColor: error_message = L"Figure: Invalid color"; break;

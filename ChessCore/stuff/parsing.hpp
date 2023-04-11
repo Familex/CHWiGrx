@@ -61,11 +61,13 @@ enum class ParseErrorType {
     Meta_Max = Meta_InvalidCastling,
     // Figures parse errors
     Figure_Base,
-    Figure_UnexpectedEnd = Figure_Base,
-    Figure_IdDelimeterMissing,
+    Figure_CouldNotFindId = Figure_Base,
     Figure_InvalidId,
+    Figure_CouldNotFindPos,
     Figure_InvalidPos,
+    Figure_CouldNotFindColor,
     Figure_InvalidColor,
+    Figure_CouldNotFindType,
     Figure_InvalidType,
     Figure_Max = Figure_InvalidType,
     // MoveMessage parse error
@@ -99,3 +101,7 @@ enum class ParseErrorType {
     MainEvent_InvalidEnPassantEatenId,
     MainEvent_Max = MainEvent_InvalidEnPassantEatenId,
 };
+
+#pragma region Parse step types
+
+struct ParseStep { };
