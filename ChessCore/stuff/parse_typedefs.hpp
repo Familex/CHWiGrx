@@ -40,10 +40,15 @@ struct as_string;
 #pragma endregion   // from_string, as_string
 
 enum class ParseErrorType {
+    // General parse errors
+    General_Base,
+    General_EmptyString = General_Base,
+    General_Max = General_EmptyString,
     // Meta parse errors
     Meta_Base,
     Meta_CouldNotFindMeta = Meta_Base,
     Meta_InvalidVersion,
+    Meta_UnsupportedVersion,
     Meta_CouldNotFindHeight,
     Meta_InvalidHeight,
     Meta_CouldNotFindWidth,

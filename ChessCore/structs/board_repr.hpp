@@ -145,8 +145,9 @@ namespace board_repr {
 
 template <>
 struct from_string<board_repr::BoardRepr> {
-    FN operator()(const std::string_view sv, const FromStringMeta& meta) const noexcept
-       -> ParseEither<board_repr::BoardRepr, ParseErrorType>
+
+    FN parseV2(const std::string_view sv, const FromStringMeta& meta) const noexcept
+        -> ParseEither<board_repr::BoardRepr, ParseErrorType>
     {
         board_repr::BoardRepr result{};
 
@@ -168,8 +169,8 @@ struct from_string<board_repr::BoardRepr> {
                         static_cast<ParseErrorType>(
                             static_cast<std::size_t>(ParseErrorType::Figure_Base)
                             + static_cast<std::size_t>(figure_sus.error().type)
-                        ),
-                        figure_sus.error().position + fig_curr_pos + start_pos
+                            ),
+                            figure_sus.error().position + fig_curr_pos + start_pos
                     };
                 }
             }
@@ -181,7 +182,7 @@ struct from_string<board_repr::BoardRepr> {
             -> std::optional<ParseError<ParseErrorType>>
         {
             std::size_t move_message_curr_pos{ };
-            
+
             for (const auto& move_message_sv : split(sv, "$"sv)) {
                 if (const auto& move_message_sus = from_string<mvmsg::MoveMessage>{}(move_message_sv, meta)) {
                     out.push_back(move_message_sus.value().value);
@@ -193,15 +194,16 @@ struct from_string<board_repr::BoardRepr> {
                         static_cast<ParseErrorType>(
                             static_cast<std::size_t>(ParseErrorType::MoveMessage_Base)
                             + static_cast<std::size_t>(move_message_sus.error().type)
-                        ),
-                        move_message_sus.error().position + move_message_curr_pos + start_pos
+                            ),
+                            move_message_sus.error().position + move_message_curr_pos + start_pos
                     };
                 }
             }
             return std::nullopt;
         };
 
-        {
+        
+        /* Figures */ {
             const auto start_pos = sv.find('!') + 1;
             const auto figures = sv.substr(
                 start_pos,
@@ -219,13 +221,13 @@ struct from_string<board_repr::BoardRepr> {
                 return std::unexpected{ *error_sus };
             }
         }
-        {
+        /* Past */ {
             const auto start_pos = sv.find('<') + 1;
             const auto past = sv.substr(
                 start_pos,
                 sv.find('>') - sv.find('<') - 1
             );
-            
+
             if (const auto& error_sus =
                     process_move_message(
                         past,
@@ -237,13 +239,13 @@ struct from_string<board_repr::BoardRepr> {
                 return std::unexpected{ *error_sus };
             }
         }
-        {
+        /* Future */ {
             const auto start_pos = sv.find('<', sv.find('<') + 1) + 1;
             const auto future = sv.substr(
                 start_pos,
                 sv.find('>', sv.find('>') + 1) - sv.find('<', sv.find('<') + 1) - 1
             );
-            
+
             if (const auto& error_sus =
                     process_move_message(
                         future,
@@ -255,26 +257,36 @@ struct from_string<board_repr::BoardRepr> {
                 return std::unexpected{ *error_sus };
             }
         }
-        {
+        /* Captured */ {
             const auto start_pos = sv.find('>', sv.find('>') + 1) + 1;
             const auto captured = sv.substr(
                 start_pos,
                 sv.size() - sv.find('>', sv.find('>') + 1)
             );
 
-            if (const auto& error_sus = process_figures(
-                    captured, 
-                    result.captured_figures,
-                    start_pos
+            if (const auto& error_sus =
+                    process_figures(
+                        captured,
+                        result.captured_figures,
+                        start_pos
                     )
                 )
             {
                 return std::unexpected{ *error_sus };
             }
         }
-        
+
         return { { std::move(result), sv.size() } };
         //              seems useless ^^^^^^^^^
+    }
+
+    FN operator()(const std::string_view sv, const FromStringMeta& meta) const noexcept
+       -> ParseEither<board_repr::BoardRepr, ParseErrorType>
+    {
+        switch (meta.version) {
+            case 2: return parseV2(sv, meta);
+            default: return UNEXPECTED_PARSE(Meta_UnsupportedVersion, 0ull);
+        }
     }
     
     FN operator()(const std::string_view sv) const noexcept
@@ -283,6 +295,9 @@ struct from_string<board_repr::BoardRepr> {
         FromStringMeta meta{ };
         std::size_t pos{ };
         
+        if (sv.empty()) {
+            return UNEXPECTED_PARSE(General_EmptyString, pos);
+        }
         const auto meta_end = sv.find('!');
         if (meta_end == std::string_view::npos) {
             return UNEXPECTED_PARSE(Meta_CouldNotFindMeta, pos);

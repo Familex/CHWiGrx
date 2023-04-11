@@ -24,8 +24,10 @@ LRESULT CALLBACK main_default_wndproc(HWND hWnd, UINT message, WPARAM wParam, LP
 
                         switch (board_repr_sus.error().type)
                         {
+                            case ParseErrorType::General_EmptyString: error_message = L"General: Empty string"; break;
                             case ParseErrorType::Meta_CouldNotFindMeta:  error_message = L"Meta: Could not find meta"; break;
                             case ParseErrorType::Meta_InvalidVersion: error_message = L"Meta: Invalid version"; break;
+                            case ParseErrorType::Meta_UnsupportedVersion: error_message = L"Meta: Unsupported version"; break;
                             case ParseErrorType::Meta_CouldNotFindHeight: error_message = L"Meta: Could not find height"; break;
                             case ParseErrorType::Meta_InvalidHeight: error_message = L"Meta: Invalid height"; break;
                             case ParseErrorType::Meta_CouldNotFindWidth: error_message = L"Meta: Could not find width"; break;
