@@ -57,7 +57,7 @@ struct from_string<Id> {
     {
         auto res = svtoi(sv);
         if (res) {
-            return { { Id{ static_cast<Id_type>(res.value().value) }, res.value().position } };
+            return { { Id{ static_cast<Id_type>(res->value) }, res->position } };
         }
         else {
             return PARSE_STEP_UNEXPECTED(ParseErrorType, Id_Invalid, res.error());

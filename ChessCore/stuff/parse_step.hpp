@@ -94,40 +94,49 @@ namespace parse_step {
     struct ParseStepBuilder {
         ParseStep<Result, Error> parse_step{ };
 
-        FN extra_pos( std::size_t value ) && noexcept -> ParseStepBuilder {
+        // Value what adds to curr_pos after parse
+        FN extra( std::size_t value ) && noexcept -> ParseStepBuilder {
             this->parse_step.extra_position = value;
             return *this;
         }
         
+        // Position to start parsing from (default: 0)
+        // Also uses by other steps in sequence
         FN bind_curr_pos( std::size_t& value ) && noexcept -> ParseStepBuilder {
             this->parse_step.curr_pos = &value;
             return *this;
         }
         
+        // Max length of substring to parse
         FN max_length( std::size_t value ) && noexcept -> ParseStepBuilder {
             this->parse_step.substr_max_length = value;
             return *this;
         }
         
+        // Error what throws on parse error
         FN error( Error value ) && noexcept -> ParseStepBuilder {
             this->parse_step.error = value;
             return *this;
         }
 
+        // Error what throws on unexpected end of parse
         FN on_abrupt_halt( Error value ) && noexcept -> ParseStepBuilder {
             this->parse_step.on_abrupt_halt = value;
             return *this;
         }
 
+        // On turn on forward_error, error from parse step will be forwarded (error will be ignored)
         FN forward_error( bool value ) && noexcept -> ParseStepBuilder {
             this->parse_step.forward_error = value;
             return *this;
         }
         
+        // Returns ParseStep object
         FN build() && noexcept -> ParseStep<Result, Error> {
             return this->parse_step;
         }
         
+        // Execute own ParseStep instead of build
         FN operator() (const std::string_view sv,
                        const FromStringMeta& meta) && noexcept
            -> ParseEither<Result, Error> {

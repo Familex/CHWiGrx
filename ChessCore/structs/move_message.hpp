@@ -155,7 +155,7 @@ struct from_string<mvmsg::MainEvent> {
             curr_pos += 1;
             const auto id_sus = from_string<Id>{}(sv.substr(curr_pos));
             if (id_sus.has_value()) {
-                return { { mvmsg::Eat{ id_sus.value().value }, curr_pos + id_sus.value().position + 1 } };
+                return { { mvmsg::Eat{ id_sus->value }, curr_pos + id_sus->position + 1 } };
                 //                                                skip full_stop at end of the id ^^^
             }
             return PARSE_STEP_UNEXPECTED(ParseErrorType, MainEvent_InvalidEnPassantEatenId, curr_pos);
@@ -171,13 +171,14 @@ struct from_string<mvmsg::MainEvent> {
         if (sv.starts_with("C"sv)) {
             using parse_step::execute_sequence, parse_step::ParseStepBuilder;
             using enum ParseErrorType;
+
             return execute_sequence(
                 ++curr_pos, sv, meta,
                 [](const Id id, const Pos from, const Pos to) {
                     return mvmsg::MainEvent{ mvmsg::Castling{ id, Input{ from, to } } };
                 }
 
-                , StepB<Id>{}.error(MainEvent_InvalidCastlingSecondToMoveId).on_abrupt_halt(MainEvent_CouldNotFindCastlindSecondToMoveId).extra_pos(1)
+                , StepB<Id>{}.error(MainEvent_InvalidCastlingSecondToMoveId).on_abrupt_halt(MainEvent_CouldNotFindCastlindSecondToMoveId).extra(1)
                 , StepB<Pos>{}.error(MainEvent_CouldNotFindCastlingSecondInputFrom).on_abrupt_halt(MainEvent_InvalidCastlingSecondInputFrom).max_length(meta.max_pos_length)
                 , StepB<Pos>{}.error(MainEvent_CouldNotFindCastlingSecondInputTo).on_abrupt_halt(MainEvent_InvalidCastlingSecondInputTo).max_length(meta.max_pos_length)
             );
@@ -186,7 +187,7 @@ struct from_string<mvmsg::MainEvent> {
             std::size_t curr_pos{ 1 };
             const auto id_sus = from_string<Id>{}(sv.substr(curr_pos));
             if (id_sus.has_value()) {
-                return { { mvmsg::EnPassant{ id_sus.value().value }, curr_pos + id_sus.value().position + 1 } };
+                return { { mvmsg::EnPassant{ id_sus->value }, curr_pos + id_sus->position + 1 } };
                 //                                                      skip full_stop at end of the id ^^^
             }
             return PARSE_STEP_UNEXPECTED(ParseErrorType, MoveMessage_InvalidEnPassantToEatId, curr_pos);

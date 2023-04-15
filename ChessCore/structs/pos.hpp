@@ -84,9 +84,9 @@ struct from_string<Pos> {
         if (!payload_sus) {
             return std::unexpected{ ParseError<ParseErrorType>{ ParseErrorType::Pos_Invalid, payload_sus.error() } };
         };
-        const auto y = payload_sus.value().value % meta.width;
-        const auto x = (payload_sus.value().value - y) / meta.width;
-        return { { Pos{ static_cast<int>(x), static_cast<int>(y) }, payload_sus.value().position } };
+        const auto y = payload_sus->value % meta.width;
+        const auto x = (payload_sus->value - y) / meta.width;
+        return { { Pos{ static_cast<int>(x), static_cast<int>(y) }, payload_sus->position } };
     }
 };
 

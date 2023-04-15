@@ -98,7 +98,7 @@ struct from_string<Figure> {
             0ull, sv, meta,
             gen_constructor<Figure>()
 
-            , StepB<Id>{}.error(Figure_InvalidId).on_abrupt_halt(Figure_CouldNotFindId).extra_pos(1)
+            , StepB<Id>{}.error(Figure_InvalidId).on_abrupt_halt(Figure_CouldNotFindId).extra(1)
             , StepB<Pos>{}.error(Figure_InvalidPos).on_abrupt_halt(Figure_CouldNotFindPos).max_length(meta.max_pos_length)
             , StepB<Color>{}.error(Figure_InvalidColor).on_abrupt_halt(Figure_CouldNotFindColor)
             , StepB<FigureType>{}.error(Figure_InvalidType).on_abrupt_halt(Figure_CouldNotFindType)
