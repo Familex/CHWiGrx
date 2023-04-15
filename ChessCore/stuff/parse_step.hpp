@@ -21,7 +21,7 @@ namespace parse_step {
         std::optional<std::size_t> substr_position{ std::nullopt };
         std::optional<std::size_t> substr_max_length{ std::nullopt };
         Error error{ }; // Default error to throw
-        Error unexpected_end_error{ };
+        Error on_abrupt_halt{ };
 
         FN get_substr_position() const noexcept -> std::size_t {
             return substr_position ? *substr_position : get_curr_pos();
@@ -39,14 +39,14 @@ namespace parse_step {
             -> ParseEither<Result, Error>
             requires FromStringUsingMeta<Result>
         {
-            return from_string<Result>{}(sv.substr(get_substr_position(), get_substr_max_length()), meta);
+            return from_string<Result>{}(sv, meta);
         }
 
         FN apply_from_string(const std::string_view sv, const FromStringMeta& meta) noexcept
             -> ParseEither<Result, Error>
             requires (!FromStringUsingMeta<Result>)
         {
-            return from_string<Result>{}(sv.substr(get_substr_position(), get_substr_max_length()));
+            return from_string<Result>{}(sv);
         }
 
         FN operator() (const std::string_view sv,
@@ -56,7 +56,7 @@ namespace parse_step {
             if (sv.size() < get_curr_pos()) {
                 return std::unexpected{
                     ParseError<Error> {
-                        unexpected_end_error,
+                        on_abrupt_halt,
                         get_curr_pos()
                     }
                 };
@@ -93,34 +93,34 @@ namespace parse_step {
     template <typename Result, typename Error = ParseErrorType>
     struct ParseStepBuilder {
         ParseStep<Result, Error> parse_step{ };
-        
-        FN set_auto_substr( bool value ) && noexcept -> ParseStepBuilder {
-            this->parse_step.auto_substr = value;
-            return *this;
-        }
-        
-        FN set_extra_position( std::size_t value ) && noexcept -> ParseStepBuilder {
+
+        FN extra_pos( std::size_t value ) && noexcept -> ParseStepBuilder {
             this->parse_step.extra_position = value;
             return *this;
         }
         
-        FN set_curr_pos( std::size_t& value ) && noexcept -> ParseStepBuilder {
+        FN bind_curr_pos( std::size_t& value ) && noexcept -> ParseStepBuilder {
             this->parse_step.curr_pos = &value;
             return *this;
         }
         
-        FN set_substr_max_length( std::size_t value ) && noexcept -> ParseStepBuilder {
+        FN max_length( std::size_t value ) && noexcept -> ParseStepBuilder {
             this->parse_step.substr_max_length = value;
             return *this;
         }
         
-        FN set_error( Error value ) && noexcept -> ParseStepBuilder {
+        FN error( Error value ) && noexcept -> ParseStepBuilder {
             this->parse_step.error = value;
             return *this;
         }
 
-        FN set_unexpected_end_error(Error value) && noexcept -> ParseStepBuilder {
-            this->parse_step.unexpected_end_error = value;
+        FN on_abrupt_halt( Error value ) && noexcept -> ParseStepBuilder {
+            this->parse_step.on_abrupt_halt = value;
+            return *this;
+        }
+
+        FN forward_error( bool value ) && noexcept -> ParseStepBuilder {
+            this->parse_step.forward_error = value;
             return *this;
         }
         
@@ -131,7 +131,7 @@ namespace parse_step {
         FN operator() (const std::string_view sv,
                        const FromStringMeta& meta) && noexcept
            -> ParseEither<Result, Error> {
-            this->parse_step();               
+            this->parse_step(sv, meta);               
         }
     };
     
@@ -184,7 +184,7 @@ namespace parse_step {
             std::size_t curr_pos{ start_pos };
             // FORSE EXETUTION ORDER 😡
             std::tuple step_results{
-                make_step(sv, meta, std::forward<ParseStepBuilder<ParseStepResults, Error>>(steps).set_curr_pos(curr_pos).build())...
+                make_step(sv, meta, std::forward<ParseStepBuilder<ParseStepResults, Error>>(steps).bind_curr_pos(curr_pos).build())...
             };
             return { { collector(
                 std::get<ParseStepResults>(step_results)...

@@ -38,12 +38,9 @@ struct as_string;
 
 enum class ParseErrorType {
     // General parse errors
-    General_Base,
-    General_EmptyString = General_Base,
-    General_Max = General_EmptyString,
+    General_EmptyString,
     // Meta parse errors
-    Meta_Base,
-    Meta_CouldNotFindMeta = Meta_Base,
+    Meta_CouldNotFindMeta,
     Meta_InvalidVersion,
     Meta_UnsupportedVersion,
     Meta_CouldNotFindHeight,
@@ -55,28 +52,18 @@ enum class ParseErrorType {
     Meta_InvalidCurrentTurn,
     Meta_CouldNotFindCastlings,
     Meta_InvalidCastling,
-    Meta_Max = Meta_InvalidCastling,
     // Id parse errors
-    Id_Base,
-    Id_Invalid = Id_Base,
-    Id_Max = Id_Invalid,
+    Id_Invalid,
     // Pos parse errors
-    Pos_Base,
-    Pos_Invalid = Pos_Base,
-    Pos_Max = Pos_Invalid,
+    Pos_Invalid,
     // Color parse errors
-    Color_Base,
-    Color_CouldNotFound = Color_Base,
+    Color_CouldNotFound,
     Color_Invalid,
-    Color_Max = Color_Invalid,
     // FigureType parse errors
-    FigureType_Base,
-    FigureType_CouldNotFound = FigureType_Base,
+    FigureType_CouldNotFound,
     FigureType_Invalid,
-    FigureType_Max = FigureType_Invalid,
     // Figures parse errors
-    Figure_Base,
-    Figure_CouldNotFindId = Figure_Base,
+    Figure_CouldNotFindId,
     Figure_InvalidId,
     Figure_CouldNotFindPos,
     Figure_InvalidPos,
@@ -84,27 +71,21 @@ enum class ParseErrorType {
     Figure_InvalidColor,
     Figure_CouldNotFindType,
     Figure_InvalidType,
-    Figure_Max = Figure_InvalidType,
     // MoveMessage parse error
-    MoveMessage_Base,
-    MoveMessage_EmptyMap = MoveMessage_Base,
+    MoveMessage_EmptyMap,
     MoveMessage_CouldNotFindTo,
     MoveMessage_InvalidTo,
     MoveMessage_CouldNotFindPromotionChoice,
     MoveMessage_InvalidPromotionChoice,
     MoveMessage_InvalidEnPassantToEatId,
     MoveMessage_CouldNotFindMainEvent,
-    MoveMessage_Max = MoveMessage_CouldNotFindMainEvent,
     // Side events parse errors
-    SideEvent_Base,
-    SideEvent_EmptyString = SideEvent_Base,
+    SideEvent_EmptyString,
     SideEvent_CouldNotFindType,
     SideEvent_InvalidType,
     SideEvent_InvalidCastlingBreakId,
-    SideEvent_Max = SideEvent_InvalidCastlingBreakId,
     // Main events parse errors
-    MainEvent_Base,
-    MainEvent_CouldNotFindType = MainEvent_Base,
+    MainEvent_CouldNotFindType,
     MainEvent_InvalidType,
     MainEvent_CouldNotFindCastlindSecondToMoveId,
     MainEvent_InvalidCastlingSecondToMoveId,
@@ -114,7 +95,6 @@ enum class ParseErrorType {
     MainEvent_InvalidCastlingSecondInputTo,
     MainEvent_CouldNotFindEnPassantEatenId,
     MainEvent_InvalidEnPassantEatenId,
-    MainEvent_Max = MainEvent_InvalidEnPassantEatenId,
 };
 
 #define PARSE_ERROR_TYPE_AS_TSTRING_IMPL(name, liter) \

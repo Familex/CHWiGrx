@@ -85,6 +85,9 @@ FN to_pos_vector(const std::vector<Figure*>& lst) noexcept -> std::vector<Pos> {
 
 template <>
 struct from_string<Figure> {
+    template <typename StepResult>
+    using StepB = parse_step::ParseStepBuilder<StepResult>;
+
     FN operator()(const std::string_view sv, const FromStringMeta& meta) const noexcept
         -> ParseEither<Figure, ParseErrorType>
     {
@@ -95,10 +98,10 @@ struct from_string<Figure> {
             0ull, sv, meta,
             [](Id id, Pos pos, Color color, FigureType figure_type) { return Figure{ id, pos, color, figure_type }; }
 
-            , ParseStepBuilder<Id>{}.set_error(Figure_InvalidId).set_unexpected_end_error(Figure_CouldNotFindId).set_extra_position(1)
-            , ParseStepBuilder<Pos>{}.set_error(Figure_InvalidPos).set_unexpected_end_error(Figure_CouldNotFindPos).set_substr_max_length(meta.max_pos_length)
-            , ParseStepBuilder<Color>{}.set_error(Figure_InvalidColor).set_unexpected_end_error(Figure_CouldNotFindColor)
-            , ParseStepBuilder<FigureType>{}.set_error(Figure_InvalidType).set_unexpected_end_error(Figure_CouldNotFindType)
+            , StepB<Id>{}.error(Figure_InvalidId).on_abrupt_halt(Figure_CouldNotFindId).extra_pos(1)
+            , StepB<Pos>{}.error(Figure_InvalidPos).on_abrupt_halt(Figure_CouldNotFindPos).max_length(meta.max_pos_length)
+            , StepB<Color>{}.error(Figure_InvalidColor).on_abrupt_halt(Figure_CouldNotFindColor)
+            , StepB<FigureType>{}.error(Figure_InvalidType).on_abrupt_halt(Figure_CouldNotFindType)
         );
     }
 };
