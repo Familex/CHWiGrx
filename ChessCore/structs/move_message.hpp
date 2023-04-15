@@ -138,12 +138,19 @@ struct as_string<mvmsg::SideEvent> {
 
 template <>
 struct from_string<mvmsg::MainEvent> {
+
+    template <typename StepResult>
+    using StepB = parse_step::ParseStepBuilder<StepResult>;
+
     FN operator()(const std::string_view sv, const FromStringMeta& meta) const noexcept
         -> ParseEither<mvmsg::MainEvent, ParseErrorType>
     {
+        if (sv.empty()) {
+            return PARSE_STEP_UNEXPECTED(ParseErrorType, MainEvent_CouldNotFindType, sv.size());
+        }
+
         std::size_t curr_pos{ 0 };
 
-        PARSE_UNEXPECTED_END_GUARD(sv, MainEvent_CouldNotFindType, curr_pos);
         if (sv.starts_with("E"sv)) {
             curr_pos += 1;
             const auto id_sus = from_string<Id>{}(sv.substr(curr_pos));
@@ -151,7 +158,7 @@ struct from_string<mvmsg::MainEvent> {
                 return { { mvmsg::Eat{ id_sus.value().value }, curr_pos + id_sus.value().position + 1 } };
                 //                                                skip full_stop at end of the id ^^^
             }
-            return PARSE_STEP_UNEXPECTED(ParseErrorType, MainEvent_InvalidEnPassantEatenId, 1ull);
+            return PARSE_STEP_UNEXPECTED(ParseErrorType, MainEvent_InvalidEnPassantEatenId, curr_pos);
         }
         if (sv.starts_with("M"sv)) {
             curr_pos += 1;
@@ -162,27 +169,18 @@ struct from_string<mvmsg::MainEvent> {
             return { { mvmsg::LongMove{ }, curr_pos } };
         }
         if (sv.starts_with("C"sv)) {
-            curr_pos += 1;
-            PARSE_UNEXPECTED_END_GUARD(sv, MainEvent_CouldNotFindCastlindSecondToMoveId, curr_pos);
-            PARSE_STEP_EX(sv, id, Id, curr_pos, ParseErrorType, Figure_InvalidId, 1);
-            PARSE_UNEXPECTED_END_GUARD(sv, MainEvent_CouldNotFindCastlingSecondInputFrom, curr_pos);
-            PARSE_STEP_WITHOUT_SUBSTR_WITH_META(
-                sv.substr(curr_pos, meta.max_pos_length), from, Pos, curr_pos, meta,
-                ParseErrorType, MainEvent_InvalidCastlingSecondInputFrom);
-            PARSE_UNEXPECTED_END_GUARD(sv, MainEvent_CouldNotFindCastlingSecondInputTo, curr_pos);
-            PARSE_STEP_WITHOUT_SUBSTR_WITH_META(
-                sv.substr(curr_pos, meta.max_pos_length), to, Pos, curr_pos, meta,
-                ParseErrorType, MainEvent_InvalidCastlingSecondInputTo);
-            return { { 
-                mvmsg::Castling{
-                    id,
-                    Input {
-                        from,
-                        to
-                    }
-                },
-                curr_pos
-            } };
+            using parse_step::execute_sequence, parse_step::ParseStepBuilder;
+            using enum ParseErrorType;
+            return execute_sequence(
+                ++curr_pos, sv, meta,
+                [](const Id id, const Pos from, const Pos to) {
+                    return mvmsg::MainEvent{ mvmsg::Castling{ id, Input{ from, to } } };
+                }
+
+                , StepB<Id>{}.error(MainEvent_InvalidCastlingSecondToMoveId).on_abrupt_halt(MainEvent_CouldNotFindCastlindSecondToMoveId).extra_pos(1)
+                , StepB<Pos>{}.error(MainEvent_CouldNotFindCastlingSecondInputFrom).on_abrupt_halt(MainEvent_InvalidCastlingSecondInputFrom).max_length(meta.max_pos_length)
+                , StepB<Pos>{}.error(MainEvent_CouldNotFindCastlingSecondInputTo).on_abrupt_halt(MainEvent_InvalidCastlingSecondInputTo).max_length(meta.max_pos_length)
+            );
         }
         if (sv.starts_with("P"sv)) {
             std::size_t curr_pos{ 1 };
@@ -235,9 +233,10 @@ struct from_string<mvmsg::MoveMessage> {
     FN operator()(const std::string_view sv, const FromStringMeta& meta) const noexcept
        -> ParseEither<mvmsg::MoveMessage, ParseErrorType>
     {
+        if (sv.empty()) {
+            return PARSE_STEP_UNEXPECTED(ParseErrorType, MoveMessage_EmptyMap, sv.size());
+        }
         std::size_t curr_pos{ };
-
-        PARSE_UNEXPECTED_END_GUARD(sv, MoveMessage_EmptyMap, curr_pos);
 
         const auto figure_sus = from_string<Figure>{}(sv, meta);
         if (!figure_sus) {

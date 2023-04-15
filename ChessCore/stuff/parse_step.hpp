@@ -186,9 +186,15 @@ namespace parse_step {
             std::tuple step_results{
                 make_step(sv, meta, std::forward<ParseStepBuilder<ParseStepResults, Error>>(steps).bind_curr_pos(curr_pos).build())...
             };
-            return { { collector(
-                std::move( std::get<ParseStepResults>(step_results) )...
-            ), curr_pos } };
+            return { {
+                std::apply(
+                    [&collector](auto&& ...args) {
+                        return collector( std::move(args)... );
+                    },
+                    std::move( step_results )
+                ),
+                curr_pos
+            } };
         }
         catch (const ParseStepException<ParseError<Error>>& e) {
             return std::unexpected{ e.error };
