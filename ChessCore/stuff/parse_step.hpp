@@ -187,6 +187,7 @@ namespace parse_step {
                 make_step(sv, meta, std::forward<ParseStepBuilder<ParseStepResults, Error>>(steps).set_curr_pos(curr_pos).build())...
             ), curr_pos } };
         }
+
         catch (const ParseStepException<ParseError<Error>>& e) {
             return std::unexpected{ e.error };
         }
