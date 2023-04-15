@@ -183,11 +183,13 @@ namespace parse_step {
         try {
             std::size_t curr_pos{ start_pos };
             // FORSE EXETUTION ORDER 😡
-            return { { collector(
+            std::tuple step_results{
                 make_step(sv, meta, std::forward<ParseStepBuilder<ParseStepResults, Error>>(steps).set_curr_pos(curr_pos).build())...
+            };
+            return { { collector(
+                std::get<ParseStepResults>(step_results)...
             ), curr_pos } };
         }
-
         catch (const ParseStepException<ParseError<Error>>& e) {
             return std::unexpected{ e.error };
         }
