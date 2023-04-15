@@ -182,6 +182,7 @@ namespace parse_step {
     {
         try {
             std::size_t curr_pos{ start_pos };
+            // FORSE EXETUTION ORDER 😡
             return { { collector(
                 make_step(sv, meta, std::forward<ParseStepBuilder<ParseStepResults, Error>>(steps).set_curr_pos(curr_pos).build())...
             ), curr_pos } };

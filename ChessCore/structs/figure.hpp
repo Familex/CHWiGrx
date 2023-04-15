@@ -93,12 +93,12 @@ struct from_string<Figure> {
 
         return execute_sequence(
             0ull, sv, meta,
-            [](Id id, Pos pos, Color color, FigureType figure_type) { return Figure{ id, pos, color, figure_type }; },
+            [](Id id, Pos pos, Color color, FigureType figure_type) { return Figure{ id, pos, color, figure_type }; }
 
-            ParseStepBuilder<Id>{}.set_error(Figure_InvalidId).set_unexpected_end_error(Figure_CouldNotFindId).set_extra_position(1),
-            ParseStepBuilder<Pos>{}.set_error(Figure_InvalidPos).set_unexpected_end_error(Figure_CouldNotFindPos).set_substr_max_length(meta.max_pos_length),
-            ParseStepBuilder<Color>{}.set_error(Figure_InvalidColor).set_unexpected_end_error(Figure_CouldNotFindColor),
-            ParseStepBuilder<FigureType>{}.set_error(Figure_InvalidType).set_unexpected_end_error(Figure_CouldNotFindType)
+            , ParseStepBuilder<Id>{}.set_error(Figure_InvalidId).set_unexpected_end_error(Figure_CouldNotFindId).set_extra_position(1)
+            , ParseStepBuilder<Pos>{}.set_error(Figure_InvalidPos).set_unexpected_end_error(Figure_CouldNotFindPos).set_substr_max_length(meta.max_pos_length)
+            , ParseStepBuilder<Color>{}.set_error(Figure_InvalidColor).set_unexpected_end_error(Figure_CouldNotFindColor)
+            , ParseStepBuilder<FigureType>{}.set_error(Figure_InvalidType).set_unexpected_end_error(Figure_CouldNotFindType)
         );
     }
 };
