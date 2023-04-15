@@ -285,7 +285,7 @@ struct from_string<board_repr::BoardRepr> {
     {
         switch (meta.version) {
             case 2: return parseV2(sv, meta);
-            default: return UNEXPECTED_PARSE(Meta_UnsupportedVersion, 0ull);
+            default: return PARSE_STEP_UNEXPECTED(ParseErrorType, Meta_UnsupportedVersion, 0ull);
         }
     }
     
@@ -296,11 +296,11 @@ struct from_string<board_repr::BoardRepr> {
         std::size_t pos{ };
         
         if (sv.empty()) {
-            return UNEXPECTED_PARSE(General_EmptyString, pos);
+            return PARSE_STEP_UNEXPECTED(ParseErrorType, General_EmptyString, pos);
         }
         const auto meta_end = sv.find('!');
         if (meta_end == std::string_view::npos) {
-            return UNEXPECTED_PARSE(Meta_CouldNotFindMeta, pos);
+            return PARSE_STEP_UNEXPECTED(ParseErrorType, Meta_CouldNotFindMeta, pos);
         }
         const auto sv_meta = sv.substr(0, meta_end);
 
@@ -308,27 +308,27 @@ struct from_string<board_repr::BoardRepr> {
             meta.version = version.value().value;
             pos += 2;
         } else {
-            return UNEXPECTED_PARSE(Meta_InvalidVersion, version.error());
+            return PARSE_STEP_UNEXPECTED(ParseErrorType, Meta_InvalidVersion, version.error());
         }
         if (sv_meta[pos++] != 'H') {
-            return UNEXPECTED_PARSE(Meta_CouldNotFindHeight, pos - 1);
+            return PARSE_STEP_UNEXPECTED(ParseErrorType, Meta_CouldNotFindHeight, pos - 1);
         }
         auto w_pos = sv_meta.find('W', pos);
         if (w_pos == std::string_view::npos) {
-            return UNEXPECTED_PARSE(Meta_CouldNotFindWidth, pos - 1);
+            return PARSE_STEP_UNEXPECTED(ParseErrorType, Meta_CouldNotFindWidth, pos - 1);
         }
         if (auto height = svtoi(sv_meta.substr(pos, w_pos - pos))) {
             meta.height = height.value().value;
             pos = w_pos + 1;
             //          ^^^ because of the 'W' delimiter
         } else {
-            return UNEXPECTED_PARSE(Meta_InvalidHeight, height.error());
+            return PARSE_STEP_UNEXPECTED(ParseErrorType, Meta_InvalidHeight, height.error());
         }
         auto idw_pos = sv_meta.find('T', pos);
         if (idw_pos == std::string_view::npos) {
             idw_pos = sv_meta.find('F', pos);
             if (idw_pos == std::string_view::npos) {
-                return UNEXPECTED_PARSE(Meta_CouldNotFindIDW, pos - 1);
+                return PARSE_STEP_UNEXPECTED(ParseErrorType, Meta_CouldNotFindIDW, pos - 1);
             }
             else {
                 meta.idw = false;
@@ -343,13 +343,13 @@ struct from_string<board_repr::BoardRepr> {
             //            ^^^ because of the 'T' or 'F' delimiter
         }
         else {
-            return UNEXPECTED_PARSE(Meta_InvalidWidth, pos - 1);
+            return PARSE_STEP_UNEXPECTED(ParseErrorType, Meta_InvalidWidth, pos - 1);
         }
         if (sv_meta.size() == pos) {
-            return UNEXPECTED_PARSE(Meta_CouldNotFindCurrentTurn, pos - 1);
+            return PARSE_STEP_UNEXPECTED(ParseErrorType, Meta_CouldNotFindCurrentTurn, pos - 1);
         }
         if (sv_meta[pos] != 'B' && sv_meta[pos] != 'W') {
-            return UNEXPECTED_PARSE(Meta_InvalidCurrentTurn, pos);
+            return PARSE_STEP_UNEXPECTED(ParseErrorType, Meta_InvalidCurrentTurn, pos);
         }
         meta.turn =
             sv_meta[pos] == 'B'
@@ -358,7 +358,7 @@ struct from_string<board_repr::BoardRepr> {
         pos += 1;
         if (sv_meta.size() != pos) {
             if (sv_meta[pos] != 'C') {
-                return UNEXPECTED_PARSE(Meta_CouldNotFindCastlings, pos);
+                return PARSE_STEP_UNEXPECTED(ParseErrorType, Meta_CouldNotFindCastlings, pos);
             }
             for (const auto& castling
                     : split(sv_meta.substr(pos + 1, sv_meta.size() - pos - 1), ","sv))
@@ -367,7 +367,7 @@ struct from_string<board_repr::BoardRepr> {
                     meta.castlings.push_back(Id{ static_cast<Id_type>(id.value().value) });
                 }
                 else {
-                    return UNEXPECTED_PARSE(Meta_InvalidCastling, id.error());
+                    return PARSE_STEP_UNEXPECTED(ParseErrorType, Meta_InvalidCastling, id.error());
                 }
             }
         }

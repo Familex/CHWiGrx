@@ -60,7 +60,7 @@ struct from_string<Id> {
             return { { Id{ static_cast<Id_type>(res.value().value) }, res.value().position } };
         }
         else {
-            return UNEXPECTED_PARSE(Id_Invalid, res.error());
+            return PARSE_STEP_UNEXPECTED(ParseErrorType, Id_Invalid, res.error());
         }
     }
 };

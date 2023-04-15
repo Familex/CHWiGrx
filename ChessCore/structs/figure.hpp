@@ -6,6 +6,7 @@
 #include "../stuff/stuff.hpp"
 #include "../stuff/parsing.hpp"
 #include "../stuff/parse_meta.hpp"
+#include "../stuff/parse_step.hpp"
 
 #include <format>
 
@@ -87,21 +88,18 @@ struct from_string<Figure> {
     FN operator()(const std::string_view sv, const FromStringMeta& meta) const noexcept
         -> ParseEither<Figure, ParseErrorType>
     {
-        std::size_t curr_pos{ };
-        
-        PARSE_UNEXPECTED_END_GUARD(sv, Figure_CouldNotFindId, curr_pos)
-        PARSE_STEP_EX(sv, id, Id, curr_pos, ParseErrorType, Figure_InvalidId, 1)
-        PARSE_UNEXPECTED_END_GUARD(sv, Figure_CouldNotFindPos, curr_pos)
-        PARSE_STEP_WITHOUT_SUBSTR_WITH_META(sv.substr(curr_pos, meta.max_pos_length), pos, Pos, curr_pos, meta, ParseErrorType, Figure_InvalidPos)
-        PARSE_UNEXPECTED_END_GUARD(sv, Figure_CouldNotFindColor, curr_pos)
-        PARSE_STEP(sv, col, Color, curr_pos, ParseErrorType, Figure_InvalidColor)
-        PARSE_UNEXPECTED_END_GUARD(sv, Figure_CouldNotFindType, curr_pos)
-        PARSE_STEP(sv, type, FigureType, curr_pos, ParseErrorType, Figure_InvalidType)
-        
-        return { { 
-            Figure { id, pos, col, type }, 
-            curr_pos
-        } };
+        using parse_step::execute_sequence, parse_step::ParseStepBuilder;
+        using enum ParseErrorType;
+
+        return execute_sequence(
+            0ull, sv, meta,
+            [](Id id, Pos pos, Color color, FigureType figure_type) { return Figure{ id, pos, color, figure_type }; },
+
+            ParseStepBuilder<Id>{}.set_error(Figure_InvalidId).set_unexpected_end_error(Figure_CouldNotFindId).set_extra_position(1),
+            ParseStepBuilder<Pos>{}.set_error(Figure_InvalidPos).set_unexpected_end_error(Figure_CouldNotFindPos).set_substr_max_length(meta.max_pos_length),
+            ParseStepBuilder<Color>{}.set_error(Figure_InvalidColor).set_unexpected_end_error(Figure_CouldNotFindColor),
+            ParseStepBuilder<FigureType>{}.set_error(Figure_InvalidType).set_unexpected_end_error(Figure_CouldNotFindType)
+        );
     }
 };
 

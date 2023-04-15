@@ -91,10 +91,10 @@ struct from_string<mvmsg::SideEvent> {
        -> ParseEither<mvmsg::SideEvent, ParseErrorType>
     {
         if (sv.empty()) {
-            return UNEXPECTED_PARSE(SideEvent_EmptyString, sv.size() );
+            return PARSE_STEP_UNEXPECTED(ParseErrorType, SideEvent_EmptyString, sv.size() );
         }
         if (sv.size() < 2) {
-            return UNEXPECTED_PARSE(SideEvent_CouldNotFindType, sv.size() );
+            return PARSE_STEP_UNEXPECTED(ParseErrorType, SideEvent_CouldNotFindType, sv.size() );
         }
         if (sv.starts_with("CH"sv)) {
             return { { mvmsg::Check{}, 2ull } };
@@ -109,9 +109,9 @@ struct from_string<mvmsg::SideEvent> {
                 return { { mvmsg::CastlingBreak{ id_sus.value().value }, curr_pos + id_sus.value().position + 1 } };
                 //                                                          skip full_stop at end of the id ^^^
             }
-            return UNEXPECTED_PARSE(SideEvent_InvalidCastlingBreakId, curr_pos);
+            return PARSE_STEP_UNEXPECTED(ParseErrorType, SideEvent_InvalidCastlingBreakId, curr_pos);
         }
-        return UNEXPECTED_PARSE(SideEvent_InvalidType, 1ull);
+        return PARSE_STEP_UNEXPECTED(ParseErrorType, SideEvent_InvalidType, 1ull);
     }
 };
 
@@ -141,61 +141,48 @@ struct from_string<mvmsg::MainEvent> {
     FN operator()(const std::string_view sv, const FromStringMeta& meta) const noexcept
         -> ParseEither<mvmsg::MainEvent, ParseErrorType>
     {
-        if (sv.empty()) {
-            return UNEXPECTED_PARSE(MainEvent_CouldNotFindType, 0ull);
-        }
+        std::size_t curr_pos{ 0 };
+
+        PARSE_UNEXPECTED_END_GUARD(sv, MainEvent_CouldNotFindType, curr_pos);
         if (sv.starts_with("E"sv)) {
-            std::size_t curr_pos{ 1 };
+            curr_pos += 1;
             const auto id_sus = from_string<Id>{}(sv.substr(curr_pos));
             if (id_sus.has_value()) {
                 return { { mvmsg::Eat{ id_sus.value().value }, curr_pos + id_sus.value().position + 1 } };
                 //                                                skip full_stop at end of the id ^^^
             }
-            return UNEXPECTED_PARSE(MainEvent_InvalidEnPassantEatenId, 1ull);
+            return PARSE_STEP_UNEXPECTED(ParseErrorType, MainEvent_InvalidEnPassantEatenId, 1ull);
         }
         if (sv.starts_with("M"sv)) {
-            return { { mvmsg::Move{ }, 1ull } };
+            curr_pos += 1;
+            return { { mvmsg::Move{ }, curr_pos } };
         }
         if (sv.starts_with("L"sv)) {
-            return { { mvmsg::LongMove{ }, 1ull } };
+            curr_pos += 1;
+            return { { mvmsg::LongMove{ }, curr_pos } };
         }
         if (sv.starts_with("C"sv)) {
-            std::size_t curr_pos{ 1 };
-            const auto id_sus = from_string<Id>{}(sv.substr(1));
-            if (id_sus.has_value()) {
-                curr_pos += id_sus.value().position;
-                if (sv.size() < curr_pos) {
-                    return UNEXPECTED_PARSE(MainEvent_CouldNotFindCastlingSecondInputFrom, curr_pos);
-                }
-                const auto from_sus = from_string<Pos>{}(sv.substr(curr_pos, meta.max_pos_length), meta);
-                if (!from_sus) {
-                    return UNEXPECTED_PARSE(MainEvent_InvalidCastlingSecondInputFrom, curr_pos + from_sus.error().position);
-                }
-                else {
-                    curr_pos += from_sus.value().position;
-                }
-                if (sv.size() < curr_pos) {
-                    return UNEXPECTED_PARSE(MainEvent_CouldNotFindCastlingSecondInputTo, curr_pos);
-                }
-                const auto to_sus = from_string<Pos>{}(sv.substr(curr_pos, meta.max_pos_length), meta);
-                if (!to_sus) {
-                    return UNEXPECTED_PARSE(MainEvent_InvalidCastlingSecondInputTo, curr_pos + to_sus.error().position);
-                }
-                else {
-                    curr_pos += to_sus.value().position;
-                }
-                return { { 
-                    mvmsg::Castling{
-                        id_sus.value().value,
-                        Input {
-                            from_sus.value().value,
-                            to_sus.value().value
-                        }
-                    },
-                    curr_pos
-                } };
-            }
-            return UNEXPECTED_PARSE(MainEvent_InvalidCastlingSecondToMoveId, 1ull);
+            curr_pos += 1;
+            PARSE_UNEXPECTED_END_GUARD(sv, MainEvent_CouldNotFindCastlindSecondToMoveId, curr_pos);
+            PARSE_STEP_EX(sv, id, Id, curr_pos, ParseErrorType, Figure_InvalidId, 1);
+            PARSE_UNEXPECTED_END_GUARD(sv, MainEvent_CouldNotFindCastlingSecondInputFrom, curr_pos);
+            PARSE_STEP_WITHOUT_SUBSTR_WITH_META(
+                sv.substr(curr_pos, meta.max_pos_length), from, Pos, curr_pos, meta,
+                ParseErrorType, MainEvent_InvalidCastlingSecondInputFrom);
+            PARSE_UNEXPECTED_END_GUARD(sv, MainEvent_CouldNotFindCastlingSecondInputTo, curr_pos);
+            PARSE_STEP_WITHOUT_SUBSTR_WITH_META(
+                sv.substr(curr_pos, meta.max_pos_length), to, Pos, curr_pos, meta,
+                ParseErrorType, MainEvent_InvalidCastlingSecondInputTo);
+            return { { 
+                mvmsg::Castling{
+                    id,
+                    Input {
+                        from,
+                        to
+                    }
+                },
+                curr_pos
+            } };
         }
         if (sv.starts_with("P"sv)) {
             std::size_t curr_pos{ 1 };
@@ -204,9 +191,9 @@ struct from_string<mvmsg::MainEvent> {
                 return { { mvmsg::EnPassant{ id_sus.value().value }, curr_pos + id_sus.value().position + 1 } };
                 //                                                      skip full_stop at end of the id ^^^
             }
-            return UNEXPECTED_PARSE(MoveMessage_InvalidEnPassantToEatId, curr_pos);
+            return PARSE_STEP_UNEXPECTED(ParseErrorType, MoveMessage_InvalidEnPassantToEatId, curr_pos);
         }
-        return UNEXPECTED_PARSE(MainEvent_InvalidType, 1ull);
+        return PARSE_STEP_UNEXPECTED(ParseErrorType, MainEvent_InvalidType, 1ull);
     }
 };
 
@@ -250,9 +237,8 @@ struct from_string<mvmsg::MoveMessage> {
     {
         std::size_t curr_pos{ };
 
-        if (sv.empty()) {
-            return UNEXPECTED_PARSE(MoveMessage_EmptyMap, 0ull);
-        }
+        PARSE_UNEXPECTED_END_GUARD(sv, MoveMessage_EmptyMap, curr_pos);
+
         const auto figure_sus = from_string<Figure>{}(sv, meta);
         if (!figure_sus) {
             return std::unexpected{ ParseError<ParseErrorType>{ figure_sus.error().type, figure_sus.error().position } };
@@ -261,27 +247,27 @@ struct from_string<mvmsg::MoveMessage> {
             curr_pos += figure_sus.value().position;
         }
         if (sv.size() < curr_pos) {
-            return UNEXPECTED_PARSE(MoveMessage_CouldNotFindTo, curr_pos);
+            return PARSE_STEP_UNEXPECTED(ParseErrorType, MoveMessage_CouldNotFindTo, curr_pos);
         }
         const auto to_sus = from_string<Pos>{}(sv.substr(curr_pos, meta.max_pos_length), meta);
         if (!to_sus) {
-            return UNEXPECTED_PARSE(MoveMessage_InvalidTo, curr_pos + to_sus.error().position);
+            return PARSE_STEP_UNEXPECTED(ParseErrorType, MoveMessage_InvalidTo, curr_pos + to_sus.error().position);
         }
         else {
             curr_pos += to_sus.value().position;
         }
         if (sv.size() < curr_pos) {
-            return UNEXPECTED_PARSE(MoveMessage_CouldNotFindPromotionChoice, curr_pos + to_sus.value().position);
+            return PARSE_STEP_UNEXPECTED(ParseErrorType, MoveMessage_CouldNotFindPromotionChoice, curr_pos + to_sus.value().position);
         }
         const auto promotion_choice_sus = from_string<FigureType>{}(sv.substr(curr_pos));
         if (!promotion_choice_sus) {
-            return UNEXPECTED_PARSE(MoveMessage_InvalidPromotionChoice, curr_pos + to_sus.value().position);
+            return PARSE_STEP_UNEXPECTED(ParseErrorType, MoveMessage_InvalidPromotionChoice, curr_pos + to_sus.value().position);
         }
         else {
             curr_pos += promotion_choice_sus.value().position;
         }
         if (sv.size() < curr_pos) {
-            return UNEXPECTED_PARSE(MoveMessage_CouldNotFindMainEvent, curr_pos);
+            return PARSE_STEP_UNEXPECTED(ParseErrorType, MoveMessage_CouldNotFindMainEvent, curr_pos);
         }
         const auto main_event_sus = from_string<mvmsg::MainEvent>{}(sv.substr(curr_pos), meta);
         if (!main_event_sus) {

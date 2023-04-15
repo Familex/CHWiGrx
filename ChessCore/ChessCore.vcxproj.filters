@@ -79,6 +79,9 @@
     <ClInclude Include="stuff\itoa.hpp">
       <Filter>stuff</Filter>
     </ClInclude>
+    <ClInclude Include="stuff\parse_step.hpp">
+      <Filter>stuff</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="cpp.hint" />

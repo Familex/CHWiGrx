@@ -7,9 +7,6 @@
 
 #pragma region Parse error types
 
-#define UNEXPECTED_PARSE(type, pos) \
-    std::unexpected{ ParseError<ParseErrorType>{ ParseErrorType :: type, pos } }
-
 template <typename ErrorType>
 struct ParseError {
     ErrorType type;
@@ -119,7 +116,7 @@ enum class ParseErrorType {
     MainEvent_Max = MainEvent_InvalidEnPassantEatenId,
 };
 
-#pragma region Parse step types
+#pragma region Macro zone
 
 #define PARSE_UNEXPECTED_END_GUARD_BASE(sv, parse_error_type, error_type, position) \
     if (sv.size() < curr_pos) { \
@@ -129,18 +126,23 @@ enum class ParseErrorType {
                 position \
             } \
         }; \
-    }
+    } (void)NULL
 
 #define PARSE_UNEXPECTED_END_GUARD(sv, error_value, position) \
     PARSE_UNEXPECTED_END_GUARD_BASE(sv, ParseErrorType, ParseErrorType :: error_value, position)
 
-#define PARSE_STEP_MAKE_UNEXPECTED(parse_error_type, error_type, position) \
+/// For internal usage
+#define PARSE_STEP_MAKE_UNEXPECTED(error_type, error_value, position) \
     std::unexpected{ \
-        ParseError<parse_error_type>{ \
-            error_type, \
+        ParseError<error_type>{ \
+            error_value, \
             position \
         } \
     }
+
+/// For external usage
+#define PARSE_STEP_UNEXPECTED(error_type, error_value, position) \
+    PARSE_STEP_MAKE_UNEXPECTED(error_type, error_type :: error_value, position)
 
 #define PARSE_STEP_PACK(...) \
     __VA_ARGS__
@@ -153,7 +155,7 @@ enum class ParseErrorType {
     else { \
         return PARSE_STEP_MAKE_UNEXPECTED( parse_error_type, error_type, error_position ); \
     } \
-    const auto value_name = value_name ## _sus->value;
+    const auto value_name = value_name ## _sus->value
 
 #define PARSE_STEP_FORWARD_WITH_META_EX(sv, value_name, type_name, curr_pos, meta, parse_error_type, extra_pos) \
     PARSE_STEP_BASE( \
@@ -190,3 +192,5 @@ enum class ParseErrorType {
 
 #define PARSE_STEP(sv, value_name, type_name, curr_pos, parse_error_type, error_value) \
     PARSE_STEP_EX(sv, value_name, type_name, curr_pos, parse_error_type, error_value, 0)
+
+#pragma endregion   // Macro zone
