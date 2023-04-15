@@ -91,9 +91,10 @@ namespace parse_step {
     };
 
     template <typename Result, typename Error = ParseErrorType>
-    struct ParseStepBuilder {
+    class ParseStepBuilder {
         ParseStep<Result, Error> parse_step{ };
 
+    public:
         // Value what adds to curr_pos after parse
         FN extra( std::size_t value ) && noexcept -> ParseStepBuilder {
             this->parse_step.extra_position = value;
