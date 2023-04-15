@@ -187,11 +187,19 @@ namespace parse_step {
                 make_step(sv, meta, std::forward<ParseStepBuilder<ParseStepResults, Error>>(steps).bind_curr_pos(curr_pos).build())...
             };
             return { { collector(
-                std::get<ParseStepResults>(step_results)...
+                std::move( std::get<ParseStepResults>(step_results) )...
             ), curr_pos } };
         }
         catch (const ParseStepException<ParseError<Error>>& e) {
             return std::unexpected{ e.error };
         }
     }
+
+    // Generates a constructor function for a type
+    // that takes a variadic number of arguments
+    template <typename Result>
+    FN gen_constructor() noexcept {
+        return [](const auto&& ...args) { return Result{ std::forward<decltype(args)>(args)... }; };
+    }
+
 }   // namespace parse_step

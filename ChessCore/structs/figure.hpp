@@ -91,12 +91,12 @@ struct from_string<Figure> {
     FN operator()(const std::string_view sv, const FromStringMeta& meta) const noexcept
         -> ParseEither<Figure, ParseErrorType>
     {
-        using parse_step::execute_sequence, parse_step::ParseStepBuilder;
+        using parse_step::execute_sequence, parse_step::ParseStepBuilder, parse_step::gen_constructor;
         using enum ParseErrorType;
 
         return execute_sequence(
             0ull, sv, meta,
-            [](Id id, Pos pos, Color color, FigureType figure_type) { return Figure{ id, pos, color, figure_type }; }
+            gen_constructor<Figure>()
 
             , StepB<Id>{}.error(Figure_InvalidId).on_abrupt_halt(Figure_CouldNotFindId).extra_pos(1)
             , StepB<Pos>{}.error(Figure_InvalidPos).on_abrupt_halt(Figure_CouldNotFindPos).max_length(meta.max_pos_length)
