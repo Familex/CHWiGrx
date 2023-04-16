@@ -52,7 +52,7 @@ itoa_push_front_impl(Char const (&str)[N], index_tuple<Indices...>, Char c){
 template<typename Char, std::size_t N>
 constexpr c_string<Char, N>
 itoa_push_front(Char const (&str)[N], Char c){
-    return itoa_push_front_impl(str, typename index_range<0, N-2>::type(), c);
+    return itoa_push_front_impl(str, typename index_range<0, N-2>::type_(), c);
 }
 
 template<typename Char, std::size_t N>

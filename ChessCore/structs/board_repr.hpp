@@ -19,8 +19,8 @@ namespace board_repr {
         std::vector<Figure*> captured_figures;
         std::vector<Id> can_castle;
 
-        friend from_string<BoardRepr>;
-        friend as_string<BoardRepr>;
+        friend FromString<BoardRepr>;
+        friend AsString<BoardRepr>;
 
         /* ---- Methods ---- */
         CTOR BoardRepr(const BoardRepr& other) noexcept
@@ -30,66 +30,82 @@ namespace board_repr {
             , future(other.future)
             , can_castle(other.can_castle)
         {
-            for (auto fig : other.figures) {
+            for (const auto fig : other.figures) {
                 figures.push_back(figfab::FigureFabric::instance().create(fig, true).release());
             }
-            for (auto fig : other.captured_figures) {
+            for (const auto fig : other.captured_figures) {
                 captured_figures.push_back(figfab::FigureFabric::instance().create(fig, true).release());
             }
         }
         
         CTOR BoardRepr(
                  std::vector<Figure*>&& figures,
-                 Color turn,
-                 bool idw,
-                 const std::vector<Id>& can_castle,
-                 const std::vector<mvmsg::MoveMessage>& past = {},
-                 const std::vector<mvmsg::MoveMessage>& future = {},
-                 const std::vector<Figure*>& captured_figures = {}) noexcept
+                 const Color turn,
+                 const bool idw,
+                 std::vector<Id> can_castle,
+                 std::vector<mvmsg::MoveMessage> past = {},
+                 std::vector<mvmsg::MoveMessage> future = {},
+                 std::vector<Figure*> captured_figures = {}) noexcept
             : figures(figures)
             , turn(turn)
             , idw(idw)
-            , past(past)
-            , future(future)
-            , captured_figures(captured_figures)
-            , can_castle(can_castle)
-        {
-        };
+            , past(std::move(past))
+            , future(std::move(future))
+            , captured_figures(std::move(captured_figures))
+            , can_castle(std::move(can_castle))
+        { }
 
         /* Without castling (automatically set all to true) */
         CTOR BoardRepr(
                   std::vector<Figure*>&& figures,
-                  Color turn,
-                  bool idw,
-                  const std::vector<mvmsg::MoveMessage>& past = {},
-                  const std::vector<mvmsg::MoveMessage>& future = {},
-                  const std::vector<Figure*>& captured_figures = {}) noexcept
+                  const Color turn,
+                  const bool idw,
+                  std::vector<mvmsg::MoveMessage> past = {},
+                  std::vector<mvmsg::MoveMessage> future = {},
+                  std::vector<Figure*> captured_figures = {}) noexcept
             : figures(figures)
             , turn(turn)
             , idw(idw)
-            , past(past)
-            , future(future)
-            , captured_figures(captured_figures)
+            , past(std::move(past))
+            , future(std::move(future))
+            , captured_figures(std::move(captured_figures))
         {
             // all can castle by default
-            for (auto fig : figures) {
+            for (const auto fig : figures) {
                 if (fig->is(FigureType::Rook)) {
                     can_castle.push_back(fig->get_id());
                 }
             }
-        };
+        }
         
         CTOR BoardRepr() noexcept = default;
+        // FIXME is destructor will be look like this?
+        // I tried to use clear() method and all was broken
+        ~BoardRepr() noexcept = default;
         
         // implicit move constructor to easy use in std::expected
         [[nodiscard]] constexpr
             BoardRepr(BoardRepr&& br) noexcept
         {
             clear();
-            *this = std::move(br);
+            *this = br;
         }
 
-        constexpr BoardRepr*
+        // FIXME not tested yet
+        FN operator= (BoardRepr&& br) noexcept -> BoardRepr&
+        {
+            clear();
+            figures = std::move(br.figures);
+            turn = br.turn;
+            idw = br.idw;
+            past = std::move(br.past);
+            future = std::move(br.future);
+            captured_figures = std::move(br.captured_figures);
+            can_castle = std::move(br.can_castle);
+            return *this;
+        }
+
+        constexpr BoardRepr&
             operator =(const BoardRepr& other) noexcept
         {
             this->clear();
@@ -104,16 +120,16 @@ namespace board_repr {
             idw = other.idw;
             past = other.past;
             can_castle = other.can_castle;
-            return this;
+            return *this;
         }
 
         FN clear() noexcept -> void
         {
-            for (auto fig : figures) {
+            for (const auto fig : figures) {
                 delete fig;
             }
             figures.clear();
-            for (auto fig : captured_figures) {
+            for (const auto fig : captured_figures) {
                 delete fig;
             }
             captured_figures.clear();
@@ -144,9 +160,9 @@ namespace board_repr {
 }   // namespace board_repr
 
 template <>
-struct from_string<board_repr::BoardRepr> {
+struct FromString<board_repr::BoardRepr> {
 
-    FN parseV2(const std::string_view sv, const FromStringMeta& meta) const noexcept
+    FN parse_v2(const std::string_view sv, const FromStringMeta& meta) const noexcept
         -> ParseEither<board_repr::BoardRepr, ParseErrorType>
     {
         board_repr::BoardRepr result{};
@@ -154,13 +170,13 @@ struct from_string<board_repr::BoardRepr> {
         result.can_castle = meta.castlings;
 
         auto process_figures =
-            [&meta](const std::string_view sv, std::vector<Figure*>& out, std::size_t start_pos)
+            [&meta](const std::string_view proc_sv, std::vector<Figure*>& out, const std::size_t start_pos)
             -> std::optional<ParseError<ParseErrorType>>
         {
             std::size_t fig_curr_pos{ };
 
-            while (fig_curr_pos < sv.size()) {
-                if (const auto& figure_sus = from_string<Figure>{}(sv.substr(fig_curr_pos), meta)) {
+            while (fig_curr_pos < proc_sv.size()) {
+                if (const auto& figure_sus = FromString<Figure>{}(proc_sv.substr(fig_curr_pos), meta)) {
                     out.push_back(
                         figfab::FigureFabric::instance().create(&figure_sus.value().value, true).release()
                     );
@@ -185,7 +201,7 @@ struct from_string<board_repr::BoardRepr> {
             std::size_t move_message_curr_pos{ };
 
             for (const auto& move_message_sv : split(sv, "$"sv)) {
-                if (const auto& move_message_sus = from_string<mvmsg::MoveMessage>{}(move_message_sv, meta)) {
+                if (const auto& move_message_sus = FromString<mvmsg::MoveMessage>{}(move_message_sv, meta)) {
                     out.push_back(move_message_sus.value().value);
                     move_message_curr_pos += move_message_sus.value().position + 1;
                     //                        + 1 because of the '$' delimiter ^^^
@@ -284,7 +300,7 @@ struct from_string<board_repr::BoardRepr> {
        -> ParseEither<board_repr::BoardRepr, ParseErrorType>
     {
         switch (meta.version) {
-            case 2: return parseV2(sv, meta);
+            case 2: return parse_v2(sv, meta);
             default: return PARSE_STEP_UNEXPECTED(ParseErrorType, Meta_UnsupportedVersion, 0ull);
         }
     }
@@ -313,7 +329,7 @@ struct from_string<board_repr::BoardRepr> {
         if (sv_meta[pos++] != 'H') {
             return PARSE_STEP_UNEXPECTED(ParseErrorType, Meta_CouldNotFindHeight, pos - 1);
         }
-        auto w_pos = sv_meta.find('W', pos);
+        const auto w_pos = sv_meta.find('W', pos);
         if (w_pos == std::string_view::npos) {
             return PARSE_STEP_UNEXPECTED(ParseErrorType, Meta_CouldNotFindWidth, pos - 1);
         }
@@ -328,7 +344,7 @@ struct from_string<board_repr::BoardRepr> {
         if (idw_pos == std::string_view::npos) {
             idw_pos = sv_meta.find('F', pos);
             if (idw_pos == std::string_view::npos) {
-                return PARSE_STEP_UNEXPECTED(ParseErrorType, Meta_CouldNotFindIDW, pos - 1);
+                return PARSE_STEP_UNEXPECTED(ParseErrorType, Meta_CouldNotFindIdw, pos - 1);
             }
             else {
                 meta.idw = false;
@@ -337,8 +353,8 @@ struct from_string<board_repr::BoardRepr> {
         else {
             meta.idw = true;
         }
-        if (auto width = svtoi(sv_meta.substr(pos, idw_pos - pos))) {
-            meta.width = width.value().value;
+        if (const auto width = svtoi(sv_meta.substr(pos, idw_pos - pos))) {
+            meta.width = width->value;
             pos = idw_pos + 1;
             //            ^^^ because of the 'T' or 'F' delimiter
         }
@@ -364,7 +380,7 @@ struct from_string<board_repr::BoardRepr> {
                     : split(sv_meta.substr(pos + 1, sv_meta.size() - pos - 1), ","sv))
             {
                 if (const auto id = svtoi(castling)) {
-                    meta.castlings.push_back(Id{ static_cast<Id_type>(id.value().value) });
+                    meta.castlings.emplace_back(static_cast<IdType>(id.value().value));
                 }
                 else {
                     return PARSE_STEP_UNEXPECTED(ParseErrorType, Meta_InvalidCastling, id.error());
@@ -379,7 +395,7 @@ struct from_string<board_repr::BoardRepr> {
 };
 
 template <>
-struct as_string<board_repr::BoardRepr> {
+struct AsString<board_repr::BoardRepr> {
     FN operator()(const board_repr::BoardRepr& br,
                   const AsStringMeta& meta) const noexcept
        -> std::string
@@ -397,18 +413,18 @@ struct as_string<board_repr::BoardRepr> {
                 br.get_turn_char()
             );
             for (const Id castle_id : br.can_castle) {
-                result += as_string<Id>{}(castle_id, meta.min_id) + ',';
+                result += AsString<Id>{}(castle_id, meta.min_id) + ',';
             }
             result.back() = '!';
         }
         // Figures
         for (const auto& fig : br.figures) {
-            result += as_string<const Figure*>{}(fig, meta);
+            result += AsString<const Figure*>{}(fig, meta);
         }
         // Prev moves
         result += '<';
         for (const auto& mm : br.past) {
-            result += as_string<mvmsg::MoveMessage>{}(mm, meta) + '$';
+            result += AsString<mvmsg::MoveMessage>{}(mm, meta) + '$';
         }
         // Future moves
         if (br.past.empty()) {
@@ -419,7 +435,7 @@ struct as_string<board_repr::BoardRepr> {
             result += '<';
         }
         for (const auto& mm : br.future) {
-            result += as_string<mvmsg::MoveMessage>{}(mm, meta) + '$';
+            result += AsString<mvmsg::MoveMessage>{}(mm, meta) + '$';
         }
         // Captured figures
         if (br.future.empty()) {
@@ -429,7 +445,7 @@ struct as_string<board_repr::BoardRepr> {
             result.back() = '>';
         }
         for (const auto& fig : br.captured_figures) {
-            result += as_string<const Figure*>{}(fig, meta);
+            result += AsString<const Figure*>{}(fig, meta);
         }
         return result;
     }
@@ -441,7 +457,7 @@ struct as_string<board_repr::BoardRepr> {
         
         meta.version = 2;
 
-        // calc min id in br.figures
+        // calc min id_ in br.figures
         if (!br.figures.empty()) {
             meta.min_id = br.figures.front()->get_id();
             for (const auto& fig : br.figures) {

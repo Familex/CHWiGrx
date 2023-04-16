@@ -11,67 +11,67 @@
 #include <format>
 
 class Figure {
-    Id id;
-    Pos position;
-    Color color;
-    FigureType type;
+    Id id_;
+    Pos position_;
+    Color color_;
+    FigureType type_;
     
 public:
-    friend from_string<Figure>;
-    friend as_string<Figure>;
+    friend FromString<Figure>;
+    friend AsString<Figure>;
 
     CTOR Figure(const Id id, const Pos& position, const Color color, const FigureType type) noexcept
-        : id{ id }
-        , position{ position }
-        , color{ color }
-        , type{ type } {};
+        : id_{ id }
+        , position_{ position }
+        , color_{ color }
+        , type_{ type } {};
         
     FN move_to(const Pos& p) noexcept {
-        position = p;
+        position_ = p;
     }
     
     FN move_to(const int x, const int y) noexcept {
-        position.x = x; position.y = y;
+        position_.x = x; position_.y = y;
     }
     
     FN operator <=>(const Figure& r) const noexcept {
-        return this->id <=> r.id;
+        return this->id_ <=> r.id_;
     }
     
     FN get_id() const noexcept -> Id {
-        return id;
+        return id_;
     }
     
     FN get_pos() const noexcept -> Pos {
-        return position;
+        return position_;
     }
     
     FN get_col() const noexcept -> Color {
-        return color;
+        return color_;
     }
     
     FN get_type() const noexcept -> FigureType {
-        return type;
+        return type_;
     }
     
     FN is_col(const Color col) const noexcept -> bool {
-        return color == col;
+        return color_ == col;
     }
     
     FN is_col(const Figure* const fig) const noexcept -> bool {
-        return color == fig->get_col();
+        return color_ == fig->get_col();
     }
 
     FN is(const Id id) const noexcept -> bool {
-        return this->id == id;
+        return this->id_ == id;
     }
     
-    FN is(FigureType type) const noexcept -> bool {
-        return this->type == type;
+    FN is(const FigureType type) const noexcept -> bool {
+        return this->type_ == type;
     }
     
-    FN at(Pos p) const noexcept -> bool {
-        return position == p;
+    FN at(const Pos p) const noexcept -> bool {
+        return position_ == p;
     }
 };
 
@@ -84,7 +84,7 @@ FN to_pos_vector(const std::vector<Figure*>& lst) noexcept -> std::vector<Pos> {
 }
 
 template <>
-struct from_string<Figure> {
+struct FromString<Figure> {
     template <typename StepResult>
     using StepB = parse_step::ParseStepBuilder<StepResult>;
 
@@ -107,26 +107,26 @@ struct from_string<Figure> {
 };
 
 template <>
-struct as_string<Figure> {
+struct AsString<Figure> {
     FN operator()(const Figure& fig, const AsStringMeta& meta) const noexcept
         -> std::string
     {
-        return as_string<Id>{}(fig.id, meta.min_id)
+        return AsString<Id>{}(fig.id_, meta.min_id)
                + "."s
-               + as_string<Pos>{}(fig.position, meta)
-               + as_string<Color>{}(fig.color)
-               + as_string<FigureType>{}(fig.type);
+               + AsString<Pos>{}(fig.position_, meta)
+               + AsString<Color>{}(fig.color_)
+               + AsString<FigureType>{}(fig.type_);
     }
 };
 
 template <>
-struct as_string<const Figure*> {
+struct AsString<const Figure*> {
     FN operator()(const Figure* fig, const AsStringMeta& meta) const noexcept
         -> std::string
     {
         if (!fig) {
             return "nullptr";
         }
-        return as_string<Figure>{}(*fig, meta);
+        return AsString<Figure>{}(*fig, meta);
     }
 };

@@ -32,7 +32,7 @@ FN col_to_char(const Color color) noexcept -> char {
 }
 
 template <>
-struct from_string<Color> {
+struct FromString<Color> {
     FN operator()(const std::string_view sv) const noexcept
         -> ParseEither<Color, ParseErrorType>
     {
@@ -51,7 +51,7 @@ struct from_string<Color> {
 };
 
 template <>
-struct as_string<Color> {
+struct AsString<Color> {
     FN operator()(const Color color) const noexcept -> std::string
     {
         switch (color) {
@@ -116,7 +116,7 @@ FN figure_type_to_char(const FigureType figure_type) noexcept -> char
 }
 
 template <>
-struct from_string<FigureType> {
+struct FromString<FigureType> {
     FN operator()(const std::string_view sv) const noexcept
         -> ParseEither<FigureType, ParseErrorType>
     {
@@ -143,7 +143,7 @@ struct from_string<FigureType> {
 };
 
 template <>
-struct as_string<FigureType> {
+struct AsString<FigureType> {
     FN operator()(const FigureType figure_type) const noexcept -> std::string
     {
         switch (figure_type) {
@@ -159,9 +159,8 @@ struct as_string<FigureType> {
                 return "Q";
             case FigureType::King:
                 return "K";
-            default:
-                std::unreachable();
         }
+        return "?";
     }
 };
 
@@ -186,10 +185,10 @@ inline const std::set<FigureType> PROMOTION_FIGURES{
 #pragma region Events
 
 enum class ErrorEvent {
-    INVALID_MOVE,
-    UNDER_CHECK,
-    CHECK_IN_THAT_TILE,
-    UNFORESEEN
+    InvalidMove,
+    UnderCheck,
+    CheckInThatTile,
+    Unforeseen
 };
 
 #pragma endregion   // Events

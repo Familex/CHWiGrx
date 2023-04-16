@@ -7,25 +7,33 @@
 #include "../stuff/parsing.hpp"
 #include "../stuff/stuff.hpp"
 
-#include <cassert>
 #include <string>
 #include <format>
 #include <algorithm>
 
-using Id_type = unsigned long long int;
-struct Id_tag { };
-struct Id
-    : strong_typedef<Id_tag, Id_type>
-    , strong_typedef_utils::addition<Id>
-    , strong_typedef_utils::subtraction<Id>
-{
-    using strong_typedef::strong_typedef;
+#include "figure.hpp"
 
-    friend from_string<Id>;
-    friend as_string<Id>;
+using IdType = unsigned long long int;
+struct IdTag { };
+struct Id
+    : StrongTypedef<IdTag, IdType>
+    , strong_typedef_utils::Addition<Id>
+    , strong_typedef_utils::Subtraction<Id>
+{
+    using StrongTypedef::StrongTypedef;
+
+    friend FromString<Id>;
+    friend AsString<Id>;
+
+    FN operator<=>(const Id& id) const noexcept {
+        return static_cast<IdType>(*this) <=> static_cast<IdType>(id);
+    }
+    FN operator==(const Id& id) const noexcept {
+        return static_cast<IdType>(*this) == static_cast<IdType>(id);
+    }
 };
 
-FN operator""_id(Id_type id) noexcept -> Id {
+FN operator""_id(const IdType id) noexcept -> Id {
     return Id{ id };
 }
 
@@ -34,7 +42,7 @@ namespace std {
     struct hash<Id> {
         FN operator()(const Id id) const noexcept -> size_t
         {
-            return static_cast<Id_type>(id);
+            return static_cast<IdType>(id);
         }
     };
     
@@ -44,20 +52,19 @@ namespace std {
             format(Id id, format_context& ctx) const noexcept
         {
             return formatter<std::string>::format(
-                std::format("{}", static_cast<Id_type>(id)), ctx
+                std::format("{}", static_cast<IdType>(id)), ctx
             );
         }
     };
 }
 
 template <>
-struct from_string<Id> {
+struct FromString<Id> {
     FN operator()(const std::string_view sv) const noexcept
         -> ParseEither<Id, ParseErrorType>
     {
-        auto res = svtoi(sv);
-        if (res) {
-            return { { Id{ static_cast<Id_type>(res->value) }, res->position } };
+        if (auto res = svtoi(sv)) {
+            return { { Id{ static_cast<IdType>(res->value) }, res->position } };
         }
         else {
             return PARSE_STEP_UNEXPECTED(ParseErrorType, Id_Invalid, res.error());
@@ -66,11 +73,11 @@ struct from_string<Id> {
 };
 
 template <>
-struct as_string<Id> {
+struct AsString<Id> {
     [[nodiscard]] auto
         operator()(const Id id, const Id min_id) const noexcept
         -> std::string
     {
-        return std::to_string(static_cast<Id_type>(id - min_id));
+        return std::to_string(static_cast<IdType>(id - min_id));
     }
 };

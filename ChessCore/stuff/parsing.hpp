@@ -26,15 +26,15 @@ using ParseEither = std::expected<ParseResult<ResultType>, ParseError<ErrorType>
 #pragma endregion   // Parse error types
 
 #pragma region from_string, as_string declarations
-/// implement operator() for this type with your type as template parameter
+/// implement operator() for this type_ with your type_ as template parameter
 template <typename ResultType>
-struct from_string;
+struct FromString;
 
-/// implement operator() for this type with your type as template parameter
+/// implement operator() for this type_ with your type_ as template parameter
 template <typename ResultType>
-struct as_string;
+struct AsString;
 
-#pragma endregion   // from_string, as_string declarations
+#pragma endregion   // FromString, AsString declarations
 
 enum class ParseErrorType {
     // General parse errors
@@ -47,7 +47,7 @@ enum class ParseErrorType {
     Meta_InvalidHeight,
     Meta_CouldNotFindWidth,
     Meta_InvalidWidth,
-    Meta_CouldNotFindIDW,
+    Meta_CouldNotFindIdw,
     Meta_CouldNotFindCurrentTurn,
     Meta_InvalidCurrentTurn,
     Meta_CouldNotFindCastlings,
@@ -87,7 +87,7 @@ enum class ParseErrorType {
     // Main events parse errors
     MainEvent_CouldNotFindType,
     MainEvent_InvalidType,
-    MainEvent_CouldNotFindCastlindSecondToMoveId,
+    MainEvent_CouldNotFindCastlingSecondToMoveId,
     MainEvent_InvalidCastlingSecondToMoveId,
     MainEvent_CouldNotFindCastlingSecondInputFrom,
     MainEvent_InvalidCastlingSecondInputFrom,
@@ -97,7 +97,7 @@ enum class ParseErrorType {
     MainEvent_InvalidEnPassantEatenId,
 };
 
-#define PARSE_ERROR_TYPE_AS_TSTRING_IMPL(name, liter) \
+#define PARSE_ERROR_TYPE_AS_T_STRING_IMPL(name, liter) \
     inline auto name(ParseErrorType error_type) { \
         switch (error_type) \
         { \
@@ -109,7 +109,7 @@ enum class ParseErrorType {
             case ParseErrorType::Meta_InvalidHeight: return liter( "Meta: Invalid height" ); \
             case ParseErrorType::Meta_CouldNotFindWidth: return liter( "Meta: Could not find width" ); \
             case ParseErrorType::Meta_InvalidWidth: return liter( "Meta: Invalid width" ); \
-            case ParseErrorType::Meta_CouldNotFindIDW: return liter( "Meta: Could not find idw" ); \
+            case ParseErrorType::Meta_CouldNotFindIdw: return liter( "Meta: Could not find idw" ); \
             case ParseErrorType::Meta_CouldNotFindCurrentTurn: return liter( "Meta: Could not find current turn" ); \
             case ParseErrorType::Meta_InvalidCurrentTurn: return liter( "Meta: Invalid current turn" ); \
             case ParseErrorType::Meta_CouldNotFindCastlings: return liter( "Meta: Could not find castlings" ); \
@@ -118,7 +118,7 @@ enum class ParseErrorType {
             case ParseErrorType::Figure_InvalidId: return liter( "Figure: Invalid id" ); \
             case ParseErrorType::Figure_InvalidPos: return liter( "Figure: Invalid pos" ); \
             case ParseErrorType::Figure_InvalidColor: return liter( "Figure: Invalid color" ); \
-            case ParseErrorType::Figure_InvalidType: return liter( "Figure: Invalid type" ); \
+            case ParseErrorType::Figure_InvalidType: return liter( "Figure: Invalid type_" ); \
             case ParseErrorType::MoveMessage_EmptyMap: return liter( "MoveMessage: Empty map" ); \
             case ParseErrorType::MoveMessage_CouldNotFindTo: return liter( "MoveMessage: Could not find to" ); \
             case ParseErrorType::MoveMessage_InvalidTo: return liter( "MoveMessage: Invalid to" ); \
@@ -127,12 +127,12 @@ enum class ParseErrorType {
             case ParseErrorType::MoveMessage_InvalidPromotionChoice: return liter( "MoveMessage: Invalid promitoin choice" ); \
             case ParseErrorType::MoveMessage_CouldNotFindMainEvent: return liter( "MoveMessage: Could not find main event" ); \
             case ParseErrorType::SideEvent_EmptyString: return liter( "SideEvent: Empty string" ); \
-            case ParseErrorType::SideEvent_CouldNotFindType: return liter( "SideEvent: Could not find type" ); \
-            case ParseErrorType::SideEvent_InvalidType: return liter( "SideEvent: Invalid type" ); \
+            case ParseErrorType::SideEvent_CouldNotFindType: return liter( "SideEvent: Could not find type_" ); \
+            case ParseErrorType::SideEvent_InvalidType: return liter( "SideEvent: Invalid type_" ); \
             case ParseErrorType::SideEvent_InvalidCastlingBreakId: return liter( "SideEvent: Invalid castling break id" ); \
-            case ParseErrorType::MainEvent_CouldNotFindType: return liter( "MainEvent: Could not find type" ); \
-            case ParseErrorType::MainEvent_InvalidType: return liter( "MainEvent: Invalid type" ); \
-            case ParseErrorType::MainEvent_CouldNotFindCastlindSecondToMoveId: return liter( "MainEvent: Could not find castling second to move id" ); \
+            case ParseErrorType::MainEvent_CouldNotFindType: return liter( "MainEvent: Could not find type_" ); \
+            case ParseErrorType::MainEvent_InvalidType: return liter( "MainEvent: Invalid type_" ); \
+            case ParseErrorType::MainEvent_CouldNotFindCastlingSecondToMoveId: return liter( "MainEvent: Could not find castling second to move id" ); \
             case ParseErrorType::MainEvent_InvalidCastlingSecondToMoveId: return liter( "MainEvent: Invalid castling second to move id" ); \
             case ParseErrorType::MainEvent_CouldNotFindCastlingSecondInputFrom: return liter( "MainEvent: Could not find castling second input from" ); \
             case ParseErrorType::MainEvent_InvalidCastlingSecondInputFrom: return liter( "MainEvent: Invalid castling second input from" ); \
@@ -147,12 +147,12 @@ enum class ParseErrorType {
 #define ADD_L(str) L ## str
 #define ADD_NO(str) str
 
-PARSE_ERROR_TYPE_AS_TSTRING_IMPL(parse_error_type_as_wstring, ADD_L)
-PARSE_ERROR_TYPE_AS_TSTRING_IMPL(parse_error_type_as_string, ADD_NO)
+PARSE_ERROR_TYPE_AS_T_STRING_IMPL(parse_error_type_as_wstring, ADD_L)
+PARSE_ERROR_TYPE_AS_T_STRING_IMPL(parse_error_type_as_string, ADD_NO)
 
 #undef ADD_L
 #undef ADD_NO
-#undef PARSE_ERROR_TYPE_AS_TSTRING_IMPL
+#undef PARSE_ERROR_TYPE_AS_T_STRING_IMPL
 
 /// For external usage
 #define PARSE_STEP_UNEXPECTED(error_type, error_value, position) \

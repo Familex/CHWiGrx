@@ -18,15 +18,15 @@ struct Pos {
     int x{ -1 };
     int y{ -1 };
 
-    friend from_string<Pos>;
-    friend as_string<Pos>;
+    friend FromString<Pos>;
+    friend AsString<Pos>;
 
-    CTOR Pos() noexcept {};
+    CTOR Pos() noexcept = default;
 
-    CTOR Pos(int x, int y) noexcept
+    CTOR Pos(const int x, const int y) noexcept
         : x(x)
         , y(y) 
-    {};
+    { }
 
     constexpr auto operator <=> (const Pos& other) const noexcept = default;
 
@@ -45,12 +45,12 @@ struct Pos {
         this->x += r.x; this->y += r.y; return *this;
     }
 
-    FN mul_x(int mx) const noexcept -> Pos
+    FN mul_x(const int mx) const noexcept -> Pos
     {
         return Pos{ x * mx, y };
     }
 
-    FN loop_add(Pos add, int max_x, int max_y) noexcept -> void
+    FN loop_add(const Pos add, const int max_x, const int max_y) noexcept -> void
     {
         this->x += add.x; this->y += add.y;
         if (this->x >= max_x) this->x = 0;
@@ -66,7 +66,7 @@ struct Pos {
 
     FN in(const std::vector<Pos>& lst) const noexcept -> bool
     {
-        return std::find(lst.cbegin(), lst.cend(), *this) != lst.cend();
+        return std::ranges::find(lst, *this) != lst.cend();
     }
 };
 
@@ -75,7 +75,7 @@ FN inline change_axes(const Pos& val) noexcept -> Pos {
 }
 
 template <>
-struct from_string<Pos> {
+struct FromString<Pos> {
     [[nodiscard]] inline constexpr auto
         operator()(const std::string_view str, const FromStringMeta& meta) const noexcept
         -> ParseEither<Pos, ParseErrorType>
@@ -91,7 +91,7 @@ struct from_string<Pos> {
 };
 
 template <>
-struct as_string<Pos> {
+struct AsString<Pos> {
     [[nodiscard]] inline auto
         operator()(const Pos& pos, const AsStringMeta& meta) const noexcept
         -> std::string
@@ -100,3 +100,4 @@ struct as_string<Pos> {
         return std::string(meta.max_pos_length - payload.length(), '0') + payload;
     }
 };
+

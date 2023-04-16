@@ -5,36 +5,36 @@
 #include <utility>  // std::swap
 
 template <class Tag, typename T>
-class strong_typedef
+class StrongTypedef
 {
     T value_;
 public:
-    CTOR strong_typedef()
+    CTOR StrongTypedef()
         : value_()
     { }
 
-    CTOR strong_typedef(const T& value)
+    CTOR StrongTypedef(const T& value)
         : value_(value)
     { }
 
-    CTOR strong_typedef(T&& value)
-            noexcept(std::is_nothrow_move_constructible<T>::value)
+    CTOR StrongTypedef(T&& value)
+            noexcept(std::is_nothrow_move_constructible_v<T>)
         : value_(std::move(value))
     { }
 
-    [[nodiscard]] constexpr
+    [[nodiscard]] explicit constexpr
         operator T& () noexcept
     {
         return value_;
     }
 
-    [[nodiscard]] constexpr
+    [[nodiscard]] explicit constexpr
         operator const T& () const noexcept
     {
         return value_;
     }
 
-    FN friend swap(strong_typedef& a, strong_typedef& b) noexcept
+    FN friend swap(StrongTypedef& a, StrongTypedef& b) noexcept
     {
         using std::swap;
         swap(static_cast<T&>(a), static_cast<T&>(b));
@@ -42,17 +42,17 @@ public:
 };
 
 namespace strong_typedef_utils {
-
+    // Find way to declare this without implementation
     template <typename Tag, typename T>
-    FN underlying_type_impl(strong_typedef<Tag, T>) noexcept -> T;
+    FN underlying_type_impl(StrongTypedef<Tag, T>) noexcept -> T { return T{ }; };
 
     template <typename T>
-    using underlying_type = decltype(underlying_type_impl(std::declval<T>()));
+    using UnderlyingType = decltype(underlying_type_impl(std::declval<T>()));
 
     template <class StrongTypedef>
-    struct addition
+    struct Addition
     {
-        using type = underlying_type<StrongTypedef>;
+        using type = UnderlyingType<StrongTypedef>;
 
         constexpr friend StrongTypedef&
             operator+=(StrongTypedef& lhs, const StrongTypedef& rhs)
@@ -85,9 +85,9 @@ namespace strong_typedef_utils {
     };
 
     template <class StrongTypedef>
-    struct subtraction
+    struct Subtraction
     {
-        using type = underlying_type<StrongTypedef>;
+        using type = UnderlyingType<StrongTypedef>;
 
         constexpr friend StrongTypedef&
             operator-=(StrongTypedef& lhs, const StrongTypedef& rhs)

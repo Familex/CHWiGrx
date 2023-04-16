@@ -82,7 +82,7 @@ public:
     
     FN is_fifty_move_rule_was_triggered() const noexcept -> bool
     {
-        size_t without_eat_and_pawnmoves = 0;
+        size_t without_eat_and_pawn_moves = 0;
         for (auto move{ prev_moves.rbegin() }; move != prev_moves.rend(); ++move) {
             if (move->first.get_type() == FigureType::Pawn
                 || std::holds_alternative<mvmsg::Eat>(move->main_event))
@@ -90,13 +90,13 @@ public:
                 break;
             }
             else {
-                ++without_eat_and_pawnmoves;
+                ++without_eat_and_pawn_moves;
             }
         }
-        return without_eat_and_pawnmoves >= 50;
+        return without_eat_and_pawn_moves >= 50;
     }
     
-    /// @todo
+    /// FIXME implement 
     FN is_moves_repeat_rule_was_triggered() const noexcept -> bool {
         return false;
     }

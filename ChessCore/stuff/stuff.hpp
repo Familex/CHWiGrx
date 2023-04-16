@@ -34,24 +34,23 @@ FN inline
         acc.push_back(str.substr(previous, current - previous));
         previous = current + delimiter.size();
     }
-    const auto last = str.substr(previous);
-    if (!last.empty()) {
+    if (const auto last = str.substr(previous); !last.empty()) {
         acc.push_back(last);
     }
     return acc;
 }
 
-/// Converts a string_view to an int if all string is convertable.
-/// Returns next character position on success.
-/// Returns invalid character position on error.
+/// Converts a string_view to an int if all string is convertible.
+/// Returns next character position_ on success.
+/// Returns invalid character position_ on error.
 FN inline
     svtoi(const std::string_view s) noexcept
     -> std::expected<ParseResult<int>, std::size_t>
 {
     int value{ };
-    const auto res = std::from_chars(s.data(), s.data() + s.size(), value);
-    const auto pos = static_cast<std::size_t>(res.ptr - s.data());
-    if (res.ec == std::errc{}) {
+    const auto [ptr, ec] = std::from_chars(s.data(), s.data() + s.size(), value);
+    const auto pos = static_cast<std::size_t>(ptr - s.data());
+    if (ec == std::errc{}) {
         return { { value, pos } };
     }
     else {

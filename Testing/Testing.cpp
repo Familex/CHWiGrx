@@ -50,7 +50,7 @@ namespace FigureBoardTesting
             return std::find(std::begin(v), std::end(v), x) != std::end(v);
         }
 
-        const auto base{ BoardRepr::from_string(
+        const auto base{ BoardRepr::FromString(
                 "1;0;0;B;R;2;0;1;B;H;3;0;2;B;B;4;0;3;B;Q;5;0;4;B;K;6;0;5;B;B;7;0;6;B;H;8;0;7;B;R;"
                 "9;1;0;B;P;10;1;1;B;P;11;1;2;B;P;12;1;3;B;P;13;1;4;B;P;14;1;5;B;P;15;1;6;B;P;16;1;7;B;P;"
 
@@ -60,7 +60,7 @@ namespace FigureBoardTesting
                 "[TW1;8;25;32;]<><>~"
         ).value() };
 
-        const auto baseReversed{ BoardRepr::from_string(
+        const auto baseReversed{ BoardRepr::FromString(
             "1;0;0;W;R;2;0;1;W;H;3;0;2;W;B;4;0;3;W;Q;5;0;4;W;K;6;0;5;W;B;7;0;6;W;H;8;0;7;W;R;"
             "9;1;0;W;P;10;1;1;W;P;11;1;2;W;P;12;1;3;W;P;13;1;4;W;P;14;1;5;W;P;15;1;6;W;P;16;1;7;W;P;"
 
@@ -292,13 +292,13 @@ namespace FigureBoardTesting
                 FigureBoard board{ BoardRepr{base} };
 
                 // white first moves
-                for (Id id = 17_id; id <= 24_id; ++id) {
-                    Assert::AreEqual(board.get_all_possible_moves(board.get_fig(id).value()).size(), 2ull);
+                for (Id id_ = 17_id; id_ <= 24_id; ++id_) {
+                    Assert::AreEqual(board.get_all_possible_moves(board.get_fig(id_).value()).size(), 2ull);
                 }
 
                 // black first moves
-                for (Id id = 9_id; id <= 16_id; ++id) {
-                    Assert::AreEqual(board.get_all_possible_moves(board.get_fig(id).value()).size(), 2ull);
+                for (Id id_ = 9_id; id_ <= 16_id; ++id_) {
+                    Assert::AreEqual(board.get_all_possible_moves(board.get_fig(id_).value()).size(), 2ull);
                 }
             }	// TEST_METHOD(Basic)
 
@@ -307,13 +307,13 @@ namespace FigureBoardTesting
                 FigureBoard board{ BoardRepr{baseReversed} };
 
                 // white first moves
-                for (Id id = 17_id; id <= 24_id; ++id) {
-                    Assert::AreEqual(board.get_all_moves(board.get_fig(id).value()).size(), 2ull);
+                for (Id id_ = 17_id; id_ <= 24_id; ++id_) {
+                    Assert::AreEqual(board.get_all_moves(board.get_fig(id_).value()).size(), 2ull);
                 }
 
                 // black first moves
-                for (Id id = 9_id; id <= 16_id; ++id) {
-                    Assert::AreEqual(board.get_all_moves(board.get_fig(id).value()).size(), 2ull);
+                for (Id id_ = 9_id; id_ <= 16_id; ++id_) {
+                    Assert::AreEqual(board.get_all_moves(board.get_fig(id_).value()).size(), 2ull);
                 }
 
             }	// TEST_METHOD(Basic)
@@ -1009,7 +1009,7 @@ namespace FigureBoardTesting
                         "46;7;1;W;R;45;7;4;W;K;47;7;7;W;R;[TW46;47;]<><>~",
                     })
                 {
-                    FigureBoard b{ BoardRepr::from_string( br ).value() };
+                    FigureBoard b{ BoardRepr::FromString( br ).value() };
 
                     auto king = b.get_fig_unsafe(45_id);
                     auto moves = b.get_all_moves(king);

@@ -1,13 +1,10 @@
 #include "declarations.hpp"
 
-int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
-                      _In_opt_ HINSTANCE hPrevInstance,
-                      _In_ LPWSTR    lpCmdLine,
-                      _In_ int       nCmdShow)
+int APIENTRY wWinMain(const HINSTANCE hInstance,
+                      [[maybe_unused]] const HINSTANCE hPrevInstance,
+                      [[maybe_unused]] const LPWSTR lpCmdLine,
+                      int nCmdShow)
 {
-    UNREFERENCED_PARAMETER(hPrevInstance);
-    UNREFERENCED_PARAMETER(lpCmdLine);
-
     {
         pieces_bitmaps['B']['P'] = LoadBitmap(hInstance, MAKEINTRESOURCE(IDB_BLACK_PAWN));
         pieces_bitmaps['B']['R'] = LoadBitmap(hInstance, MAKEINTRESOURCE(IDB_BLACK_ROOK));
@@ -46,7 +43,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
             .hInstance = hInstance,
             .hIcon = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_GAME_MODE_BIG)),
             .hCursor = LoadCursor(hInstance, MAKEINTRESOURCE(IDC_MINIMAL_CURSOR)),
-            .hbrBackground = (HBRUSH)(COLOR_WINDOW),
+            .hbrBackground = reinterpret_cast<HBRUSH>((COLOR_WINDOW)),
             .hIconSm = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_GAME_MODE_SMALL))
         })) {
         return FALSE;

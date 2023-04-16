@@ -19,14 +19,14 @@ struct Input {
     CTOR Input(std::string str) {
         /* "from.first from.second target.first target.second" */
         str += " ";
-        char delimiter = ' ';
-        size_t delimiter_len = 1;
         size_t pos = 0;
-        std::string token;
         std::vector<int> acc{};
         for (int i{}; i < 4; ++i) {
-            if ((pos = str.find(delimiter)) != std::string::npos) {
-                token = str.substr(0, pos);
+            if (constexpr char delimiter = ' ';
+                    (pos = str.find(delimiter)) != std::string::npos)
+            {
+                constexpr size_t delimiter_len = 1;
+                std::string token = str.substr(0, pos);
                 acc.push_back(std::stoi(token));
                 str.erase(0, pos + delimiter_len);
             }

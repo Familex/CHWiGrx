@@ -2,10 +2,10 @@
 
 #include <variant>
 
-template <typename ...Ts> struct overload : Ts... { using Ts::operator()...; };
-template <typename ...Ts> overload(Ts...) -> overload<Ts...>;
+template <typename ...Ts> struct Overload : Ts... { using Ts::operator()...; };
+template <typename ...Ts> Overload(Ts...) -> Overload<Ts...>;
 
-/// VISIT macro for simple usage of overload pattern
+/// VISIT macro for simple usage of Overload pattern
 /// <example>
 /// std::variant<int, double> smth { 1.0 };
 /// 
@@ -17,7 +17,7 @@ template <typename ...Ts> overload(Ts...) -> overload<Ts...>;
 /// </example
 #define VISIT(variants, ...) \
     std::visit(                 \
-        overload{               \
+        Overload{               \
             __VA_ARGS__         \
         },                      \
         variants                \
