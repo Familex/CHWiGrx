@@ -14,6 +14,8 @@ namespace parse_step {
 
     template <typename Result, typename Error = ParseErrorType>
     struct ParseStep {
+        using ParseStepParser = ParseEither<Result, Error>(*)( ParseStep const* const, const std::string_view, const FromStringMeta& );
+
         bool forward_error{ false };
 
         std::size_t extra_position{ 0 };    // extra moves curr_pos by this value
@@ -22,6 +24,7 @@ namespace parse_step {
         std::optional<std::size_t> substr_max_length{ std::nullopt };
         Error error{ }; // Default error to throw
         Error on_abrupt_halt{ };
+        std::optional<ParseStepParser> parser;
 
         FN get_substr_position() const noexcept -> std::size_t {
             return substr_position ? *substr_position : get_curr_pos();
@@ -63,12 +66,14 @@ namespace parse_step {
             }
             
             const auto value_sus =
-                apply_from_string(
-                    sv.substr(
-                        get_substr_position(),
-                        get_substr_max_length()),
-                    meta
-                );
+                parser
+                ? parser.value()(this, sv, meta)
+                : apply_from_string(
+                      sv.substr(
+                          get_substr_position(),
+                          get_substr_max_length()),
+                      meta
+                  );
 
             if (value_sus) {
                 if (curr_pos) {
@@ -90,58 +95,72 @@ namespace parse_step {
         }
     };
 
+    // Builder for ParseStep
     template <typename Result, typename Error = ParseErrorType>
     class ParseStepBuilder {
         ParseStep<Result, Error> parse_step{ };
 
     public:
-        // Value what adds to curr_pos after parse
-        FN extra( std::size_t value ) && noexcept -> ParseStepBuilder {
-            this->parse_step.extra_position = value;
-            return *this;
-        }
-        
-        // Position to start parsing from (default: 0)
-        // Also uses by other steps in sequence
-        FN bind_curr_pos( std::size_t& value ) && noexcept -> ParseStepBuilder {
-            this->parse_step.curr_pos = &value;
-            return *this;
-        }
-        
-        // Max length of substring to parse
-        FN max_length( std::size_t value ) && noexcept -> ParseStepBuilder {
-            this->parse_step.substr_max_length = value;
-            return *this;
-        }
-        
-        // Error what throws on parse error
-        FN error( Error value ) && noexcept -> ParseStepBuilder {
-            this->parse_step.error = value;
-            return *this;
-        }
+        constexpr ParseStepBuilder& operator=(const ParseStepBuilder&) noexcept = delete;
+        constexpr ParseStepBuilder(const ParseStepBuilder&) noexcept = delete;
 
-        // Error what throws on unexpected end of parse
-        FN on_abrupt_halt( Error value ) && noexcept -> ParseStepBuilder {
-            this->parse_step.on_abrupt_halt = value;
-            return *this;
-        }
+        CTOR ParseStepBuilder(ParseStepBuilder&&) noexcept = default;
+        [[nodiscard]] constexpr ParseStepBuilder& operator=(ParseStepBuilder&&) noexcept = default;
+        CTOR ParseStepBuilder() noexcept = default;
 
-        // On turn on forward_error, error from parse step will be forwarded (error will be ignored)
-        FN forward_error( bool value ) && noexcept -> ParseStepBuilder {
-            this->parse_step.forward_error = value;
-            return *this;
-        }
-        
         // Returns ParseStep object
         FN build() && noexcept -> ParseStep<Result, Error> {
             return this->parse_step;
         }
-        
+
         // Execute own ParseStep instead of build
         FN operator() (const std::string_view sv,
-                       const FromStringMeta& meta) && noexcept
-           -> ParseEither<Result, Error> {
-            this->parse_step(sv, meta);               
+            const FromStringMeta& meta) && noexcept
+            -> ParseEither<Result, Error> {
+            this->parse_step(sv, meta);
+        }
+
+        // Parser what will be used to parse ( default: from_string<Result>{})
+        FN parser(typename ParseStep<Result, Error>::ParseStepParser value) && noexcept -> ParseStepBuilder&& {
+            this->parse_step.parser = value;
+            return std::move(*this);
+        }
+
+        // Value what adds to curr_pos after parse
+        FN extra( std::size_t value ) && noexcept -> ParseStepBuilder&& {
+            this->parse_step.extra_position = value;
+            return std::move(*this);
+        }
+        
+        // Position to start parsing from (default: 0)
+        // Also uses by other steps in sequence
+        FN bind_curr_pos( std::size_t& value ) && noexcept -> ParseStepBuilder&& {
+            this->parse_step.curr_pos = &value;
+            return std::move(*this);
+        }
+        
+        // Max length of substring to parse
+        FN max_length( std::size_t value ) && noexcept -> ParseStepBuilder&& {
+            this->parse_step.substr_max_length = value;
+            return std::move(*this);
+        }
+        
+        // Error what throws on parse error
+        FN error( Error value ) && noexcept -> ParseStepBuilder&& {
+            this->parse_step.error = value;
+            return std::move(*this);
+        }
+
+        // Error what throws on unexpected end of parse
+        FN on_abrupt_halt( Error value ) && noexcept -> ParseStepBuilder&& {
+            this->parse_step.on_abrupt_halt = value;
+            return std::move(*this);
+        }
+
+        // On turn on forward_error, error from parse step will be forwarded (error will be ignored)
+        FN forward_error( bool value ) && noexcept {
+            this->parse_step.forward_error = value;
+            return *this;
         }
     };
     
@@ -155,6 +174,7 @@ namespace parse_step {
     };
 
     // throws ParseStepException<ParseStepError>
+    // idk how to implement execute_sequence without exceptions 😁
     template <typename ParseStepResult, typename ParseStepError>
     FN static make_step(const std::string_view sv,
         const FromStringMeta& meta,
@@ -172,7 +192,8 @@ namespace parse_step {
         }
     }
 
-    // idk how to implement execute_sequence without exceptions 😁
+    // Execute sequence of ParseSteps, and return result of collector
+    // Order of execution is from left to right
     template <
         typename Collector,
         typename Error = ParseErrorType,
