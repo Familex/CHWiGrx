@@ -75,12 +75,12 @@ namespace mvmsg /* move_message */ {
                 const Input& input,
                 const FigureType p,
                 const MainEvent& main_event,
-                const std::vector<SideEvent>& side_evs) noexcept
+                std::vector<SideEvent> side_evs) noexcept
             : first{ first }
             , input{ input }
             , promotion_choice{ p }
             , main_event{ main_event }
-            , side_evs{ side_evs }
+            , side_evs{std::move(side_evs)}
         { }
     };
 }   // namespace mvmsg
@@ -103,12 +103,16 @@ struct FromString<mvmsg::SideEvent> {
             return { { mvmsg::Promotion{ }, 2ull } };
         }
         if (sv.starts_with("CB"sv)) {
+            using parse_step::execute_sequence, parse_step::ParseStepBuilder;
+            using enum ParseErrorType;
+
             constexpr std::size_t curr_pos{ 2 };
-            if (const auto id_sus = FromString<Id>{}(sv.substr(curr_pos)); id_sus.has_value()) {
-                return { { mvmsg::CastlingBreak{ id_sus.value().value }, curr_pos + id_sus.value().position + 1 } };
-                //                                                          skip full_stop at end of the id_ ^^^
-            }
-            return PARSE_STEP_UNEXPECTED(ParseErrorType, SideEvent_InvalidCastlingBreakId, curr_pos);
+            return execute_sequence(
+                2ull, sv, meta,
+                [](const Id id) { return mvmsg::SideEvent{ mvmsg::CastlingBreak{ id } }; }
+
+                , ParseStepBuilder<Id>{}.extra(1).error(SideEvent_InvalidCastlingBreakId).on_abrupt_halt(SideEvent_CouldNotFindCastlingBreakId)
+            );
         }
         return PARSE_STEP_UNEXPECTED(ParseErrorType, SideEvent_InvalidType, 1ull);
     }

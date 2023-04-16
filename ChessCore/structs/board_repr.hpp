@@ -42,27 +42,11 @@ namespace board_repr {
                  std::vector<Figure*>&& figures,
                  const Color turn,
                  const bool idw,
-                 std::vector<Id> can_castle,
                  std::vector<mvmsg::MoveMessage> past = {},
                  std::vector<mvmsg::MoveMessage> future = {},
-                 std::vector<Figure*> captured_figures = {}) noexcept
-            : figures(figures)
-            , turn(turn)
-            , idw(idw)
-            , past(std::move(past))
-            , future(std::move(future))
-            , captured_figures(std::move(captured_figures))
-            , can_castle(std::move(can_castle))
-        { }
-
-        /* Without castling (automatically set all to true) */
-        CTOR BoardRepr(
-                  std::vector<Figure*>&& figures,
-                  const Color turn,
-                  const bool idw,
-                  std::vector<mvmsg::MoveMessage> past = {},
-                  std::vector<mvmsg::MoveMessage> future = {},
-                  std::vector<Figure*> captured_figures = {}) noexcept
+                 std::vector<Figure*> captured_figures = {},
+                 const std::optional<std::vector<Id>>& can_castle = std::nullopt
+        ) noexcept
             : figures(figures)
             , turn(turn)
             , idw(idw)
@@ -70,14 +54,17 @@ namespace board_repr {
             , future(std::move(future))
             , captured_figures(std::move(captured_figures))
         {
-            // all can castle by default
-            for (const auto fig : figures) {
-                if (fig->is(FigureType::Rook)) {
-                    can_castle.push_back(fig->get_id());
+            if (can_castle) {
+                this->can_castle = *can_castle;
+            } else {
+                for (const auto fig : figures) {
+                    if (fig->is(FigureType::Rook)) {
+                        this->can_castle.push_back(fig->get_id());
+                    }
                 }
             }
         }
-        
+
         CTOR BoardRepr() noexcept = default;
         // FIXME is destructor will be look like this?
         // I tried to use clear() method and all was broken

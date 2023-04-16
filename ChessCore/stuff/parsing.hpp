@@ -83,6 +83,7 @@ enum class ParseErrorType {
     SideEvent_EmptyString,
     SideEvent_CouldNotFindType,
     SideEvent_InvalidType,
+    SideEvent_CouldNotFindCastlingBreakId,
     SideEvent_InvalidCastlingBreakId,
     // Main events parse errors
     MainEvent_CouldNotFindType,
@@ -118,7 +119,7 @@ enum class ParseErrorType {
             case ParseErrorType::Figure_InvalidId: return liter( "Figure: Invalid id" ); \
             case ParseErrorType::Figure_InvalidPos: return liter( "Figure: Invalid pos" ); \
             case ParseErrorType::Figure_InvalidColor: return liter( "Figure: Invalid color" ); \
-            case ParseErrorType::Figure_InvalidType: return liter( "Figure: Invalid type_" ); \
+            case ParseErrorType::Figure_InvalidType: return liter( "Figure: Invalid type" ); \
             case ParseErrorType::MoveMessage_EmptyMap: return liter( "MoveMessage: Empty map" ); \
             case ParseErrorType::MoveMessage_CouldNotFindTo: return liter( "MoveMessage: Could not find to" ); \
             case ParseErrorType::MoveMessage_InvalidTo: return liter( "MoveMessage: Invalid to" ); \
@@ -127,11 +128,12 @@ enum class ParseErrorType {
             case ParseErrorType::MoveMessage_InvalidPromotionChoice: return liter( "MoveMessage: Invalid promitoin choice" ); \
             case ParseErrorType::MoveMessage_CouldNotFindMainEvent: return liter( "MoveMessage: Could not find main event" ); \
             case ParseErrorType::SideEvent_EmptyString: return liter( "SideEvent: Empty string" ); \
-            case ParseErrorType::SideEvent_CouldNotFindType: return liter( "SideEvent: Could not find type_" ); \
-            case ParseErrorType::SideEvent_InvalidType: return liter( "SideEvent: Invalid type_" ); \
+            case ParseErrorType::SideEvent_CouldNotFindType: return liter( "SideEvent: Could not find type" ); \
+            case ParseErrorType::SideEvent_InvalidType: return liter( "SideEvent: Invalid type" ); \
+            case ParseErrorType::SideEvent_CouldNotFindCastlingBreakId: return liter( "SideEvent: Could not find castling break id" ); \
             case ParseErrorType::SideEvent_InvalidCastlingBreakId: return liter( "SideEvent: Invalid castling break id" ); \
-            case ParseErrorType::MainEvent_CouldNotFindType: return liter( "MainEvent: Could not find type_" ); \
-            case ParseErrorType::MainEvent_InvalidType: return liter( "MainEvent: Invalid type_" ); \
+            case ParseErrorType::MainEvent_CouldNotFindType: return liter( "MainEvent: Could not find type" ); \
+            case ParseErrorType::MainEvent_InvalidType: return liter( "MainEvent: Invalid type" ); \
             case ParseErrorType::MainEvent_CouldNotFindCastlingSecondToMoveId: return liter( "MainEvent: Could not find castling second to move id" ); \
             case ParseErrorType::MainEvent_InvalidCastlingSecondToMoveId: return liter( "MainEvent: Invalid castling second to move id" ); \
             case ParseErrorType::MainEvent_CouldNotFindCastlingSecondInputFrom: return liter( "MainEvent: Could not find castling second input from" ); \

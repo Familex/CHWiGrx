@@ -94,23 +94,30 @@ void FigureBoard::apply_map(board_repr::BoardRepr&& board_repr) noexcept {
 }
 
 auto FigureBoard::
-    get_repr(const Color turn, const bool save_all_moves) const noexcept -> board_repr::BoardRepr
+    get_repr(const Color turn, const bool save_all_moves) const noexcept
+    -> board_repr::BoardRepr
 {
     std::vector<Figure*> fig_vec;
     for (const auto& fig : figures_ | std::views::values)
         fig_vec.push_back(fig);
     const auto& prev_moves = move_logger_.get_past();
+    const auto& has_castlings =
+        castling_
+        | std::views::filter([](const auto& pair) { return pair.second; })
+        | std::views::keys
+        | std::ranges::to<std::vector<Id>>();
     return board_repr::BoardRepr{
         std::move(fig_vec),
         turn,
         idw_,
-        save_all_moves 
+        save_all_moves
             ? prev_moves
             : prev_moves.empty()
                 ? std::vector<mvmsg::MoveMessage>{}
-                : std::vector<mvmsg::MoveMessage>{ prev_moves.back() },
+                : std::vector{ prev_moves.back() },
         move_logger_.get_future(),
-        captured_figures_
+        captured_figures_,
+        has_castlings 
     };
 }
 
@@ -583,10 +590,10 @@ auto FigureBoard::
         
         Pos rook_pos = rook->get_pos();
         const Pos target{ king_pos.x, king_end_col };
-        for (step = king_pos < target ? 1 : -1; king_pos != target; king_pos.y += step) {
+        for (step = king_pos.y < target.y ? 1 : -1; king_pos.y != target.y; king_pos.y += step) {
             castling_can_be_done &= not check_for_when(in_hand->get_col(), { king_pos, rook_pos }, king_pos);
         }
-        for (step = king_pos < rook_pos ? 1 : -1; king_pos != rook_pos; king_pos.y += step) {
+        for (step = king_pos.y < rook_pos.y ? 1 : -1; king_pos.y != rook_pos.y; king_pos.y += step) {
             auto cell_sus = get_fig(king_pos);
             castling_can_be_done &= 
                 !cell_sus.has_value() 
@@ -685,13 +692,13 @@ auto FigureBoard::  // FIXME move check and under check checks to separate funct
     }
 
     // Castling breaks
-    if (in_hand->get_type() == FigureType::Rook) {
+    if (in_hand->get_type() == FigureType::Rook && has_castling(in_hand->get_id())) {
         side_events.emplace_back( mvmsg::CastlingBreak{ in_hand->get_id() } );
     }
     else if (in_hand->is(FigureType::King)) {
-        for (const auto& fig : get_figures_of(in_hand->get_col())) {
-            if (fig->is(FigureType::Rook)) {
-                side_events.emplace_back( mvmsg::CastlingBreak{ fig->get_id() } );
+        for (const auto& [id, has_castling] : castling_) {
+            if (has_castling) {
+                side_events.emplace_back(mvmsg::CastlingBreak{id});
             }
         }
     }
