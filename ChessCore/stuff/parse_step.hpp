@@ -52,8 +52,15 @@ namespace parse_step {
             return FromString<Result>{}(sv);
         }
 
-        FN operator() (const std::string_view sv,
-            const FromStringMeta& meta) noexcept
+        FN get_local_sv(const std::string_view sv) const noexcept -> std::string_view
+        {
+            if (sv.size() < get_substr_position()) {
+                return sv.substr(0, 0);
+            }
+            return sv.substr(get_substr_position(), get_substr_max_length());
+        } 
+
+        FN operator() (const std::string_view sv, const FromStringMeta& meta) noexcept
             -> ParseEither<Result, Error>
         {
             if (sv.size() < get_curr_pos()) {
@@ -69,18 +76,17 @@ namespace parse_step {
                 parser
                     ? parser.value()(this, sv, meta)
                     : apply_from_string(
-                        sv.substr(
-                            get_substr_position(),
-                            get_substr_max_length()),
+                        get_local_sv(sv),
                         meta
-                    )) {
+                    ))
+            {
                 if (curr_pos) {
                     *curr_pos += value_sus->position + extra_position;
                 }
                 return value_sus;
             }
             else {
-                return std::unexpected{
+                return std::unexpected {
                     ParseError<Error> {
                         forward_error
                             ? value_sus.error().type
