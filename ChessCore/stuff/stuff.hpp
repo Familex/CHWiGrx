@@ -41,8 +41,8 @@ FN inline
 }
 
 /// Converts a string_view to an int if all string is convertible.
-/// Returns next character position_ on success.
-/// Returns invalid character position_ on error.
+/// Returns next character position on success.
+/// Returns invalid character position on error.
 FN inline
     svtoi(const std::string_view s) noexcept
     -> std::expected<ParseResult<int>, std::size_t>

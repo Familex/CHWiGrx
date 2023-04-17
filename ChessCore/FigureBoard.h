@@ -297,12 +297,15 @@ namespace figboard {
         }
     };
 
-    FN is_valid_coords(const Pos position) noexcept -> bool
-    {
+    FN is_valid_coords(const Pos position) noexcept -> bool {
         const int x = position.x;
         const int y = position.y;
         return ((x >= 0) && (x < HEIGHT) &&
             (y >= 0) && (y < WIDTH));
+    }
+
+    FN is_valid_coords(const Input input) noexcept -> bool {
+        return is_valid_coords(input.from) && is_valid_coords(input.target);
     }
 
 }   // namespace figboard

@@ -697,7 +697,7 @@ auto FigureBoard::  // FIXME move check and under check checks to separate funct
     }
     else if (in_hand->is(FigureType::King)) {
         for (const auto& [id, has_castling] : castling_) {
-            if (has_castling) {
+            if (has_castling && (*get_fig(id))->is_col(in_hand)) {
                 side_events.emplace_back(mvmsg::CastlingBreak{id});
             }
         }
