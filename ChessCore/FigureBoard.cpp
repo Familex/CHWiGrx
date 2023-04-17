@@ -728,8 +728,8 @@ auto FigureBoard::  // FIXME move check and under check checks to separate funct
                         promotion_choice,
                         mvmsg::Castling{
                             (in_hand->is(FigureType::King) 
-                                ? king
-                                : rook)->get_id(),
+                                ? rook 
+                                : king)->get_id(),
                             second_figure_to_move
                         }, 
                         side_events};
@@ -1013,9 +1013,7 @@ auto FigureBoard::
         move_logger_.add_without_reset(future_sus.value());
         return true;
     }
-    else {
-        return false;
-    }
+    return false;
 }
 
 /// <summary>
@@ -1048,3 +1046,4 @@ void FigureBoard::
     const Pos position = to_promote->get_pos();
     figfab::FigureFabric::instance().create_in_place(position, color, new_type, id, to_promote);
 }
+
