@@ -11,7 +11,6 @@ FigureBoard::FigureBoard(board_repr::BoardRepr&& board_repr) noexcept {
 
 void FigureBoard::reset(board_repr::BoardRepr&& map) noexcept {
     move_logger_.reset();
-    curr_id_ = 0_id;
     for (const auto& fig : figures_ | std::views::values) {
         delete fig;
     }
@@ -668,28 +667,11 @@ auto FigureBoard::
     return GameEndType::NotGameEnd;
 }
 
-/// <summary>
-/// Проверка хода на валидность и составление сообщения хода
-/// </summary>
-/// <exception cref="std::invalid_argument">Ход нельзя совершить</exception>
-/// <param name="in_hand">Фигура, которой собираются ходить</param>
-/// <param name="input">Ввод</param>
-/// <param name="promotion_choice"></param>
-/// <returns>Сообщение хода</returns>
-auto FigureBoard::  // FIXME move check and under check checks to separate function
-    move_check(const Figure* const in_hand, const Input& input, const FigureType promotion_choice) const noexcept
-        -> std::expected<mvmsg::MoveMessage, ErrorEvent>
+auto FigureBoard::
+    determine_move(const Figure* in_hand, const Input& input, const FigureType promotion_choice) const noexcept
+    -> std::optional<mvmsg::MoveMessage>
 {
     std::vector<mvmsg::SideEvent> side_events;
-    
-    if (!(is_valid_coords(input.from) && is_valid_coords(input.target)) 
-        || input.from == input.target
-        || !cont_fig(input.from)
-        || (get_fig(input.target).has_value()
-            && get_fig(input.target).value()->is_col(in_hand->get_col()))
-        ) {
-        return std::unexpected{ ErrorEvent::InvalidMove };
-    }
 
     // Castling breaks
     if (in_hand->get_type() == FigureType::Rook && has_castling(in_hand->get_id())) {
@@ -766,16 +748,6 @@ auto FigureBoard::  // FIXME move check and under check checks to separate funct
             if (check_for_when(what_next(in_hand->get_col()), { input.from }, Pos{}, {}, { in_hand_in_targ_tmp.get()})) {
                 side_events.emplace_back(mvmsg::Check{ });
             }
-            if (in_hand->get_type() == FigureType::King) {
-                if (check_for_when(in_hand->get_col(), { input.from }, input.target)) {
-                    return std::unexpected{ ErrorEvent::CheckInThatTile };
-                }
-            }
-            else {
-                if (check_for_when(in_hand->get_col(), { input.from }, Pos{}, { in_hand_in_targ_tmp.get()}, {})) {
-                    return std::unexpected{ ErrorEvent::UnderCheck };
-                }
-            }
             return mvmsg::MoveMessage{
                 *in_hand,
                 input,
@@ -808,18 +780,6 @@ auto FigureBoard::  // FIXME move check and under check checks to separate funct
                 if (check_for_when(what_next(in_hand->get_col()), { input.from, Pos{input.from.x, input.target.y}, input.target }, Pos{}, {}, { in_hand_in_targ_tmp.get() })) {
                     side_events.emplace_back(mvmsg::Check{ });
                 }
-                if (in_hand->get_type() == FigureType::King) {
-                    // Фигура на которой сейчас стоим всё ещё учитывается!
-                    if (check_for_when(in_hand->get_col(), { input.from, Pos{input.from.x, input.target.y}, input.target }, input.target)) {
-                        return std::unexpected{ ErrorEvent::CheckInThatTile };
-                    }
-                }
-                else {
-                    // Фигура на которой сейчас стоим всё ещё учитывается!
-                    if (check_for_when(in_hand->get_col(), { input.from, Pos{input.from.x, input.target.y}, input.target }, Pos{}, { in_hand_in_targ_tmp.get() }, {})) {
-                        return std::unexpected{ ErrorEvent::UnderCheck };
-                    }
-                }
                 auto const& to_eat_sus = get_fig(Pos{ input.from.x, input.target.y });
                 return mvmsg::MoveMessage{
                     *in_hand,
@@ -843,18 +803,6 @@ auto FigureBoard::  // FIXME move check and under check checks to separate funct
             if (check_for_when(what_next(in_hand->get_col()), {input.from, input.target}, Pos{}, {}, { in_hand_in_curr_tmp.get() })) {
                 side_events.emplace_back(mvmsg::Check{ });
             }
-            if (in_hand->get_type() == FigureType::King) {
-                // Фигура на которой сейчас стоим всё ещё учитывается!
-                if (check_for_when(in_hand->get_col(), {input.from, input.target}, curr)) {
-                    return std::unexpected{ ErrorEvent::CheckInThatTile };
-                }
-            }
-            else {
-                // Фигура на которой сейчас стоим всё ещё учитывается!
-                if (check_for_when(in_hand->get_col(), {input.from, input.target}, Pos{}, { in_hand_in_curr_tmp.get() }, {})) {
-                    return std::unexpected{ ErrorEvent::UnderCheck };
-                }
-            }
             return mvmsg::MoveMessage{
                 *in_hand,
                 input,
@@ -871,16 +819,6 @@ auto FigureBoard::  // FIXME move check and under check checks to separate funct
             if (check_for_when(what_next(in_hand->get_col()), {input.from}, Pos{}, {}, { in_hand_in_curr_tmp.get() })) {
                 side_events.emplace_back(mvmsg::Check{ });
             }
-            if (in_hand->get_type() == FigureType::King) {
-                if (check_for_when(in_hand->get_col(), {input.from}, curr)) {
-                    return std::unexpected{ ErrorEvent::CheckInThatTile };
-                }
-            }
-            else {
-                if (check_for_when(in_hand->get_col(), {input.from}, Pos{}, { in_hand_in_curr_tmp.get() }, {})) {
-                    return std::unexpected{ ErrorEvent::UnderCheck };
-                }
-            }
             return mvmsg::MoveMessage{
                 *in_hand,
                 input,
@@ -890,15 +828,38 @@ auto FigureBoard::  // FIXME move check and under check checks to separate funct
             };
         }
     }
-    return std::unexpected{ ErrorEvent::Unforeseen };
+    return std::nullopt;
 }
 
-/// <summary>
-/// Берет ход из истории ходов
-/// и воспроизводит его в обратном
-/// порядке
-/// </summary>
-/// <returns>Удалось ли отменить ход</returns>
+auto FigureBoard::  // FIXME move check and under check checks to separate function
+    move_check(const Figure* const in_hand, const Input& input, const FigureType promotion_choice) const noexcept
+        -> std::expected<mvmsg::MoveMessage, ErrorEvent>
+{
+    if (!(is_valid_coords(input.from) && is_valid_coords(input.target)) || !cont_fig(input.from))
+    {
+        return std::unexpected{ ErrorEvent::InvalidMove };
+    }
+
+    auto move_sus = determine_move(in_hand, input, promotion_choice);
+
+    if (!move_sus.has_value()) {
+        return std::unexpected{ ErrorEvent::InvalidMove };
+    }
+
+    FigureBoard next_board{ *this };
+
+    next_board.provide_move(*move_sus);
+
+    if (next_board.check_for_when(in_hand->get_col())) {
+        return std::unexpected{ ErrorEvent::UnderCheck };
+    }
+    if (next_board.check_for_when(what_next(in_hand->get_col()))) {
+        move_sus->side_evs.emplace_back(mvmsg::Check{ });
+    }
+
+    return *move_sus;
+}
+
 auto FigureBoard::
     undo_move() -> bool
 {
@@ -1001,10 +962,6 @@ auto FigureBoard::
     return true;
 }
 
-/// <summary>
-/// Совершает отменённый ход
-/// </summary>
-/// <returns>Удалось ли совершить ход</returns>
 auto FigureBoard::
     restore_move() -> bool
 {
@@ -1016,13 +973,6 @@ auto FigureBoard::
     return false;
 }
 
-/// <summary>
-/// Возвращает съеденную фигуру на доску
-/// </summary>
-/// <exception cref="std::invalid_argument">
-/// Фигуры с полученным идентификатором не было в съеденных
-/// </exception>
-/// <param name="id">Идентификатор фигуры</param>
 void FigureBoard::
     recapture_figure(const Id id)
 {

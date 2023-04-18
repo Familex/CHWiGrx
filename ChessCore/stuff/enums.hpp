@@ -187,7 +187,6 @@ inline const std::set<FigureType> PROMOTION_FIGURES{
 enum class ErrorEvent {
     InvalidMove,
     UnderCheck,
-    CheckInThatTile,
     Unforeseen
 };
 

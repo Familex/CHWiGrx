@@ -41,7 +41,7 @@ public:
     FN get_id() const noexcept -> Id {
         return id_;
     }
-    
+
     FN get_pos() const noexcept -> Pos {
         return position_;
     }

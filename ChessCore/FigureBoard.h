@@ -20,7 +20,6 @@ namespace figboard {
         using shift_broom = std::vector<std::vector<Pos>>;
 
         bool idw_{ true };
-        Id curr_id_{ };
         MoveLogger move_logger_{ };
         std::map<Pos, Figure*> figures_;
         std::vector<Figure*> captured_figures_;
@@ -31,15 +30,29 @@ namespace figboard {
     public:
         [[nodiscard]] explicit FigureBoard(board_repr::BoardRepr&&) noexcept;
 
+        CTOR FigureBoard() noexcept = default;
+
         void reset(board_repr::BoardRepr&&) noexcept;
 
         FigureBoard& operator =(board_repr::BoardRepr&&) noexcept;
 
-        void operator =(const board_repr::BoardRepr&) = delete;
+        void operator =(const board_repr::BoardRepr&) noexcept = delete;
 
         void apply_map(board_repr::BoardRepr&&) noexcept;
 
-        FigureBoard(const FigureBoard&) = delete;
+        [[nodiscard]] explicit FigureBoard(const FigureBoard& other) noexcept {
+            idw_ = other.idw_;
+            moves_ = other.moves_;
+            eats_ = other.eats_;
+            move_logger_ = other.move_logger_;
+            castling_ = other.castling_;
+            for (const auto& [pos, fig] : other.figures_) {
+                figures_.insert({ pos, figfab::FigureFabric::instance().create(fig, false).release() });
+            }
+            for (const auto& fig : other.captured_figures_) {
+                captured_figures_.push_back(figfab::FigureFabric::instance().create(fig, false).release());
+            }
+        } 
 
         [[nodiscard]] auto
             get_fig(const Pos position) const noexcept -> std::optional<Figure*>
@@ -295,6 +308,10 @@ namespace figboard {
                 delete fig;
             }
         }
+
+    private /* ---- Helper methods ---- */:
+        auto determine_move( const Figure*, const Input&, const FigureType ) const noexcept
+            -> std::optional<mvmsg::MoveMessage>;
     };
 
     FN is_valid_coords(const Pos position) noexcept -> bool {
