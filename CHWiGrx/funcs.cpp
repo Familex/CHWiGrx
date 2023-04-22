@@ -101,7 +101,6 @@ void draw_figure(const HDC hdc, const Figure* figure, const Pos begin_paint, con
     }
     
     // if it's a castling rook, add a star to right top corner
-    // FIXME draws rook instead of star.
     if (board.has_castling(figure->get_id()))
     {
         const HBITMAP h_star_bitmap = other_bitmaps["star"];
@@ -121,10 +120,6 @@ void draw_figure(const HDC hdc, const Figure* figure, const Pos begin_paint, con
     draw_figure(hdc, figure, begin_paint, is_transparent, main_window.get_cell_width(), main_window.get_cell_height());
 }
 
-/// <summary>
-/// Совершает ход
-/// </summary>
-/// <param name="h_wnd">Дескриптор окна</param>
 void make_move(const HWND h_wnd) {
     if (!is_bot_move() && !motion_input.is_current_turn(turn))
         return;     // Запрет хода вне очереди
@@ -308,8 +303,6 @@ std::string take_str_from_clip(const HWND h_wnd) {
     return text;
 }
 
-
-
 /// <summary>
 /// Создаёт экземпляр окна для выбранной фигуры
 /// </summary>
@@ -470,7 +463,7 @@ void MotionInput::clear() {
 void MotionInput::prepare(const Color turn) {
     in_hand_ = board_->get_fig(input_.from);
     input_.target = input_.from;
-    if (in_hand_.has_value() && in_hand_.value()->get_col() == turn) {
+    if (in_hand_.has_value() && in_hand_.value()->is_col(turn)) {
         calculate_possible_moves();
     }
 }

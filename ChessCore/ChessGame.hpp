@@ -228,7 +228,7 @@ public:
     {
         std::vector<std::pair<bool, Pos>> all_moves{ expand_broom(in_hand, to_ignore, ours, enemies) };
         const Pos in_hand_pos = in_hand->get_pos();
-        if (in_hand->get_type() == FigureType::Pawn) {
+        if (in_hand->is(FigureType::Pawn)) {
             // Ход пешки на 2 (смотрю свои фигуры на 2 линии)
             if (in_hand->is_col(Color::White)) {
                 if (in_hand_pos.x == (HEIGHT - 2) && idw_ && is_empty(in_hand_pos + Pos(-1, 0)) &&
@@ -278,7 +278,7 @@ public:
             }
         }
         // FIXME use Figure::is
-        if (in_hand->get_type() == FigureType::King) {
+        if (in_hand->is(FigureType::King)) {
             for (auto [king_end_col, rook_end_col] : { std::pair(6, 5), std::pair(2, 3) } ) {
                 if (const auto check_result_sus =
                     castling_check(in_hand, Input{ in_hand_pos, Pos{in_hand_pos.x, king_end_col} }, king_end_col, rook_end_col))
@@ -289,7 +289,7 @@ public:
                 }
             }
         }
-        if (in_hand->get_type() == FigureType::Rook) {
+        if (in_hand->is(FigureType::Rook)) {
             for (auto [king_end_col, rook_end_col] : { std::pair(6, 5), std::pair(2, 3) }) {
                 if (const auto check_result_sus =
                         castling_check(in_hand, Input{ in_hand_pos, Pos{in_hand_pos.x, rook_end_col} }, king_end_col, rook_end_col))
@@ -367,7 +367,7 @@ public:
         }
         for (const auto& figure : get_figures_of(col)) {
             for (const auto& [is_eat, curr] : expand_broom(figure, to_ignore, { to_defend })) {
-                if (figure->get_type() == FigureType::King) {
+                if (figure->is(FigureType::King)) {
                     if (is_eat
                         ? !check_for_when(col, to_ignore + figure->get_pos() + curr + to_defend, curr)
                         : !check_for_when(col, to_ignore + figure->get_pos() + to_defend, curr)
@@ -411,7 +411,7 @@ public:
         if (to_defend == Pos()) to_defend = king->get_pos();
         for (const auto& aspt : get_figures_of(col)) {
             for (const auto& [is_eat, curr] : expand_broom(aspt)) {
-                if (aspt->get_type() == FigureType::King) {
+                if (aspt->is(FigureType::King)) {
                     if (is_eat
                         ? not check_for_when(col, to_ignore + curr + to_defend, curr)
                         : not check_for_when(col, to_ignore + to_defend, curr)
@@ -536,7 +536,7 @@ public:
                        -> std::optional<CastlingCheckResult>
     {
         // Рокировка на g-фланг
-        const auto king_sus = in_hand->get_type() == FigureType::King ? in_hand : find_king(in_hand->get_col());
+        const auto king_sus = in_hand->is(FigureType::King ) ? in_hand : find_king(in_hand->get_col());
         if (!king_sus.has_value()) {
             return std::nullopt;
         }
@@ -552,13 +552,13 @@ public:
             for (Pos rook_aspt_pos{ king_pos };
                 is_valid_coords(rook_aspt_pos); rook_aspt_pos.y += step) {
                 if (auto rook_sus = get_fig(rook_aspt_pos);
-                        rook_sus.has_value() && rook_sus.value()->is_col(in_hand->get_col()) && rook_sus.value()->get_type() == FigureType::Rook)
+                        rook_sus.has_value() && rook_sus.value()->is_col(in_hand->get_col()) && rook_sus.value()->is(FigureType::Rook))
                 {
                     rook = rook_sus.value();
                     break;
                 }
             }
-            if ((rook->get_type() != FigureType::Rook)
+            if (!rook->is(FigureType::Rook)
                 || (king_pos.x != input.target.x && rook->get_pos().x != input.target.x) 
                 ) {
                 return std::nullopt;
@@ -573,8 +573,8 @@ public:
                 auto cell_sus = get_fig(king_pos);
                 castling_can_be_done &= 
                     !cell_sus.has_value() 
-                    || cell_sus.value()->get_id() == king->get_id() 
-                    || cell_sus.value()->get_id() == rook->get_id();
+                    || cell_sus.value()->is(king->get_id()) 
+                    || cell_sus.value()->is(rook->get_id());
             }
             // FIXME can this be done in loop body?
             castling_can_be_done &= 
@@ -582,8 +582,8 @@ public:
             const auto cell_sus = get_fig(Pos{ king_pos.x, rook_end_col });
             castling_can_be_done &= 
                 !cell_sus.has_value()
-                || cell_sus.value()->get_id() == king->get_id() 
-                || cell_sus.value()->get_id() == rook->get_id();
+                || cell_sus.value()->is(king->get_id())
+                || cell_sus.value()->is(rook->get_id());
             if (castling_can_be_done) {
                 return CastlingCheckResult{
                     rook,
@@ -911,20 +911,20 @@ public:
                 std::ranges::find_if(
                     board_.figures,
                     [](const auto& it) {
-                        return it.second->get_type() == FigureType::Knight
-                               || it.second->get_type() == FigureType::Bishop;
+                        return it.second->is(FigureType::Knight)
+                               || it.second->is(FigureType::Bishop);
                     }
                 ) != board_.figures.end()
             ) return true;
         size_t b_cell_bishops_cnt{};
         size_t w_cell_bishops_cnt{};
         for (const auto& fig : get_all_figures()) {
-            if (fig->get_type() == FigureType::Bishop)
+            if (fig->is(FigureType::Bishop))
                 if ((fig->get_pos().x + fig->get_pos().y) % 2)
                     ++b_cell_bishops_cnt;
                 else
                     ++w_cell_bishops_cnt;
-            else if (fig->get_type() != FigureType::King)
+            else if (!fig->is(FigureType::King))
                 return false; // при модификации функции не забыть тут поставить хотя бы goto
         }
         return not (b_cell_bishops_cnt && w_cell_bishops_cnt);
@@ -964,7 +964,7 @@ private /* ---- Helper methods ---- */:
         std::vector<mvmsg::SideEvent> side_events;
 
         // Castling breaks
-        if (in_hand->get_type() == FigureType::Rook && has_castling(in_hand->get_id())) {
+        if (in_hand->is(FigureType::Rook) && has_castling(in_hand->get_id())) {
             side_events.emplace_back( mvmsg::CastlingBreak{ in_hand->get_id() } );
         }
         else if (in_hand->is(FigureType::King)) {
@@ -1015,7 +1015,7 @@ private /* ---- Helper methods ---- */:
             // Promotion
             if (in_hand->is_col(Color::White) &&
                     (idw_ && input.target.x == 0 || !idw_ && input.target.x == (HEIGHT - 1)) ||
-                    in_hand->get_col() == Color::Black &&
+                    in_hand->is_col(Color::Black) &&
                     (!idw_ && input.target.x == 0 || idw_ && input.target.x == (HEIGHT - 1))
                     ) {
                 side_events.emplace_back(mvmsg::Promotion{ });
