@@ -490,6 +490,11 @@ public:
             return std::unexpected{ ErrorEvent::InvalidMove };
         }
 
+        /// Crutch... rook castlings must be in Figure field.
+        if (const auto rook_sus = get_fig(move_sus->input.target); rook_sus && rook_sus.value()->is(FigureType::Rook)) {
+            move_sus->side_evs.emplace_back(mvmsg::CastlingBreak{ rook_sus.value()->get_id() });
+        }
+
         ChessGame next_board{ *this };
 
         next_board.provide_move(*move_sus);
