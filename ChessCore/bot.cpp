@@ -31,7 +31,7 @@ Input bot::impl::random_move(const ChessGame& board, const Color turn) noexcept 
     for (const auto& fig : board.get_figures_of(turn)) {
         for (const auto& move : board.get_all_possible_moves(fig))
         {
-            possible_figure_moves.push_back({ fig, move });
+            possible_figure_moves.emplace_back(fig, move);
         }
     }
     if (possible_figure_moves.empty()) {

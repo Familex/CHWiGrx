@@ -9,7 +9,7 @@
 #include <map>
 #include <ranges>
 
-namespace figboard {
+namespace chess_game {
 
 constexpr int EN_PASSANT_INDENT = 4;
 
@@ -24,7 +24,6 @@ FN is_valid_coords(const Input input) noexcept -> bool {
     return is_valid_coords(input.from) && is_valid_coords(input.target);
 }
 
-// FIXME add constructors, assign operators, etc.
 class ChessGame {
     /*  x-axis from top to bottom (↓)  **
     **  y-axis from left to right (→)  */
@@ -44,6 +43,24 @@ public:
     }
 
     [[nodiscard]] explicit ChessGame() noexcept = default;
+
+    [[nodiscard]] explicit ChessGame(const ChessGame& other) noexcept {
+        idw_ = other.idw_;
+        moves_ = other.moves_;
+        eats_ = other.eats_;
+        move_logger_ = other.move_logger_;
+        castling_ = other.castling_;
+        for (const auto& [pos, fig] : other.board_.figures) {
+            board_.figures.insert({ pos, figfab::FigureFabric::instance().create(fig, true).release() });
+        }
+        for (const auto& fig : other.board_.captured_figures) {
+            board_.captured_figures.push_back(figfab::FigureFabric::instance().create(fig, true).release());
+        }
+    } 
+
+    ChessGame(ChessGame&&) noexcept = delete;
+    ChessGame& operator= (ChessGame&&) noexcept = delete;
+    ChessGame& operator= (ChessGame const&) noexcept = delete;
 
     ~ChessGame() noexcept = default;
 
@@ -75,20 +92,6 @@ public:
         }
         board_repr.figures.clear();  /* delete ownership */
     }
-
-    [[nodiscard]] explicit ChessGame(const ChessGame& other) noexcept {
-        idw_ = other.idw_;
-        moves_ = other.moves_;
-        eats_ = other.eats_;
-        move_logger_ = other.move_logger_;
-        castling_ = other.castling_;
-        for (const auto& [pos, fig] : other.board_.figures) {
-            board_.figures.insert({ pos, figfab::FigureFabric::instance().create(fig, false).release() });
-        }
-        for (const auto& fig : other.board_.captured_figures) {
-            board_.captured_figures.push_back(figfab::FigureFabric::instance().create(fig, false).release());
-        }
-    } 
 
     template <typename T>
     [[nodiscard]] auto
@@ -329,8 +332,9 @@ public:
             if (const Pos to_defend =
                 in_hand->is(FigureType::King)
                     ? move.second
+                    : Pos{};
             //                                            extra argument when checking the king ↓
-                    : Pos{}; !check_for_when(in_hand->get_col(), ignore, to_defend, { moved_fig.get() }))
+                     !check_for_when(in_hand->get_col(), ignore, to_defend, { moved_fig.get() }))
             {
                 all_possible_moves.push_back( move );
             }
@@ -1118,7 +1122,7 @@ private /* ---- Helper methods ---- */:
     }
 };
 
-}   // namespace figboard
+}   // namespace chess_game
 
-using figboard::ChessGame, figboard::is_valid_coords;
+using chess_game::ChessGame, chess_game::is_valid_coords;
 
