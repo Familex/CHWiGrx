@@ -3,7 +3,7 @@
 //      ^^^^^^^^^^^^^^^^^^^^^^^^^^^ for TransparentBlt
 #include "resource.hpp"
 #include "framework.hpp"
-#include "../ChessCore/FigureBoard.h"
+#include "../ChessCore/ChessGame.hpp"
 #include "../ChessCore/bot.h"
 #include <optional>
 #include <string>
@@ -76,7 +76,7 @@ inline constexpr COLORREF TRANSPARENCY_PLACEHOLDER{ RGB(0xFF, 0x0, 0x0) };
 /* single mutable globals */
 inline WindowState window_state = WindowState::Game;
 inline board_repr::BoardRepr start_board_repr{ DEFAULT_CHESS_BOARD_IDW };
-inline FigureBoard board{ board_repr::BoardRepr{ start_board_repr } /* <- explicit copy */ };
+inline ChessGame board{ board_repr::BoardRepr{ start_board_repr } /* <- explicit copy */ };
 inline Color turn{ Color::White };
 inline FigureType chose{ FigureType::Queen };
 inline std::map<char, std::map<char, HBITMAP>> pieces_bitmaps;
@@ -277,7 +277,7 @@ private:
 /* Текущее состояние ввода */
 class MotionInput {
 public:
-    explicit MotionInput(FigureBoard* board)
+    explicit MotionInput(ChessGame* board)
         : board_(board)
     { }
 
@@ -315,7 +315,7 @@ public:
     inline auto get_possible_moves() { return all_moves_; }
     inline bool is_figure_dragged(const Id id) const { return in_hand_.has_value() && in_hand_.value()->is(id) && is_curr_choice_moving_ && !input_order_by_two_; }
 private:
-    FigureBoard* board_;
+    ChessGame* board_;
     const Pos default_input_from_{ 0, -1 };
     Input input_{ default_input_from_, Pos{-1, -1} };
     int  input_order_by_one_{ 0 };

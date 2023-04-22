@@ -1,7 +1,7 @@
 #include "bot.h"
     
 Input bot::create_move(const bot::Type bot_type,
-                       const FigureBoard& board, 
+                       const ChessGame& board, 
                        const Color turn) noexcept {
     switch (bot_type) {
         case bot::Type::Random:
@@ -24,7 +24,7 @@ Input bot::create_move(const bot::Type bot_type,
     }
 }
 
-Input bot::impl::random_move(const FigureBoard& board, const Color turn) noexcept {
+Input bot::impl::random_move(const ChessGame& board, const Color turn) noexcept {
     std::vector<std::pair<Figure*, std::pair<bool, Pos>>> possible_figure_moves;
     //                    ~~~~~~~            ~~~~  ~~~
     //                      in_hand           is_eat target
@@ -41,18 +41,18 @@ Input bot::impl::random_move(const FigureBoard& board, const Color turn) noexcep
     return Input{ fig->get_pos(), move.second };
 }
 
-Input bot::impl::minimax_move(const FigureBoard& board, const Color turn) noexcept {
+Input bot::impl::minimax_move(const ChessGame& board, const Color turn) noexcept {
     return random_move(board, turn);
 }
 
-Input bot::impl::alpha_beta_move(const FigureBoard& board, const Color turn) noexcept {
+Input bot::impl::alpha_beta_move(const ChessGame& board, const Color turn) noexcept {
     return random_move(board, turn);
 }
 
-Input bot::impl::monte_carlo_move(const FigureBoard& board, const Color turn) noexcept {
+Input bot::impl::monte_carlo_move(const ChessGame& board, const Color turn) noexcept {
     return random_move(board, turn);
 }
 
-Input bot::impl::neural_network_move(const FigureBoard& board, const Color turn) noexcept {
+Input bot::impl::neural_network_move(const ChessGame& board, const Color turn) noexcept {
     return random_move(board, turn);
 }

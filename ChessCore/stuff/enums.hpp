@@ -164,7 +164,7 @@ struct AsString<FigureType> {
     }
 };
 
-inline const std::set<FigureType> PLAYABLE_FIGURES{
+inline const std::set<FigureType> PLAYABLE_FIGURES {
     FigureType::Pawn,
     FigureType::Knight,
     FigureType::Rook,
@@ -173,7 +173,7 @@ inline const std::set<FigureType> PLAYABLE_FIGURES{
     FigureType::King,
 };
 
-inline const std::set<FigureType> PROMOTION_FIGURES{
+inline const std::set<FigureType> PROMOTION_FIGURES {
     FigureType::Knight,
     FigureType::Rook,
     FigureType::Bishop,

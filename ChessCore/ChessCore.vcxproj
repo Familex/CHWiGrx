@@ -188,13 +188,13 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="bot.cpp" />
-    <ClCompile Include="FigureBoard.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="bot.h" />
-    <ClInclude Include="FigureBoard.h" />
+    <ClInclude Include="ChessGame.hpp" />
     <ClInclude Include="structs\board_repr.hpp" />
     <ClInclude Include="structs\figure.hpp" />
+    <ClInclude Include="structs\figure_board.hpp" />
     <ClInclude Include="structs\figure_fabric.hpp" />
     <ClInclude Include="structs\id.hpp" />
     <ClInclude Include="structs\input.hpp" />

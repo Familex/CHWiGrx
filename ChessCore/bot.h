@@ -2,7 +2,7 @@
 
 #include "stuff/stuff.hpp"
 #include "structs/figure.hpp"
-#include "FigureBoard.h"
+#include "ChessGame.hpp"
 
 namespace bot {
     
@@ -25,15 +25,15 @@ namespace bot {
         D3 = 3,
     };
 
-    [[nodiscard]] Input create_move(const Type, const FigureBoard&, Color turn) noexcept;
+    [[nodiscard]] Input create_move(const Type, const ChessGame&, Color turn) noexcept;
     
     namespace impl {
 
-        [[nodiscard]] Input random_move(const FigureBoard&, const Color) noexcept;
-        [[nodiscard]] Input minimax_move(const FigureBoard&, const Color) noexcept;
-        [[nodiscard]] Input alpha_beta_move(const FigureBoard&, const Color) noexcept;
-        [[nodiscard]] Input monte_carlo_move(const FigureBoard&, const Color) noexcept;
-        [[nodiscard]] Input neural_network_move(const FigureBoard&, const Color) noexcept;
+        [[nodiscard]] Input random_move(const ChessGame&, const Color) noexcept;
+        [[nodiscard]] Input minimax_move(const ChessGame&, const Color) noexcept;
+        [[nodiscard]] Input alpha_beta_move(const ChessGame&, const Color) noexcept;
+        [[nodiscard]] Input monte_carlo_move(const ChessGame&, const Color) noexcept;
+        [[nodiscard]] Input neural_network_move(const ChessGame&, const Color) noexcept;
 
     }
     

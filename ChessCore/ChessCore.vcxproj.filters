@@ -12,19 +12,16 @@
       <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
       <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
     </Filter>
+    <Filter Include="main">
+      <UniqueIdentifier>{0a4c44f7-0505-43e5-a132-1093fcb99196}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="FigureBoard.cpp">
-      <Filter>Исходные файлы</Filter>
-    </ClCompile>
     <ClCompile Include="bot.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="FigureBoard.h">
-      <Filter>structs</Filter>
-    </ClInclude>
     <ClInclude Include="structs\board_repr.hpp">
       <Filter>structs</Filter>
     </ClInclude>
@@ -81,6 +78,12 @@
     </ClInclude>
     <ClInclude Include="stuff\parse_step.hpp">
       <Filter>stuff</Filter>
+    </ClInclude>
+    <ClInclude Include="structs\figure_board.hpp">
+      <Filter>structs</Filter>
+    </ClInclude>
+    <ClInclude Include="ChessGame.hpp">
+      <Filter>main</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

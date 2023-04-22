@@ -1,6 +1,6 @@
 #include "pch.hpp"
 #include "CppUnitTest.h"
-#include "../ChessCore/FigureBoard.h"
+#include "../ChessCore/ChessGame.hpp"
 
 #include <algorithm>
 #include <string>
@@ -133,7 +133,7 @@ namespace FigureBoardTesting
             /* ---- board setup ---- */
             
             Id id_tmp{ 0_id };
-            FigureBoard b{ BoardRepr{ {}, col, idw } };
+            ChessGame b{ BoardRepr{ {}, col, idw } };
             
             // main figure
             b.place_fig(new Figure{ id_tmp++, figure_pos, col, ft });
@@ -181,7 +181,7 @@ namespace FigureBoardTesting
         }
 
         bool is_legal_move(Input&& move, FigureType ft) {
-            FigureBoard b{ BoardRepr{baseEmpty} };
+            ChessGame b{ BoardRepr{baseEmpty} };
             b.place_fig(new Figure{ 0_id, move.from, Color::White, ft });
             auto moves = b.get_all_moves(b.get_fig(0_id).value());
             return std::find_if(moves.begin(), moves.end(),
@@ -190,7 +190,7 @@ namespace FigureBoardTesting
 
         template <bool idw>
         std::size_t moves_count(Pos&& pos, FigureType ft) {
-            FigureBoard b{ BoardRepr{baseEmpty } };
+            ChessGame b{ BoardRepr{baseEmpty } };
             b.set_idw(idw);
             b.place_fig(new Figure{ 0_id, pos, Color::White, ft });
             return b.get_all_moves(b.get_fig(0_id).value()).size();
@@ -289,7 +289,7 @@ namespace FigureBoardTesting
 
             TEST_METHOD(LongMoves)
             {
-                FigureBoard board{ BoardRepr{base} };
+                ChessGame board{ BoardRepr{base} };
 
                 // white first moves
                 for (Id id_ = 17_id; id_ <= 24_id; ++id_) {
@@ -304,7 +304,7 @@ namespace FigureBoardTesting
 
             TEST_METHOD(LongMovesReversed)
             {
-                FigureBoard board{ BoardRepr{baseReversed} };
+                ChessGame board{ BoardRepr{baseReversed} };
 
                 // white first moves
                 for (Id id_ = 17_id; id_ <= 24_id; ++id_) {
@@ -320,7 +320,7 @@ namespace FigureBoardTesting
 
             TEST_METHOD(Detailed)
             {
-                FigureBoard board{ BoardRepr{base} };
+                ChessGame board{ BoardRepr{base} };
 
                 auto p_17 = board.get_fig_unsafe(17_id);
                 auto p_17_moves = board.get_all_possible_moves(p_17);
@@ -359,7 +359,7 @@ namespace FigureBoardTesting
             
             TEST_METHOD(DetailedReversed)
             {
-                FigureBoard board{ BoardRepr{baseReversed} };
+                ChessGame board{ BoardRepr{baseReversed} };
 
                 auto p_17 = board.get_fig_unsafe(17_id);
                 auto p_17_moves = board.get_all_possible_moves(p_17);
@@ -398,7 +398,7 @@ namespace FigureBoardTesting
 
             TEST_METHOD(EnPassant)
             {
-                FigureBoard board{ BoardRepr{
+                ChessGame board{ BoardRepr{
                     {new Figure(0_id, Pos{3, 2}, Color::White, FigureType::Pawn),
                      new Figure(1_id, Pos{1, 3}, Color::Black, FigureType::Pawn)},
                      Color::Black,
@@ -451,7 +451,7 @@ namespace FigureBoardTesting
 
             TEST_METHOD(EnPassantReversed)
             {
-                FigureBoard board{ BoardRepr{
+                ChessGame board{ BoardRepr{
                     {new Figure(0_id, Pos{3, 2}, Color::Black, FigureType::Pawn),
                      new Figure(1_id, Pos{1, 3}, Color::White, FigureType::Pawn)},
                      Color::White,
@@ -504,7 +504,7 @@ namespace FigureBoardTesting
             
             TEST_METHOD(Promotion)
             {
-                FigureBoard board{ BoardRepr{
+                ChessGame board{ BoardRepr{
                     {new Figure(0_id, Pos{1, 5}, Color::White, FigureType::Pawn)},
                      Color::White,
                      true
@@ -542,7 +542,7 @@ namespace FigureBoardTesting
 
             TEST_METHOD(PromotionReversed)
             {
-                FigureBoard board{ BoardRepr{
+                ChessGame board{ BoardRepr{
                     {new Figure(0_id, Pos{1, 5}, Color::Black, FigureType::Pawn)},
                      Color::Black,
                      false
@@ -1009,7 +1009,7 @@ namespace FigureBoardTesting
                         "46;7;1;W;R;45;7;4;W;K;47;7;7;W;R;[TW46;47;]<><>~",
                     })
                 {
-                    FigureBoard b{ BoardRepr::FromString( br ).value() };
+                    ChessGame b{ BoardRepr::FromString( br ).value() };
 
                     auto king = b.get_fig_unsafe(45_id);
                     auto moves = b.get_all_moves(king);

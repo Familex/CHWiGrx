@@ -44,7 +44,7 @@ public:
 namespace strong_typedef_utils {
     // Find way to declare this without implementation
     template <typename Tag, typename T>
-    FN underlying_type_impl(StrongTypedef<Tag, T>) noexcept -> T { return T{ }; };
+    FN underlying_type_impl(StrongTypedef<Tag, T>) noexcept -> T;
 
     template <typename T>
     using UnderlyingType = decltype(underlying_type_impl(std::declval<T>()));

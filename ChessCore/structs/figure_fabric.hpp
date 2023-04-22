@@ -50,7 +50,7 @@ namespace figfab {
         }
 
         [[nodiscard]] auto static submit_on(const Figure* who, const Pos on) noexcept -> std::unique_ptr<Figure> {
-            std::unique_ptr<Figure> tmp(FigureFabric::instance().create(who, true));
+            auto tmp(FigureFabric::instance().create(who, true));
             tmp->move_to(on);
             return tmp;
         }
