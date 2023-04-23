@@ -149,7 +149,8 @@ namespace board_repr {
 template <>
 struct FromString<board_repr::BoardRepr> {
 
-    FN parse_v2(const std::string_view sv, const FromStringMeta& meta) const noexcept
+    [[nodiscard]] auto
+        parse_v2(const std::string_view sv, const FromStringMeta& meta) const noexcept
         -> ParseEither<board_repr::BoardRepr, ParseErrorType>
     {
         board_repr::BoardRepr result{};
@@ -333,9 +334,7 @@ struct FromString<board_repr::BoardRepr> {
             if (idw_pos == std::string_view::npos) {
                 return PARSE_STEP_UNEXPECTED(ParseErrorType, Meta_CouldNotFindIdw, pos - 1);
             }
-            else {
-                meta.idw = false;
-            }
+            meta.idw = false;
         }
         else {
             meta.idw = true;
@@ -444,15 +443,13 @@ struct AsString<board_repr::BoardRepr> {
         
         meta.version = 2;
 
-        // calc min id_ in br.figures
-        if (!br.figures.empty()) {
-            meta.min_id = br.figures.front()->get_id();
-            for (const auto& fig : br.figures) {
-                if (fig->get_id() < meta.min_id) {
-                    meta.min_id = fig->get_id();
+        meta.min_id =
+            std::ranges::fold_left_first(
+                br.figures + br.captured_figures,
+                [](Figure const* acc, Figure const* fig) {
+                    return fig->get_id() < acc->get_id() ? fig : acc;
                 }
-            }
-        }
+            ).transform(&Figure::get_id).value_or(0_id);
         
         meta.max_pos_length = std::to_string(HEIGHT * WIDTH - 1).length();
         

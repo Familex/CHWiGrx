@@ -2,7 +2,6 @@
 
 #include "figure.hpp"
 
-#include <expected>
 #include <memory>
 
 namespace figfab {
