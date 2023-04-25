@@ -35,8 +35,6 @@ LRESULT CALLBACK figures_list_wndproc(const HWND h_wnd, const UINT message, cons
             si.nPage = 1;
             SetScrollInfo(h_wnd, SB_HORZ, &si, TRUE);
 
-            figures_list.recalculate_dimensions();
-
             si.fMask = SIF_POS | SIF_RANGE | SIF_PAGE;
             si.nPos = 0;
             si.nMax = static_cast<int>(figures_list.get_max_scroll());
@@ -61,8 +59,6 @@ LRESULT CALLBACK figures_list_wndproc(const HWND h_wnd, const UINT message, cons
             si.fMask = SIF_POS;
             si.nPos = static_cast<int>(figures_list.get_figures_in_row());
             SetScrollInfo(h_wnd, SB_HORZ, &si, TRUE);
-
-            figures_list.recalculate_dimensions();
 
             si.fMask = SIF_RANGE | SIF_PAGE;
             si.nMin = 0;

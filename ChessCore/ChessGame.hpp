@@ -94,16 +94,14 @@ public:
     }
 
     template <typename T>
-    [[nodiscard]] auto
-        get_fig(T&& value) const noexcept
+    FN get_fig(T&& value) const noexcept
         -> std::optional<Figure*>
     {
         return board_.get_fig(std::forward<T>(value));
     }
 
     template <typename T>
-    [[nodiscard]] auto
-        get_fig_unsafe(T&& value) const noexcept
+    FN get_fig_unsafe(T&& value) const noexcept
         -> Figure*
     {
         return board_.get_fig_unsafe(std::forward<T>(value));

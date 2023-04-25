@@ -136,72 +136,11 @@ LRESULT CALLBACK curr_choice_figures_list_wndproc(HWND, UINT, WPARAM, LPARAM);
 template <bool> LRESULT CALLBACK curr_choice_wndproc(HWND, UINT, WPARAM, LPARAM);
 LRESULT CALLBACK moves_list_wndproc(HWND, UINT, WPARAM, LPARAM);
 
+/*
+ * x-axis from left to right  (→) 
+ * y-axis from top  to bottom (↓)
+ */
 class WindowStats {
-    /* Габариты окна для отрисовки и захвата ввода */
-    /*  x-axis from left to right  (→)  **
-    **  y-axis from top  to bottom (↓)  */
-public:
-    WindowStats(const Pos window_pos, const Pos window_size)
-        : window_pos_(window_pos)
-        , window_size_(window_size)
-    { }
-
-    void virtual recalculate_cell_size() {
-        cell_size_ = Pos{ window_size_.x / WIDTH, window_size_.y / HEIGHT };
-    }
-    void virtual set_size(const int x /* LOWORD */, const int y /* HIWORD */) {
-        this->window_size_ = Pos{ x, y };
-        recalculate_cell_size();
-    }
-    void set_size(const Pos new_window_size) { set_size(new_window_size.x, new_window_size.y); }
-    void virtual set_size(const LPARAM l_param) { set_size(LOWORD(l_param), HIWORD(l_param)); }
-    inline void set_rect(const RECT rect) {
-        set_pos(rect.left, rect.top);
-        set_size(rect.right - rect.left, rect.bottom - rect.top);
-    }
-    inline int get_width() const { return window_size_.x; }
-    inline int get_height() const { return window_size_.y; }
-    inline virtual int get_width_with_extra() { return window_size_.x + extra_window_size_.x; }
-    inline virtual int get_height_with_extra() { return window_size_.y + extra_window_size_.y; }
-    inline int get_cell_width() const { return cell_size_.x; }
-    inline int get_cell_height() const { return cell_size_.y; }
-    inline void set_prev_lbutton_click(const Pos prev_lbutton_click) { this->prev_lbutton_click_ = prev_lbutton_click; }
-    inline Pos get_prev_lbutton_click() const { return prev_lbutton_click_; }
-    inline void set_pos(const Pos wp) { window_pos_ = wp; }
-    inline void set_pos(const int x, const int y) { window_pos_.x = x; window_pos_.y = y; }
-    inline void set_pos(const LPARAM l_param) { set_pos(LOWORD(l_param), HIWORD(l_param)); }
-    inline int get_window_pos_x() const { return window_pos_.x; }
-    inline int get_window_pos_y() const { return window_pos_.y; }
-    inline bool is_mouse_moved_enough(const Pos mouse) const
-    {
-        /* не используется */
-        const auto shift = Pos{
-            abs(mouse.x - prev_lbutton_click_.x),
-            abs(mouse.y - prev_lbutton_click_.y)
-        };
-        return shift.x >= units_to_move_enough_ &&
-               shift.y >= units_to_move_enough_;
-    }
-    inline Pos divide_by_cell_size(const int x, const int y) const { return Pos{ x / cell_size_.x, y / cell_size_.y }; }
-    inline Pos divide_by_cell_size(const LPARAM l_param) const { return divide_by_cell_size(LOWORD(l_param), HIWORD(l_param)); }
-    inline RECT get_cell(const Pos start) const
-    {
-        return {
-            .left = start.x * cell_size_.x + indentation_from_edges_,
-            .top = start.y * cell_size_.y + indentation_from_edges_,
-            .right = (start.x + 1) * cell_size_.x - indentation_from_edges_ * 2,
-            .bottom = (start.y + 1) * cell_size_.y - indentation_from_edges_ * 2
-        };
-    }
-    inline RECT get_cell(const int i, const int j) const { return get_cell(Pos{ i, j }); }
-    inline Pos get_figure_under_mouse(const POINT mouse) const
-    {
-        return divide_by_cell_size(
-            mouse.x - window_pos_.x,
-            mouse.y - window_pos_.y
-        ).change_axes();
-    }
-    virtual ~WindowStats() = default;
 protected:
     const int units_to_move_enough_{ 2 };
     const Pos extra_window_size_{ 0, HEADER_HEIGHT };
@@ -210,112 +149,382 @@ protected:
     Pos window_size_;
     Pos cell_size_{ window_size_.x / WIDTH, window_size_.y / HEIGHT };
     const int indentation_from_edges_{ 0 };
-} inline main_window{ Pos{ 300, 300 }, Pos{ 498, 498 } };
+
+    FN virtual recalculate() noexcept -> void {
+        cell_size_ = Pos{ window_size_.x / WIDTH, window_size_.y / HEIGHT };
+    }
+public:
+    CTOR WindowStats(const Pos window_pos, const Pos window_size)
+        : window_pos_(window_pos)
+        , window_size_(window_size) {
+        recalculate();
+    }
+
+    virtual constexpr ~WindowStats() = default;
+
+    FN virtual set_size(const int x /* LOWORD */, const int y /* HIWORD */) -> void {
+        this->window_size_ = Pos{ x, y };
+        recalculate();
+    }
+
+    FN set_size(const Pos new_window_size) -> void {
+        set_size(new_window_size.x, new_window_size.y);
+    }
+
+    FN virtual set_size(const LPARAM l_param) -> void {
+        set_size(LOWORD(l_param), HIWORD(l_param));
+    }
+
+    FN set_rect(const RECT rect) -> void {
+        set_pos(rect.left, rect.top);
+        set_size(rect.right - rect.left, rect.bottom - rect.top);
+    }
+
+    FN get_width() const -> int {
+        return window_size_.x;
+    }
+
+    FN get_height() const -> int {
+        return window_size_.y;
+    }
+
+    FN virtual get_width_with_extra() const -> int {
+        return window_size_.x + extra_window_size_.x;
+    }
+
+    FN virtual get_height_with_extra() const -> int {
+        return window_size_.y + extra_window_size_.y;
+    }
+
+    FN get_cell_width() const -> int {
+        return cell_size_.x;
+    }
+
+    FN get_cell_height() const -> int {
+        return cell_size_.y;
+    }
+
+    FN set_prev_lbutton_click(const Pos prev_lbutton_click) -> void {
+        this->prev_lbutton_click_ = prev_lbutton_click;
+    }
+
+    FN get_prev_lbutton_click() const -> Pos {
+        return prev_lbutton_click_;
+    }
+
+    FN set_pos(const Pos wp) -> void {
+        window_pos_ = wp;
+    }
+
+    FN set_pos(const int x, const int y) -> void {
+        window_pos_.x = x; window_pos_.y = y;
+    }
+
+    FN set_pos(const LPARAM l_param) -> void {
+        set_pos(LOWORD(l_param), HIWORD(l_param));
+    }
+
+    FN get_window_pos_x() const -> int {
+        return window_pos_.x;
+    }
+
+    FN get_window_pos_y() const -> int {
+        return window_pos_.y;
+    }
+
+    // Is not used
+    FN is_mouse_moved_enough(const Pos mouse) const -> bool
+    {
+        const auto shift = Pos{
+            abs(mouse.x - prev_lbutton_click_.x),
+            abs(mouse.y - prev_lbutton_click_.y)
+        };
+        return shift.x >= units_to_move_enough_ &&
+               shift.y >= units_to_move_enough_;
+    }
+
+    FN divide_by_cell_size(const int x, const int y) const -> Pos {
+        return Pos{ x / cell_size_.x, y / cell_size_.y };
+    }
+
+    FN divide_by_cell_size(const LPARAM l_param) const -> Pos {
+        return divide_by_cell_size(LOWORD(l_param), HIWORD(l_param));
+    }
+
+    FN get_cell(const Pos start) const -> RECT
+    {
+        return {
+            .left = start.x * cell_size_.x + indentation_from_edges_,
+            .top = start.y * cell_size_.y + indentation_from_edges_,
+            .right = (start.x + 1) * cell_size_.x - indentation_from_edges_ * 2,
+            .bottom = (start.y + 1) * cell_size_.y - indentation_from_edges_ * 2
+        };
+    }
+
+    FN get_cell(const int i, const int j) const  -> RECT {
+        return get_cell(Pos{ i, j });
+    }
+
+    FN get_figure_under_mouse(const POINT mouse) const -> Pos
+    {
+        return divide_by_cell_size(
+            mouse.x - window_pos_.x,
+            mouse.y - window_pos_.y
+        ).change_axes();
+    }
+
+} inline main_window {
+    Pos{ 300, 300 },
+    Pos{ 498, 498 }
+};
 
 class FiguresListStats final : public WindowStats {
+    size_t figures_in_row_{ 2 };
+    size_t max_figures_in_row_{ PLAYABLE_FIGURES.size() };
+    int curr_scroll_{ };
+    size_t max_scroll_{ };
+    long total_height_of_all_figures_{ };
+
+    // Not constexpr cause of std::ceil
+    void recalculate() noexcept override {
+        cell_size_.x = cell_size_.y = static_cast<int>(std::max(0, window_size_.x) / figures_in_row_);
+
+        const int rows_num =
+            static_cast<int>(
+                std::ceil(
+                    static_cast<double>(max_figures_in_row_)
+                    / static_cast<double>(figures_in_row_)
+                )
+            );
+        total_height_of_all_figures_ = rows_num * cell_size_.y;
+        max_scroll_ = std::max(static_cast<int>(total_height_of_all_figures_), window_size_.y);
+    }
 public:
-    FiguresListStats(const Pos window_pos, const Pos window_size, const size_t figures_in_row, const size_t figures_num)
+    [[nodiscard]] explicit FiguresListStats(const Pos window_pos, const Pos window_size, const size_t figures_in_row, const size_t figures_num)
             : WindowStats(window_pos, window_size)
             , figures_in_row_(figures_in_row)
     {
-        const int rows_num = static_cast<int>(ceil(figures_num / static_cast<double>(figures_in_row)));
-        total_height_of_all_figures_ = static_cast<int>(rows_num * cell_size_.y);
+        recalculate();
     }
-    void set_size(const int w, const int h) override {
-        WindowStats::set_size(w, h);
-        recalculate_dimensions();
+
+    FN set_size(const LPARAM l_param) -> void override {
+        WindowStats::set_size(LOWORD(l_param), HIWORD(l_param));
     }
-    void set_size(const LPARAM l_param) override { set_size(LOWORD(l_param), HIWORD(l_param)); }
-    void recalculate_cell_size() override {
-        cell_size_.x = cell_size_.y = static_cast<int>(std::max(0, window_size_.x) / figures_in_row_);
-    }
-    inline int get_width_with_extra() override {
+
+    [[nodiscard]] auto get_width_with_extra() const -> int override {
         // Может не быть слайдера TODO 
         return WindowStats::get_width_with_extra() + SCROLLBAR_THICKNESS;
     }
-    inline int get_height_with_extra() override {
+
+    [[nodiscard]] auto get_height_with_extra() const -> int override {
         return WindowStats::get_height_with_extra() + SCROLLBAR_THICKNESS;
     }
-    void recalculate_dimensions() {
-        recalculate_cell_size();
-        const int rows_num = static_cast<int>(ceil(max_figures_in_row_ / static_cast<double>(figures_in_row_)));
-        total_height_of_all_figures_ = static_cast<int>(rows_num * cell_size_.y);
-        max_scroll_ = std::max(static_cast<int>(total_height_of_all_figures_), window_size_.y);
+
+    FN get_figures_in_row() const -> std::size_t {
+        return figures_in_row_;
     }
-    inline size_t get_figures_in_row() const { return figures_in_row_; }
-    inline void inc_figures_in_row() { if (figures_in_row_ < max_figures_in_row_) figures_in_row_++; }
-    inline void dec_figures_in_row() { if (figures_in_row_ != 1) figures_in_row_--; }
-    inline size_t get_max_scroll() const { return max_scroll_; }
+
+    FN inc_figures_in_row() -> void {
+        if (figures_in_row_ >= max_figures_in_row_) return;
+
+        figures_in_row_++;
+        recalculate();
+    }
+
+    FN dec_figures_in_row() -> void {
+        if (figures_in_row_ <= 1) return;
+
+        figures_in_row_--;
+        recalculate();
+    }
+
+    FN get_max_scroll() const -> std::size_t {
+        return max_scroll_;
+    }
+
     // returns delta
-    inline int add_to_curr_scroll(const int val) {
+    FN add_to_curr_scroll(const int val) -> int {
         const int old_scroll = curr_scroll_;
         curr_scroll_ = std::min(static_cast<int>(max_scroll_), std::max(0, curr_scroll_ + val));
         return curr_scroll_ - old_scroll;
     }
-    inline int get_curr_scroll() const { return curr_scroll_; }
-    inline int set_curr_scroll(const int new_scroll) {
+
+    FN get_curr_scroll() const -> int {
+        return curr_scroll_;
+    }
+
+    FN set_curr_scroll(const int new_scroll) -> int {
         const int delta = new_scroll - curr_scroll_;
         curr_scroll_ = new_scroll;
         return delta;
     }
-    inline size_t get_all_figures_height() const { return total_height_of_all_figures_; }
-    inline void clear_scrolling() {
+
+    FN get_all_figures_height() const -> std::size_t {
+        return total_height_of_all_figures_;
+    }
+
+    FN clear_scrolling() -> void {
         max_scroll_ = 0;
         curr_scroll_ = 0;
     }
-private:
-    size_t figures_in_row_{ 2 };
-    size_t max_figures_in_row_{ PLAYABLE_FIGURES.size() };
-    int curr_scroll_{ 0 };
-    size_t max_scroll_{ 0 };
-    long total_height_of_all_figures_;
-} inline figures_list{
-    FIGURES_LIST_WINDOW_DEFAULT_POS, FIGURES_LIST_WINDOW_DEFAULT_DIMENSIONS,
-    2, PLAYABLE_FIGURES.size()
+} inline figures_list {
+    FIGURES_LIST_WINDOW_DEFAULT_POS,
+    FIGURES_LIST_WINDOW_DEFAULT_DIMENSIONS,
+    2,
+    PLAYABLE_FIGURES.size()
 };
 
 /* Текущее состояние ввода */
 class MotionInput {
 public:
-    explicit MotionInput(ChessGame* board)
-        : board_(board)
+    CTOR MotionInput(ChessGame& board)
+        : board_{ board }
     { }
 
-    void clear();
-    void prepare(Color turn);
-    void calculate_possible_moves();
-    void init_curr_choice_window(HWND, WNDPROC);
-    inline void activate_by_click() { 
+    void clear() {
+        is_lbutton_down_ = false;
+        DestroyWindow(curr_chose_window_);
+        is_curr_choice_moving_ = false;
+        deactivate_by_click();
+        deactivate_by_pos();
+        in_hand_ = std::nullopt;
+        input_ = Input{ Pos{0, -1}, Pos{-1, -1} };
+        all_moves_.clear();
+    }
+
+    FN prepare(const Color turn) {
+        in_hand_ = board_.get_fig(input_.from);
+        input_.target = input_.from;
+        if (in_hand_.has_value() && in_hand_.value()->is_col(turn)) {
+            calculate_possible_moves();
+        }
+    }
+
+    FN calculate_possible_moves() -> void {
+        if (in_hand_.has_value()) {
+            all_moves_ = board_.get_all_possible_moves(in_hand_.value());
+        }
+    }
+
+    void init_curr_choice_window(const HWND h_wnd, const WNDPROC callback) { 
+        if (!in_hand_.has_value()) return;
+        
+        is_curr_choice_moving_ = true;
+        POINT mouse{};
+        GetCursorPos(&mouse);
+        curr_chose_window_ = create_curr_choice_window(h_wnd, in_hand_.value(), mouse,
+            main_window.get_cell_width(), main_window.get_cell_height(),
+            callback);
+        RedrawWindow(h_wnd, nullptr, nullptr, RDW_INVALIDATE | RDW_UPDATENOW);  // Форсирую перерисовку, т.к. появляется артефакт
+        SendMessage(curr_chose_window_, WM_NCLBUTTONDOWN, HTCAPTION, MAKELPARAM(mouse.x, mouse.y));
+    }
+
+    FN activate_by_click() -> void { 
         input_order_by_two_ = true;
         input_order_by_one_ = 2;
     }
-    inline void deactivate_by_click() { input_order_by_two_ = false; }
-    inline void deactivate_by_pos() { input_order_by_one_ = 0; }
-    inline void set_target(const Pos target) { input_.target = target; }
-    inline void set_target(const int x, const int y) { input_.target = Pos{x, y}; }
-    inline void set_from(const Pos from) { input_.from = from; }
-    inline void set_in_hand(Figure* in_hand) { this->in_hand_ = in_hand; }
-    inline void clear_hand() { this->in_hand_ = std::nullopt; }
-    inline bool is_target_at_input() const { return input_.from == input_.target; }
-    inline void set_lbutton_up() { is_lbutton_down_ = false; }
-    inline void set_lbutton_down() { is_lbutton_down_ = true; }
-    inline bool is_active_by_click() const { return input_order_by_two_; }
-    inline bool is_current_turn(const Color turn) const { return in_hand_.has_value() && in_hand_.value()->is_col(turn); }
-    inline auto get_in_hand() const { return in_hand_; }
-    inline auto get_input() const { return input_; }
-    inline void shift_from(const Pos shift, const int max_x, const int max_y) { input_.from.loop_add(shift, max_x, max_y); }
-    inline void shift_target(const Pos shift, const int max_x, const int max_y) { input_.target.loop_add(shift, max_x, max_y); }
-    inline void by_pos_to_next() { ++input_order_by_one_; }
-    inline void set_from_x(const int val) { input_.from.x = val; }
-    inline void set_from_y(const int val) { input_.from.y = val; }
-    inline void set_target_x(const int val) { input_.target.x = val; }
-    inline void set_target_y(const int val) { input_.target.y = val; }
-    inline auto get_state_by_pos() const { return input_order_by_one_; }
-    inline bool is_drags() const { return !is_curr_choice_moving_ && is_lbutton_down_ && in_hand_.has_value(); }
-    inline auto get_possible_moves() { return all_moves_; }
-    inline bool is_figure_dragged(const Id id) const { return in_hand_.has_value() && in_hand_.value()->is(id) && is_curr_choice_moving_ && !input_order_by_two_; }
+
+    FN deactivate_by_click() -> void {
+        input_order_by_two_ = false;
+    }
+
+    FN deactivate_by_pos() -> void {
+        input_order_by_one_ = 0;
+    }
+
+    FN set_target(const Pos target) -> void {
+        input_.target = target;
+    }
+
+    FN set_target(const int x, const int y) -> void {
+        input_.target = Pos{x, y};
+    }
+
+    FN set_from(const Pos from) -> void {
+        input_.from = from;
+    }
+
+    FN set_in_hand(Figure* in_hand) -> void {
+        this->in_hand_ = in_hand;
+    }
+
+    FN clear_hand() -> void {
+        this->in_hand_ = std::nullopt;
+    }
+
+    FN is_target_at_input() const  -> bool {
+        return input_.from == input_.target;
+    }
+
+    FN set_lbutton_up() -> void {
+        is_lbutton_down_ = false;
+    }
+
+    FN set_lbutton_down() -> void {
+        is_lbutton_down_ = true;
+    }
+
+    FN is_active_by_click() const -> bool {
+        return input_order_by_two_;
+    }
+
+    FN is_current_turn(const Color turn) const -> bool {
+        return in_hand_.has_value() && in_hand_.value()->is_col(turn);
+    }
+
+    FN get_in_hand() const {
+        return in_hand_;
+    }
+
+    FN get_input() const  -> Input {
+        return input_;
+    }
+
+    FN shift_from(const Pos shift, const int max_x, const int max_y) -> void {
+        input_.from.loop_add(shift, max_x, max_y);
+    }
+
+    FN shift_target(const Pos shift, const int max_x, const int max_y) -> void {
+        input_.target.loop_add(shift, max_x, max_y);
+    }
+
+    FN by_pos_to_next() -> void {
+        ++input_order_by_one_;
+    }
+
+    FN set_from_x(const int val) -> void {
+        input_.from.x = val;
+    }
+
+    FN set_from_y(const int val) -> void {
+        input_.from.y = val;
+    }
+
+    FN set_target_x(const int val) -> void {
+        input_.target.x = val;
+    }
+
+    FN set_target_y(const int val) -> void {
+        input_.target.y = val;
+    }
+
+    FN get_state_by_pos() const -> int {
+        return input_order_by_one_;
+    }
+
+    FN is_drags() const -> bool {
+        return !is_curr_choice_moving_ && is_lbutton_down_ && in_hand_.has_value();
+    }
+
+    FN get_possible_moves() const {
+        return all_moves_;
+    }
+
+    FN is_figure_dragged(const Id id) const -> bool {
+        return in_hand_.has_value() && in_hand_.value()->is(id) && is_curr_choice_moving_ && !input_order_by_two_;
+    }
 private:
-    ChessGame* board_;
+    ChessGame& board_;
     const Pos default_input_from_{ 0, -1 };
     Input input_{ default_input_from_, Pos{-1, -1} };
     int  input_order_by_one_{ 0 };
@@ -325,4 +534,5 @@ private:
     bool is_curr_choice_moving_{ false };
     std::optional<Figure*> in_hand_{ std::nullopt };
     std::vector<std::pair<bool, Pos>> all_moves_{};
-} inline motion_input{ &board };
+} inline motion_input{ board };
+

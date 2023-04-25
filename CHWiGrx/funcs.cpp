@@ -428,46 +428,6 @@ void set_menu_checkbox(const HWND h_wnd, const UINT menu_item, const bool value)
     SetMenuItemInfoW(h_menu, menu_item, FALSE, &item_info);
 }
 
-// Создаёт окно c выбранной фигурой и привязывает к мыши
-void MotionInput::init_curr_choice_window(const HWND h_wnd, const WNDPROC callback) {
-    if (!in_hand_.has_value()) return;
-    
-    is_curr_choice_moving_ = true;
-    POINT mouse{};
-    GetCursorPos(&mouse);
-    curr_chose_window_ = create_curr_choice_window(h_wnd, in_hand_.value(), mouse,
-        main_window.get_cell_width(), main_window.get_cell_height(),
-        callback);
-    RedrawWindow(h_wnd, nullptr, nullptr, RDW_INVALIDATE | RDW_UPDATENOW);  // Форсирую перерисовку, т.к. появляется артефакт
-    SendMessage(curr_chose_window_, WM_NCLBUTTONDOWN, HTCAPTION, MAKELPARAM(mouse.x, mouse.y));
-}
-
-// Заполняет поле возможных ходов для текущей фигуры
-void MotionInput::calculate_possible_moves() {
-    if (in_hand_.has_value()) {
-        all_moves_ = board_->get_all_possible_moves(in_hand_.value());
-    }
-}
-
-void MotionInput::clear() {
-    is_lbutton_down_ = false;
-    DestroyWindow(curr_chose_window_);
-    is_curr_choice_moving_ = false;
-    deactivate_by_click();
-    deactivate_by_pos();
-    in_hand_ = std::nullopt;
-    input_ = Input{ Pos{0, -1}, Pos{-1, -1} };
-    all_moves_.clear();
-}
-
-void MotionInput::prepare(const Color turn) {
-    in_hand_ = board_->get_fig(input_.from);
-    input_.target = input_.from;
-    if (in_hand_.has_value() && in_hand_.value()->is_col(turn)) {
-        calculate_possible_moves();
-    }
-}
-
 void update_main_window_title(HWND h_wnd) {
     /* CHWiGrx vs bot [check] */
     std::wstring title = L"CHWiGrx ";
