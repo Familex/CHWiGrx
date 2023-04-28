@@ -1,7 +1,11 @@
 #include "../declarations.hpp"
 
-LRESULT CALLBACK
-curr_choice_figures_list_wndproc(const HWND h_wnd, const UINT u_msg, const WPARAM w_param, const LPARAM l_param)
+LRESULT CALLBACK curr_choice_figures_list_wndproc(
+    const HWND h_wnd,
+    const UINT u_msg,
+    const WPARAM w_param,
+    const LPARAM l_param
+) noexcept
 {
     // выбранная фигура временная => удаляется при закрытии окна
     static constexpr int TO_DESTROY_TIMER_ID { FIGURES_LIST_CHOICE_TO_DESTROY_TIMER_ID };

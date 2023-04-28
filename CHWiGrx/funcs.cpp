@@ -6,7 +6,7 @@ bool prepare_window(
     const UINT title_id,
     const UINT window_class_id,
     WNDCLASSEX wcex
-)
+) noexcept
 {
     constexpr auto max_load_string = 100;
 
@@ -29,7 +29,7 @@ bool prepare_window(
 }
 
 // Цикл сообщений
-int window_loop(const HINSTANCE h_instance)
+int window_loop(const HINSTANCE h_instance) noexcept
 {
     MSG msg;
     const HACCEL h_accelerators = LoadAccelerators(h_instance, MAKEINTRESOURCE(IDC_CHWIGRX));
@@ -51,7 +51,7 @@ bool init_instance(
     const LPTSTR sz_title,
     const LPTSTR sz_window_class,
     const int n_cmd_show
-)
+) noexcept
 {
     h_inst = h_instance;    // Сохранить маркер экземпляра в глобальной переменной
 
@@ -80,7 +80,7 @@ bool init_instance(
 }
 
 // Обработчик сообщений для окна "О программе".
-INT_PTR CALLBACK about_proc(const HWND h_dlg, const UINT message, const WPARAM w_param, const LPARAM l_param)
+INT_PTR CALLBACK about_proc(const HWND h_dlg, const UINT message, const WPARAM w_param, const LPARAM l_param) noexcept
 {
     UNREFERENCED_PARAMETER(l_param);
     switch (message) {
@@ -104,7 +104,7 @@ void draw_figure(
     const bool is_transparent,
     const int w,
     const int h
-)
+) noexcept
 {
     const int w_beg = begin_paint.y * w;
     const int h_beg = begin_paint.x * h;
@@ -147,12 +147,12 @@ void draw_figure(
     DeleteDC(hdc_mem);
 }
 
-void draw_figure(const HDC hdc, const Figure* figure, const Pos begin_paint, const bool is_transparent)
+void draw_figure(const HDC hdc, const Figure* figure, const Pos begin_paint, const bool is_transparent) noexcept
 {
     draw_figure(hdc, figure, begin_paint, is_transparent, main_window.get_cell_width(), main_window.get_cell_height());
 }
 
-void make_move(const HWND h_wnd)
+void make_move(const HWND h_wnd) noexcept
 {
     if (!is_bot_move() && !motion_input.is_current_turn(turn))
         return;    // Запрет хода вне очереди
@@ -238,9 +238,9 @@ void make_move(const HWND h_wnd)
     }
 }
 
-bool is_bot_move() { return bot_type != bot::Type::None && turn == bot_turn; }
+bool is_bot_move() noexcept { return bot_type != bot::Type::None && turn == bot_turn; }
 
-void restart()
+void restart() noexcept
 {
     board_repr::BoardRepr start_board_repr_copy { start_board_repr };    // explicit copy constructor
     board.reset(std::move(start_board_repr_copy));
@@ -248,7 +248,7 @@ void restart()
     turn = start_board_repr.turn;
 }
 
-bool cpy_str_to_clip(const HWND h_wnd, const std::string_view s)
+bool cpy_str_to_clip(const HWND h_wnd, const std::string_view s) noexcept
 {
     if (!OpenClipboard(h_wnd)) {
         debug_print("Failed to open clipboard");
@@ -290,7 +290,7 @@ bool cpy_str_to_clip(const HWND h_wnd, const std::string_view s)
     return true;
 }
 
-std::string take_str_from_clip(const HWND h_wnd)
+std::string take_str_from_clip(const HWND h_wnd) noexcept
 {
     if (!IsClipboardFormatAvailable(CF_TEXT)) {
         debug_print("CF_TEXT format not available");
@@ -337,7 +337,7 @@ std::string take_str_from_clip(const HWND h_wnd)
 /// <param name="h">Высота фигуры</param>
 /// <param name="callback">Функция окна</param>
 /// <returns>Дескриптор окна</returns>
-HWND create_curr_choice_window(HWND parent, Figure* in_hand, POINT mouse, int w, int h, const WNDPROC callback)
+HWND create_curr_choice_window(HWND parent, Figure* in_hand, POINT mouse, int w, int h, const WNDPROC callback) noexcept
 {
     UnregisterClass(CURR_CHOICE_WINDOW_CLASS_NAME, GetModuleHandle(nullptr));
     WNDCLASSEX wc { sizeof(WNDCLASSEX) };
@@ -394,7 +394,7 @@ void on_lbutton_up(
     const LPARAM l_param,
     const Pos where_fig,
     const bool use_move_check_and_log
-)
+) noexcept
 {
     motion_input.set_lbutton_up();
     motion_input.deactivate_by_pos();
@@ -438,7 +438,7 @@ void on_lbutton_up(
     }
 }
 
-void on_lbutton_down(const HWND h_wnd, const LPARAM l_param)
+void on_lbutton_down(const HWND h_wnd, const LPARAM l_param) noexcept
 {
     // bot move guard
     if (window_state == WindowState::Game && bot_type != bot::Type::None && turn == bot_turn) {
@@ -461,7 +461,7 @@ void on_lbutton_down(const HWND h_wnd, const LPARAM l_param)
     InvalidateRect(h_wnd, nullptr, NULL);
 };
 
-void set_menu_checkbox(const HWND h_wnd, const UINT menu_item, const bool value)
+void set_menu_checkbox(const HWND h_wnd, const UINT menu_item, const bool value) noexcept
 {
     const HMENU h_menu = GetMenu(h_wnd);
     MENUITEMINFO item_info;
@@ -474,7 +474,7 @@ void set_menu_checkbox(const HWND h_wnd, const UINT menu_item, const bool value)
     SetMenuItemInfoW(h_menu, menu_item, FALSE, &item_info);
 }
 
-void update_main_window_title(HWND h_wnd)
+void update_main_window_title(HWND h_wnd) noexcept
 {
     /* CHWiGrx vs bot [check] */
     std::wstring title = L"CHWiGrx ";
@@ -540,20 +540,20 @@ void update_main_window_title(HWND h_wnd)
     SetWindowText(h_wnd, title.c_str());
 }
 
-bool copy_repr_to_clip(const HWND h_wnd)
+bool copy_repr_to_clip(const HWND h_wnd) noexcept
 {
     const board_repr::BoardRepr board_repr { board.get_repr(turn, save_all_moves) };
     const auto board_repr_str = AsString<board_repr::BoardRepr> {}(board_repr);
     return cpy_str_to_clip(h_wnd, board_repr_str);
 }
 
-auto take_repr_from_clip(const HWND h_wnd) -> ParseEither<board_repr::BoardRepr, ParseErrorType>
+auto take_repr_from_clip(const HWND h_wnd) noexcept -> ParseEither<board_repr::BoardRepr, ParseErrorType>
 {
     return FromString<board_repr::BoardRepr> {}(take_str_from_clip(h_wnd));
 }
 
 /* Отрисовать фоновую доску */
-void draw_board(const HDC hdc)
+void draw_board(const HDC hdc) noexcept
 {
     for (int i {}; i < HEIGHT; ++i) {
         for (int j {}; j < WIDTH; ++j) {
@@ -569,7 +569,7 @@ void draw_board(const HDC hdc)
 }
 
 // Положение курсора и выделенной клетки
-void draw_input(const HDC hdc_mem, const Input input)
+void draw_input(const HDC hdc_mem, const Input input) noexcept
 {
     static const HBRUSH RED { CreateSolidBrush(RGB(255, 0, 0)) };
     static const HBRUSH BLUE { CreateSolidBrush(RGB(0, 0, 255)) };
@@ -580,7 +580,7 @@ void draw_input(const HDC hdc_mem, const Input input)
 }
 
 /* Отрисовать фигуры на поле (та, что в руке, не рисуется) */
-void draw_figures_on_board(const HDC hdc)
+void draw_figures_on_board(const HDC hdc) noexcept
 {
     for (const auto& figure : board.get_all_figures()) {
         if (!motion_input.is_figure_dragged(figure->get_id())) {
@@ -589,7 +589,7 @@ void draw_figures_on_board(const HDC hdc)
     }
 }
 
-void change_checkerboard_color_theme(const HWND h_wnd)
+void change_checkerboard_color_theme(const HWND h_wnd) noexcept
 {
     if (window_state == WindowState::Edit) {
         std::swap(checkerboard_one, checkerboard_two);
@@ -603,7 +603,7 @@ void change_checkerboard_color_theme(const HWND h_wnd)
     InvalidateRect(h_wnd, nullptr, NULL);
 }
 
-void update_edit_menu_variables(const HWND h_wnd)
+void update_edit_menu_variables(const HWND h_wnd) noexcept
 {
     for (const auto menu_id : { IDM_WHITE_START, IDM_BLACK_START, IDM_IDW_TRUE, IDM_IDW_FALSE }) {
         set_menu_checkbox(h_wnd, menu_id, false);
@@ -620,7 +620,7 @@ void update_edit_menu_variables(const HWND h_wnd)
         set_menu_checkbox(h_wnd, IDM_IDW_FALSE, true);
 }
 
-void update_bot_menu_variables(const HWND h_wnd)
+void update_bot_menu_variables(const HWND h_wnd) noexcept
 {
     for (const auto menu_id : {
              IDM_TOGGLE_BOT,
@@ -662,7 +662,7 @@ void update_bot_menu_variables(const HWND h_wnd)
     }
 }
 
-void update_game_menu_variables(const HWND h_wnd)
+void update_game_menu_variables(const HWND h_wnd) noexcept
 {
     update_bot_menu_variables(h_wnd);
 
@@ -705,7 +705,7 @@ void update_game_menu_variables(const HWND h_wnd)
     }
 }
 
-HWND create_figures_list_window(HWND parent)
+HWND create_figures_list_window(HWND parent) noexcept
 {
     UnregisterClass(FIGURES_LIST_WINDOW_CLASS_NAME, GetModuleHandle(nullptr));
     WNDCLASSEX wc { sizeof(WNDCLASSEX) };

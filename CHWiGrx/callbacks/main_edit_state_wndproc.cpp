@@ -1,7 +1,11 @@
 #include "../declarations.hpp"
 
-LRESULT CALLBACK
-mainproc::main_edit_state_wndproc(const HWND h_wnd, const UINT message, const WPARAM w_param, const LPARAM l_param)
+LRESULT CALLBACK mainproc::main_edit_state_wndproc(
+    const HWND h_wnd,
+    const UINT message,
+    const WPARAM w_param,
+    const LPARAM l_param
+) noexcept
 {
     static PAINTSTRUCT ps {};
     static HBITMAP hbm_mem {};

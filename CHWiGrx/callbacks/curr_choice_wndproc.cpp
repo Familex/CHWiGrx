@@ -1,8 +1,12 @@
 #include "../declarations.hpp"
 
 template<bool CheckMovesValidity>
-LRESULT CALLBACK
-curr_choice_wndproc<CheckMovesValidity>(const HWND h_wnd, const UINT u_msg, const WPARAM w_param, const LPARAM l_param)
+LRESULT CALLBACK curr_choice_wndproc<CheckMovesValidity>(
+    const HWND h_wnd,
+    const UINT u_msg,
+    const WPARAM w_param,
+    const LPARAM l_param
+) noexcept
 {
     static constexpr int TO_DESTROY_TIMER_ID { MAIN_WINDOW_CHOICE_TO_DESTROY_TIMER_ID };
     switch (u_msg) {

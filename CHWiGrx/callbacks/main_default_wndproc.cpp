@@ -2,7 +2,8 @@
 
 #include <codecvt>
 
-LRESULT CALLBACK main_default_wndproc(const HWND h_wnd, const UINT message, const WPARAM w_param, const LPARAM l_param)
+LRESULT CALLBACK
+main_default_wndproc(const HWND h_wnd, const UINT message, const WPARAM w_param, const LPARAM l_param) noexcept
 {
     switch (message) {
         case WM_COMMAND:
