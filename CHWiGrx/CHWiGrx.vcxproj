@@ -166,6 +166,7 @@
     <ClInclude Include="declarations.hpp" />
     <ClInclude Include="framework.hpp" />
     <ClInclude Include="resource.hpp" />
+    <ClInclude Include="src\create_window.hpp" />
     <ClInclude Include="targetver.hpp" />
   </ItemGroup>
   <ItemGroup>

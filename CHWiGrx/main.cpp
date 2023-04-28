@@ -1,9 +1,11 @@
 #include "declarations.hpp"
 
-int APIENTRY wWinMain(const HINSTANCE hInstance,
-                      [[maybe_unused]] const HINSTANCE hPrevInstance,
-                      [[maybe_unused]] const LPWSTR lpCmdLine,
-                      int nCmdShow)
+int APIENTRY wWinMain(
+    const HINSTANCE hInstance,
+    [[maybe_unused]] const HINSTANCE hPrevInstance,
+    [[maybe_unused]] const LPWSTR lpCmdLine,
+    int nCmdShow
+)
 {
     {
         pieces_bitmaps['B']['P'] = LoadBitmap(hInstance, MAKEINTRESOURCE(IDB_BLACK_PAWN));
@@ -24,28 +26,32 @@ int APIENTRY wWinMain(const HINSTANCE hInstance,
         other_bitmaps["star"] = LoadBitmap(hInstance, MAKEINTRESOURCE(IDB_STAR));
     }
 
-    #ifdef _DEBUG
+#ifdef _DEBUG
     if (AllocConsole()) {
         FILE* tmp;
         freopen_s(&tmp, "conin$", "r", stdin);
         freopen_s(&tmp, "conout$", "w", stdout);
         freopen_s(&tmp, "conout$", "w", stderr);
     }
-    #endif // _DEBUG
-    
-    if (!prepare_window(hInstance, nCmdShow, IDS_APP_TITLE, IDC_CHWIGRX,
-        {
-            .cbSize = sizeof(WNDCLASSEX),
-            .style = CS_HREDRAW | CS_VREDRAW,
-            .lpfnWndProc = main_default_wndproc,
-            .cbClsExtra = 0,
-            .cbWndExtra = 0,
-            .hInstance = hInstance,
-            .hIcon = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_GAME_MODE_BIG)),
-            .hCursor = LoadCursor(hInstance, MAKEINTRESOURCE(IDC_MINIMAL_CURSOR)),
-            .hbrBackground = reinterpret_cast<HBRUSH>((COLOR_WINDOW)),
-            .hIconSm = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_GAME_MODE_SMALL))
-        })) {
+#endif    // _DEBUG
+
+    if (!prepare_window(
+            hInstance,
+            nCmdShow,
+            IDS_APP_TITLE,
+            IDC_CHWIGRX,
+            { .cbSize = sizeof(WNDCLASSEX),
+              .style = CS_HREDRAW | CS_VREDRAW,
+              .lpfnWndProc = main_default_wndproc,
+              .cbClsExtra = 0,
+              .cbWndExtra = 0,
+              .hInstance = hInstance,
+              .hIcon = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_GAME_MODE_BIG)),
+              .hCursor = LoadCursor(hInstance, MAKEINTRESOURCE(IDC_MINIMAL_CURSOR)),
+              .hbrBackground = reinterpret_cast<HBRUSH>((COLOR_WINDOW)),
+              .hIconSm = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_GAME_MODE_SMALL)) }
+        ))
+    {
         return FALSE;
     }
 
