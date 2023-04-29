@@ -161,7 +161,7 @@ void make_move(const HWND h_wnd) noexcept
     Input input = motion_input.get_input();
 
     if (is_bot_move()) {
-        input = bot::create_move(bot_type, board, turn);
+        input = bot::create_move(*bot_type, bot_difficulty, board, turn);
         in_hand = board.get_fig(input.from);
     }
 
@@ -238,7 +238,7 @@ void make_move(const HWND h_wnd) noexcept
     }
 }
 
-bool is_bot_move() noexcept { return bot_type != bot::Type::None && turn == bot_turn; }
+bool is_bot_move() noexcept { return bot_type && turn == bot_turn; }
 
 void restart() noexcept
 {
@@ -441,7 +441,7 @@ void on_lbutton_up(
 void on_lbutton_down(const HWND h_wnd, const LPARAM l_param) noexcept
 {
     // bot move guard
-    if (window_state == WindowState::Game && bot_type != bot::Type::None && turn == bot_turn) {
+    if (window_state == WindowState::Game && is_bot_move()) {
         return;
     }
 
@@ -480,13 +480,10 @@ void update_main_window_title(HWND h_wnd) noexcept
     std::wstring title = L"CHWiGrx ";
     title.reserve(64);    // hardcoded (CHWiGrx vs NeuralNetwork bot diff.NaN [Check to Black])
 
-    if (bot_type != bot::Type::None) {
+    if (bot_type) {
         title += L"vs ";
 
-        switch (bot_type) {
-            case bot::Type::Unselected:
-                title += L"Unselected ";
-                break;
+        switch (*bot_type) {
             case bot::Type::Random:
                 title += L"Random ";
                 break;
@@ -635,7 +632,7 @@ void update_bot_menu_variables(const HWND h_wnd) noexcept
         set_menu_checkbox(h_wnd, menu_id, false);
     }
 
-    if (bot_type != bot::Type::None) {
+    if (bot_type) {
         set_menu_checkbox(h_wnd, IDM_TOGGLE_BOT, true);
 
         if (bot_turn == Color::White)

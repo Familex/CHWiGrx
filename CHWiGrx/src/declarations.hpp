@@ -89,7 +89,7 @@ inline bool save_all_moves = true;
 inline HBRUSH checkerboard_one = CHECKERBOARD_DARK;
 inline HBRUSH checkerboard_two = CHECKERBOARD_BRIGHT;
 inline HWND figures_list_window = nullptr;
-inline bot::Type bot_type = bot::Type::Random;
+inline std::optional<bot::Type> bot_type = std::nullopt;
 inline bot::Difficulty bot_difficulty = bot::Difficulty::D0;
 inline Color bot_turn = Color::Black;
 

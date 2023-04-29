@@ -1,5 +1,4 @@
 #include "../declarations.hpp"
-#include "stuff/macro.h"
 
 LRESULT CALLBACK mainproc::main_game_state_wndproc(
     const HWND h_wnd,
@@ -113,11 +112,11 @@ LRESULT CALLBACK mainproc::main_game_state_wndproc(
 
                 /* ---- Bot ------------------------------------------- */
                 case IDM_TOGGLE_BOT:
-                    if (bot_type != bot::Type::None) {
-                        bot_type = bot::Type::None;
+                    if (bot_type) {
+                        bot_type = std::nullopt;
                     }
                     else {
-                        bot_type = bot::Type::Unselected;
+                        bot_type = bot::Type::Random;
                     }
                     update_bot_menu_variables(h_wnd);
                     break;

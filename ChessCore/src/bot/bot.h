@@ -5,11 +5,10 @@
 namespace bot
 {
 
+/**
+ * \brief bot behavior patterns
+ */
 enum class Type {
-    None,          // bot is missing
-    Unselected,    // bot is selected, but not yet chosen
-
-    // bot behavior patterns
     Random,
     Minimax,
     AlphaBeta,
@@ -17,6 +16,9 @@ enum class Type {
     NeuralNetwork
 };
 
+/**
+ * \brief bot difficulty 
+ */
 enum class Difficulty {
     D0 = 0,
     D1 = 1,
@@ -24,17 +26,6 @@ enum class Difficulty {
     D3 = 3,
 };
 
-[[nodiscard]] Input create_move(const Type, const ChessGame&, Color turn) noexcept;
-
-namespace impl
-{
-
-[[nodiscard]] Input random_move(const ChessGame&, const Color) noexcept;
-[[nodiscard]] Input minimax_move(const ChessGame&, const Color) noexcept;
-[[nodiscard]] Input alpha_beta_move(const ChessGame&, const Color) noexcept;
-[[nodiscard]] Input monte_carlo_move(const ChessGame&, const Color) noexcept;
-[[nodiscard]] Input neural_network_move(const ChessGame&, const Color) noexcept;
-
-}    // namespace impl
+[[nodiscard]] Input create_move(Type, Difficulty, const ChessGame&, Color) noexcept;
 
 }    // namespace bot
