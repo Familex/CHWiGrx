@@ -1,92 +1,84 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="Исходные файлы">
-      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
-      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
-    </Filter>
-    <Filter Include="stuff">
-      <UniqueIdentifier>{d23765ea-c6f7-403c-b59c-4b72cff1989d}</UniqueIdentifier>
+    <Filter Include="bot">
+      <UniqueIdentifier>{e3cda068-076c-47ed-98d8-34ec10718fb8}</UniqueIdentifier>
     </Filter>
     <Filter Include="structs">
-      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
-      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
+      <UniqueIdentifier>{9fa5293f-c7b0-4a12-8af1-4fa36227c716}</UniqueIdentifier>
     </Filter>
-    <Filter Include="main">
-      <UniqueIdentifier>{0a4c44f7-0505-43e5-a132-1093fcb99196}</UniqueIdentifier>
+    <Filter Include="stuff">
+      <UniqueIdentifier>{fd24025b-b6af-4b83-98f8-fc569d5d7f0c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src">
+      <UniqueIdentifier>{395d5b68-586f-4f1f-aa7e-39f85853645b}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="bot.cpp">
-      <Filter>Исходные файлы</Filter>
+    <ClCompile Include="src\bot\bot.cpp">
+      <Filter>bot</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="structs\board_repr.hpp">
+    <ClInclude Include="src\bot\bot.h">
+      <Filter>bot</Filter>
+    </ClInclude>
+    <ClInclude Include="src\chess_game.hpp">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="src\stuff\cexau.h">
+      <Filter>stuff</Filter>
+    </ClInclude>
+    <ClInclude Include="src\stuff\enums.hpp">
+      <Filter>stuff</Filter>
+    </ClInclude>
+    <ClInclude Include="src\stuff\macro.h">
+      <Filter>stuff</Filter>
+    </ClInclude>
+    <ClInclude Include="src\stuff\parse_meta.hpp">
+      <Filter>stuff</Filter>
+    </ClInclude>
+    <ClInclude Include="src\stuff\parse_step.hpp">
+      <Filter>stuff</Filter>
+    </ClInclude>
+    <ClInclude Include="src\stuff\parsing.hpp">
+      <Filter>stuff</Filter>
+    </ClInclude>
+    <ClInclude Include="src\stuff\strong_typedef.hpp">
+      <Filter>stuff</Filter>
+    </ClInclude>
+    <ClInclude Include="src\stuff\stuff.hpp">
+      <Filter>stuff</Filter>
+    </ClInclude>
+    <ClInclude Include="src\stuff\visit.h">
+      <Filter>stuff</Filter>
+    </ClInclude>
+    <ClInclude Include="src\structs\board_repr.hpp">
       <Filter>structs</Filter>
     </ClInclude>
-    <ClInclude Include="structs\figure.hpp">
+    <ClInclude Include="src\structs\figure.hpp">
       <Filter>structs</Filter>
     </ClInclude>
-    <ClInclude Include="structs\figure_fabric.hpp">
+    <ClInclude Include="src\structs\figure_board.hpp">
       <Filter>structs</Filter>
     </ClInclude>
-    <ClInclude Include="structs\input.hpp">
+    <ClInclude Include="src\structs\figure_fabric.hpp">
       <Filter>structs</Filter>
     </ClInclude>
-    <ClInclude Include="structs\move_logger.hpp">
+    <ClInclude Include="src\structs\id.hpp">
       <Filter>structs</Filter>
     </ClInclude>
-    <ClInclude Include="structs\pos.hpp">
+    <ClInclude Include="src\structs\input.hpp">
       <Filter>structs</Filter>
     </ClInclude>
-    <ClInclude Include="stuff\stuff.hpp">
-      <Filter>stuff</Filter>
-    </ClInclude>
-    <ClInclude Include="bot.h">
-      <Filter>Исходные файлы</Filter>
-    </ClInclude>
-    <ClInclude Include="stuff\cexau.h">
-      <Filter>stuff</Filter>
-    </ClInclude>
-    <ClInclude Include="stuff\enums.hpp">
-      <Filter>stuff</Filter>
-    </ClInclude>
-    <ClInclude Include="stuff\macro.h">
-      <Filter>stuff</Filter>
-    </ClInclude>
-    <ClInclude Include="structs\move_message.hpp">
+    <ClInclude Include="src\structs\move_logger.hpp">
       <Filter>structs</Filter>
     </ClInclude>
-    <ClInclude Include="stuff\strong_typedef.hpp">
-      <Filter>stuff</Filter>
-    </ClInclude>
-    <ClInclude Include="structs\id.hpp">
+    <ClInclude Include="src\structs\move_message.hpp">
       <Filter>structs</Filter>
     </ClInclude>
-    <ClInclude Include="stuff\visit.h">
-      <Filter>stuff</Filter>
-    </ClInclude>
-    <ClInclude Include="stuff\parsing.hpp">
-      <Filter>stuff</Filter>
-    </ClInclude>
-    <ClInclude Include="stuff\parse_meta.hpp">
-      <Filter>stuff</Filter>
-    </ClInclude>
-    <ClInclude Include="stuff\itoa.hpp">
-      <Filter>stuff</Filter>
-    </ClInclude>
-    <ClInclude Include="stuff\parse_step.hpp">
-      <Filter>stuff</Filter>
-    </ClInclude>
-    <ClInclude Include="structs\figure_board.hpp">
+    <ClInclude Include="src\structs\pos.hpp">
       <Filter>structs</Filter>
     </ClInclude>
-    <ClInclude Include="ChessGame.hpp">
-      <Filter>main</Filter>
-    </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="cpp.hint" />
   </ItemGroup>
 </Project>

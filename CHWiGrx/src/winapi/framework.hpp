@@ -2,6 +2,8 @@
 
 #include "targetver.hpp"
 
+#include "resource.hpp"
+
 #define WIN32_LEAN_AND_MEAN
 #define VC_EXTRALEAN
 #define NOMINMAX

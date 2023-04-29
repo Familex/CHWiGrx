@@ -18,6 +18,31 @@
       <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\bot\bot.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\bot\bot.h" />
+    <ClInclude Include="src\chess_game.hpp" />
+    <ClInclude Include="src\structs\board_repr.hpp" />
+    <ClInclude Include="src\structs\figure.hpp" />
+    <ClInclude Include="src\structs\figure_board.hpp" />
+    <ClInclude Include="src\structs\figure_fabric.hpp" />
+    <ClInclude Include="src\structs\id.hpp" />
+    <ClInclude Include="src\structs\input.hpp" />
+    <ClInclude Include="src\structs\move_logger.hpp" />
+    <ClInclude Include="src\structs\move_message.hpp" />
+    <ClInclude Include="src\structs\pos.hpp" />
+    <ClInclude Include="src\stuff\cexau.h" />
+    <ClInclude Include="src\stuff\enums.hpp" />
+    <ClInclude Include="src\stuff\macro.h" />
+    <ClInclude Include="src\stuff\parse_meta.hpp" />
+    <ClInclude Include="src\stuff\parse_step.hpp" />
+    <ClInclude Include="src\stuff\parsing.hpp" />
+    <ClInclude Include="src\stuff\strong_typedef.hpp" />
+    <ClInclude Include="src\stuff\stuff.hpp" />
+    <ClInclude Include="src\stuff\visit.h" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
@@ -194,35 +219,6 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
   </ItemDefinitionGroup>
-  <ItemGroup>
-    <ClCompile Include="bot.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="bot.h" />
-    <ClInclude Include="ChessGame.hpp" />
-    <ClInclude Include="structs\board_repr.hpp" />
-    <ClInclude Include="structs\figure.hpp" />
-    <ClInclude Include="structs\figure_board.hpp" />
-    <ClInclude Include="structs\figure_fabric.hpp" />
-    <ClInclude Include="structs\id.hpp" />
-    <ClInclude Include="structs\input.hpp" />
-    <ClInclude Include="structs\move_logger.hpp" />
-    <ClInclude Include="structs\move_message.hpp" />
-    <ClInclude Include="structs\pos.hpp" />
-    <ClInclude Include="stuff\cexau.h" />
-    <ClInclude Include="stuff\enums.hpp" />
-    <ClInclude Include="stuff\itoa.hpp" />
-    <ClInclude Include="stuff\macro.h" />
-    <ClInclude Include="stuff\parse_meta.hpp" />
-    <ClInclude Include="stuff\parse_step.hpp" />
-    <ClInclude Include="stuff\parsing.hpp" />
-    <ClInclude Include="stuff\visit.h" />
-    <ClInclude Include="stuff\strong_typedef.hpp" />
-    <ClInclude Include="stuff\stuff.hpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="cpp.hint" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

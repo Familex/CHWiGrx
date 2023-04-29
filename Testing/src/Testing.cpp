@@ -1,6 +1,6 @@
-#include "../ChessCore/ChessGame.hpp"
-#include "CppUnitTest.h"
 #include "pch.hpp"
+#include "chess_game.hpp"
+#include "CppUnitTest.h"
 
 #include <algorithm>
 #include <array>

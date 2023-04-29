@@ -1,10 +1,9 @@
 #pragma once
 #pragma comment(lib, "Msimg32.lib")
 //      ^^^^^^^^^^^^^^^^^^^^^^^^^^^ for TransparentBlt
-#include "../ChessCore/ChessGame.hpp"
-#include "../ChessCore/bot.h"
-#include "framework.hpp"
-#include "resource.hpp"
+#include "bot/bot.h"
+#include "chess_game.hpp"
+#include "winapi/framework.hpp"
 
 #include <optional>
 #include <string>
@@ -13,7 +12,6 @@ using namespace std::string_literals;
 
 #ifdef _DEBUG
 #include <iostream>
-#include <stdio.h>
 #include <string>
 #endif    // _DEBUG
 

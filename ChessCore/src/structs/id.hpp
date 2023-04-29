@@ -1,11 +1,9 @@
 #pragma once
 
-#include "../stuff/itoa.hpp"
 #include "../stuff/macro.h"
 #include "../stuff/parsing.hpp"
 #include "../stuff/strong_typedef.hpp"
 #include "../stuff/stuff.hpp"
-#include "figure.hpp"
 
 #include <algorithm>
 #include <format>

@@ -96,7 +96,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>D:\hopelessness\2.files\CPP\ChessCore\ChessCore;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>D:\hopelessness\2.files\CPP\ChessCore\ChessCore\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
@@ -114,7 +114,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>D:\hopelessness\2.files\CPP\ChessCore\ChessCore;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>D:\hopelessness\2.files\CPP\ChessCore\ChessCore\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
@@ -132,7 +132,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>D:\hopelessness\2.files\CPP\ChessCore\ChessCore;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>D:\hopelessness\2.files\CPP\ChessCore\ChessCore\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
@@ -150,7 +150,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>D:\hopelessness\2.files\CPP\ChessCore\ChessCore;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>D:\hopelessness\2.files\CPP\ChessCore\ChessCore\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
@@ -162,27 +162,6 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
   </ItemDefinitionGroup>
-  <ItemGroup>
-    <ClInclude Include="declarations.hpp" />
-    <ClInclude Include="framework.hpp" />
-    <ClInclude Include="resource.hpp" />
-    <ClInclude Include="src\create_window.hpp" />
-    <ClInclude Include="targetver.hpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="callbacks\curr_choice_figures_list_wndproc.cpp" />
-    <ClCompile Include="callbacks\curr_choice_wndproc.cpp" />
-    <ClCompile Include="callbacks\figures_list_wndproc.cpp" />
-    <ClCompile Include="callbacks\main_default_wndproc.cpp" />
-    <ClCompile Include="callbacks\main_edit_state_wndproc.cpp" />
-    <ClCompile Include="callbacks\main_game_state_wndproc.cpp" />
-    <ClCompile Include="callbacks\moves_list_wndproc.cpp" />
-    <ClCompile Include="main.cpp" />
-    <ClCompile Include="funcs.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ResourceCompile Include="CHWiGrx.rc" />
-  </ItemGroup>
   <ItemGroup>
     <Image Include="icons\figures_list.ico" />
     <Image Include="icons\game_mode_big.ico" />
@@ -210,6 +189,27 @@
   <ItemGroup>
     <None Include="icons\Minimal.ani" />
     <None Include="Minimal.ani" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\funcs.cpp" />
+    <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\wndproc\curr_choice_figures_list_wndproc.cpp" />
+    <ClCompile Include="src\wndproc\curr_choice_wndproc.cpp" />
+    <ClCompile Include="src\wndproc\figures_list_wndproc.cpp" />
+    <ClCompile Include="src\wndproc\main_default_wndproc.cpp" />
+    <ClCompile Include="src\wndproc\main_edit_state_wndproc.cpp" />
+    <ClCompile Include="src\wndproc\main_game_state_wndproc.cpp" />
+    <ClCompile Include="src\wndproc\moves_list_wndproc.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\create_window.hpp" />
+    <ClInclude Include="src\declarations.hpp" />
+    <ClInclude Include="src\winapi\framework.hpp" />
+    <ClInclude Include="src\winapi\resource.hpp" />
+    <ClInclude Include="src\winapi\targetver.hpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="src\winapi\CHWiGrx.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -1,8 +1,6 @@
 #pragma once
 
-#include "ChessGame.hpp"
-#include "structs/figure.hpp"
-#include "stuff/stuff.hpp"
+#include "../chess_game.hpp"
 
 namespace bot
 {
