@@ -10,14 +10,41 @@
     <Filter Include="pieces">
       <UniqueIdentifier>{ebbc46bc-f73c-417d-aa62-1066d38b2e2b}</UniqueIdentifier>
     </Filter>
-    <Filter Include="wndproc">
-      <UniqueIdentifier>{030068dc-d8c1-4772-91c6-7c4d72e6fd96}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="src">
-      <UniqueIdentifier>{26797f12-c5f0-4208-8558-c43d1af54d71}</UniqueIdentifier>
-    </Filter>
     <Filter Include="winapi">
       <UniqueIdentifier>{9e4557aa-7130-406c-af3d-8ecda7536ea2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src">
+      <UniqueIdentifier>{2c89046e-048c-4282-8c40-353ccdb01fcd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\functions">
+      <UniqueIdentifier>{0626db4f-3c39-439a-b797-58af409ea946}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\structs">
+      <UniqueIdentifier>{f49a67f1-b8c2-475f-b05a-77287ffe15e4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\stuff">
+      <UniqueIdentifier>{1285b0b3-df65-47b4-91f7-27c754fa605d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\variables">
+      <UniqueIdentifier>{89dbe2c5-696e-45e0-8434-43bce1865ff2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\functions\board_logic">
+      <UniqueIdentifier>{a2b33a0e-99ae-48ee-b53b-e03b8610170d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\functions\create_window">
+      <UniqueIdentifier>{25110fe6-ca70-45ea-87c2-88fc29907745}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\functions\draw">
+      <UniqueIdentifier>{cfb54a8e-ea3a-4c7f-b811-0ecf8e9c8cce}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\functions\menu">
+      <UniqueIdentifier>{3a4fed2c-7c11-4d05-8ad2-a408c652ea71}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\functions\misc">
+      <UniqueIdentifier>{f6f02b88-caec-4f74-9366-1e987b0b4357}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\functions\wndproc">
+      <UniqueIdentifier>{487567de-5b6d-4a65-a395-e16077a1bbe9}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -82,41 +109,6 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\wndproc\curr_choice_figures_list_wndproc.cpp">
-      <Filter>wndproc</Filter>
-    </ClCompile>
-    <ClCompile Include="src\wndproc\curr_choice_wndproc.cpp">
-      <Filter>wndproc</Filter>
-    </ClCompile>
-    <ClCompile Include="src\wndproc\figures_list_wndproc.cpp">
-      <Filter>wndproc</Filter>
-    </ClCompile>
-    <ClCompile Include="src\wndproc\main_default_wndproc.cpp">
-      <Filter>wndproc</Filter>
-    </ClCompile>
-    <ClCompile Include="src\wndproc\main_edit_state_wndproc.cpp">
-      <Filter>wndproc</Filter>
-    </ClCompile>
-    <ClCompile Include="src\wndproc\main_game_state_wndproc.cpp">
-      <Filter>wndproc</Filter>
-    </ClCompile>
-    <ClCompile Include="src\wndproc\moves_list_wndproc.cpp">
-      <Filter>wndproc</Filter>
-    </ClCompile>
-    <ClCompile Include="src\funcs.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
-    <ClCompile Include="src\main.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="src\create_window.hpp">
-      <Filter>src</Filter>
-    </ClInclude>
-    <ClInclude Include="src\declarations.hpp">
-      <Filter>src</Filter>
-    </ClInclude>
     <ClInclude Include="src\winapi\framework.hpp">
       <Filter>winapi</Filter>
     </ClInclude>
@@ -126,10 +118,96 @@
     <ClInclude Include="src\winapi\targetver.hpp">
       <Filter>winapi</Filter>
     </ClInclude>
+    <ClInclude Include="src\variables\constants.hpp">
+      <Filter>src\variables</Filter>
+    </ClInclude>
+    <ClInclude Include="src\variables\mutables.hpp">
+      <Filter>src\variables</Filter>
+    </ClInclude>
+    <ClInclude Include="src\stuff\debug_print.hpp">
+      <Filter>src\stuff</Filter>
+    </ClInclude>
+    <ClInclude Include="src\stuff\virtual_keys.hpp">
+      <Filter>src\stuff</Filter>
+    </ClInclude>
+    <ClInclude Include="src\structs\figures_list_stats.hpp">
+      <Filter>src\structs</Filter>
+    </ClInclude>
+    <ClInclude Include="src\structs\motion_input.hpp">
+      <Filter>src\structs</Filter>
+    </ClInclude>
+    <ClInclude Include="src\structs\window_state.hpp">
+      <Filter>src\structs</Filter>
+    </ClInclude>
+    <ClInclude Include="src\structs\window_stats.hpp">
+      <Filter>src\structs</Filter>
+    </ClInclude>
+    <ClInclude Include="src\functions\wndproc\wndproc.h">
+      <Filter>src\functions\wndproc</Filter>
+    </ClInclude>
+    <ClInclude Include="src\functions\misc\misc.h">
+      <Filter>src\functions\misc</Filter>
+    </ClInclude>
+    <ClInclude Include="src\functions\menu\menu.h">
+      <Filter>src\functions\menu</Filter>
+    </ClInclude>
+    <ClInclude Include="src\functions\draw\draw.h">
+      <Filter>src\functions\draw</Filter>
+    </ClInclude>
+    <ClInclude Include="src\functions\create_window\create_window.h">
+      <Filter>src\functions\create_window</Filter>
+    </ClInclude>
+    <ClInclude Include="src\functions\board_logic\board_logic.h">
+      <Filter>src\functions\board_logic</Filter>
+    </ClInclude>
+    <ClInclude Include="src\declarations.hpp">
+      <Filter>src</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="src\winapi\CHWiGrx.rc">
       <Filter>winapi</Filter>
     </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\functions\wndproc\curr_choice_figures_list_wndproc.cpp">
+      <Filter>src\functions\wndproc</Filter>
+    </ClCompile>
+    <ClCompile Include="src\functions\wndproc\curr_choice_wndproc.cpp">
+      <Filter>src\functions\wndproc</Filter>
+    </ClCompile>
+    <ClCompile Include="src\functions\wndproc\figures_list_wndproc.cpp">
+      <Filter>src\functions\wndproc</Filter>
+    </ClCompile>
+    <ClCompile Include="src\functions\wndproc\main_default_wndproc.cpp">
+      <Filter>src\functions\wndproc</Filter>
+    </ClCompile>
+    <ClCompile Include="src\functions\wndproc\main_edit_state_wndproc.cpp">
+      <Filter>src\functions\wndproc</Filter>
+    </ClCompile>
+    <ClCompile Include="src\functions\wndproc\main_game_state_wndproc.cpp">
+      <Filter>src\functions\wndproc</Filter>
+    </ClCompile>
+    <ClCompile Include="src\functions\wndproc\moves_list_wndproc.cpp">
+      <Filter>src\functions\wndproc</Filter>
+    </ClCompile>
+    <ClCompile Include="src\functions\misc\misc.cpp">
+      <Filter>src\functions\misc</Filter>
+    </ClCompile>
+    <ClCompile Include="src\functions\menu\menu.cpp">
+      <Filter>src\functions\menu</Filter>
+    </ClCompile>
+    <ClCompile Include="src\functions\draw\draw.cpp">
+      <Filter>src\functions\draw</Filter>
+    </ClCompile>
+    <ClCompile Include="src\functions\create_window\create_window.cpp">
+      <Filter>src\functions\create_window</Filter>
+    </ClCompile>
+    <ClCompile Include="src\functions\board_logic\board_logic.cpp">
+      <Filter>src\functions\board_logic</Filter>
+    </ClCompile>
+    <ClCompile Include="src\main.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

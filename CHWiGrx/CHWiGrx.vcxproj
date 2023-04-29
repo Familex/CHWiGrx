@@ -191,25 +191,42 @@
     <None Include="Minimal.ani" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\funcs.cpp" />
-    <ClCompile Include="src\main.cpp" />
-    <ClCompile Include="src\wndproc\curr_choice_figures_list_wndproc.cpp" />
-    <ClCompile Include="src\wndproc\curr_choice_wndproc.cpp" />
-    <ClCompile Include="src\wndproc\figures_list_wndproc.cpp" />
-    <ClCompile Include="src\wndproc\main_default_wndproc.cpp" />
-    <ClCompile Include="src\wndproc\main_edit_state_wndproc.cpp" />
-    <ClCompile Include="src\wndproc\main_game_state_wndproc.cpp" />
-    <ClCompile Include="src\wndproc\moves_list_wndproc.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="src\create_window.hpp" />
     <ClInclude Include="src\declarations.hpp" />
+    <ClInclude Include="src\functions\board_logic\board_logic.h" />
+    <ClInclude Include="src\functions\create_window\create_window.h" />
+    <ClInclude Include="src\functions\draw\draw.h" />
+    <ClInclude Include="src\functions\menu\menu.h" />
+    <ClInclude Include="src\functions\misc\misc.h" />
+    <ClInclude Include="src\functions\wndproc\wndproc.h" />
+    <ClInclude Include="src\structs\figures_list_stats.hpp" />
+    <ClInclude Include="src\structs\motion_input.hpp" />
+    <ClInclude Include="src\structs\window_state.hpp" />
+    <ClInclude Include="src\structs\window_stats.hpp" />
+    <ClInclude Include="src\stuff\debug_print.hpp" />
+    <ClInclude Include="src\stuff\virtual_keys.hpp" />
+    <ClInclude Include="src\variables\constants.hpp" />
+    <ClInclude Include="src\variables\mutables.hpp" />
     <ClInclude Include="src\winapi\framework.hpp" />
     <ClInclude Include="src\winapi\resource.hpp" />
     <ClInclude Include="src\winapi\targetver.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="src\winapi\CHWiGrx.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\functions\board_logic\board_logic.cpp" />
+    <ClCompile Include="src\functions\create_window\create_window.cpp" />
+    <ClCompile Include="src\functions\draw\draw.cpp" />
+    <ClCompile Include="src\functions\menu\menu.cpp" />
+    <ClCompile Include="src\functions\misc\misc.cpp" />
+    <ClCompile Include="src\functions\wndproc\curr_choice_figures_list_wndproc.cpp" />
+    <ClCompile Include="src\functions\wndproc\curr_choice_wndproc.cpp" />
+    <ClCompile Include="src\functions\wndproc\figures_list_wndproc.cpp" />
+    <ClCompile Include="src\functions\wndproc\main_default_wndproc.cpp" />
+    <ClCompile Include="src\functions\wndproc\main_edit_state_wndproc.cpp" />
+    <ClCompile Include="src\functions\wndproc\main_game_state_wndproc.cpp" />
+    <ClCompile Include="src\functions\wndproc\moves_list_wndproc.cpp" />
+    <ClCompile Include="src\main.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

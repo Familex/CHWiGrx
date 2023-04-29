@@ -1,4 +1,8 @@
-#include "../declarations.hpp"
+#include "../../functions/draw/draw.h"
+#include "../../functions/menu/menu.h"
+#include "../../variables/constants.hpp"
+#include "../../variables/mutables.hpp"
+#include "wndproc.h"
 
 LRESULT CALLBACK curr_choice_figures_list_wndproc(
     const HWND h_wnd,

@@ -1,4 +1,10 @@
-#include "../declarations.hpp"
+#include "../../functions/draw/draw.h"
+#include "../../functions/menu/menu.h"
+#include "../../stuff/debug_print.hpp"
+#include "../../variables/constants.hpp"
+#include "../../variables/mutables.hpp"
+#include "../board_logic/board_logic.h"
+#include "wndproc.h"
 
 #include <codecvt>
 

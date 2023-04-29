@@ -1,4 +1,13 @@
-#include "../declarations.hpp"
+#include "../../functions/draw/draw.h"
+#include "../../functions/menu/menu.h"
+#include "../../stuff/debug_print.hpp"
+#include "../../stuff/virtual_keys.hpp"
+#include "../../variables/constants.hpp"
+#include "../../variables/mutables.hpp"
+#include "../board_logic/board_logic.h"
+#include "../misc/misc.h"
+#include "bot/bot.h"
+#include "wndproc.h"
 
 LRESULT CALLBACK mainproc::main_game_state_wndproc(
     const HWND h_wnd,
@@ -296,7 +305,11 @@ LRESULT CALLBACK mainproc::main_game_state_wndproc(
                     motion_input.clear();
                 }
                 else {
-                    motion_input.init_curr_choice_window(h_wnd, curr_choice_game_mode_wndproc);
+                    motion_input.init_curr_choice_window(
+                        h_wnd,
+                        curr_choice_game_mode_wndproc,
+                        Pos { main_window.get_cell_width(), main_window.get_cell_height() }
+                    );
                 }
             }
             break;

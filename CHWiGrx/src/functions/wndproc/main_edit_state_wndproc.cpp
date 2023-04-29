@@ -1,4 +1,10 @@
-#include "../declarations.hpp"
+#include "../../functions/draw/draw.h"
+#include "../../functions/menu/menu.h"
+#include "../../variables/constants.hpp"
+#include "../../variables/mutables.hpp"
+#include "../board_logic/board_logic.h"
+#include "../misc/misc.h"
+#include "wndproc.h"
 
 LRESULT CALLBACK mainproc::main_edit_state_wndproc(
     const HWND h_wnd,
@@ -86,7 +92,11 @@ LRESULT CALLBACK mainproc::main_edit_state_wndproc(
 
         case WM_MOUSEMOVE:
             if (!motion_input.is_active_by_click() && motion_input.is_drags()) {
-                motion_input.init_curr_choice_window(h_wnd, curr_choice_edit_mode_wndproc);
+                motion_input.init_curr_choice_window(
+                    h_wnd,
+                    curr_choice_edit_mode_wndproc,
+                    Pos { main_window.get_cell_width(), main_window.get_cell_height() }
+                );
             }
             break;
 

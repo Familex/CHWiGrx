@@ -1,4 +1,8 @@
-#include "../declarations.hpp"
+#include "../../functions/draw/draw.h"
+#include "../../functions/menu/menu.h"
+#include "../../variables/constants.hpp"
+#include "../../variables/mutables.hpp"
+#include "wndproc.h"
 
 #include <map>
 
@@ -233,7 +237,11 @@ figures_list_wndproc(const HWND h_wnd, const UINT message, const WPARAM w_param,
         case WM_MOUSEMOVE:
         {
             if (motion_input.is_drags()) {
-                motion_input.init_curr_choice_window(h_wnd, curr_choice_figures_list_wndproc);
+                motion_input.init_curr_choice_window(
+                    h_wnd,
+                    curr_choice_figures_list_wndproc,
+                    Pos { main_window.get_cell_width(), main_window.get_cell_height() }
+                );
             }
 
             break;

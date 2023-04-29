@@ -1,8 +1,7 @@
 #pragma once
 
-#include "targetver.hpp"
-
 #include "resource.hpp"
+#include "targetver.hpp"
 
 #define WIN32_LEAN_AND_MEAN
 #define VC_EXTRALEAN

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../framework.hpp"
+#include "../../winapi/framework.hpp"
 
 #include <utility>
 
@@ -96,3 +96,4 @@ inline void destroy_window(HWND& wnd) noexcept
         std::unreachable();
     }
 }
+

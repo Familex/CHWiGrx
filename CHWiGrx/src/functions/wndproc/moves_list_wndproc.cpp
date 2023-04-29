@@ -1,4 +1,7 @@
-#include "../declarations.hpp"
+#include "structs/move_message.hpp"
+#include "wndproc.h"
+
+#include <vector>
 
 LRESULT CALLBACK
 moves_list_wndproc(const HWND h_wnd, const UINT u_msg, const WPARAM w_param, const LPARAM l_param) noexcept
