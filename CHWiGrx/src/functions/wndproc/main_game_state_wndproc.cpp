@@ -1,12 +1,4 @@
-#include "../../functions/draw/draw.h"
-#include "../../functions/menu/menu.h"
-#include "../../stuff/debug_print.hpp"
-#include "../../stuff/virtual_keys.hpp"
-#include "../../variables/constants.hpp"
-#include "../../variables/mutables.hpp"
-#include "../board_logic/board_logic.h"
-#include "../misc/misc.h"
-#include "bot/bot.h"
+#include "../../declarations.hpp"
 #include "wndproc.h"
 
 LRESULT CALLBACK mainproc::main_game_state_wndproc(

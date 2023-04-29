@@ -1,4 +1,4 @@
-#include "structs/move_message.hpp"
+#include "../../declarations.hpp"
 #include "wndproc.h"
 
 #include <vector>

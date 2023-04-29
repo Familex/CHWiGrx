@@ -1,8 +1,4 @@
-#include "../../functions/draw/draw.h"
-#include "../../functions/menu/menu.h"
-#include "../../variables/constants.hpp"
-#include "../../variables/mutables.hpp"
-#include "../board_logic/board_logic.h"
+#include "../../declarations.hpp"
 #include "wndproc.h"
 
 namespace

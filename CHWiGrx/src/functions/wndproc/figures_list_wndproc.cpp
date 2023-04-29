@@ -1,7 +1,4 @@
-#include "../../functions/draw/draw.h"
-#include "../../functions/menu/menu.h"
-#include "../../variables/constants.hpp"
-#include "../../variables/mutables.hpp"
+#include "../../declarations.hpp"
 #include "wndproc.h"
 
 #include <map>
