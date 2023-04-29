@@ -86,7 +86,7 @@ LRESULT CALLBACK mainproc::main_edit_state_wndproc(
 
         case WM_MOUSEMOVE:
             if (!motion_input.is_active_by_click() && motion_input.is_drags()) {
-                motion_input.init_curr_choice_window(h_wnd, curr_choice_wndproc<false>);
+                motion_input.init_curr_choice_window(h_wnd, curr_choice_edit_mode_wndproc);
             }
             break;
 

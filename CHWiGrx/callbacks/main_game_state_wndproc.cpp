@@ -297,7 +297,7 @@ LRESULT CALLBACK mainproc::main_game_state_wndproc(
                     motion_input.clear();
                 }
                 else {
-                    motion_input.init_curr_choice_window(h_wnd, curr_choice_wndproc<true>);
+                    motion_input.init_curr_choice_window(h_wnd, curr_choice_game_mode_wndproc);
                 }
             }
             break;

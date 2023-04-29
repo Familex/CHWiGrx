@@ -1,12 +1,10 @@
 #include "../declarations.hpp"
 
+namespace
+{
 template<bool CheckMovesValidity>
-LRESULT CALLBACK curr_choice_wndproc<CheckMovesValidity>(
-    const HWND h_wnd,
-    const UINT u_msg,
-    const WPARAM w_param,
-    const LPARAM l_param
-) noexcept
+LRESULT CALLBACK
+curr_choice_wndproc(const HWND h_wnd, const UINT u_msg, const WPARAM w_param, const LPARAM l_param) noexcept
 {
     static constexpr int TO_DESTROY_TIMER_ID { MAIN_WINDOW_CHOICE_TO_DESTROY_TIMER_ID };
     switch (u_msg) {
@@ -58,6 +56,16 @@ LRESULT CALLBACK curr_choice_wndproc<CheckMovesValidity>(
     }
     return static_cast<LRESULT>(0);
 }
+}    // namespace
 
-template LRESULT CALLBACK curr_choice_wndproc<true>(HWND, UINT, WPARAM, LPARAM);
-template LRESULT CALLBACK curr_choice_wndproc<false>(HWND, UINT, WPARAM, LPARAM);
+LRESULT CALLBACK
+curr_choice_edit_mode_wndproc(const HWND h_wnd, const UINT u_msg, const WPARAM w_param, const LPARAM l_param) noexcept
+{
+    return curr_choice_wndproc<false>(h_wnd, u_msg, w_param, l_param);
+}
+
+LRESULT CALLBACK
+curr_choice_game_mode_wndproc(const HWND h_wnd, const UINT u_msg, const WPARAM w_param, const LPARAM l_param) noexcept
+{
+    return curr_choice_wndproc<true>(h_wnd, u_msg, w_param, l_param);
+}
