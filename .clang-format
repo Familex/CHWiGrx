@@ -28,6 +28,7 @@ ContinuationIndentWidth: 4
 BreakBeforeConceptDeclarations: true
 AlwaysBreakAfterDefinitionReturnType: None
 AlwaysBreakAfterReturnType: None
+SpaceAfterTemplateKeyword: true
 
 # clang-format 17.0 
 Macros:
@@ -56,10 +57,9 @@ BraceWrapping:
   SplitEmptyRecord: false
   SplitEmptyNamespace: false
   
-
 # SpaceBeforeCaseColon: false
 IndentCaseLabels: true
-SpaceBeforeCpp11BracedList: true
+SpaceBeforeCpp11BracedList: false
 SpaceBeforeRangeBasedForLoopColon: true 
 SpaceInEmptyBlock: true 
 SpacesBeforeTrailingComments: 4 

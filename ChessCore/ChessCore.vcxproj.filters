@@ -50,7 +50,7 @@
     <ClInclude Include="src\stuff\stuff.hpp">
       <Filter>stuff</Filter>
     </ClInclude>
-    <ClInclude Include="src\stuff\visit.h">
+    <ClInclude Include="src\stuff\visit.hpp">
       <Filter>stuff</Filter>
     </ClInclude>
     <ClInclude Include="src\structs\board_repr.hpp">

@@ -45,22 +45,27 @@ struct FigureBoard
         captured_figures.clear();
     }
 
-    [[nodiscard]] auto get_figures() const noexcept -> std::vector<Figure*>
+    template <typename Self>
+    [[nodiscard]] auto get_figures(this Self&& self) noexcept
     {
-        return (figures | std::views::values | std::ranges::to<std::vector<Figure*>>());
+        return self.figures | std::views::values | std::ranges::to<std::vector<Figure*>>();
     }
 
-    [[nodiscard]] auto get_fig(const Pos position) const noexcept -> std::optional<Figure*>
+    template <typename Self>
+    [[nodiscard]] auto get_fig(this Self&& self, const Pos position) noexcept
+        -> std::optional<typename decltype(self.figures)::mapped_type>
     {
-        if (figures.contains(position)) {
-            return figures.at(position);
+        if (self.figures.contains(position)) {
+            return self.figures.at(position);
         }
         return std::nullopt;
     }
 
-    [[nodiscard]] auto get_fig(const Id id) const noexcept -> std::optional<Figure*>
+    template <typename Self>
+    [[nodiscard]] auto
+    get_fig(this Self&& self, const Id id) noexcept -> std::optional<typename decltype(self.figures)::mapped_type>
     {
-        for (const auto& fig : figures | std::views::values) {
+        for (auto fig : self.figures | std::views::values) {
             if (fig->is(id)) {
                 return fig;
             }
@@ -68,15 +73,19 @@ struct FigureBoard
         return std::nullopt;
     }
 
-    [[nodiscard]] auto get_fig_unsafe(const Pos position) const noexcept -> Figure*
+    template <typename Self>
+    [[nodiscard]] auto
+    get_fig_unsafe(this Self&& self, const Pos position) noexcept -> typename decltype(self.figures)::mapped_type
     {
-        const auto out = get_fig(position);
+        const auto out = self.get_fig(position);
         return out.has_value() ? out.value() : nullptr;
     }
 
-    [[nodiscard]] auto get_fig_unsafe(const Id id) const noexcept -> Figure*
+    template <typename Self>
+    [[nodiscard]] auto
+    get_fig_unsafe(this Self&& self, const Id id) noexcept -> typename decltype(self.figures)::mapped_type
     {
-        const auto out = get_fig(id);
+        const auto out = self.get_fig(id);
         return out.has_value() ? out.value() : nullptr;
     }
 
@@ -152,7 +161,7 @@ struct FigureBoard
 
     [[nodiscard]] auto get_figures_of(const Color col) const noexcept -> std::vector<Figure*>
     {
-        std::vector<Figure*> acc {};
+        std::vector<Figure*> acc{};
         for (const auto& fig : figures | std::views::values) {
             if (fig->is_col(col)) {
                 acc.push_back(fig);

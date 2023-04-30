@@ -126,7 +126,7 @@ void on_lbutton_down(const HWND h_wnd, const LPARAM l_param) noexcept
     }
 
     motion_input.set_lbutton_down();
-    main_window.set_prev_lbutton_click(Pos { LOWORD(l_param), HIWORD(l_param) });
+    main_window.set_prev_lbutton_click(Pos{ LOWORD(l_param), HIWORD(l_param) });
     motion_input.deactivate_by_pos();
     if (motion_input.is_active_by_click()) {
         motion_input.set_target(main_window.divide_by_cell_size(l_param).change_axes());
@@ -143,7 +143,7 @@ void on_lbutton_down(const HWND h_wnd, const LPARAM l_param) noexcept
 
 void restart() noexcept
 {
-    board_repr::BoardRepr start_board_repr_copy { start_board_repr };    // explicit copy constructor
+    board_repr::BoardRepr start_board_repr_copy{ start_board_repr };    // explicit copy constructor
     board.reset(std::move(start_board_repr_copy));
     motion_input.clear();
     turn = start_board_repr.turn;
@@ -151,14 +151,14 @@ void restart() noexcept
 
 bool copy_repr_to_clip(const HWND h_wnd) noexcept
 {
-    const board_repr::BoardRepr board_repr { board.get_repr(turn, save_all_moves) };
-    const auto board_repr_str = AsString<board_repr::BoardRepr> {}(board_repr);
+    const board_repr::BoardRepr board_repr{ board.get_repr(turn, save_all_moves) };
+    const auto board_repr_str = AsString<board_repr::BoardRepr>{}(board_repr);
     return cpy_str_to_clip(h_wnd, board_repr_str);
 }
 
 auto take_repr_from_clip(const HWND h_wnd) noexcept -> ParseEither<board_repr::BoardRepr, ParseErrorType>
 {
-    return FromString<board_repr::BoardRepr> {}(take_str_from_clip(h_wnd));
+    return FromString<board_repr::BoardRepr>{}(take_str_from_clip(h_wnd));
 }
 
 void make_move(const HWND h_wnd) noexcept
@@ -174,23 +174,20 @@ void make_move(const HWND h_wnd) noexcept
         in_hand = board.get_fig(input.from);
     }
 
-    if (!in_hand.has_value()) {
+    if (!in_hand) {
         InvalidateRect(h_wnd, nullptr, NULL);
         return;
     }
 
     const auto move_message_sus = board.provide_move(in_hand.value(), input, turn, [c = chose] { return c; });
 
-    if (!move_message_sus.has_value()) {
+    if (!move_message_sus) {
         InvalidateRect(h_wnd, nullptr, NULL);
         return;
     }
 
-    const auto& move_message = move_message_sus.value();
+    debug_print("Curr move was:", AsString<mvmsg::MoveMessage>{}(*move_message_sus, AsStringMeta{ 0_id, 2, 2 }));
 
-    debug_print("Curr move was:", AsString<mvmsg::MoveMessage> {}(move_message, AsStringMeta { 0_id, 2, 2 }));
-
-    board.set_last_move(move_message);
     turn = what_next(turn);
     InvalidateRect(h_wnd, nullptr, NULL);
     UpdateWindow(h_wnd);

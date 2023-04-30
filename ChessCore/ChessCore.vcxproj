@@ -41,7 +41,7 @@
     <ClInclude Include="src\stuff\parsing.hpp" />
     <ClInclude Include="src\stuff\strong_typedef.hpp" />
     <ClInclude Include="src\stuff\stuff.hpp" />
-    <ClInclude Include="src\stuff\visit.h" />
+    <ClInclude Include="src\stuff\visit.hpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>

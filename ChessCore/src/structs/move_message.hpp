@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../stuff/stuff.hpp"
-#include "../stuff/visit.h"
+#include "../stuff/visit.hpp"
 #include "figure.hpp"
 #include "figure_fabric.hpp"
 #include "input.hpp"
@@ -127,11 +127,11 @@ struct AsString<mvmsg::SideEvent>
 {
     FN operator()(const mvmsg::SideEvent& side_event, const AsStringMeta& meta) const noexcept -> std::string
     {
-        return VISIT(
+        return visit_one(
             side_event,
             [&](const mvmsg::Check&) { return "CH"s; },
             [&](const mvmsg::Promotion&) { return "PR"s; },
-            [&](const mvmsg::CastlingBreak& cb) { return "CB"s + AsString<Id> {}(cb.whose, meta.min_id) + "."s; },
+            [&](const mvmsg::CastlingBreak& cb) { return "CB"s + AsString<Id> {}(cb.whose, meta.min_id) + "."s; }
         );
     }
 };
@@ -210,7 +210,7 @@ struct AsString<mvmsg::MainEvent>
 {
     FN operator()(const mvmsg::MainEvent& main_event, const AsStringMeta& meta) const noexcept -> std::string
     {
-        return VISIT(
+        return visit_one(
             main_event,
             [&](const mvmsg::Eat& eat) constexpr { return "E"s + AsString<Id> {}(eat.eaten, meta.min_id) + '.'; },
             [&](const mvmsg::Move&) constexpr { return "M"s; },
@@ -222,7 +222,7 @@ struct AsString<mvmsg::MainEvent>
             },
             [&](const mvmsg::EnPassant& en_passant) constexpr {
                 return "P"s + AsString<Id> {}(en_passant.eaten, meta.min_id) + "."s;
-            },
+            }
         );
     }
 };

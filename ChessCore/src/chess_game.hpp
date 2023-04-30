@@ -32,13 +32,13 @@ class ChessGame
     **  y-axis from left to right (→)  */
     using shift_broom = std::vector<std::vector<Pos>>;
 
-    bool idw_ { true };
+    bool idw_{ true };
     std::map<Id, bool> castling_;
     std::map<FigureType, shift_broom> moves_;
     std::map<FigureType, shift_broom> eats_;
 
-    MoveLogger move_logger_ {};
-    FigureBoard board_ {};
+    MoveLogger move_logger_{};
+    FigureBoard board_{};
 
 public:
     [[nodiscard]] explicit ChessGame(board_repr::BoardRepr&& board_repr) noexcept { reset(std::move(board_repr)); }
@@ -91,23 +91,23 @@ public:
         for (const auto& cap_fig : board_repr.captured_figures) {
             board_.captured_figures.push_back(cap_fig); /* move ownership */
         }
-        board_repr.captured_figures.clear();            /* delete ownership */
+        board_repr.captured_figures.clear(); /* delete ownership */
         for (const auto& fig : board_repr.figures) {
-            board_.figures[fig->get_pos()] = fig;       /* move ownership */
+            board_.figures[fig->get_pos()] = fig; /* move ownership */
         }
-        board_repr.figures.clear();                     /* delete ownership */
+        board_repr.figures.clear(); /* delete ownership */
     }
 
-    template<typename T>
-    FN get_fig(T&& value) const noexcept -> std::optional<Figure*>
+    template <typename Self, typename T>
+    FN get_fig(this Self&& self, T&& value) noexcept
     {
-        return board_.get_fig(std::forward<T>(value));
+        return std::forward<Self>(self).board_.get_fig(std::forward<T>(value));
     }
 
-    template<typename T>
-    FN get_fig_unsafe(T&& value) const noexcept -> Figure*
+    template <typename Self, typename T>
+    FN get_fig_unsafe(this Self&& self, T&& value) noexcept
     {
-        return board_.get_fig_unsafe(std::forward<T>(value));
+        return std::forward<Self>(self).board_.get_fig_unsafe(std::forward<T>(value));
     }
 
     [[nodiscard]] bool cont_fig(const Pos pos) const noexcept { return board_.cont_fig(pos); }
@@ -116,19 +116,19 @@ public:
 
     [[nodiscard]] bool is_empty() const noexcept { return board_.figures.empty(); }
 
-    template<typename T>
+    template <typename T>
     bool capture_figure(T&& value)
     {
         return board_.capture_figure(std::forward<T>(value));
     }
 
-    template<typename T>
+    template <typename T>
     void recapture_figure(T&& value)
     {
         board_.recapture_figure(std::forward<T>(value));
     }
 
-    template<typename T>
+    template <typename T>
     void delete_fig(T&& value)
     {
         board_.delete_fig(std::forward<T>(value));
@@ -161,12 +161,12 @@ public:
         const std::vector<Pos>& enemies = {}
     ) const noexcept -> std::vector<std::pair<bool, Pos>>
     {
-        std::vector<std::pair<bool, Pos>> possible_moves {};    // list { pair{ is_eat, targ }, ... }
+        std::vector<std::pair<bool, Pos>> possible_moves{};    // list { pair{ is_eat, targ }, ... }
         const auto in_hand_pos = in_hand->get_pos();
         for (const auto in_hand_type = in_hand->get_type(); const std::vector<Pos>& eat_beams : eats_.at(in_hand_type))
         {
             for (Pos eat : eat_beams) {
-                Pos curr { in_hand_pos + (in_hand->is_col(Color::White) ? eat : eat.mul_x(-1)) };
+                Pos curr{ in_hand_pos + (in_hand->is_col(Color::White) ? eat : eat.mul_x(-1)) };
                 if (!is_valid_coords(curr))
                     continue;
                 if (curr.in(ours)) {
@@ -189,7 +189,7 @@ public:
         }
         for (const auto& move_beams : moves_.at(in_hand->get_type())) {
             for (Pos move : move_beams) {
-                Pos curr { in_hand_pos + (in_hand->is_col(Color::White) ? move : move.mul_x(-1)) };
+                Pos curr{ in_hand_pos + (in_hand->is_col(Color::White) ? move : move.mul_x(-1)) };
                 if (not is_valid_coords(curr))
                     continue;
                 if (not((not curr.in(to_ignore) && cont_fig(curr)) || curr.in(ours) || curr.in(enemies))) {
@@ -219,7 +219,7 @@ public:
         const std::vector<Pos>& enemies = {}
     ) const noexcept -> std::vector<std::pair<bool, Pos>>
     {
-        std::vector<std::pair<bool, Pos>> all_moves { expand_broom(in_hand, to_ignore, ours, enemies) };
+        std::vector<std::pair<bool, Pos>> all_moves{ expand_broom(in_hand, to_ignore, ours, enemies) };
         const Pos in_hand_pos = in_hand->get_pos();
         if (in_hand->is(FigureType::Pawn)) {
             // Pawn moves 2 (check my figures on 2 line)
@@ -286,13 +286,13 @@ public:
         if (in_hand->is(FigureType::King)) {
             for (auto [king_end_col, rook_end_col] : { std::pair(6, 5), std::pair(2, 3) }) {
                 if (const auto check_result_sus = castling_check(
-                        in_hand, Input { in_hand_pos, Pos { in_hand_pos.x, king_end_col } }, king_end_col, rook_end_col
+                        in_hand, Input{ in_hand_pos, Pos{ in_hand_pos.x, king_end_col } }, king_end_col, rook_end_col
                     ))
                 {
                     if (const auto& [rook, king, second_figure_to_move] = check_result_sus.value();
                         has_castling(rook->get_id()))
                     {
-                        all_moves.push_back({ false, Pos { in_hand_pos.x, king_end_col } });
+                        all_moves.push_back({ false, Pos{ in_hand_pos.x, king_end_col } });
                     }
                 }
             }
@@ -300,13 +300,13 @@ public:
         if (in_hand->is(FigureType::Rook)) {
             for (auto [king_end_col, rook_end_col] : { std::pair(6, 5), std::pair(2, 3) }) {
                 if (const auto check_result_sus = castling_check(
-                        in_hand, Input { in_hand_pos, Pos { in_hand_pos.x, rook_end_col } }, king_end_col, rook_end_col
+                        in_hand, Input{ in_hand_pos, Pos{ in_hand_pos.x, rook_end_col } }, king_end_col, rook_end_col
                     ))
                 {
                     if (const auto& [rook, king, second_figure_to_move] = check_result_sus.value();
                         has_castling(rook->get_id()))
                     {
-                        all_moves.push_back({ false, Pos { in_hand_pos.x, rook_end_col } });
+                        all_moves.push_back({ false, Pos{ in_hand_pos.x, rook_end_col } });
                     }
                 }
             }
@@ -336,8 +336,8 @@ public:
         for (const auto& move : get_all_moves(in_hand)) {
             auto moved_fig = figfab::FigureFabric::instance().submit_on(in_hand, move.second);
             const std::vector<Pos> ignore =
-                move.first ? std::vector { move.second, in_hand->get_pos() } : std::vector { in_hand->get_pos() };
-            if (const Pos to_defend = in_hand->is(FigureType::King) ? move.second : Pos {};
+                move.first ? std::vector{ move.second, in_hand->get_pos() } : std::vector{ in_hand->get_pos() };
+            if (const Pos to_defend = in_hand->is(FigureType::King) ? move.second : Pos{};
                 //                                            extra argument when checking the king ↓
                 !check_for_when(in_hand->get_col(), ignore, to_defend, { moved_fig.get() }))
             {
@@ -356,8 +356,7 @@ public:
      * \return is checkmate
      */
     [[nodiscard]] auto
-    checkmate_for(const Color col, const std::vector<Pos>& to_ignore = {}, Pos to_defend = Pos {}) const noexcept
-        -> bool
+    checkmate_for(const Color col, const std::vector<Pos>& to_ignore = {}, Pos to_defend = Pos{}) const noexcept -> bool
     {
         const auto king = find_king(col);
         if (to_defend == Pos()) {
@@ -401,8 +400,7 @@ public:
      * \return is stalemate
      */
     [[nodiscard]] auto
-    stalemate_for(const Color col, const std::vector<Pos>& to_ignore = {}, Pos to_defend = Pos {}) const noexcept
-        -> bool
+    stalemate_for(const Color col, const std::vector<Pos>& to_ignore = {}, Pos to_defend = Pos{}) const noexcept -> bool
     {
         const auto king_sus = find_king(col);
         if (!king_sus.has_value()) {
@@ -448,7 +446,7 @@ public:
     [[nodiscard]] auto check_for_when(
         const Color col,
         const std::vector<Pos>& to_ignore = {},
-        Pos to_defend = Pos {},
+        Pos to_defend = Pos{},
         const std::vector<Figure*>& ours = {},
         const std::vector<Figure*>& enemies = {}
     ) const noexcept -> bool
@@ -479,34 +477,40 @@ public:
         return false;    // No one attacks.
     }
 
+    /**
+     * \brief Determines move and check for checkmate
+     * \param in_hand Figure to move
+     * \param input User input
+     * \param promotion_choice Type of figure to promote pawns
+     */
     [[nodiscard]] auto
     move_check(const Figure* const in_hand, const Input& input, const FigureType promotion_choice) const noexcept
         -> std::expected<mvmsg::MoveMessage, ErrorEvent>
     {
         if (!(is_valid_coords(input.from) && is_valid_coords(input.target)) || !cont_fig(input.from)) {
-            return std::unexpected { ErrorEvent::InvalidMove };
+            return std::unexpected{ ErrorEvent::InvalidMove };
         }
 
         auto move_sus = determine_move(in_hand, input, promotion_choice);
 
         if (!move_sus.has_value()) {
-            return std::unexpected { ErrorEvent::InvalidMove };
+            return std::unexpected{ ErrorEvent::InvalidMove };
         }
 
         /// Crutch... rook castlings must be in Figure field.
         if (const auto rook_sus = get_fig(move_sus->input.target); rook_sus && rook_sus.value()->is(FigureType::Rook)) {
-            move_sus->side_evs.emplace_back(mvmsg::CastlingBreak { rook_sus.value()->get_id() });
+            move_sus->side_evs.emplace_back(mvmsg::CastlingBreak{ rook_sus.value()->get_id() });
         }
 
-        ChessGame next_board { *this };
+        ChessGame next_board{ *this };
 
         next_board.provide_move(*move_sus);
 
         if (next_board.check_for_when(in_hand->get_col())) {
-            return std::unexpected { ErrorEvent::UnderCheck };
+            return std::unexpected{ ErrorEvent::UnderCheck };
         }
         if (next_board.check_for_when(what_next(in_hand->get_col()))) {
-            move_sus->side_evs.emplace_back(mvmsg::Check {});
+            move_sus->side_evs.emplace_back(mvmsg::Check{});
         }
 
         return *move_sus;
@@ -557,8 +561,8 @@ public:
             // Input is correct (king could be on g col, so castling is available from rook)
             // Need to check that all intermediate positions (where king goes) are not under check
             const Figure* rook = (*board_.figures.begin()).second;
-            int step { king_end_col - king_pos.y > 0 ? 1 : -1 };
-            for (Pos rook_aspt_pos { king_pos }; is_valid_coords(rook_aspt_pos); rook_aspt_pos.y += step) {
+            int step{ king_end_col - king_pos.y > 0 ? 1 : -1 };
+            for (Pos rook_aspt_pos{ king_pos }; is_valid_coords(rook_aspt_pos); rook_aspt_pos.y += step) {
                 if (auto rook_sus = get_fig(rook_aspt_pos); rook_sus.has_value() &&
                                                             rook_sus.value()->is_col(in_hand->get_col()) &&
                                                             rook_sus.value()->is(FigureType::Rook))
@@ -572,7 +576,7 @@ public:
             }
 
             Pos rook_pos = rook->get_pos();
-            const Pos target { king_pos.x, king_end_col };
+            const Pos target{ king_pos.x, king_end_col };
             for (step = king_pos.y < target.y ? 1 : -1; king_pos.y != target.y; king_pos.y += step) {
                 castling_can_be_done &= not check_for_when(in_hand->get_col(), { king_pos, rook_pos }, king_pos);
             }
@@ -583,16 +587,16 @@ public:
             }
             // FIXME can this be done in loop body?
             castling_can_be_done &=
-                !check_for_when(in_hand->get_col(), { king_pos, rook_pos }, Pos { king_pos.x, king_end_col });
-            const auto cell_sus = get_fig(Pos { king_pos.x, rook_end_col });
+                !check_for_when(in_hand->get_col(), { king_pos, rook_pos }, Pos{ king_pos.x, king_end_col });
+            const auto cell_sus = get_fig(Pos{ king_pos.x, rook_end_col });
             castling_can_be_done &=
                 !cell_sus.has_value() || cell_sus.value()->is(king->get_id()) || cell_sus.value()->is(rook->get_id());
             if (castling_can_be_done) {
-                return CastlingCheckResult { rook,
-                                             king,
-                                             in_hand->is(FigureType::King)
-                                                 ? Input { rook_pos, Pos { rook_pos.x, rook_end_col } }
-                                                 : Input { king_pos, Pos { king_pos.x, king_end_col } } };
+                return CastlingCheckResult{ rook,
+                                            king,
+                                            in_hand->is(FigureType::King)
+                                                ? Input{ rook_pos, Pos{ rook_pos.x, rook_end_col } }
+                                                : Input{ king_pos, Pos{ king_pos.x, king_end_col } } };
             }
         }
         return std::nullopt;
@@ -655,47 +659,49 @@ public:
 
     void on_castling(const Id id) noexcept { castling_[id] = true; }
 
-    FN get_last_moves() const noexcept -> const std::vector<mvmsg::MoveMessage>& { return move_logger_.get_past(); }
+    FN get_last_moves() const noexcept -> const std::vector<mvmsg::MoveMessage>&
+    {
+        return move_logger_.get_past();
+    }
 
-    FN get_future_moves() const noexcept -> const std::vector<mvmsg::MoveMessage>& { return move_logger_.get_future(); }
+    FN get_future_moves() const noexcept -> const std::vector<mvmsg::MoveMessage>&
+    {
+        return move_logger_.get_future();
+    }
 
-    FN get_last_move() const noexcept -> std::optional<mvmsg::MoveMessage> { return move_logger_.get_last_move(); }
+    FN get_last_move() const noexcept -> std::optional<mvmsg::MoveMessage>
+    {
+        return move_logger_.get_last_move();
+    }
 
-    FN set_last_move(const mvmsg::MoveMessage& move_rec) noexcept -> void { this->move_logger_.add(move_rec); }
-
-    template<typename Func>
+    template <typename Func>
         requires requires(Func func) {
             /// FIXME clang-format. put on one line: { func() } -> std::same_as<FigureType>;
             {
                 func()
             } -> std::same_as<FigureType>;
         }
-    FN provide_move(Figure* in_hand, const Input& input, Color turn, Func&& get_choice) noexcept
+    FN
+    provide_move(Figure* in_hand, const Input& input, Color turn, Func&& get_choice) noexcept
         -> std::optional<mvmsg::MoveMessage>
     {
         const auto move_message_sus = move_check(in_hand, input, get_choice());
 
-        if (!move_message_sus.has_value()) {
-            return std::nullopt;
+        if (move_message_sus && provide_move(*move_message_sus)) {
+            return *move_message_sus;
         }
 
-        const auto& move_message = move_message_sus.value();
-
-        if (!provide_move(move_message)) {
-            return std::nullopt;
-        }
-
-        return move_message;
+        return std::nullopt;
     }
 
-    auto provide_move(const mvmsg::MoveMessage& move_message) -> bool
+    auto provide_move(const mvmsg::MoveMessage& move_message) noexcept -> bool
     {
         const auto in_hand_sus = get_fig(move_message.first.get_id());
         if (!in_hand_sus.has_value())
             return false;
         const auto in_hand = in_hand_sus.value();
 
-        VISIT(
+        visit_one(
             move_message.main_event,
             [&](const mvmsg::Move&) { move_fig(in_hand, move_message.input.target); },
             [&](const mvmsg::LongMove&) { move_fig(in_hand, move_message.input.target); },
@@ -709,7 +715,9 @@ public:
             },
             /* (has_castling(ms.to_move.back().first)) */
             [&](const mvmsg::Castling& castling) {
-                const auto who = get_fig_unsafe(castling.second_to_move);
+                using Test = decltype(this);
+                const auto who = (*this).get_fig_unsafe(castling.second_to_move);
+                //               ^^^^^^^ "no matching overloaded function found" without this
                 if (who->at(move_message.input.target)) {
                     swap_fig(in_hand, who);
                 }
@@ -717,8 +725,9 @@ public:
                 move_fig(who, castling.second_input.target);
             }
         );
+
         for (const auto& side_event : move_message.side_evs) {
-            VISIT(
+            visit_one(
                 side_event,
                 [&](const mvmsg::Promotion& promotion) { promotion_fig(in_hand, move_message.promotion_choice); },
                 [&](const mvmsg::Check&) {
@@ -729,10 +738,12 @@ public:
             );
         }
 
+        move_logger_.add(move_message);
+
         return true;
     }
 
-    auto undo_move() -> bool
+    auto undo_move() noexcept -> bool
     {
         if (move_logger_.prev_empty())
             return false;
@@ -742,7 +753,7 @@ public:
             return false;
         const auto in_hand = in_hand_sus.value();
 
-        VISIT(
+        visit_one(
             move_message.main_event,
             [&](const mvmsg::Move&) { move_fig(in_hand, move_message.input.from); },
             [&](const mvmsg::LongMove&) { move_fig(in_hand, move_message.input.from); },
@@ -757,12 +768,13 @@ public:
             },
             [&](const mvmsg::Castling& castling) {
                 move_fig(in_hand, move_message.input.from);
-                const auto who = get_fig_unsafe(castling.second_to_move);
+                const auto who = (*this).get_fig_unsafe(castling.second_to_move);
                 move_fig(who, castling.second_input.from);
             }
         );
+
         for (const auto& side_event : move_message.side_evs) {
-            VISIT(
+            visit_one(
                 side_event,
                 [&](const mvmsg::Promotion& promotion) { promotion_fig(in_hand, FigureType::Pawn); },
                 [&](const mvmsg::Check&) {
@@ -777,7 +789,7 @@ public:
         return true;
     }
 
-    auto restore_move() -> bool
+    auto restore_move() noexcept -> bool
     {
         if (const auto future_sus = move_logger_.pop_future_move()) {
             provide_move(future_sus.value());
@@ -810,17 +822,17 @@ public:
         }
 
         // Set relative to white via idw
-        moves_[FigureType::Pawn] = { { Pos { (idw_ ? -1 : 1), 0 } } };
-        eats_[FigureType::Pawn] = { { Pos { (idw_ ? -1 : 1), -1 } }, { Pos { (idw_ ? -1 : 1), 1 } } };
+        moves_[FigureType::Pawn] = { { Pos{ (idw_ ? -1 : 1), 0 } } };
+        eats_[FigureType::Pawn] = { { Pos{ (idw_ ? -1 : 1), -1 } }, { Pos{ (idw_ ? -1 : 1), 1 } } };
 
         moves_[FigureType::Knight] = {
-            { Pos { -1, 2 } }, { Pos { -1, -2 } }, { Pos { 1, -2 } }, { Pos { 1, 2 } },
-            { Pos { 2, -1 } }, { Pos { -2, -1 } }, { Pos { 2, 1 } },  { Pos { -2, 1 } },
+            { Pos{ -1, 2 } }, { Pos{ -1, -2 } }, { Pos{ 1, -2 } }, { Pos{ 1, 2 } },
+            { Pos{ 2, -1 } }, { Pos{ -2, -1 } }, { Pos{ 2, 1 } },  { Pos{ -2, 1 } },
         };
         eats_[FigureType::Knight] = moves_[FigureType::Knight];
 
-        moves_[FigureType::King] = { { Pos { -1, -1 } }, { Pos { -1, 1 } }, { Pos { -1, 0 } }, { Pos { 0, -1 } },
-                                     { Pos { 0, 1 } },   { Pos { 1, 1 } },  { Pos { 1, -1 } }, { Pos { 1, 0 } } };
+        moves_[FigureType::King] = { { Pos{ -1, -1 } }, { Pos{ -1, 1 } }, { Pos{ -1, 0 } }, { Pos{ 0, -1 } },
+                                     { Pos{ 0, 1 } },   { Pos{ 1, 1 } },  { Pos{ 1, -1 } }, { Pos{ 1, 0 } } };
         eats_[FigureType::King] = moves_[FigureType::King];
 
         moves_[FigureType::Bishop] = { temp_left_up, temp_left_down, temp_right_up, temp_right_down };
@@ -849,7 +861,7 @@ public:
         return GameEndType::NotGameEnd;
     }
 
-    static void promotion_fig(Figure* to_promote, const FigureType new_type)
+    static void promotion_fig(Figure* to_promote, const FigureType new_type) noexcept
     {
         const Id id = to_promote->get_id();
         const Color color = to_promote->get_col();
@@ -877,8 +889,8 @@ public:
                              return it.second->is(FigureType::Knight) || it.second->is(FigureType::Bishop);
                          }) != board_.figures.end())
             return true;
-        size_t b_cell_bishops_cnt {};
-        size_t w_cell_bishops_cnt {};
+        size_t b_cell_bishops_cnt{};
+        size_t w_cell_bishops_cnt{};
         for (const auto& fig : get_all_figures()) {
             if (fig->is(FigureType::Bishop))
                 if ((fig->get_pos().x + fig->get_pos().y) % 2) {
@@ -899,18 +911,17 @@ public:
         const auto& prev_moves = move_logger_.get_past();
         const auto& has_castlings = castling_ | std::views::filter([](const auto& pair) { return pair.second; }) |
                                     std::views::keys | std::ranges::to<std::vector<Id>>();
-        return board_repr::BoardRepr { board_.get_figures(),
-                                       turn,
-                                       idw_,
-                                       save_all_moves       ? prev_moves
-                                       : prev_moves.empty() ? std::vector<mvmsg::MoveMessage> {}
-                                                            : std::vector { prev_moves.back() },
-                                       move_logger_.get_future(),
-                                       board_.captured_figures,
-                                       has_castlings };
+        return board_repr::BoardRepr{ board_.get_figures(),
+                                      turn,
+                                      idw_,
+                                      save_all_moves       ? prev_moves
+                                      : prev_moves.empty() ? std::vector<mvmsg::MoveMessage>{}
+                                                           : std::vector{ prev_moves.back() },
+                                      move_logger_.get_future(),
+                                      board_.captured_figures,
+                                      has_castlings };
     }
 
-private /* ---- Helper methods ---- */:
     auto determine_move(const Figure* in_hand, const Input& input, const FigureType promotion_choice) const noexcept
         -> std::optional<mvmsg::MoveMessage>
     {
@@ -918,12 +929,12 @@ private /* ---- Helper methods ---- */:
 
         // Castling breaks
         if (in_hand->is(FigureType::Rook) && has_castling(in_hand->get_id())) {
-            side_events.emplace_back(mvmsg::CastlingBreak { in_hand->get_id() });
+            side_events.emplace_back(mvmsg::CastlingBreak{ in_hand->get_id() });
         }
         else if (in_hand->is(FigureType::King)) {
             for (const auto& [id, has_castling] : castling_) {
                 if (has_castling && (*get_fig(id))->is_col(in_hand)) {
-                    side_events.emplace_back(mvmsg::CastlingBreak { id });
+                    side_events.emplace_back(mvmsg::CastlingBreak{ id });
                 }
             }
         }
@@ -932,34 +943,33 @@ private /* ---- Helper methods ---- */:
         if ((in_hand->is(FigureType::King) || in_hand->is(FigureType::Rook)) && WIDTH == 8) {
             using PairInt = std::pair<int, int>;
 
-            for (auto [king_end_col, rook_end_col] : { PairInt { 6, 5 }, PairInt { 2, 3 } }) {
+            for (auto [king_end_col, rook_end_col] : { PairInt{ 6, 5 }, PairInt{ 2, 3 } }) {
                 if (const auto check_result_sus = castling_check(in_hand, input, king_end_col, rook_end_col)) {
                     if (const auto& [rook, king, second_figure_to_move] = check_result_sus.value();
                         has_castling(rook->get_id()))
                     {
-                        const auto king_tmp = figfab::FigureFabric::instance().submit_on(
-                            king, Pos { in_hand->get_pos().x, king_end_col }
-                        );
+                        const auto king_tmp =
+                            figfab::FigureFabric::instance().submit_on(king, Pos{ in_hand->get_pos().x, king_end_col });
                         const auto rook_tmp =
-                            figfab::FigureFabric::instance().submit_on(rook, Pos { rook->get_pos().x, rook_end_col });
+                            figfab::FigureFabric::instance().submit_on(rook, Pos{ rook->get_pos().x, rook_end_col });
                         // FIXME debug this branch (move_message.push and check after success castling)
                         if (check_for_when(
                                 what_next(in_hand->get_col()),
                                 { input.from, king->get_pos(), rook->get_pos() },
-                                Pos {},
+                                Pos{},
                                 {},
                                 { king_tmp.get(), rook_tmp.get() }
                             ))
                         {
-                            side_events.emplace_back(mvmsg::Check {});
+                            side_events.emplace_back(mvmsg::Check{});
                         }
-                        return mvmsg::MoveMessage { *in_hand,
-                                                    input,
-                                                    promotion_choice,
-                                                    mvmsg::Castling {
-                                                        (in_hand->is(FigureType::King) ? rook : king)->get_id(),
-                                                        second_figure_to_move },
-                                                    side_events };
+                        return mvmsg::MoveMessage{ *in_hand,
+                                                   input,
+                                                   promotion_choice,
+                                                   mvmsg::Castling{
+                                                       (in_hand->is(FigureType::King) ? rook : king)->get_id(),
+                                                       second_figure_to_move },
+                                                   side_events };
                     }
                 }
             }
@@ -973,11 +983,11 @@ private /* ---- Helper methods ---- */:
                 in_hand->is_col(Color::Black) &&
                     (!idw_ && input.target.x == 0 || idw_ && input.target.x == (HEIGHT - 1)))
             {
-                side_events.emplace_back(mvmsg::Promotion {});
+                side_events.emplace_back(mvmsg::Promotion{});
             }
 
             // Long move
-            const Pos shift { input.target - input.from };
+            const Pos shift{ input.target - input.from };
             // Pawn move by 2 (check my figures on 2nd line)
             if (shift.y == 0 && is_empty(input.target) &&
                 (in_hand->get_col() == Color::White &&
@@ -989,12 +999,12 @@ private /* ---- Helper methods ---- */:
             {
                 const auto in_hand_in_targ_tmp = figfab::FigureFabric::instance().submit_on(in_hand, input.target);
                 if (check_for_when(
-                        what_next(in_hand->get_col()), { input.from }, Pos {}, {}, { in_hand_in_targ_tmp.get() }
+                        what_next(in_hand->get_col()), { input.from }, Pos{}, {}, { in_hand_in_targ_tmp.get() }
                     ))
                 {
-                    side_events.emplace_back(mvmsg::Check {});
+                    side_events.emplace_back(mvmsg::Check{});
                 }
-                return mvmsg::MoveMessage { *in_hand, input, promotion_choice, mvmsg::LongMove {}, side_events };
+                return mvmsg::MoveMessage{ *in_hand, input, promotion_choice, mvmsg::LongMove{}, side_events };
             }
 
             // En passant move (check enemy figures on 4th line and prev. move)
@@ -1019,20 +1029,18 @@ private /* ---- Helper methods ---- */:
                     const auto in_hand_in_targ_tmp = figfab::FigureFabric::instance().submit_on(in_hand, input.target);
                     if (check_for_when(
                             what_next(in_hand->get_col()),
-                            { input.from, Pos { input.from.x, input.target.y }, input.target },
-                            Pos {},
+                            { input.from, Pos{ input.from.x, input.target.y }, input.target },
+                            Pos{},
                             {},
                             { in_hand_in_targ_tmp.get() }
                         ))
                     {
-                        side_events.emplace_back(mvmsg::Check {});
+                        side_events.emplace_back(mvmsg::Check{});
                     }
-                    auto const& to_eat_sus = get_fig(Pos { input.from.x, input.target.y });
-                    return mvmsg::MoveMessage { *in_hand,
-                                                input,
-                                                promotion_choice,
-                                                mvmsg::EnPassant { to_eat_sus.value()->get_id() },
-                                                side_events };
+                    auto const& to_eat_sus = get_fig(Pos{ input.from.x, input.target.y });
+                    return mvmsg::MoveMessage{
+                        *in_hand, input, promotion_choice, mvmsg::EnPassant{ to_eat_sus.value()->get_id() }, side_events
+                    };
                 }
             }
         }
@@ -1047,15 +1055,15 @@ private /* ---- Helper methods ---- */:
                 if (check_for_when(
                         what_next(in_hand->get_col()),
                         { input.from, input.target },
-                        Pos {},
+                        Pos{},
                         {},
                         { in_hand_in_curr_tmp.get() }
                     ))
                 {
-                    side_events.emplace_back(mvmsg::Check {});
+                    side_events.emplace_back(mvmsg::Check{});
                 }
-                return mvmsg::MoveMessage {
-                    *in_hand, input, promotion_choice, mvmsg::Eat { targ_sus.value()->get_id() }, side_events
+                return mvmsg::MoveMessage{
+                    *in_hand, input, promotion_choice, mvmsg::Eat{ targ_sus.value()->get_id() }, side_events
                 };
             }
             else if (!is_eat && !targ_sus.has_value()) {
@@ -1063,12 +1071,12 @@ private /* ---- Helper methods ---- */:
                 // FIXME {input.from} without input.target?? see prev check_for_when
                 // FIXME double check for when? see move_check
                 if (check_for_when(
-                        what_next(in_hand->get_col()), { input.from }, Pos {}, {}, { in_hand_in_curr_tmp.get() }
+                        what_next(in_hand->get_col()), { input.from }, Pos{}, {}, { in_hand_in_curr_tmp.get() }
                     ))
                 {
-                    side_events.emplace_back(mvmsg::Check {});
+                    side_events.emplace_back(mvmsg::Check{});
                 }
-                return mvmsg::MoveMessage { *in_hand, input, promotion_choice, mvmsg::Move {}, side_events };
+                return mvmsg::MoveMessage{ *in_hand, input, promotion_choice, mvmsg::Move{}, side_events };
             }
         }
         return std::nullopt;
