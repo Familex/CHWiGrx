@@ -700,8 +700,9 @@ public:
     /**
      * \brief Apply move message to board and set to move log
      * \param move_message Move message
+     * \param set_to_log If false, move message will not be set to log
      */
-    auto provide_move(const mvmsg::MoveMessage& move_message) noexcept -> bool
+    auto provide_move(const mvmsg::MoveMessage& move_message, const bool set_to_log = true) noexcept -> bool
     {
         const auto in_hand_sus = get_fig(move_message.first.get_id());
         if (!in_hand_sus.has_value())
@@ -745,7 +746,9 @@ public:
             );
         }
 
-        move_logger_.add(move_message);
+        if (set_to_log) {
+            move_logger_.add(move_message);
+        }
 
         return true;
     }
@@ -774,8 +777,11 @@ public:
                 recapture_figure(en_passant.eaten);
             },
             [&](const mvmsg::Castling& castling) {
-                move_fig(in_hand, move_message.input.from);
                 const auto who = (*this).get_fig_unsafe(castling.second_to_move);
+                if (who->at(move_message.input.from)) {
+                    swap_fig(in_hand, who);
+                }
+                move_fig(in_hand, move_message.input.from);
                 move_fig(who, castling.second_input.from);
             }
         );
@@ -799,7 +805,7 @@ public:
     auto restore_move() noexcept -> bool
     {
         if (const auto future_sus = move_logger_.pop_future_move()) {
-            provide_move(future_sus.value());
+            provide_move(future_sus.value(), false);
             move_logger_.add_without_reset(future_sus.value());
             return true;
         }
