@@ -26,6 +26,7 @@ FN is_valid_coords(const Input input) noexcept -> bool
     return is_valid_coords(input.from) && is_valid_coords(input.target);
 }
 
+/// FIXME rearrange methods
 class ChessGame
 {
     /*  x-axis from top to bottom (↓)  **
@@ -74,6 +75,8 @@ public:
         apply_map(std::move(map));
         init_figures_moves();
     }
+
+    void reset_move_logger() noexcept { move_logger_.reset(); }
 
     ChessGame& operator=(board_repr::BoardRepr&& board_repr) noexcept
     {
@@ -694,6 +697,10 @@ public:
         return std::nullopt;
     }
 
+    /**
+     * \brief Apply move message to board and set to move log
+     * \param move_message Move message
+     */
     auto provide_move(const mvmsg::MoveMessage& move_message) noexcept -> bool
     {
         const auto in_hand_sus = get_fig(move_message.first.get_id());

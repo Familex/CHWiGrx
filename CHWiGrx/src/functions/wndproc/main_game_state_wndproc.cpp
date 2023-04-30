@@ -8,11 +8,11 @@ LRESULT CALLBACK mainproc::main_game_state_wndproc(
     const LPARAM l_param
 ) noexcept
 {
-    static PAINTSTRUCT ps {};
-    static HBITMAP hbm_mem {};
-    static HGDIOBJ h_old {};
-    static HDC hdc_mem {};
-    static HDC hdc {};
+    static PAINTSTRUCT ps{};
+    static HBITMAP hbm_mem{};
+    static HGDIOBJ h_old{};
+    static HDC hdc_mem{};
+    static HDC hdc{};
 
     switch (message) {
         case WM_COMMAND:
@@ -107,6 +107,7 @@ LRESULT CALLBACK mainproc::main_game_state_wndproc(
                     motion_input.clear();
                     update_edit_menu_variables(h_wnd);
                     change_checkerboard_color_theme(h_wnd);
+                    board.reset_move_logger();
                     figures_list_window = create_figures_list_window(h_wnd);
                 } break;
 
@@ -170,7 +171,7 @@ LRESULT CALLBACK mainproc::main_game_state_wndproc(
 
         case WM_KEYDOWN:
         {
-            int cord { -1 };
+            int cord{ -1 };
 
             switch (w_param) {
                 case VK_0:
@@ -222,10 +223,10 @@ LRESULT CALLBACK mainproc::main_game_state_wndproc(
                 case VK_UP:
                 case VK_DOWN:
                 {
-                    const Pos shift { w_param == VK_LEFT
-                                          ? Pos(0, -1)
-                                          : (w_param == VK_RIGHT ? Pos(0, 1)
-                                                                 : (w_param == VK_UP ? Pos(-1, 0) : Pos(1, 0))) };
+                    const Pos shift{ w_param == VK_LEFT
+                                         ? Pos(0, -1)
+                                         : (w_param == VK_RIGHT ? Pos(0, 1)
+                                                                : (w_param == VK_UP ? Pos(-1, 0) : Pos(1, 0))) };
                     if (!motion_input.is_active_by_click())
                         motion_input.shift_from(shift, HEIGHT, WIDTH);
                     else
@@ -280,7 +281,7 @@ LRESULT CALLBACK mainproc::main_game_state_wndproc(
             motion_input.clear();
             InvalidateRect(h_wnd, nullptr, NULL);
 
-            debug_print("Curr board:", AsString<board_repr::BoardRepr> {}(board.get_repr(turn, true)));
+            debug_print("Curr board:", AsString<board_repr::BoardRepr>{}(board.get_repr(turn, true)));
 
             break;
 
@@ -299,7 +300,7 @@ LRESULT CALLBACK mainproc::main_game_state_wndproc(
                     motion_input.init_curr_choice_window(
                         h_wnd,
                         curr_choice_game_mode_wndproc,
-                        Pos { main_window.get_cell_width(), main_window.get_cell_height() }
+                        Pos{ main_window.get_cell_width(), main_window.get_cell_height() }
                     );
                 }
             }
@@ -318,8 +319,8 @@ LRESULT CALLBACK mainproc::main_game_state_wndproc(
             /* Возможные ходы текущей фигуры */
             {
                 for (const auto& [is_eat, move_pos] : motion_input.get_possible_moves()) {
-                    static const HBRUSH GREEN { CreateSolidBrush(RGB(0, 255, 0)) };
-                    static const HBRUSH DARK_GREEN { CreateSolidBrush(RGB(0, 150, 0)) };
+                    static const HBRUSH GREEN{ CreateSolidBrush(RGB(0, 255, 0)) };
+                    static const HBRUSH DARK_GREEN{ CreateSolidBrush(RGB(0, 150, 0)) };
                     const RECT cell = main_window.get_cell(change_axes(move_pos));
                     if (is_eat) {
                         FillRect(hdc_mem, &cell, DARK_GREEN);
