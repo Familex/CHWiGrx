@@ -94,8 +94,8 @@ void on_lbutton_up(
     else {
         motion_input.set_target(where_fig.x, where_fig.y);
         if (motion_input.is_target_at_input()) {
-            if (main_window.get_prev_lbutton_click() != Pos(LOWORD(l_param), HIWORD(l_param)))
-            {    // Отпустили в пределах клетки, но в другом месте
+            if (main_window.get_prev_lbutton_click() != Pos(LOWORD(l_param), HIWORD(l_param))) {
+                // Released within the cell, but in another place
                 motion_input.clear();
                 InvalidateRect(h_wnd, nullptr, NULL);
                 return;
@@ -164,7 +164,7 @@ auto take_repr_from_clip(const HWND h_wnd) noexcept -> ParseEither<board_repr::B
 void make_move(const HWND h_wnd) noexcept
 {
     if (!is_bot_move() && !motion_input.is_current_turn(turn))
-        return;    // Запрет хода вне очереди
+        return;    // "Move out of turn"
 
     auto in_hand = motion_input.get_in_hand();
     Input input = motion_input.get_input();

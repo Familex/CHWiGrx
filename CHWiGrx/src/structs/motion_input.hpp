@@ -51,7 +51,8 @@ public:
             create_curr_choice_window(h_wnd, in_hand_.value(), mouse, cell_size.x, cell_size.y, callback);
         RedrawWindow(
             h_wnd, nullptr, nullptr, RDW_INVALIDATE | RDW_UPDATENOW
-        );    // Форсирую перерисовку, т.к. появляется артефакт
+        );
+        // Force redraw, because there is an artifact
         SendMessage(curr_chose_window_, WM_NCLBUTTONDOWN, HTCAPTION, MAKELPARAM(mouse.x, mouse.y));
     }
 

@@ -5,7 +5,6 @@
 #include "../../variables/mutables.hpp"
 #include "../wndproc/wndproc.h"
 
-// Инициализация окна
 bool create_main_window(
     const HINSTANCE h_instance,
     const LPTSTR sz_title,
@@ -37,7 +36,6 @@ bool create_main_window(
     return true;
 }
 
-// Обработчик сообщений для окна "О программе".
 INT_PTR CALLBACK about_proc(const HWND h_dlg, const UINT message, const WPARAM w_param, const LPARAM l_param) noexcept
 {
     UNREFERENCED_PARAMETER(l_param);
@@ -134,23 +132,23 @@ std::string take_str_from_clip(const HWND h_wnd) noexcept
     return text;
 }
 
-/// <summary>
-/// Создаёт экземпляр окна для выбранной фигуры
-/// </summary>
-/// <param name="parent">Основное окно</param>
-/// <param name="in_hand">Выбранная фигура</param>
-/// <param name="mouse">Позиция мыши</param>
-/// <param name="w">Ширина фигуры</param>
-/// <param name="h">Высота фигуры</param>
-/// <param name="callback">Функция окна</param>
-/// <returns>Дескриптор окна</returns>
+/**
+ * \brief Create a curr choice window
+ * \param parent Parent window
+ * \param in_hand Figure, what will be drawn in curr choice window
+ * \param mouse Mouse initial position
+ * \param w Curr choice window width
+ * \param h Curr choice window height
+ * \param callback Curr choice window wndproc
+ * \return Curr choice window handle
+ */
 HWND create_curr_choice_window(HWND parent, Figure* in_hand, POINT mouse, int w, int h, const WNDPROC callback) noexcept
 {
     UnregisterClass(CURR_CHOICE_WINDOW_CLASS_NAME, GetModuleHandle(nullptr));
     WNDCLASSEX wc { sizeof(WNDCLASSEX) };
-    Figure* for_storage = in_hand;    // Нужно копировать TODO (В колбеке тоже тогда не забыть удалить)
-                                      // т.к. в основной программе тоже будет использоваться in_hand
-                                      // который может быть уничтожен.
+    // FIXME need to copy figure (Don't forget to delete in callback too)
+    // because in main program in_hand will be used too where it can be destroyed.
+    Figure* for_storage = in_hand;
     wc.cbClsExtra = 0;
     wc.cbWndExtra = sizeof(in_hand);
     wc.hbrBackground = nullptr;
@@ -208,12 +206,11 @@ bool prepare_window(
     WCHAR sz_title[max_load_string];
     WCHAR sz_window_class[max_load_string];
 
-    // Инициализация глобальных строк
     LoadStringW(h_instance, title_id, sz_title, max_load_string);
     LoadStringW(h_instance, window_class_id, sz_window_class, max_load_string);
 
     wcex.lpszClassName = sz_window_class;
-    wcex.lpszMenuName = MAKEINTRESOURCE(window_class_id);    // ... = szWindowClass не работает
+    wcex.lpszMenuName = MAKEINTRESOURCE(window_class_id);    // ... = szWindowClass does not work 
 
     RegisterClassExW(&wcex);
 
@@ -223,7 +220,6 @@ bool prepare_window(
     return true;
 }
 
-// Цикл сообщений
 int window_loop(const HINSTANCE h_instance) noexcept
 {
     MSG msg;

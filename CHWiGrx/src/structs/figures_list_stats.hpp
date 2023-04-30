@@ -42,7 +42,7 @@ public:
 
     [[nodiscard]] auto get_width_with_extra() const noexcept -> int override
     {
-        // Может не быть слайдера TODO
+        // FIXME There may be no slider
         return WindowStats::get_width_with_extra() + SCROLLBAR_THICKNESS;
     }
 

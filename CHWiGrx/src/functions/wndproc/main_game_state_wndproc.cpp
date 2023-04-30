@@ -17,7 +17,6 @@ LRESULT CALLBACK mainproc::main_game_state_wndproc(
     switch (message) {
         case WM_COMMAND:
         {
-            // Разобрать выбор в меню:
             switch (const int wm_id = LOWORD(w_param)) {
                 case IDM_UNDO:
                     if (board.undo_move()) {
@@ -79,7 +78,7 @@ LRESULT CALLBACK mainproc::main_game_state_wndproc(
                 case IDM_SET_CHOICE_TO_QUEEN:
                 case IDM_SET_CHOICE_TO_BISHOP:
                 {
-                    // можно просто всё занулять
+                    // FIXME move to menu.cpp
                     const UINT item_menu_to_set_id = wm_id;
                     const UINT curr_item_menu_state = chose == FigureType::Queen    ? IDM_SET_CHOICE_TO_QUEEN
                                                       : chose == FigureType::Rook   ? IDM_SET_CHOICE_TO_ROOK
@@ -165,7 +164,7 @@ LRESULT CALLBACK mainproc::main_game_state_wndproc(
                     return DefWindowProc(h_wnd, message, w_param, l_param);
             }
         }
-            update_main_window_title(h_wnd);    // Для надёжности обновлю на все исходы
+            update_main_window_title(h_wnd);
             InvalidateRect(h_wnd, nullptr, NULL);
             break;
 
@@ -293,7 +292,7 @@ LRESULT CALLBACK mainproc::main_game_state_wndproc(
         case WM_MOUSEMOVE:
             if (motion_input.is_drags()) {
                 if (motion_input.is_active_by_click()) {
-                    // Отмена ввода при перетягивании конечной клетки
+                    // Move cancel on target cell drag
                     motion_input.clear();
                 }
                 else {

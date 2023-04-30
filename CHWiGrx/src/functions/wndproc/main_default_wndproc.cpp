@@ -49,7 +49,7 @@ main_default_wndproc(const HWND h_wnd, const UINT message, const WPARAM w_param,
                 } break;
 
                 case IDM_EXIT:
-                    // нужно ли чистить память?
+                    // Is it necessary to free memory?
                     DestroyWindow(h_wnd);
                     break;
 

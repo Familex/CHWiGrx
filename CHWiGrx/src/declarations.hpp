@@ -1,6 +1,5 @@
 #pragma once
 
-
 #include "bot/bot.h"
 #include "chess_game.hpp"
 #include "functions/board_logic/board_logic.h"

@@ -107,7 +107,7 @@ LRESULT CALLBACK mainproc::main_edit_state_wndproc(
             draw_input(hdc_mem, motion_input.get_input());
             draw_figures_on_board(hdc_mem);
 
-            // Копирование временного буфера в основной
+            // Copying the temporary buffer to the main one
             BitBlt(hdc, 0, 0, main_window.get_width(), main_window.get_height(), hdc_mem, 0, 0, SRCCOPY);
 
             SelectObject(hdc_mem, h_old);

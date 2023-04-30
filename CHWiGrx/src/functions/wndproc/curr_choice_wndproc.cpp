@@ -18,10 +18,10 @@ curr_choice_wndproc(const HWND h_wnd, const UINT u_msg, const WPARAM w_param, co
                 SendMessage(h_wnd, WM_EXITSIZEMOVE, NULL, NULL);
             }
             break;
-        case WM_ENTERSIZEMOVE:    // Фигуру начали передвигать
+        case WM_ENTERSIZEMOVE:    // On figure start dragging 
             KillTimer(h_wnd, TO_DESTROY_TIMER_ID);
             break;
-        case WM_EXITSIZEMOVE:    // Фигуру отпустил
+        case WM_EXITSIZEMOVE:    // On figure release 
         {
             const HWND parent = GetParent(h_wnd);
             POINT cur_pos {};
@@ -30,7 +30,7 @@ curr_choice_wndproc(const HWND h_wnd, const UINT u_msg, const WPARAM w_param, co
             if (const Pos where_fig = main_window.get_figure_under_mouse(cur_pos);
                 !CheckMovesValidity && !is_valid_coords(where_fig))
             {
-                // Вынесли фигуру за пределы доски без проверки валидности => удаляем с доски
+                // Moved figure out of the board without checking validity => delete it from the board
                 board.delete_fig(reinterpret_cast<Figure*>(GetWindowLongPtr(h_wnd, GWLP_USERDATA))->get_pos());
                 motion_input.clear();
             }
@@ -40,8 +40,7 @@ curr_choice_wndproc(const HWND h_wnd, const UINT u_msg, const WPARAM w_param, co
             InvalidateRect(parent, nullptr, NULL);
             DestroyWindow(h_wnd);
         } break;
-        case WM_NCHITTEST:
-            // При перехвате нажатий мыши симулируем перетаскивание
+        case WM_NCHITTEST:    // When intercepting mouse clicks, we simulate dragging.
             return (LRESULT)HTCAPTION;
         case WM_PAINT:
         {

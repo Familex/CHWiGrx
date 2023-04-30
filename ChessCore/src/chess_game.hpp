@@ -170,19 +170,19 @@ public:
                 if (!is_valid_coords(curr))
                     continue;
                 if (curr.in(ours)) {
-                    break;    // Врезались в союзника
+                    break;    // Bumped into an ally
                 }
                 else if (curr.in(enemies)) {
-                    possible_moves.emplace_back(true, curr);    // Съели противника
-                    break;                                      // И врезались...
+                    possible_moves.emplace_back(true, curr);    // Ate the enemy
+                    break;                                      // And bumped into...
                 }
                 else if (cont_fig(curr) && !curr.in(to_ignore)) {
                     if (!get_fig(curr).value()->is_col(in_hand->get_col())) {
                         possible_moves.emplace_back(true, curr);
-                        break;    // Врезались
+                        break;    // Bumped
                     }
                     else {
-                        break;    // Врезались
+                        break;    // Bumped
                     }
                 }
             }
@@ -196,7 +196,7 @@ public:
                     possible_moves.emplace_back(false, curr);
                 }
                 else {
-                    break;    // Врезались
+                    break;    // Bumped
                 }
             }
         }
@@ -222,7 +222,7 @@ public:
         std::vector<std::pair<bool, Pos>> all_moves { expand_broom(in_hand, to_ignore, ours, enemies) };
         const Pos in_hand_pos = in_hand->get_pos();
         if (in_hand->is(FigureType::Pawn)) {
-            // Ход пешки на 2 (смотрю свои фигуры на 2 линии)
+            // Pawn moves 2 (check my figures on 2 line)
             if (in_hand->is_col(Color::White)) {
                 if (in_hand_pos.x == (HEIGHT - 2) && idw_ && is_empty(in_hand_pos + Pos(-1, 0)) &&
                     is_empty(in_hand_pos + Pos(-2, 0)))
@@ -248,7 +248,7 @@ public:
                 }
             }
 
-            // Взятие на проходе
+            // En passant
             if (const auto& last_move_sus = move_logger_.get_last_move(); last_move_sus.has_value()) {
                 const auto& last_move = last_move_sus.value();
                 if (const Pos& who_went_at_last_move_pos = last_move.first.get_pos();
@@ -283,7 +283,6 @@ public:
                 }
             }
         }
-        // FIXME use Figure::is
         if (in_hand->is(FigureType::King)) {
             for (auto [king_end_col, rook_end_col] : { std::pair(6, 5), std::pair(2, 3) }) {
                 if (const auto check_result_sus = castling_check(
@@ -366,7 +365,7 @@ public:
                 to_defend = king.value()->get_pos();
             }
             else {
-                return false;    // Нечего защищать
+                return false;    // Nothing to defend
             }
         }
         for (const auto& figure : get_figures_of(col)) {
@@ -407,7 +406,7 @@ public:
     {
         const auto king_sus = find_king(col);
         if (!king_sus.has_value()) {
-            return false;    // Нет короля
+            return false;    // No king
         }
         const auto king = king_sus.value();
         if (to_defend == Pos())
@@ -460,13 +459,13 @@ public:
                 to_defend = king_sus.value()->get_pos();
             }
             else {
-                return false;    // Нечего защищать
+                return false;    // Nothing to defend
             }
         }
         for (const auto& enemy : get_figures_of(what_next(col)) + enemies) {
             if (std::ranges::find(to_ignore, enemy->get_pos()) != to_ignore.end()) {
                 if (std::ranges::find(enemies, enemy) ==
-                    enemies.end())    // Пока не нужно, но должно быть тут на всякий
+                    enemies.end())    // While not needed, but should be here just in case.
                     continue;
             }
             for (const auto& [is_eat, curr] :
@@ -477,7 +476,7 @@ public:
                 }
             }
         }
-        return false;    // Никто не атакует
+        return false;    // No one attacks.
     }
 
     [[nodiscard]] auto
@@ -513,9 +512,9 @@ public:
         return *move_sus;
     }
 
-    /// <summary>
-    /// Helper type_ for ChessGame::castling_check
-    /// </summary>
+    /**
+     * \brief Helper type_ for ChessGame::castling_check
+     */
     struct CastlingCheckResult
     {
         const Figure* rook;
@@ -523,28 +522,27 @@ public:
         Input second_figure_to_move;    // for rook or king
     };
 
-    // FIXME translate
-    /// <summary>
-    /// <para>Проверка валидности рокировки</para>
-    /// <para>Рокировка как в 960 (ширина обязательно 8)</para>
-    /// <para>Условия:</para>
-    /// <para>1. Король и рокируемая ладья не ходили ранее</para>
-    /// <para>2. Поля между начальной и конечной позицией короля и ладьи соответственно пусты</para>
-    /// <para>3. Король не проходит через битое поле, не находится под шахом и не встаёт под него</para>
-    /// <para><i>Ладья может быть под шахом</i></para>
-    /// <para><i>Король мог быть под шахом до этого</i></para>
-    /// <para><i>Рокировка сбрасывает все рокировки</i></para>
-    /// </summary>
-    /// <param name="in_hand">Фигура, которой собираются сходить</param>
-    /// <param name="input">Ввод для проверки</param>
-    /// <param name="king_end_col">Целевой столбец для короля</param>
-    /// <param name="rook_end_col">Целевой столбец для ладьи</param>
-    /// <returns>Если рокировка валидна, возвращает фигуру короля и ладьи</returns>
+    /**
+     * \brief Castling validity check
+     * \details Castling like in 960 (width must be 8).
+     * Rules:
+     * 1. King and rook must not be moved before
+     * 2. Fields between start and end positions of king and rook are empty
+     * 3. King does not pass through a broken field, is not under check and does not stand under it
+     * 4. Rook can be under check
+     * 5. King may have been under check before
+     * 6. Castling resets all castlings for target player color
+     * \param in_hand Figure, which is going to move (may be rook or king)
+     * \param input Input for check
+     * \param king_end_col Target column for king
+     * \param rook_end_col Target column for rook
+     * \return If castling is valid, returns king and rook figures, and input for second figure to move
+     */
     [[nodiscard]] auto
     castling_check(const Figure* in_hand, const Input& input, const int king_end_col, const int rook_end_col)
         const noexcept -> std::optional<CastlingCheckResult>
     {
-        // Рокировка на g-фланг
+        // Castling on g-flank
         const auto king_sus = in_hand->is(FigureType::King) ? in_hand : find_king(in_hand->get_col());
         if (!king_sus.has_value()) {
             return std::nullopt;
@@ -556,8 +554,8 @@ public:
              in_hand->get_pos().y != rook_end_col))
         {
             bool castling_can_be_done = true;
-            // input правильный (король уже мог быть на g вертикали, так что доступна возможность рокировки от ладьи)
-            // Нужно проверить, что все промежуточные позиции (где идёт король) не под шахом
+            // Input is correct (king could be on g col, so castling is available from rook)
+            // Need to check that all intermediate positions (where king goes) are not under check
             const Figure* rook = (*board_.figures.begin()).second;
             int step { king_end_col - king_pos.y > 0 ? 1 : -1 };
             for (Pos rook_aspt_pos { king_pos }; is_valid_coords(rook_aspt_pos); rook_aspt_pos.y += step) {
@@ -667,6 +665,7 @@ public:
 
     template<typename Func>
         requires requires(Func func) {
+            /// FIXME clang-format. put on one line: { func() } -> std::same_as<FigureType>;
             {
                 func()
             } -> std::same_as<FigureType>;
@@ -810,7 +809,7 @@ public:
             temp_down.emplace_back(ij, 0);
         }
 
-        // Задаётся относительно белых через idw
+        // Set relative to white via idw
         moves_[FigureType::Pawn] = { { Pos { (idw_ ? -1 : 1), 0 } } };
         eats_[FigureType::Pawn] = { { Pos { (idw_ ? -1 : 1), -1 } }, { Pos { (idw_ ? -1 : 1), 1 } } };
 
@@ -860,16 +859,15 @@ public:
 
     [[nodiscard]] size_t cnt_of_figures() const noexcept { return board_.figures.size(); }
 
-    // FIXME translate
-    /// <summary>
-    /// <para>Проверка на недостаточный материал для мата</para>
-    /// <para>Варианты:</para>
-    /// <para>Король против короля</para>
-    /// <para>Король против короля и коня</para>
-    /// <para>Король против короля и слона</para>
-    /// <para>Король и слон против короля и слонов, где все слоны на одном цвете</para>
-    /// </summary>
-    /// <returns>Не хватает ли материала для мата</returns>
+    /**
+     * \brief Insufficient material check
+     * \details Cases:
+     * 1. King vs king
+     * 2. King vs king and knight
+     * 3. King vs king and bishop
+     * 4. King and bishop vs king and bishops of same cell color
+     * \return Is material insufficient for checkmate
+     */
     [[nodiscard]] bool insufficient_material() const noexcept
     {
         const size_t size = cnt_of_figures();
@@ -883,12 +881,15 @@ public:
         size_t w_cell_bishops_cnt {};
         for (const auto& fig : get_all_figures()) {
             if (fig->is(FigureType::Bishop))
-                if ((fig->get_pos().x + fig->get_pos().y) % 2)
+                if ((fig->get_pos().x + fig->get_pos().y) % 2) {
                     ++b_cell_bishops_cnt;
-                else
+                }
+                else {
                     ++w_cell_bishops_cnt;
-            else if (!fig->is(FigureType::King))
-                return false;    // при модификации функции не забыть тут поставить хотя бы goto
+                }
+            else if (!fig->is(FigureType::King)) {
+                return false;    // Careful. Result based on assumption of default chess rules.
+            }
         }
         return not(b_cell_bishops_cnt && w_cell_bishops_cnt);
     }
@@ -977,7 +978,7 @@ private /* ---- Helper methods ---- */:
 
             // Long move
             const Pos shift { input.target - input.from };
-            // Ход пешки на 2 (смотрю свои фигуры на 2 линии)
+            // Pawn move by 2 (check my figures on 2nd line)
             if (shift.y == 0 && is_empty(input.target) &&
                 (in_hand->get_col() == Color::White &&
                      (input.from.x == (HEIGHT - 2) && idw_ && shift.x == -2 && is_empty(input.from + Pos(-1, 0)) ||
@@ -996,8 +997,7 @@ private /* ---- Helper methods ---- */:
                 return mvmsg::MoveMessage { *in_hand, input, promotion_choice, mvmsg::LongMove {}, side_events };
             }
 
-            // Взятие на проходе (смотрю чужие фигуры на 4 линии)
-            // А ещё проверяю прошлый ход
+            // En passant move (check enemy figures on 4th line and prev. move)
             if (const auto& last_move_sus = move_logger_.get_last_move(); last_move_sus.has_value()) {
                 const auto& last_move = last_move_sus.value();
                 if (const Pos& who_went_at_last_move_pos = last_move.first.get_pos();
@@ -1043,7 +1043,7 @@ private /* ---- Helper methods ---- */:
                 continue;
             if (is_eat && targ_sus.has_value()) {
                 const auto in_hand_in_curr_tmp = figfab::FigureFabric::instance().submit_on(in_hand, curr);
-                // Фигура на которой сейчас стоим всё ещё учитывается!
+                // Figure what we are standing on is still counted!
                 if (check_for_when(
                         what_next(in_hand->get_col()),
                         { input.from, input.target },
@@ -1061,6 +1061,7 @@ private /* ---- Helper methods ---- */:
             else if (!is_eat && !targ_sus.has_value()) {
                 const auto in_hand_in_curr_tmp = figfab::FigureFabric::instance().submit_on(in_hand, curr);
                 // FIXME {input.from} without input.target?? see prev check_for_when
+                // FIXME double check for when? see move_check
                 if (check_for_when(
                         what_next(in_hand->get_col()), { input.from }, Pos {}, {}, { in_hand_in_curr_tmp.get() }
                     ))

@@ -20,7 +20,7 @@ struct Input
 
     CTOR Input(std::string str)
     {
-        /* "from.first from.second target.first target.second" */
+        // from.first from.second target.first target.second
         str += " ";
         size_t pos = 0;
         std::vector<int> acc {};

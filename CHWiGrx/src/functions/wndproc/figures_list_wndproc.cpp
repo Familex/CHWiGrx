@@ -175,7 +175,7 @@ figures_list_wndproc(const HWND h_wnd, const UINT message, const WPARAM w_param,
                 );
             }
 
-            /* Копирование временного буфера в основной (взято из майкросовтовской документации) */
+            // Copy the off-screen bitmap onto the screen.
             if (is_scrolls) {
                 BitBlt(
                     ps.hdc,
@@ -195,7 +195,7 @@ figures_list_wndproc(const HWND h_wnd, const UINT message, const WPARAM w_param,
                 is_resizes = false;
             }
             else {
-                // При разворачивании окна заходит сюда
+                // When the window is expanded, it comes here
                 BitBlt(ps.hdc, 0, 0, width, static_cast<int>(all_figures_height), hdc_mem, 0, curr_scroll, SRCCOPY);
             }
 
@@ -248,7 +248,7 @@ figures_list_wndproc(const HWND h_wnd, const UINT message, const WPARAM w_param,
         {
             figures_prototypes.clear();
             figures_list_window = nullptr;
-            const HWND owner = GetWindow(h_wnd, GW_OWNER);    // это должен быть GetParent, но оный возвращает NULL
+            const HWND owner = GetWindow(h_wnd, GW_OWNER);    // It should be GetParent, but it returns NULL.
             set_menu_checkbox(owner, IDM_TOGGLE_LIST_WINDOW, false);
 
             break;

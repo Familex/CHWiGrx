@@ -1,6 +1,8 @@
 #include "../../declarations.hpp"
 #include "wndproc.h"
 
+/// FIXME may be merged with curr_choice_wndproc
+
 LRESULT CALLBACK curr_choice_figures_list_wndproc(
     const HWND h_wnd,
     const UINT u_msg,
@@ -8,7 +10,7 @@ LRESULT CALLBACK curr_choice_figures_list_wndproc(
     const LPARAM l_param
 ) noexcept
 {
-    // выбранная фигура временная => удаляется при закрытии окна
+    // selected figure is temporary => it will be deleted when window is closed
     static constexpr int TO_DESTROY_TIMER_ID { FIGURES_LIST_CHOICE_TO_DESTROY_TIMER_ID };
     switch (u_msg) {
         case WM_CREATE:
@@ -23,7 +25,7 @@ LRESULT CALLBACK curr_choice_figures_list_wndproc(
         case WM_ENTERSIZEMOVE:
             KillTimer(h_wnd, TO_DESTROY_TIMER_ID);
             break;
-        case WM_EXITSIZEMOVE:    // Фигуру отпустил
+        case WM_EXITSIZEMOVE:    // On figure release
         {
             const HWND hmain_window = GetWindow(GetParent(h_wnd), GW_OWNER);
             POINT cur_pos {};
@@ -50,7 +52,7 @@ LRESULT CALLBACK curr_choice_figures_list_wndproc(
             motion_input.clear();
             DestroyWindow(h_wnd);
         } break;
-        case WM_NCHITTEST:    // При перехвате нажатий мыши симулируем перетаскивание
+        case WM_NCHITTEST:    // When intercepting mouse clicks, we simulate dragging.
             return (LRESULT)HTCAPTION;
         case WM_PAINT:
         {

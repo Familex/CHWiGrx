@@ -61,7 +61,10 @@ void draw_figure(const HDC hdc, const Figure* figure, const Pos begin_paint, con
     draw_figure(hdc, figure, begin_paint, is_transparent, main_window.get_cell_width(), main_window.get_cell_height());
 }
 
-/* Отрисовать фоновую доску */
+/**
+ * \brief Draw background board
+ * \param hdc Draw context
+ */
 void draw_board(const HDC hdc) noexcept
 {
     for (int i {}; i < HEIGHT; ++i) {
@@ -77,7 +80,10 @@ void draw_board(const HDC hdc) noexcept
     }
 }
 
-/* Отрисовать фигуры на поле (та, что в руке, не рисуется) */
+/**
+ * \brief Draw figures on board (the one that is in hand is not drawn)
+ * \param hdc Draw context
+ */
 void draw_figures_on_board(const HDC hdc) noexcept
 {
     for (const auto& figure : board.get_all_figures()) {
@@ -87,9 +93,14 @@ void draw_figures_on_board(const HDC hdc) noexcept
     }
 }
 
-// Положение курсора и выделенной клетки
+/**
+ * \brief Draw cursor position and selected cell
+ * \param hdc_mem Draw context
+ * \param input User input to draw
+ */
 void draw_input(const HDC hdc_mem, const Input input) noexcept
 {
+    /// FIXME hardcoded colors
     static const HBRUSH RED { CreateSolidBrush(RGB(255, 0, 0)) };
     static const HBRUSH BLUE { CreateSolidBrush(RGB(0, 0, 255)) };
     const RECT from_cell = main_window.get_cell(change_axes(input.from));

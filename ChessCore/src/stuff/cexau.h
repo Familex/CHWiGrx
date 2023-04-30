@@ -6,6 +6,8 @@
 
 #ifdef _MSC_VER
 
+/// FIXME clang-format.
+
 // count arguments
 #define CEXAU_ARG_COUNT(...) CEXAU_INTERNAL_EXPAND_ARGS_PRIVATE(CEXAU_INTERNAL_ARGS_AUGMENTER(__VA_ARGS__))
 #define CEXAU_INTERNAL_ARGS_AUGMENTER(...) unused, __VA_ARGS__
@@ -240,19 +242,16 @@
 #define CEXAU_MAP_LINES_EXCEPT_LAST(...)                                                                               \
     CEXAU_MAP_LINES_EXCEPT_LAST_N(CEXAU_ARG_COUNT(__VA_ARGS__), __VA_ARGS__, , , , , , , , , , , )
 
-/// <summary>
-///     for quick function tests using visual studio cpp interpreter
-/// </summary>
-/// <example>
-///     CEXAU test_val = CEXAUQKT(1 + 2);
-/// </example>
-/// <example>
-///     CEXAU test_val = CEXAUQKT(
-///         int a = 2,
-///         int b = 3,
-///         a + b
-///     );
-/// </example>
+/**
+ * \brief for quick function tests using visual studio cpp interpreter
+ * \example CEXAU test_val = CEXAUQKT(1 + 2);
+ * \example
+ * CEXAU test_val = CEXAUQKT( \n
+ *     int a = 2, \n
+ *     int b = 3, \n
+ *     a + b
+ * );
+ */
 #define CEXAU inline constexpr auto
 #define CEXAU_CONSTEVAL_EXECUTE_ONE_LINE(return_line) ([&]() constexpr -> auto { return (return_line); })()
 #define CEXAU_CONSTEVAL_EXECUTE_MULTI_LINE(...)                                                                        \
