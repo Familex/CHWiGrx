@@ -94,16 +94,8 @@ struct CreateWindowArgsBuilder
     DECLARE_SETTER(set_wc_background, wc.hbrBackground)
     DECLARE_SETTER(set_wc_menu_name, wc.lpszMenuName)
     DECLARE_SETTER(set_wc_icon_sm, wc.hIconSm)
-    [[nodiscard]] constexpr auto set_class_name(const auto value) && noexcept -> CreateWindowArgsBuilder
-    {
-        result.class_name = value;
-        return *this;
-    }
-    [[nodiscard]] constexpr auto set_title(const auto value) && noexcept -> CreateWindowArgsBuilder
-    {
-        result.title = value;
-        return *this;
-    }
+    DECLARE_SETTER(set_class_name, class_name)
+    DECLARE_SETTER(set_title, title)
     DECLARE_SETTER(set_style, style)
     DECLARE_SETTER(set_x, x)
     DECLARE_SETTER(set_y, y)
