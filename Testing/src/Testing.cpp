@@ -869,10 +869,7 @@ public:
     TEST_METHOD(Castling)
     {
         std::vector<std::pair<Pos, Pos>> fails;
-        const auto c = Pos{ 7, 2 };
-        const auto d = Pos{ 7, 3 };
-        const auto g = Pos{ 7, 6 };
-        const auto f = Pos{ 7, 5 };
+
         // include impossible in 960-chess cases ((k=0, r=1), (k=7, r=6))
         const auto k_iota = [](bool is_left) {
             if (is_left)
@@ -884,27 +881,38 @@ public:
                 return std::views::iota(0, k);
             return std::views::iota(k + 1, 8);
         };
-        for (const auto is_left : { false, true }) {
-            const auto ke = is_left ? c : g;
-            const auto re = is_left ? d : f;
-            for (const auto k : k_iota(is_left)) {
-                for (const auto r : r_iota(is_left, k)) {
-                    const auto kp = Pos{ 7, k };
-                    const auto rp = Pos{ 7, r };
-                    ChessGame board{ BoardRepr{ { new Figure{ 0_id, kp, Color::White, FigureType::King },
-                                                  new Figure{ 1_id, rp, Color::White, FigureType::Rook } },
-                                                Color::White,
-                                                true } };
-                    const auto king = board.get_fig_unsafe(0_id);
-                    const auto rook = board.get_fig_unsafe(1_id);
-                    auto move = board.provide_move(king, Input{ king->get_pos(), ke }, Color::White, STANDARD_PROVIDER);
-                    // If king moves to one tile (and there is no rook), then user must move rook
-                    if (std::abs(kp.y - ke.y) == 1 && rp != ke || !move) {
-                        board.undo_move();
-                        move = board.provide_move(rook, Input{ rp, re }, Color::White, STANDARD_PROVIDER);
-                    }
-                    if (!move || king->get_pos() != ke || rook->get_pos() != re) {
-                        fails.emplace_back(kp, rp);
+        for (const auto idw : { false, true }) {
+            const auto row = idw ? 7 : 0;
+            for (const auto is_left : { false, true }) {
+                for (const auto k : k_iota(is_left)) {
+                    for (const auto r : r_iota(is_left, k)) {
+                        const auto kp = Pos{ row, k };
+                        const auto rp = Pos{ row, r };
+                        ChessGame board{ BoardRepr{ { new Figure{ 0_id, kp, Color::White, FigureType::King },
+                                                      new Figure{ 1_id, rp, Color::White, FigureType::Rook } },
+                                                    Color::White,
+                                                    idw } };
+
+                        const auto c = Pos{ row, board.get_column_by_name('c') };
+                        const auto d = Pos{ row, board.get_column_by_name('d') };
+                        const auto g = Pos{ row, board.get_column_by_name('g') };
+                        const auto f = Pos{ row, board.get_column_by_name('f') };
+
+                        const auto ke = is_left ^ !idw ? c : g;
+                        const auto re = is_left ^ !idw ? d : f;
+
+                        const auto king = board.get_fig_unsafe(0_id);
+                        const auto rook = board.get_fig_unsafe(1_id);
+                        auto move =
+                            board.provide_move(king, Input{ king->get_pos(), ke }, Color::White, STANDARD_PROVIDER);
+                        // If king moves to one tile (and there is no rook), then user must move rook
+                        if (std::abs(kp.y - ke.y) == 1 && rp != ke || !move) {
+                            board.undo_move();
+                            move = board.provide_move(rook, Input{ rp, re }, Color::White, STANDARD_PROVIDER);
+                        }
+                        if (!move || king->get_pos() != ke || rook->get_pos() != re) {
+                            fails.emplace_back(kp, rp);
+                        }
                     }
                 }
             }
@@ -915,5 +923,34 @@ public:
 };    // TEST_CLASS(KingMoves)
 
 }    // namespace moves
+
+TEST_CLASS(Utils)
+{
+    TEST_METHOD(GetColumnByName)
+    {
+        {
+            ChessGame board{ BoardRepr{ {}, Color::White, true } };
+            Assert::AreEqual(6, board.get_column_by_name('g'));
+            Assert::AreEqual(6, board.get_column_by_name('G'));
+            Assert::AreEqual(5, board.get_column_by_name('f'));
+            Assert::AreEqual(5, board.get_column_by_name('F'));
+            Assert::AreEqual(2, board.get_column_by_name('c'));
+            Assert::AreEqual(2, board.get_column_by_name('C'));
+            Assert::AreEqual(3, board.get_column_by_name('d'));
+            Assert::AreEqual(3, board.get_column_by_name('D'));
+        }
+        {
+            ChessGame board{ BoardRepr{ {}, Color::White, false } };
+            Assert::AreEqual(1, board.get_column_by_name('g'));
+            Assert::AreEqual(1, board.get_column_by_name('G'));
+            Assert::AreEqual(2, board.get_column_by_name('f'));
+            Assert::AreEqual(2, board.get_column_by_name('F'));
+            Assert::AreEqual(5, board.get_column_by_name('c'));
+            Assert::AreEqual(5, board.get_column_by_name('C'));
+            Assert::AreEqual(4, board.get_column_by_name('d'));
+            Assert::AreEqual(4, board.get_column_by_name('D'));
+        }
+    }    // TEST_METHOD(GetColumnByName)
+};       // TEST_CLASS(Utils)
 
 }    // namespace figure_board

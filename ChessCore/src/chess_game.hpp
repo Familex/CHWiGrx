@@ -67,6 +67,14 @@ public:
 
     ~ChessGame() noexcept = default;
 
+    FN get_column_by_name(char name) const noexcept
+    {
+        if ('A' <= name && name <= 'Z') {
+            name -= 'A' - 'a';
+        }
+        return idw_ ? name - 'a' : WIDTH - (name - 'a') - 1;
+    }
+
     void reset(board_repr::BoardRepr&& map) noexcept
     {
         move_logger_.reset();
@@ -287,7 +295,10 @@ public:
             }
         }
         if (in_hand->is(FigureType::King)) {
-            for (auto [king_end_col, rook_end_col] : { std::pair(6, 5), std::pair(2, 3) }) {
+            using PairInt = std::pair<int, int>;
+            for (auto [king_end_col, rook_end_col] : { PairInt{ get_column_by_name('g'), get_column_by_name('f') },
+                                                       PairInt{ get_column_by_name('c'), get_column_by_name('d') } })
+            {
                 if (const auto check_result_sus = castling_check(
                         in_hand, Input{ in_hand_pos, Pos{ in_hand_pos.x, king_end_col } }, king_end_col, rook_end_col
                     ))
@@ -301,7 +312,10 @@ public:
             }
         }
         if (in_hand->is(FigureType::Rook)) {
-            for (auto [king_end_col, rook_end_col] : { std::pair(6, 5), std::pair(2, 3) }) {
+            using PairInt = std::pair<int, int>;
+            for (auto [king_end_col, rook_end_col] : { PairInt{ get_column_by_name('g'), get_column_by_name('f') },
+                                                       PairInt{ get_column_by_name('c'), get_column_by_name('d') } })
+            {
                 if (const auto check_result_sus = castling_check(
                         in_hand, Input{ in_hand_pos, Pos{ in_hand_pos.x, rook_end_col } }, king_end_col, rook_end_col
                     ))
@@ -1092,7 +1106,9 @@ public:
         if ((in_hand->is(FigureType::King) || in_hand->is(FigureType::Rook)) && WIDTH == 8) {
             using PairInt = std::pair<int, int>;
 
-            for (auto [king_end_col, rook_end_col] : { PairInt{ 6, 5 }, PairInt{ 2, 3 } }) {
+            for (auto [king_end_col, rook_end_col] : { PairInt{ get_column_by_name('g'), get_column_by_name('f') },
+                                                       PairInt{ get_column_by_name('c'), get_column_by_name('d') } })
+            {
                 if (const auto check_result_sus = castling_check(in_hand, input, king_end_col, rook_end_col)) {
                     if (const auto& [rook, king, second_figure_to_move] = check_result_sus.value();
                         has_castling(rook->get_id()))
