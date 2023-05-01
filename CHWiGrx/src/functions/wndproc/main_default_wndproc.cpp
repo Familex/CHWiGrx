@@ -9,7 +9,7 @@ main_default_wndproc(const HWND h_wnd, const UINT message, const WPARAM w_param,
     switch (message) {
         case WM_COMMAND:
         {
-            switch (const int wm_id = LOWORD(w_param); wm_id) {
+            switch (const int wm_id = LOWORD(w_param)) {
                 case IDM_COPY_MAP:
                     copy_repr_to_clip(h_wnd);
                     break;
@@ -60,6 +60,7 @@ main_default_wndproc(const HWND h_wnd, const UINT message, const WPARAM w_param,
         case WM_CREATE:
             update_main_window_title(h_wnd);
             update_game_menu_variables(h_wnd);
+            PostMessage(h_wnd, WM_COMMAND, IDM_WINDOW_MAKEQUAD, NULL);
             break;
 
         case WM_LBUTTONDOWN:
