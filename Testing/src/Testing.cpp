@@ -25,6 +25,34 @@ std::wstring ToString<Pos>(const Pos& pos)
     const auto str = std::format("({}, {})", pos.x, pos.y);
     return { str.begin(), str.end() };
 }
+
+template <>
+std::wstring ToString<std::vector<std::pair<Pos, Pos>>>(const std::vector<std::pair<Pos, Pos>>& vec)
+{
+    std::string str{ "[ " };
+    for (const auto& [x, y] : vec) {
+        str += std::format("(({}, {}), ({}, {})), ", x.x, x.y, y.x, y.y);
+    }
+    str.pop_back();
+    str += "]";
+    return { str.begin(), str.end() };
+}
+
+template <>
+std::wstring ToString<std::pair<std::size_t, std::vector<std::pair<Pos, Pos>>>>(
+    const std::pair<std::size_t, std::vector<std::pair<Pos, Pos>>>& val
+)
+{
+    std::string str{ "[ " };
+    for (const auto& [x, y] : val.second) {
+        str += std::format("(({}, {}), ({}, {})), ", x.x, x.y, y.x, y.y);
+    }
+    str.pop_back();
+    str += "]";
+    const auto str2 = std::format("({}, {})", val.first, str);
+    return { str2.begin(), str2.end() };
+}
+
 }    // namespace Microsoft::VisualStudio::CppUnitTestFramework
 
 namespace figure_board
@@ -102,6 +130,19 @@ void all_fmap(Range&& range, Fn&& fn)
         }
     }
     Assert::IsTrue(true);
+}
+
+template <typename T>
+void assert_eq(const T& actual, const T& expected)
+{
+    Assert::AreEqual(expected, actual);
+}
+
+template <typename T, typename U>
+    requires requires(T t, U u) { t == u; }
+void assert_eq(const T& actual, const U& expected)
+{
+    Assert::AreEqual(expected, actual);
 }
 
 bool move_check(const std::array<const char[9], 8>& table, const Color col, const FigureType ft, const bool idw)
@@ -827,29 +868,50 @@ public:
 
     TEST_METHOD(Castling)
     {
-        struct Test
-        {
-            Pos king_start;
-            Pos rook_start;
-            Pos king_end;
-            Pos rook_end;
+        std::vector<std::pair<Pos, Pos>> fails;
+        const auto c = Pos{ 7, 2 };
+        const auto d = Pos{ 7, 3 };
+        const auto g = Pos{ 7, 6 };
+        const auto f = Pos{ 7, 5 };
+        // include impossible in 960-chess cases ((k=0, r=1), (k=7, r=6))
+        const auto k_iota = [](bool is_left) {
+            if (is_left)
+                return std::views::iota(1, 8);
+            return std::views::iota(0, 7);
         };
-        /// FIXME write more Tests
-        const Test tests[] = { { Pos{ 7, 3 }, Pos{ 7, 7 }, Pos{ 7, 6 }, Pos{ 7, 5 } },
-                               { Pos{ 7, 4 }, Pos{ 7, 7 }, Pos{ 7, 6 }, Pos{ 7, 5 } } };
-        for (const auto [kb, rb, ke, re] : tests) {
-            ChessGame board{ BoardRepr{ { new Figure{ 0_id, kb, Color::White, FigureType::King },
-                                          new Figure{ 1_id, rb, Color::White, FigureType::Rook } },
-                                        Color::White,
-                                        true } };
-            const auto king = board.get_fig_unsafe(0_id);
-            const auto rook = board.get_fig_unsafe(1_id);
-            const auto move = board.provide_move(king, Input{ king->get_pos(), ke }, Color::White, STANDARD_PROVIDER);
-            Assert::IsTrue(move.has_value());
-            Assert::AreEqual(king->get_pos(), ke);
-            Assert::AreEqual(rook->get_pos(), re);
+        const auto r_iota = [](bool is_left, int k) {
+            if (is_left)
+                return std::views::iota(0, k);
+            return std::views::iota(k + 1, 8);
+        };
+        for (const auto is_left : { false, true }) {
+            const auto ke = is_left ? c : g;
+            const auto re = is_left ? d : f;
+            for (const auto k : k_iota(is_left)) {
+                for (const auto r : r_iota(is_left, k)) {
+                    const auto kp = Pos{ 7, k };
+                    const auto rp = Pos{ 7, r };
+                    ChessGame board{ BoardRepr{ { new Figure{ 0_id, kp, Color::White, FigureType::King },
+                                                  new Figure{ 1_id, rp, Color::White, FigureType::Rook } },
+                                                Color::White,
+                                                true } };
+                    const auto king = board.get_fig_unsafe(0_id);
+                    const auto rook = board.get_fig_unsafe(1_id);
+                    auto move = board.provide_move(king, Input{ king->get_pos(), ke }, Color::White, STANDARD_PROVIDER);
+                    // If king moves to one tile (and there is no rook), then user must move rook
+                    if (std::abs(kp.y - ke.y) == 1 && rp != ke || !move) {
+                        board.undo_move();
+                        move = board.provide_move(rook, Input{ rp, re }, Color::White, STANDARD_PROVIDER);
+                    }
+                    if (!move || king->get_pos() != ke || rook->get_pos() != re) {
+                        fails.emplace_back(kp, rp);
+                    }
+                }
+            }
         }
-    }
+        assert_eq(std::pair{ fails.size(), fails }, { 0, {} });
+    }    // TEST_METHOD(Castling)
+
 };    // TEST_CLASS(KingMoves)
 
 }    // namespace moves

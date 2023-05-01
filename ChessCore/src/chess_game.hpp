@@ -501,8 +501,12 @@ public:
         }
 
         /// Crutch... rook castlings must be in Figure field.
-        if (const auto rook_sus = get_fig(move_sus->input.target); rook_sus && rook_sus.value()->is(FigureType::Rook)) {
-            move_sus->side_evs.emplace_back(mvmsg::CastlingBreak{ rook_sus.value()->get_id() });
+        if (!std::holds_alternative<mvmsg::Castling>(move_sus->main_event)) {
+            if (const auto rook_sus = get_fig(move_sus->input.target);
+                rook_sus && rook_sus.value()->is(FigureType::Rook))
+            {
+                move_sus->side_evs.emplace_back(mvmsg::CastlingBreak{ rook_sus.value()->get_id() });
+            }
         }
 
         ChessGame next_board{ *this };
@@ -533,6 +537,7 @@ public:
      * \brief Castling validity check
      * \details Castling like in 960 (width must be 8).
      * Rules:
+     * 0. Target rook and king cols is f-g or c-d
      * 1. King and rook must not be moved before
      * 2. Fields between start and end positions of king and rook are empty
      * 3. King does not pass through a broken field, is not under check and does not stand under it
@@ -549,58 +554,83 @@ public:
     castling_check(const Figure* in_hand, const Input& input, const int king_end_col, const int rook_end_col)
         const noexcept -> std::optional<CastlingCheckResult>
     {
-        // Castling on g-flank
+        if (board_.empty()) {
+            return std::nullopt;
+        }
         const auto king_sus = in_hand->is(FigureType::King) ? in_hand : find_king(in_hand->get_col());
         if (!king_sus.has_value()) {
             return std::nullopt;
         }
         const auto king = king_sus.value();
-        if (Pos king_pos = king->get_pos();
-            (in_hand->is(FigureType::King) && input.target.y == king_end_col && in_hand->get_pos().y != king_end_col) ||
-            (king_pos.y == king_end_col && in_hand->is(FigureType::Rook) && input.target.y == rook_end_col &&
-             in_hand->get_pos().y != rook_end_col))
+        const auto king_start_pos = king->get_pos();
+        // Is input correct
+        if ((in_hand->is(FigureType::King) && input.target.y == king_end_col) ||
+            (in_hand->is(FigureType::Rook) && input.target.y == rook_end_col))
         {
-            bool castling_can_be_done = true;
-            // Input is correct (king could be on g col, so castling is available from rook)
-            // Need to check that all intermediate positions (where king goes) are not under check
-            const Figure* rook = (*board_.figures.begin()).second;
-            int step{ king_end_col - king_pos.y > 0 ? 1 : -1 };
-            for (Pos rook_aspt_pos{ king_pos }; is_valid_coords(rook_aspt_pos); rook_aspt_pos.y += step) {
-                if (auto rook_sus = get_fig(rook_aspt_pos); rook_sus.has_value() &&
-                                                            rook_sus.value()->is_col(in_hand->get_col()) &&
-                                                            rook_sus.value()->is(FigureType::Rook))
-                {
-                    rook = rook_sus.value();
-                    break;
+            const auto rook_sus = [&]() -> std::optional<const Figure*> {
+                if (in_hand->is(FigureType::Rook)) {
+                    return in_hand;
                 }
-            }
-            if (!rook->is(FigureType::Rook) || (king_pos.x != input.target.x && rook->get_pos().x != input.target.x)) {
+                else {
+                    const auto bound{ king_end_col > king_start_pos.y ? WIDTH : 0 };
+
+                    for (const auto rook_aspt_y : between(king_start_pos.y, bound)) {
+                        const auto rook_aspt_pos = Pos{ king_start_pos.x, rook_aspt_y };
+                        if (auto rook_sus = (*this).get_fig(rook_aspt_pos);
+                            rook_sus && rook_sus.value()->is_col(in_hand->get_col()) &&
+                            rook_sus.value()->is(FigureType::Rook))
+                        {
+                            return *rook_sus;
+                        }
+                    }
+                }
+                return std::nullopt;
+            }();
+
+            if (!rook_sus) {
                 return std::nullopt;
             }
 
-            Pos rook_pos = rook->get_pos();
-            const Pos target{ king_pos.x, king_end_col };
-            for (step = king_pos.y < target.y ? 1 : -1; king_pos.y != target.y; king_pos.y += step) {
-                castling_can_be_done &= not check_for_when(in_hand->get_col(), { king_pos, rook_pos }, king_pos);
+            const auto rook = *rook_sus;
+
+            // king and rook xs must be in input's xs
+            if (king_start_pos.x != input.target.x && rook->get_pos().x != input.target.x) {
+                return std::nullopt;
             }
-            for (step = king_pos.y < rook_pos.y ? 1 : -1; king_pos.y != rook_pos.y; king_pos.y += step) {
-                auto cell_sus = get_fig(king_pos);
-                castling_can_be_done &= !cell_sus.has_value() || cell_sus.value()->is(king->get_id()) ||
-                                        cell_sus.value()->is(rook->get_id());
+
+            // valid rook and king relative positions
+            if ((rook->get_pos().y > king->get_pos().y) == (rook_end_col > king_end_col)) {
+                return std::nullopt;
             }
-            // FIXME can this be done in loop body?
-            castling_can_be_done &=
-                !check_for_when(in_hand->get_col(), { king_pos, rook_pos }, Pos{ king_pos.x, king_end_col });
-            const auto cell_sus = get_fig(Pos{ king_pos.x, rook_end_col });
-            castling_can_be_done &=
-                !cell_sus.has_value() || cell_sus.value()->is(king->get_id()) || cell_sus.value()->is(rook->get_id());
-            if (castling_can_be_done) {
-                return CastlingCheckResult{ rook,
-                                            king,
-                                            in_hand->is(FigureType::King)
-                                                ? Input{ rook_pos, Pos{ rook_pos.x, rook_end_col } }
-                                                : Input{ king_pos, Pos{ king_pos.x, king_end_col } } };
+
+            const auto rook_start_pos = rook->get_pos();
+            const auto rook_end_pos = Pos{ rook_start_pos.x, rook_end_col };
+            const auto king_end_pos = Pos{ king_start_pos.x, king_end_col };
+
+            for (const auto king_aspt_y : between(king_start_pos.y, king_end_pos.y)) {
+                const auto king_aspt_pos = Pos{ king_start_pos.x, king_aspt_y };
+                if (check_for_when(in_hand->get_col(), { king_start_pos, rook_start_pos }, king_aspt_pos)) {
+                    return std::nullopt;
+                }
             }
+
+            for (const auto& left_right =
+                     std::minmax({ king_start_pos.y, king_end_pos.y, rook_start_pos.y, rook_end_pos.y });
+                 const auto cell_aspt_y : between(left_right.first, left_right.second))
+            // COMPILER BUG using variables from structured binding in init statement in range statement does not
+            // compile (VS 17.5.4). e.g: for (cnst auto& [l, r] = minmax(...); cnst auto a : between(l, r)) {...}
+            {
+                auto cell_sus = get_fig(Pos{ king_start_pos.x, cell_aspt_y });
+                if (cell_sus && !cell_sus.value()->is(king->get_id()) && !cell_sus.value()->is(rook->get_id())) {
+                    return std::nullopt;
+                }
+            }
+
+            return CastlingCheckResult{ rook,
+                                        king,
+                                        in_hand->is(FigureType::King)
+                                            ? Input{ rook_start_pos, Pos{ rook_start_pos.x, rook_end_col } }
+                                            : Input{ king_start_pos, Pos{ king_start_pos.x, king_end_col } } };
         }
         return std::nullopt;
     }
@@ -952,42 +982,6 @@ public:
             }
         }
 
-        // Castling
-        if ((in_hand->is(FigureType::King) || in_hand->is(FigureType::Rook)) && WIDTH == 8) {
-            using PairInt = std::pair<int, int>;
-
-            for (auto [king_end_col, rook_end_col] : { PairInt{ 6, 5 }, PairInt{ 2, 3 } }) {
-                if (const auto check_result_sus = castling_check(in_hand, input, king_end_col, rook_end_col)) {
-                    if (const auto& [rook, king, second_figure_to_move] = check_result_sus.value();
-                        has_castling(rook->get_id()))
-                    {
-                        const auto king_tmp =
-                            figfab::FigureFabric::instance().submit_on(king, Pos{ in_hand->get_pos().x, king_end_col });
-                        const auto rook_tmp =
-                            figfab::FigureFabric::instance().submit_on(rook, Pos{ rook->get_pos().x, rook_end_col });
-                        // FIXME debug this branch (move_message.push and check after success castling)
-                        if (check_for_when(
-                                what_next(in_hand->get_col()),
-                                { input.from, king->get_pos(), rook->get_pos() },
-                                Pos{},
-                                {},
-                                { king_tmp.get(), rook_tmp.get() }
-                            ))
-                        {
-                            side_events.emplace_back(mvmsg::Check{});
-                        }
-                        return mvmsg::MoveMessage{ *in_hand,
-                                                   input,
-                                                   promotion_choice,
-                                                   mvmsg::Castling{
-                                                       (in_hand->is(FigureType::King) ? rook : king)->get_id(),
-                                                       second_figure_to_move },
-                                                   side_events };
-                    }
-                }
-            }
-        }
-
         // Pawn
         if (in_hand->is(FigureType::Pawn)) {
             // Promotion
@@ -1092,6 +1086,44 @@ public:
                 return mvmsg::MoveMessage{ *in_hand, input, promotion_choice, mvmsg::Move{}, side_events };
             }
         }
+
+        // Castling
+        // Checks after brooms moves
+        if ((in_hand->is(FigureType::King) || in_hand->is(FigureType::Rook)) && WIDTH == 8) {
+            using PairInt = std::pair<int, int>;
+
+            for (auto [king_end_col, rook_end_col] : { PairInt{ 6, 5 }, PairInt{ 2, 3 } }) {
+                if (const auto check_result_sus = castling_check(in_hand, input, king_end_col, rook_end_col)) {
+                    if (const auto& [rook, king, second_figure_to_move] = check_result_sus.value();
+                        has_castling(rook->get_id()))
+                    {
+                        const auto king_tmp =
+                            figfab::FigureFabric::instance().submit_on(king, Pos{ in_hand->get_pos().x, king_end_col });
+                        const auto rook_tmp =
+                            figfab::FigureFabric::instance().submit_on(rook, Pos{ rook->get_pos().x, rook_end_col });
+                        // FIXME debug this branch (move_message.push and check after success castling)
+                        if (check_for_when(
+                                what_next(in_hand->get_col()),
+                                { input.from, king->get_pos(), rook->get_pos() },
+                                Pos{},
+                                {},
+                                { king_tmp.get(), rook_tmp.get() }
+                            ))
+                        {
+                            side_events.emplace_back(mvmsg::Check{});
+                        }
+                        return mvmsg::MoveMessage{ *in_hand,
+                                                   input,
+                                                   promotion_choice,
+                                                   mvmsg::Castling{
+                                                       (in_hand->is(FigureType::King) ? rook : king)->get_id(),
+                                                       second_figure_to_move },
+                                                   side_events };
+                    }
+                }
+            }
+        }
+
         return std::nullopt;
     }
 };
