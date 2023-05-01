@@ -111,14 +111,11 @@ std::string take_str_from_clip(const HWND h_wnd) noexcept
 HWND create_curr_choice_window(HWND parent, Figure* in_hand, POINT mouse, int w, int h, const WNDPROC callback) noexcept
 {
     return *create_window(
-        h_inst,
-        CreateWindowParamBuilder{}
+        CreateWindowArgsBuilder{}
             .set_wc_wndproc(callback)
-            .set_wc_cursor(LoadCursor(nullptr, MAKEINTRESOURCE(IDC_MINIMAL_CURSOR)))
             .set_wc_icon(LoadIcon(nullptr, MAKEINTRESOURCE(IDI_GAME_MODE_BIG)))
             .set_wc_icon_sm(LoadIcon(nullptr, MAKEINTRESOURCE(IDI_GAME_MODE_SMALL)))
-            .set_wc_wnd_extra(sizeof(in_hand))
-            .set_wc_class_name(CURR_CHOICE_WINDOW_CLASS_NAME)
+            .set_wc_wnd_extra(static_cast<int>(sizeof(in_hand)))
             .set_x(mouse.x - w / 2)
             .set_y(mouse.y - h / 2)
             .set_width(w)
@@ -132,10 +129,10 @@ HWND create_curr_choice_window(HWND parent, Figure* in_hand, POINT mouse, int w,
                 SetWindowLongPtr(h_wnd, GWL_EXSTYLE, GetWindowLongPtr(h_wnd, GWL_EXSTYLE) | WS_EX_LAYERED);
                 SetLayeredWindowAttributes(h_wnd, TRANSPARENCY_PLACEHOLDER, 0xFF, LWA_COLORKEY);
             })
-            // FIXME need to copy figure (Don't forget to delete in callback too)
-            // because in main program in_hand will be used too where it can be destroyed.
-            .set_wnd_extra_data(reinterpret_cast<LONG_PTR>(in_hand))
-            .build()
+            .set_wnd_extra_data(
+                reinterpret_cast<LONG_PTR>(figfab::FigureFabric::instance().create(in_hand, true).release())
+            )
+            .build(h_inst)
     );
 }
 
@@ -155,43 +152,19 @@ void change_checkerboard_color_theme(const HWND h_wnd) noexcept
 
 HWND create_figures_list_window(HWND parent) noexcept
 {
-    UnregisterClass(FIGURES_LIST_WINDOW_CLASS_NAME, GetModuleHandle(nullptr));
-    WNDCLASSEX wc{ sizeof(WNDCLASSEX) };
-    HWND h_window{};
-    wc.cbClsExtra = 0;
-    wc.cbWndExtra = 0;
-    wc.hbrBackground = nullptr;
-    wc.hCursor = LoadCursor(h_inst, MAKEINTRESOURCE(IDC_MINIMAL_CURSOR));
-    wc.hIcon = LoadIcon(h_inst, MAKEINTRESOURCE(IDI_FIGURES_LIST));
-    wc.hIconSm = LoadIcon(h_inst, MAKEINTRESOURCE(IDI_FIGURES_LIST));
-    wc.lpfnWndProc = figures_list_wndproc;
-    wc.lpszClassName = FIGURES_LIST_WINDOW_CLASS_NAME;
-    wc.style = CS_VREDRAW | CS_HREDRAW;
-    const auto create_window = [&h_window, &parent]() -> HWND {
-        if (h_window = CreateWindow(
-                FIGURES_LIST_WINDOW_CLASS_NAME,
-                FIGURES_LIST_WINDOW_TITLE,
-                WS_OVERLAPPEDWINDOW | WS_VSCROLL | WS_HSCROLL,
-                FIGURES_LIST_WINDOW_DEFAULT_POS.x,
-                FIGURES_LIST_WINDOW_DEFAULT_POS.y,
-                figures_list.get_width_with_extra(),
-                figures_list.get_height_with_extra(),
-                parent,
-                nullptr,
-                h_inst,
-                nullptr
-            ),
-            !h_window)
-            return nullptr;
-        ShowWindow(h_window, SW_SHOWDEFAULT);
-        UpdateWindow(h_window);
-        return h_window;
-    };
-
-    if (!RegisterClassEx(&wc))
-        return create_window();
-
-    return create_window();
+    return *create_window(CreateWindowArgsBuilder{}
+                              .set_wc_wndproc(figures_list_wndproc)
+                              .set_wc_icon(LoadIcon(h_inst, MAKEINTRESOURCE(IDI_FIGURES_LIST)))
+                              .set_wc_icon_sm(LoadIcon(h_inst, MAKEINTRESOURCE(IDI_FIGURES_LIST)))
+                              .set_class_name(FIGURES_LIST_WINDOW_CLASS_NAME)
+                              .set_title(FIGURES_LIST_WINDOW_TITLE)
+                              .set_style(WS_OVERLAPPEDWINDOW | WS_VSCROLL | WS_HSCROLL)
+                              .set_x(FIGURES_LIST_WINDOW_DEFAULT_POS.x)
+                              .set_y(FIGURES_LIST_WINDOW_DEFAULT_POS.y)
+                              .set_width(figures_list.get_width_with_extra())
+                              .set_height(figures_list.get_height_with_extra())
+                              .set_parent(parent)
+                              .build(h_inst));
 }
 
 bool game_end_check(HWND h_wnd, Color turn) noexcept

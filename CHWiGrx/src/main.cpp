@@ -40,23 +40,19 @@ int APIENTRY wWinMain(
     }
 #endif    // _DEBUG
 
-    if (!create_window(
-            hInstance,
-            CreateWindowParamBuilder{}
-                .set_wc_wndproc(main_default_wndproc)
-                .set_wc_icon(LoadIcon(hInstance, MAKEINTRESOURCE(IDI_GAME_MODE_BIG)))
-                .set_wc_cursor(LoadCursor(hInstance, MAKEINTRESOURCE(IDC_MINIMAL_CURSOR)))
-                .set_wc_background(reinterpret_cast<HBRUSH>((COLOR_WINDOW)))
-                .set_wc_icon_sm(LoadIcon(hInstance, MAKEINTRESOURCE(IDI_GAME_MODE_SMALL)))
-                .set_title(static_cast<UINT>(IDS_APP_TITLE))
-                .set_class_name(static_cast<UINT>(IDC_CHWIGRX))
-                .set_style(WS_OVERLAPPEDWINDOW)
-                .set_x(main_window.get_window_pos_x())
-                .set_y(main_window.get_window_pos_y())
-                .set_width(main_window.get_width())
-                .set_height(main_window.get_height())
-                .build()
-        ))
+    if (!create_window(CreateWindowArgsBuilder{}
+                           .set_wc_wndproc(main_default_wndproc)
+                           .set_wc_icon(LoadIcon(hInstance, MAKEINTRESOURCE(IDI_GAME_MODE_BIG)))
+                           .set_wc_background(reinterpret_cast<HBRUSH>((COLOR_WINDOW)))
+                           .set_wc_icon_sm(LoadIcon(hInstance, MAKEINTRESOURCE(IDI_GAME_MODE_SMALL)))
+                           .set_title(static_cast<UINT>(IDS_APP_TITLE))
+                           .set_class_name(static_cast<UINT>(IDC_CHWIGRX))
+                           .set_style(WS_OVERLAPPEDWINDOW)
+                           .set_x(main_window.get_window_pos_x())
+                           .set_y(main_window.get_window_pos_y())
+                           .set_width(main_window.get_width())
+                           .set_height(main_window.get_height())
+                           .build(hInstance)))
     {
         return FALSE;
     }

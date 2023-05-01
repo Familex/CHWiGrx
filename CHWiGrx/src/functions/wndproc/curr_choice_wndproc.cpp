@@ -26,17 +26,19 @@ curr_choice_wndproc(const HWND h_wnd, const UINT u_msg, const WPARAM w_param, co
             const HWND parent = GetParent(h_wnd);
             POINT cur_pos{};
             GetCursorPos(&cur_pos);
-
+            const auto stored_fig = reinterpret_cast<Figure*>(GetWindowLongPtr(h_wnd, GWLP_USERDATA));
             if (const Pos where_fig = main_window.get_figure_under_mouse(cur_pos);
                 !CheckMovesValidity && !is_valid_coords(where_fig))
             {
                 // Moved figure out of the board without checking validity => delete it from the board
-                board.delete_fig(reinterpret_cast<Figure*>(GetWindowLongPtr(h_wnd, GWLP_USERDATA))->get_pos());
+                board.delete_fig(stored_fig->get_pos());
                 motion_input.clear();
             }
             else {
                 on_lbutton_up(parent, w_param, l_param, where_fig, CheckMovesValidity);
             }
+            // Clear WindowLongPtr data
+            delete stored_fig;
             InvalidateRect(parent, nullptr, NULL);
             DestroyWindow(h_wnd);
         } break;
