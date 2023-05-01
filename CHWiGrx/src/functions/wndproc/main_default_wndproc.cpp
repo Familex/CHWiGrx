@@ -73,6 +73,7 @@ main_default_wndproc(const HWND h_wnd, const UINT message, const WPARAM w_param,
 
         case WM_SIZE:
             main_window.set_size(l_param);
+            InvalidateRect(h_wnd, nullptr, NULL);
             break;
 
         case WM_DESTROY:

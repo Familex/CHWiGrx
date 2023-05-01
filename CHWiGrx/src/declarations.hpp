@@ -3,6 +3,7 @@
 #include "bot/bot.h"
 #include "chess_game.hpp"
 #include "functions/board_logic/board_logic.h"
+#include "functions/create_window/create_window.h"
 #include "functions/draw/draw.h"
 #include "functions/menu/menu.h"
 #include "functions/misc/misc.h"

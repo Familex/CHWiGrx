@@ -2,54 +2,71 @@
 
 #include "../../winapi/framework.hpp"
 
+#include <expected>
 #include <utility>
+#include <variant>
 
-struct CreateWindowInput
+struct CreateWindowParameters
 {
     WNDCLASSEX wc{ sizeof(WNDCLASSEX) };
-    LPTSTR class_name{};
-    LPTSTR title{};
-    DWORD style{};
-    int x{};
-    int y{};
-    int width{};
-    int height{};
+    std::variant<LPCTSTR, UINT> class_name{};
+    std::variant<LPCTSTR, UINT> title{};
+    DWORD style{ CS_VREDRAW | CS_HREDRAW };
+    int x{ CW_USEDEFAULT };
+    int y{ CW_USEDEFAULT };
+    int width{ CW_USEDEFAULT };
+    int height{ CW_USEDEFAULT };
     HWND parent{};
     HMENU h_menu{};
-    HINSTANCE h_inst{};
     LPVOID lp_param{};
     void (*after_create)(HWND){};
     LONG_PTR (*get_wnd_extra)(){};
     LONG_PTR (*get_cls_extra)(){};
 };
 
-struct CreateWindowInputBuilder
+struct CreateWindowParamBuilder
 {
-    CreateWindowInput result{};
+    // clang-format off
+    #define DECLARE_SETTER(name, field)                                                                                \
+        template <typename T>                                                                                          \
+        [[nodiscard]] constexpr auto name(const T value) && noexcept -> CreateWindowParamBuilder                       \
+        {                                                                                                              \
+            result.field = value;                                                                                      \
+            return std::move(*this);                                                                                   \
+        }
+    // clang-format on
 
-    [[nodiscard]] constexpr auto build() const&& noexcept -> CreateWindowInput { return result; }
+    CreateWindowParameters result{};
 
-    constexpr void set_wc_style(const UINT value) && noexcept { result.wc.style = value; }
+    [[nodiscard]] constexpr auto build() const&& noexcept -> CreateWindowParameters { return result; }
 
-    constexpr void set_wc_wndproc(const WNDPROC value) && noexcept { result.wc.lpfnWndProc = value; }
+    DECLARE_SETTER(set_wc_style, wc.style)
+    DECLARE_SETTER(set_wc_wndproc, wc.lpfnWndProc)
+    DECLARE_SETTER(set_wc_cls_extra, wc.cbClsExtra)
+    DECLARE_SETTER(set_wc_wnd_extra, wc.cbWndExtra)
+    DECLARE_SETTER(set_wc_icon, wc.hIcon)
+    DECLARE_SETTER(set_wc_cursor, wc.hCursor)
+    DECLARE_SETTER(set_wc_background, wc.hbrBackground)
+    DECLARE_SETTER(set_wc_menu_name, wc.lpszMenuName)
+    DECLARE_SETTER(set_wc_class_name, wc.lpszClassName)
+    DECLARE_SETTER(set_wc_icon_sm, wc.hIconSm)
+    DECLARE_SETTER(set_class_name, class_name)
+    DECLARE_SETTER(set_title, title)
+    DECLARE_SETTER(set_style, style)
+    DECLARE_SETTER(set_x, x)
+    DECLARE_SETTER(set_y, y)
+    DECLARE_SETTER(set_width, width)
+    DECLARE_SETTER(set_height, height)
+    DECLARE_SETTER(set_parent, parent)
+    DECLARE_SETTER(set_menu, h_menu)
+    DECLARE_SETTER(set_lp_param, lp_param)
+    DECLARE_SETTER(set_after_create, after_create)
+    DECLARE_SETTER(set_wnd_extra_getter, get_wnd_extra)
+    DECLARE_SETTER(set_cls_extra_getter, get_cls_extra)
 
-    constexpr void set_wc_cls_extra(const int value) && noexcept { result.wc.cbClsExtra = value; }
-
-    constexpr void set_wc_wnd_extra(const int value) && noexcept { result.wc.cbWndExtra = value; }
-
-    constexpr void set_wc_icon(const HICON value) && noexcept { result.wc.hIcon = value; }
-
-    constexpr void set_wc_cursor(const HCURSOR value) && noexcept { result.wc.hCursor = value; }
-
-    constexpr void set_wc_background(const HBRUSH value) && noexcept { result.wc.hbrBackground = value; }
-
-    constexpr void set_wc_menu_name(const LPCTSTR value) && noexcept { result.wc.lpszMenuName = value; }
-
-    constexpr void set_wc_class_name(const LPCTSTR value) && noexcept { result.wc.lpszClassName = value; }
-
-    constexpr void set_wc_icon_sm(const HICON value) && noexcept { result.wc.hIconSm = value; }
+#undef DECLARE_SETTER
 };
 
-auto create_window(HWND&, HINSTANCE, const CreateWindowInput& input) noexcept -> DWORD;
+auto create_window(HINSTANCE, CreateWindowParameters&& input) noexcept -> std::expected<HWND, DWORD>;
 
 inline void destroy_window(HWND&) noexcept;

@@ -5,37 +5,6 @@
 #include "../../variables/mutables.hpp"
 #include "../wndproc/wndproc.h"
 
-bool create_main_window(
-    const HINSTANCE h_instance,
-    const LPTSTR sz_title,
-    const LPTSTR sz_window_class,
-    const int n_cmd_show
-) noexcept
-{
-    const HWND h_wnd = CreateWindowW(
-        sz_window_class,
-        sz_title,
-        WS_OVERLAPPEDWINDOW,
-        main_window.get_window_pos_x(),
-        main_window.get_window_pos_y(),
-        main_window.get_width_with_extra(),
-        main_window.get_height_with_extra(),
-        nullptr,
-        nullptr,
-        h_instance,
-        nullptr
-    );
-
-    if (!h_wnd) {
-        return false;
-    }
-
-    ShowWindow(h_wnd, n_cmd_show);
-    UpdateWindow(h_wnd);
-
-    return true;
-}
-
 INT_PTR CALLBACK about_proc(const HWND h_dlg, const UINT message, const WPARAM w_param, const LPARAM l_param) noexcept
 {
     UNREFERENCED_PARAMETER(l_param);
@@ -191,49 +160,6 @@ HWND create_curr_choice_window(HWND parent, Figure* in_hand, POINT mouse, int w,
         return create_window();
 
     return create_window();
-}
-
-bool prepare_window(
-    const HINSTANCE h_instance,
-    const int n_cmd_show,
-    const UINT title_id,
-    const UINT window_class_id,
-    WNDCLASSEX wcex
-) noexcept
-{
-    constexpr auto max_load_string = 100;
-
-    WCHAR sz_title[max_load_string];
-    WCHAR sz_window_class[max_load_string];
-
-    LoadStringW(h_instance, title_id, sz_title, max_load_string);
-    LoadStringW(h_instance, window_class_id, sz_window_class, max_load_string);
-
-    wcex.lpszClassName = sz_window_class;
-    wcex.lpszMenuName = MAKEINTRESOURCE(window_class_id);    // ... = szWindowClass does not work
-
-    RegisterClassExW(&wcex);
-
-    if (!create_main_window(h_instance, sz_title, sz_window_class, n_cmd_show)) {
-        return false;
-    }
-    return true;
-}
-
-int window_loop(const HINSTANCE h_instance) noexcept
-{
-    MSG msg;
-    const HACCEL h_accelerators = LoadAccelerators(h_instance, MAKEINTRESOURCE(IDC_CHWIGRX));
-    while (const BOOL b_ret = GetMessage(&msg, nullptr, 0, 0)) {
-        if (-1 == b_ret)
-            break;
-        if (!TranslateAccelerator(msg.hwnd, h_accelerators, &msg)) {
-            TranslateMessage(&msg);
-            DispatchMessage(&msg);
-        }
-    }
-
-    return static_cast<int>(msg.wParam);
 }
 
 void change_checkerboard_color_theme(const HWND h_wnd) noexcept

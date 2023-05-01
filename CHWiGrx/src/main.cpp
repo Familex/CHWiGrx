@@ -4,7 +4,7 @@ int APIENTRY wWinMain(
     const HINSTANCE hInstance,
     [[maybe_unused]] const HINSTANCE hPrevInstance,
     [[maybe_unused]] const LPWSTR lpCmdLine,
-    int nCmdShow
+    [[maybe_unused]] int nCmdShow
 )
 {
     // init h_inst
@@ -40,25 +40,39 @@ int APIENTRY wWinMain(
     }
 #endif    // _DEBUG
 
-    if (!prepare_window(
+    if (!create_window(
             hInstance,
-            nCmdShow,
-            IDS_APP_TITLE,
-            IDC_CHWIGRX,
-            { .cbSize = sizeof(WNDCLASSEX),
-              .style = CS_HREDRAW | CS_VREDRAW,
-              .lpfnWndProc = main_default_wndproc,
-              .cbClsExtra = 0,
-              .cbWndExtra = 0,
-              .hInstance = hInstance,
-              .hIcon = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_GAME_MODE_BIG)),
-              .hCursor = LoadCursor(hInstance, MAKEINTRESOURCE(IDC_MINIMAL_CURSOR)),
-              .hbrBackground = reinterpret_cast<HBRUSH>((COLOR_WINDOW)),
-              .hIconSm = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_GAME_MODE_SMALL)) }
+            CreateWindowParamBuilder{}
+                .set_wc_wndproc(main_default_wndproc)
+                .set_wc_icon(LoadIcon(hInstance, MAKEINTRESOURCE(IDI_GAME_MODE_BIG)))
+                .set_wc_cursor(LoadCursor(hInstance, MAKEINTRESOURCE(IDC_MINIMAL_CURSOR)))
+                .set_wc_background(reinterpret_cast<HBRUSH>((COLOR_WINDOW)))
+                .set_wc_icon_sm(LoadIcon(hInstance, MAKEINTRESOURCE(IDI_GAME_MODE_SMALL)))
+                .set_title(static_cast<UINT>(IDS_APP_TITLE))
+                .set_class_name(static_cast<UINT>(IDC_CHWIGRX))
+                .set_style(WS_OVERLAPPEDWINDOW)
+                .set_x(main_window.get_window_pos_x())
+                .set_y(main_window.get_window_pos_y())
+                .set_width(main_window.get_width())
+                .set_height(main_window.get_height())
+                .build()
         ))
     {
         return FALSE;
     }
 
-    return window_loop(hInstance);
+    /* message loop */ {
+        MSG msg;
+        const HACCEL h_accelerators = LoadAccelerators(h_inst, MAKEINTRESOURCE(IDC_CHWIGRX));
+        while (const BOOL b_ret = GetMessage(&msg, nullptr, 0, 0)) {
+            if (-1 == b_ret)
+                break;
+            if (!TranslateAccelerator(msg.hwnd, h_accelerators, &msg)) {
+                TranslateMessage(&msg);
+                DispatchMessage(&msg);
+            }
+        }
+
+        return static_cast<int>(msg.wParam);
+    }
 }
