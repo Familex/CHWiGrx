@@ -294,36 +294,31 @@ public:
                 }
             }
         }
-        if (in_hand->is(FigureType::King)) {
-            using PairInt = std::pair<int, int>;
-            for (auto [king_end_col, rook_end_col] : { PairInt{ get_column_by_name('g'), get_column_by_name('f') },
-                                                       PairInt{ get_column_by_name('c'), get_column_by_name('d') } })
-            {
-                if (const auto check_result_sus = castling_check(
-                        in_hand, Input{ in_hand_pos, Pos{ in_hand_pos.x, king_end_col } }, king_end_col, rook_end_col
-                    ))
-                {
-                    if (const auto& [rook, king, second_figure_to_move] = check_result_sus.value();
-                        has_castling(rook->get_id()))
+
+        using TripleInt = std::tuple<int, int, int>;
+        using SomePair = std::pair<FigureType, std::initializer_list<TripleInt>>;
+        for (const auto& [type, cols] :
+             { SomePair{ FigureType::King,
+                         { TripleInt{ get_column_by_name('g'), get_column_by_name('g'), get_column_by_name('f') },
+                           TripleInt{ get_column_by_name('c'), get_column_by_name('c'), get_column_by_name('d') } } },
+               SomePair{ FigureType::Rook,
+                         { TripleInt{ get_column_by_name('f'), get_column_by_name('g'), get_column_by_name('f') },
+                           TripleInt{ get_column_by_name('d'), get_column_by_name('c'), get_column_by_name('d') } } } })
+        {
+            if (in_hand->is(FigureType::King)) {
+                for (const auto& [this_end_col, king_end_col, rook_end_col] : cols) {
+                    if (const auto check_result_sus = castling_check(
+                            in_hand,
+                            Input{ in_hand_pos, Pos{ in_hand_pos.x, this_end_col } },
+                            king_end_col,
+                            rook_end_col
+                        ))
                     {
-                        all_moves.push_back({ false, Pos{ in_hand_pos.x, king_end_col } });
-                    }
-                }
-            }
-        }
-        if (in_hand->is(FigureType::Rook)) {
-            using PairInt = std::pair<int, int>;
-            for (auto [king_end_col, rook_end_col] : { PairInt{ get_column_by_name('g'), get_column_by_name('f') },
-                                                       PairInt{ get_column_by_name('c'), get_column_by_name('d') } })
-            {
-                if (const auto check_result_sus = castling_check(
-                        in_hand, Input{ in_hand_pos, Pos{ in_hand_pos.x, rook_end_col } }, king_end_col, rook_end_col
-                    ))
-                {
-                    if (const auto& [rook, king, second_figure_to_move] = check_result_sus.value();
-                        has_castling(rook->get_id()))
-                    {
-                        all_moves.push_back({ false, Pos{ in_hand_pos.x, rook_end_col } });
+                        if (const auto& [rook, king, second_figure_to_move] = check_result_sus.value();
+                            has_castling(rook->get_id()))
+                        {
+                            all_moves.push_back({ false, Pos{ in_hand_pos.x, this_end_col } });
+                        }
                     }
                 }
             }
