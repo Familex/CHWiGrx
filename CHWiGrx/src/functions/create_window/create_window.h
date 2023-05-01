@@ -20,8 +20,8 @@ struct CreateWindowParameters
     HMENU h_menu{};
     LPVOID lp_param{};
     void (*after_create)(HWND){};
-    LONG_PTR (*get_wnd_extra)(){};
-    LONG_PTR (*get_cls_extra)(){};
+    LONG_PTR wnd_extra_data{};
+    LONG_PTR cls_extra_data{};
 };
 
 struct CreateWindowParamBuilder
@@ -61,8 +61,8 @@ struct CreateWindowParamBuilder
     DECLARE_SETTER(set_menu, h_menu)
     DECLARE_SETTER(set_lp_param, lp_param)
     DECLARE_SETTER(set_after_create, after_create)
-    DECLARE_SETTER(set_wnd_extra_getter, get_wnd_extra)
-    DECLARE_SETTER(set_cls_extra_getter, get_cls_extra)
+    DECLARE_SETTER(set_wnd_extra_data, wnd_extra_data)
+    DECLARE_SETTER(set_cls_extra_data, cls_extra_data)
 
 #undef DECLARE_SETTER
 };

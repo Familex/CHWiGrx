@@ -46,7 +46,7 @@ curr_choice_wndproc(const HWND h_wnd, const UINT u_msg, const WPARAM w_param, co
         {
             PAINTSTRUCT ps;
             const HDC hdc = BeginPaint(h_wnd, &ps);
-            if (const auto in_hand = reinterpret_cast<Figure*>(GetWindowLongPtr(h_wnd, GWLP_USERDATA)); in_hand) {
+            if (const auto in_hand = reinterpret_cast<Figure*>(GetWindowLongPtr(h_wnd, GWLP_USERDATA))) {
                 draw_figure(hdc, in_hand, Pos(0, 0), false);
             }
             EndPaint(h_wnd, &ps);

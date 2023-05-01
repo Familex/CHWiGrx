@@ -1,5 +1,7 @@
 #include "create_window.h"
 
+#include "../../declarations.hpp"
+
 /**
  * \breif Registers a window class and creates a window
  * \param h_inst
@@ -34,7 +36,12 @@ auto create_window(const HINSTANCE h_inst, CreateWindowParameters&& input) noexc
         input.wc.lpszMenuName = MAKEINTRESOURCE(std::get<UINT>(input.class_name));
     }
 
-    UnregisterClass(sz_title, GetModuleHandle(nullptr));
+    if (!UnregisterClass(sz_window_class, GetModuleHandle(nullptr))) {
+        const auto error = GetLastError();
+        if (error != ERROR_CLASS_DOES_NOT_EXIST) {
+            return std::unexpected{ error };
+        }
+    }
     if (!RegisterClassEx(&input.wc)) {
         return std::unexpected{ GetLastError() };
     }
@@ -57,12 +64,18 @@ auto create_window(const HINSTANCE h_inst, CreateWindowParameters&& input) noexc
     if (input.after_create) {
         input.after_create(wnd);
     }
-    ShowWindow(wnd, SW_SHOWDEFAULT);
-    UpdateWindow(wnd);
-    if (input.get_wnd_extra) {
-        SetWindowLongPtr(wnd, GWLP_USERDATA, input.get_wnd_extra());
+    if (input.wnd_extra_data) {
+        SetLastError(NULL);
+        SetWindowLongPtr(wnd, GWLP_USERDATA, input.wnd_extra_data);
+        if (const auto error = GetLastError()) {
+            return std::unexpected{ error };
+        }
     }
-    if (input.get_cls_extra) {
+    ShowWindow(wnd, SW_SHOWDEFAULT);
+    if (!UpdateWindow(wnd)) {
+        return std::unexpected{ GetLastError() };
+    }
+    if (input.cls_extra_data) {
         std::unreachable();    // 💀
     }
     return wnd;

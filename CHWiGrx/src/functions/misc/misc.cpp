@@ -110,53 +110,33 @@ std::string take_str_from_clip(const HWND h_wnd) noexcept
  */
 HWND create_curr_choice_window(HWND parent, Figure* in_hand, POINT mouse, int w, int h, const WNDPROC callback) noexcept
 {
-    UnregisterClass(CURR_CHOICE_WINDOW_CLASS_NAME, GetModuleHandle(nullptr));
-    WNDCLASSEX wc{ sizeof(WNDCLASSEX) };
-    // FIXME need to copy figure (Don't forget to delete in callback too)
-    // because in main program in_hand will be used too where it can be destroyed.
-    Figure* for_storage = in_hand;
-    wc.cbClsExtra = 0;
-    wc.cbWndExtra = sizeof(in_hand);
-    wc.hbrBackground = nullptr;
-    wc.hCursor = LoadCursor(nullptr, MAKEINTRESOURCE(IDC_MINIMAL_CURSOR));
-    wc.hIcon = LoadIcon(nullptr, MAKEINTRESOURCE(IDI_GAME_MODE_BIG));
-    wc.hIconSm = LoadIcon(nullptr, MAKEINTRESOURCE(IDI_GAME_MODE_SMALL));
-    wc.lpfnWndProc = callback;
-    wc.lpszClassName = CURR_CHOICE_WINDOW_CLASS_NAME;
-    wc.style = CS_VREDRAW | CS_HREDRAW;
-    const auto create_window = [&parent, &mouse, &w, &h, for_storage]() -> HWND {
-        if (const HWND h_window = CreateWindow(
-                CURR_CHOICE_WINDOW_CLASS_NAME,
-                L"",
-                WS_POPUP | WS_EX_TRANSPARENT | WS_EX_LAYERED,
-                mouse.x - w / 2,
-                mouse.y - h / 2,
-                w,
-                h,
-                parent,
-                nullptr,
-                nullptr,
-                nullptr
-            );
-            h_window)
-        {
-            SetWindowPos(h_window, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
-            SetWindowLongPtr(h_window, GWL_EXSTYLE, GetWindowLongPtr(h_window, GWL_EXSTYLE) | WS_EX_LAYERED);
-            SetLayeredWindowAttributes(h_window, TRANSPARENCY_PLACEHOLDER, 0xFF, LWA_COLORKEY);
-            SetWindowLongPtr(h_window, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(for_storage));
-            ShowWindow(h_window, SW_SHOWDEFAULT);
-            UpdateWindow(h_window);
-            return h_window;
-        }
-        else {
-            return nullptr;
-        }
-    };
-
-    if (!RegisterClassEx(&wc))
-        return create_window();
-
-    return create_window();
+    return *create_window(
+        h_inst,
+        CreateWindowParamBuilder{}
+            .set_wc_wndproc(callback)
+            .set_wc_cursor(LoadCursor(nullptr, MAKEINTRESOURCE(IDC_MINIMAL_CURSOR)))
+            .set_wc_icon(LoadIcon(nullptr, MAKEINTRESOURCE(IDI_GAME_MODE_BIG)))
+            .set_wc_icon_sm(LoadIcon(nullptr, MAKEINTRESOURCE(IDI_GAME_MODE_SMALL)))
+            .set_wc_wnd_extra(sizeof(in_hand))
+            .set_wc_class_name(CURR_CHOICE_WINDOW_CLASS_NAME)
+            .set_x(mouse.x - w / 2)
+            .set_y(mouse.y - h / 2)
+            .set_width(w)
+            .set_height(h)
+            .set_parent(parent)
+            .set_style(WS_POPUP | WS_EX_TRANSPARENT | WS_EX_LAYERED)
+            .set_class_name(CURR_CHOICE_WINDOW_CLASS_NAME)
+            .set_title(L"")
+            .set_after_create([](HWND h_wnd) {
+                SetWindowPos(h_wnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
+                SetWindowLongPtr(h_wnd, GWL_EXSTYLE, GetWindowLongPtr(h_wnd, GWL_EXSTYLE) | WS_EX_LAYERED);
+                SetLayeredWindowAttributes(h_wnd, TRANSPARENCY_PLACEHOLDER, 0xFF, LWA_COLORKEY);
+            })
+            // FIXME need to copy figure (Don't forget to delete in callback too)
+            // because in main program in_hand will be used too where it can be destroyed.
+            .set_wnd_extra_data(reinterpret_cast<LONG_PTR>(in_hand))
+            .build()
+    );
 }
 
 void change_checkerboard_color_theme(const HWND h_wnd) noexcept
