@@ -22,10 +22,10 @@ public:
     friend AsString<Figure>;
 
     CTOR Figure(const Id id, const Pos& position, const Color color, const FigureType type) noexcept
-      : id_ { id }
-      , position_ { position }
-      , color_ { color }
-      , type_ { type } {};
+      : id_{ id }
+      , position_{ position }
+      , color_{ color }
+      , type_{ type } {};
 
     FN move_to(const Pos& p) noexcept { position_ = p; }
 
@@ -47,7 +47,10 @@ public:
 
     FN is_col(const Color col) const noexcept -> bool { return color_ == col; }
 
-    FN is_col(const Figure* const fig) const noexcept -> bool { return color_ == fig->get_col(); }
+    FN is_col(const Figure* const fig) const noexcept -> bool
+    {
+        return color_ == fig->get_col();
+    }
 
     FN is(const Id id) const noexcept -> bool { return this->id_ == id; }
 
@@ -58,17 +61,17 @@ public:
 
 FN to_pos_vector(const std::vector<Figure*>& lst) noexcept -> std::vector<Pos>
 {
-    std::vector<Pos> acc {};
+    std::vector<Pos> acc{};
     for (const auto& fig : lst) {
         acc.emplace_back(fig->get_pos());
     }
     return acc;
 }
 
-template<>
+template <>
 struct FromString<Figure>
 {
-    template<typename StepResult>
+    template <typename StepResult>
     using StepB = parse_step::ParseStepBuilder<StepResult>;
 
     FN operator()(const std::string_view sv, const FromStringMeta& meta) const noexcept
@@ -84,28 +87,28 @@ struct FromString<Figure>
             gen_constructor<Figure>()
 
                 ,
-            StepB<Id> {}.error(Figure_InvalidId).on_abrupt_halt(Figure_CouldNotFindId).extra(1),
-            StepB<Pos> {}
+            StepB<Id>{}.error(Figure_InvalidId).on_abrupt_halt(Figure_CouldNotFindId).extra(1),
+            StepB<Pos>{}
                 .error(Figure_InvalidPos)
                 .on_abrupt_halt(Figure_CouldNotFindPos)
                 .max_length(meta.max_pos_length),
-            StepB<Color> {}.error(Figure_InvalidColor).on_abrupt_halt(Figure_CouldNotFindColor),
-            StepB<FigureType> {}.error(Figure_InvalidType).on_abrupt_halt(Figure_CouldNotFindType)
+            StepB<Color>{}.error(Figure_InvalidColor).on_abrupt_halt(Figure_CouldNotFindColor),
+            StepB<FigureType>{}.error(Figure_InvalidType).on_abrupt_halt(Figure_CouldNotFindType)
         );
     }
 };
 
-template<>
+template <>
 struct AsString<Figure>
 {
     FN operator()(const Figure& fig, const AsStringMeta& meta) const noexcept -> std::string
     {
-        return AsString<Id> {}(fig.id_, meta.min_id) + "."s + AsString<Pos> {}(fig.position_, meta) +
-               AsString<Color> {}(fig.color_) + AsString<FigureType> {}(fig.type_);
+        return AsString<Id>{}(fig.id_, meta.min_id) + "."s + AsString<Pos>{}(fig.position_, meta) +
+               AsString<Color>{}(fig.color_) + AsString<FigureType>{}(fig.type_);
     }
 };
 
-template<>
+template <>
 struct AsString<const Figure*>
 {
     FN operator()(const Figure* fig, const AsStringMeta& meta) const noexcept -> std::string
@@ -113,6 +116,6 @@ struct AsString<const Figure*>
         if (!fig) {
             return "nullptr";
         }
-        return AsString<Figure> {}(*fig, meta);
+        return AsString<Figure>{}(*fig, meta);
     }
 };

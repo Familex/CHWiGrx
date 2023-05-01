@@ -17,7 +17,7 @@ enum class Type {
 };
 
 /**
- * \brief bot difficulty 
+ * \brief bot difficulty
  */
 enum class Difficulty {
     D0 = 0,

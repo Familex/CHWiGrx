@@ -8,7 +8,7 @@ class MotionInput
 {
 public:
     CTOR MotionInput(ChessGame& board)
-      : board_ { board }
+      : board_{ board }
     { }
 
     void clear()
@@ -19,7 +19,7 @@ public:
         deactivate_by_click();
         deactivate_by_pos();
         in_hand_ = std::nullopt;
-        input_ = Input { Pos { 0, -1 }, Pos { -1, -1 } };
+        input_ = Input{ Pos{ 0, -1 }, Pos{ -1, -1 } };
         all_moves_.clear();
     }
 
@@ -45,13 +45,11 @@ public:
             return;
 
         is_curr_choice_moving_ = true;
-        POINT mouse {};
+        POINT mouse{};
         GetCursorPos(&mouse);
         curr_chose_window_ =
             create_curr_choice_window(h_wnd, in_hand_.value(), mouse, cell_size.x, cell_size.y, callback);
-        RedrawWindow(
-            h_wnd, nullptr, nullptr, RDW_INVALIDATE | RDW_UPDATENOW
-        );
+        RedrawWindow(h_wnd, nullptr, nullptr, RDW_INVALIDATE | RDW_UPDATENOW);
         // Force redraw, because there is an artifact
         SendMessage(curr_chose_window_, WM_NCLBUTTONDOWN, HTCAPTION, MAKELPARAM(mouse.x, mouse.y));
     }
@@ -68,7 +66,7 @@ public:
 
     FN set_target(const Pos target) noexcept -> void { input_.target = target; }
 
-    FN set_target(const int x, const int y) noexcept -> void { input_.target = Pos { x, y }; }
+    FN set_target(const int x, const int y) noexcept -> void { input_.target = Pos{ x, y }; }
 
     FN set_from(const Pos from) noexcept -> void { input_.from = from; }
 
@@ -115,7 +113,10 @@ public:
 
     FN get_state_by_pos() const noexcept -> int { return input_order_by_one_; }
 
-    FN is_drags() const noexcept -> bool { return !is_curr_choice_moving_ && is_lbutton_down_ && in_hand_.has_value(); }
+    FN is_drags() const noexcept -> bool
+    {
+        return !is_curr_choice_moving_ && is_lbutton_down_ && in_hand_.has_value();
+    }
 
     FN get_possible_moves() const noexcept { return all_moves_; }
 
@@ -126,13 +127,13 @@ public:
 
 private:
     ChessGame& board_;
-    const Pos default_input_from_ { 0, -1 };
-    Input input_ { default_input_from_, Pos { -1, -1 } };
-    int input_order_by_one_ { 0 };
-    bool input_order_by_two_ { false };
-    bool is_lbutton_down_ { false };
-    HWND curr_chose_window_ {};
-    bool is_curr_choice_moving_ { false };
-    std::optional<Figure*> in_hand_ { std::nullopt };
-    std::vector<std::pair<bool, Pos>> all_moves_ {};
+    const Pos default_input_from_{ 0, -1 };
+    Input input_{ default_input_from_, Pos{ -1, -1 } };
+    int input_order_by_one_{ 0 };
+    bool input_order_by_two_{ false };
+    bool is_lbutton_down_{ false };
+    HWND curr_chose_window_{};
+    bool is_curr_choice_moving_{ false };
+    std::optional<Figure*> in_hand_{ std::nullopt };
+    std::vector<std::pair<bool, Pos>> all_moves_{};
 };

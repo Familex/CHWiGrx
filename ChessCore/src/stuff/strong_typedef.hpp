@@ -4,7 +4,7 @@
 
 #include <utility>    // std::swap
 
-template<class Tag, typename T>
+template <class Tag, typename T>
 class StrongTypedef
 {
     T value_;
@@ -36,13 +36,13 @@ public:
 namespace strong_typedef_utils
 {
 // Find way to declare this without implementation
-template<typename Tag, typename T>
+template <typename Tag, typename T>
 FN underlying_type_impl(StrongTypedef<Tag, T>) noexcept -> T;
 
-template<typename T>
+template <typename T>
 using UnderlyingType = decltype(underlying_type_impl(std::declval<T>()));
 
-template<class StrongTypedef>
+template <class StrongTypedef>
 struct Addition
 {
     using type = UnderlyingType<StrongTypedef>;
@@ -72,7 +72,7 @@ struct Addition
     }
 };
 
-template<class StrongTypedef>
+template <class StrongTypedef>
 struct Subtraction
 {
     using type = UnderlyingType<StrongTypedef>;

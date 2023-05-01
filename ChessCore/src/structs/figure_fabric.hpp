@@ -21,14 +21,16 @@ public:
         return instance;
     }
 
-    FN create(const Pos position, const Color color, const FigureType type, const Id new_id) noexcept
+    FN
+    create(const Pos position, const Color color, const FigureType type, const Id new_id) noexcept
         -> std::unique_ptr<Figure>
     {
         this->id_ = std::max(this->id_, new_id + 1_id);
         return std::make_unique<Figure>(new_id, position, color, type);
     }
 
-    FN create(const Pos position, const Color color, const FigureType type) noexcept -> std::unique_ptr<Figure>
+    FN
+    create(const Pos position, const Color color, const FigureType type) noexcept -> std::unique_ptr<Figure>
     {
         return std::make_unique<Figure>(this->id_++, position, color, type);
     }
@@ -45,7 +47,8 @@ public:
         new (placement) Figure(new_id, position, color, type);
     }
 
-    FN create(const Figure* const to_copy, const bool is_id_will_be_copied) noexcept -> std::unique_ptr<Figure>
+    FN
+    create(const Figure* const to_copy, const bool is_id_will_be_copied) noexcept -> std::unique_ptr<Figure>
     {
         return create(
             to_copy->get_pos(),
@@ -72,7 +75,7 @@ public:
 private:
     constexpr FigureFabric() noexcept = default;
 
-    Id id_ { 1_id };
+    Id id_{ 1_id };
 };
 
 }    // namespace figfab

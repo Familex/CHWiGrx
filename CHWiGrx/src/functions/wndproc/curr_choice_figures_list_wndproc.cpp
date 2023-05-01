@@ -11,7 +11,7 @@ LRESULT CALLBACK curr_choice_figures_list_wndproc(
 ) noexcept
 {
     // selected figure is temporary => it will be deleted when window is closed
-    static constexpr int TO_DESTROY_TIMER_ID { FIGURES_LIST_CHOICE_TO_DESTROY_TIMER_ID };
+    static constexpr int TO_DESTROY_TIMER_ID{ FIGURES_LIST_CHOICE_TO_DESTROY_TIMER_ID };
     switch (u_msg) {
         case WM_CREATE:
             SetTimer(h_wnd, TO_DESTROY_TIMER_ID, TO_DESTROY_ELAPSE_DEFAULT_IN_MS, nullptr);
@@ -28,7 +28,7 @@ LRESULT CALLBACK curr_choice_figures_list_wndproc(
         case WM_EXITSIZEMOVE:    // On figure release
         {
             const HWND hmain_window = GetWindow(GetParent(h_wnd), GW_OWNER);
-            POINT cur_pos {};
+            POINT cur_pos{};
             GetCursorPos(&cur_pos);
             RECT figures_list;
             GetWindowRect(GetParent(h_wnd), &figures_list);

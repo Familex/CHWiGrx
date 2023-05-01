@@ -6,10 +6,10 @@
 LRESULT CALLBACK
 figures_list_wndproc(const HWND h_wnd, const UINT message, const WPARAM w_param, const LPARAM l_param) noexcept
 {
-    SCROLLINFO si { .cbSize = sizeof(SCROLLINFO) };
+    SCROLLINFO si{ .cbSize = sizeof(SCROLLINFO) };
     static PAINTSTRUCT ps;
     static std::map<Color, std::vector<std::unique_ptr<Figure>>> figures_prototypes;
-    static auto curr_color { Color::White };
+    static auto curr_color{ Color::White };
     static bool is_resizes = true;    // also to horizontal scrollbar
     static bool is_scrolls = false;
 
@@ -18,11 +18,11 @@ figures_list_wndproc(const HWND h_wnd, const UINT message, const WPARAM w_param,
         {
             for (Color col : PLAYABLE_COLORS) {
                 for (const FigureType type : PLAYABLE_FIGURES) {
-                    figures_prototypes[col].push_back(figfab::FigureFabric::instance().create(Pos {}, col, type));
+                    figures_prototypes[col].push_back(figfab::FigureFabric::instance().create(Pos{}, col, type));
                 }
             }
 
-            RECT window_rect {};
+            RECT window_rect{};
             GetWindowRect(h_wnd, &window_rect);
             figures_list.set_rect(window_rect);
             figures_list.clear_scrolling();
@@ -168,7 +168,7 @@ figures_list_wndproc(const HWND h_wnd, const UINT message, const WPARAM w_param,
                 draw_figure(
                     hdc_mem,
                     fig_to_draw.get(),
-                    Pos { x, y },
+                    Pos{ x, y },
                     true,
                     static_cast<int>(figures_list.get_cell_height()),
                     static_cast<int>(figures_list.get_cell_width())
@@ -237,7 +237,7 @@ figures_list_wndproc(const HWND h_wnd, const UINT message, const WPARAM w_param,
                 motion_input.init_curr_choice_window(
                     h_wnd,
                     curr_choice_figures_list_wndproc,
-                    Pos { main_window.get_cell_width(), main_window.get_cell_height() }
+                    Pos{ main_window.get_cell_width(), main_window.get_cell_height() }
                 );
             }
 

@@ -3,11 +3,11 @@
 
 namespace
 {
-template<bool CheckMovesValidity>
+template <bool CheckMovesValidity>
 LRESULT CALLBACK
 curr_choice_wndproc(const HWND h_wnd, const UINT u_msg, const WPARAM w_param, const LPARAM l_param) noexcept
 {
-    static constexpr int TO_DESTROY_TIMER_ID { MAIN_WINDOW_CHOICE_TO_DESTROY_TIMER_ID };
+    static constexpr int TO_DESTROY_TIMER_ID{ MAIN_WINDOW_CHOICE_TO_DESTROY_TIMER_ID };
     switch (u_msg) {
         case WM_CREATE:
             SetTimer(h_wnd, TO_DESTROY_TIMER_ID, TO_DESTROY_ELAPSE_DEFAULT_IN_MS, nullptr);
@@ -18,13 +18,13 @@ curr_choice_wndproc(const HWND h_wnd, const UINT u_msg, const WPARAM w_param, co
                 SendMessage(h_wnd, WM_EXITSIZEMOVE, NULL, NULL);
             }
             break;
-        case WM_ENTERSIZEMOVE:    // On figure start dragging 
+        case WM_ENTERSIZEMOVE:    // On figure start dragging
             KillTimer(h_wnd, TO_DESTROY_TIMER_ID);
             break;
-        case WM_EXITSIZEMOVE:    // On figure release 
+        case WM_EXITSIZEMOVE:    // On figure release
         {
             const HWND parent = GetParent(h_wnd);
-            POINT cur_pos {};
+            POINT cur_pos{};
             GetCursorPos(&cur_pos);
 
             if (const Pos where_fig = main_window.get_figure_under_mouse(cur_pos);

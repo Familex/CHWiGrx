@@ -145,7 +145,7 @@ std::string take_str_from_clip(const HWND h_wnd) noexcept
 HWND create_curr_choice_window(HWND parent, Figure* in_hand, POINT mouse, int w, int h, const WNDPROC callback) noexcept
 {
     UnregisterClass(CURR_CHOICE_WINDOW_CLASS_NAME, GetModuleHandle(nullptr));
-    WNDCLASSEX wc { sizeof(WNDCLASSEX) };
+    WNDCLASSEX wc{ sizeof(WNDCLASSEX) };
     // FIXME need to copy figure (Don't forget to delete in callback too)
     // because in main program in_hand will be used too where it can be destroyed.
     Figure* for_storage = in_hand;
@@ -210,7 +210,7 @@ bool prepare_window(
     LoadStringW(h_instance, window_class_id, sz_window_class, max_load_string);
 
     wcex.lpszClassName = sz_window_class;
-    wcex.lpszMenuName = MAKEINTRESOURCE(window_class_id);    // ... = szWindowClass does not work 
+    wcex.lpszMenuName = MAKEINTRESOURCE(window_class_id);    // ... = szWindowClass does not work
 
     RegisterClassExW(&wcex);
 
@@ -253,8 +253,8 @@ void change_checkerboard_color_theme(const HWND h_wnd) noexcept
 HWND create_figures_list_window(HWND parent) noexcept
 {
     UnregisterClass(FIGURES_LIST_WINDOW_CLASS_NAME, GetModuleHandle(nullptr));
-    WNDCLASSEX wc { sizeof(WNDCLASSEX) };
-    HWND h_window {};
+    WNDCLASSEX wc{ sizeof(WNDCLASSEX) };
+    HWND h_window{};
     wc.cbClsExtra = 0;
     wc.cbWndExtra = 0;
     wc.hbrBackground = nullptr;

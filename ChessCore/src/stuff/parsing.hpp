@@ -5,32 +5,32 @@
 
 #pragma region Parse error types
 
-template<typename ErrorType>
+template <typename ErrorType>
 struct ParseError
 {
     ErrorType type;
     std::size_t position;
 };
 
-template<typename ResultType>
+template <typename ResultType>
 struct ParseResult
 {
     ResultType value;
     std::size_t position;
 };
 
-template<typename ResultType, typename ErrorType>
+template <typename ResultType, typename ErrorType>
 using ParseEither = std::expected<ParseResult<ResultType>, ParseError<ErrorType>>;
 
 #pragma endregion    // Parse error types
 
 #pragma region from_string, as_string declarations
 /// implement operator() for this type_ with your type_ as template parameter
-template<typename ResultType>
+template <typename ResultType>
 struct FromString;
 
 /// implement operator() for this type_ with your type_ as template parameter
-template<typename ResultType>
+template <typename ResultType>
 struct AsString;
 
 #pragma endregion    // FromString, AsString declarations

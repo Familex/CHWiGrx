@@ -4,7 +4,7 @@
 #include <iostream>
 #endif    // _DEBUG
 
-template<typename... Ts>
+template <typename... Ts>
 void debug_print([[maybe_unused]] Ts... args) noexcept
 {
 #ifdef _DEBUG

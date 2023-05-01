@@ -20,7 +20,7 @@ void draw_figure(
     int h_end = h_beg + h;
     int w_end = w_beg + h;
     const HBITMAP h_bitmap = pieces_bitmaps[col_to_char(figure->get_col())][figure_type_to_char(figure->get_type())];
-    BITMAP bm {};
+    BITMAP bm{};
     GetObject(h_bitmap, sizeof(BITMAP), &bm);
     const HDC hdc_mem = CreateCompatibleDC(hdc);
     SelectObject(hdc_mem, h_bitmap);
@@ -67,8 +67,8 @@ void draw_figure(const HDC hdc, const Figure* figure, const Pos begin_paint, con
  */
 void draw_board(const HDC hdc) noexcept
 {
-    for (int i {}; i < HEIGHT; ++i) {
-        for (int j {}; j < WIDTH; ++j) {
+    for (int i{}; i < HEIGHT; ++i) {
+        for (int j{}; j < WIDTH; ++j) {
             const RECT cell = main_window.get_cell(i, j);
             if ((i + j) % 2) {
                 FillRect(hdc, &cell, checkerboard_one);
@@ -101,8 +101,8 @@ void draw_figures_on_board(const HDC hdc) noexcept
 void draw_input(const HDC hdc_mem, const Input input) noexcept
 {
     /// FIXME hardcoded colors
-    static const HBRUSH RED { CreateSolidBrush(RGB(255, 0, 0)) };
-    static const HBRUSH BLUE { CreateSolidBrush(RGB(0, 0, 255)) };
+    static const HBRUSH RED{ CreateSolidBrush(RGB(255, 0, 0)) };
+    static const HBRUSH BLUE{ CreateSolidBrush(RGB(0, 0, 255)) };
     const RECT from_cell = main_window.get_cell(change_axes(input.from));
     const RECT target_cell = main_window.get_cell(change_axes(input.target));
     FillRect(hdc_mem, &from_cell, RED);

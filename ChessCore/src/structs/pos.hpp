@@ -7,18 +7,18 @@
 #include <string>
 #include <vector>
 
-constexpr int HEIGHT { 8 };    // this definitely shouldn't be here (FIXME)
-constexpr int WIDTH { 8 };     // this definitely shouldn't be here (FIXME)
+constexpr int HEIGHT{ 8 };    // this definitely shouldn't be here (FIXME)
+constexpr int WIDTH{ 8 };     // this definitely shouldn't be here (FIXME)
 
 /**
  * \note
- * x-axis from top  to bottom (↓) \n 
+ * x-axis from top  to bottom (↓) \n
  * y-axis from left to right  (→)
  */
 struct Pos
 {
-    int x { -1 };
-    int y { -1 };
+    int x{ -1 };
+    int y{ -1 };
 
     friend FromString<Pos>;
     friend AsString<Pos>;
@@ -32,9 +32,15 @@ struct Pos
 
     constexpr auto operator<=>(const Pos& other) const noexcept = default;
 
-    FN operator-(const Pos& right) const noexcept -> Pos { return Pos { (x - right.x), (y - right.y) }; }
+    FN operator-(const Pos& right) const noexcept -> Pos
+    {
+        return Pos{ (x - right.x), (y - right.y) };
+    }
 
-    FN operator+(const Pos& right) const noexcept -> Pos { return Pos { (x + right.x), (y + right.y) }; }
+    FN operator+(const Pos& right) const noexcept -> Pos
+    {
+        return Pos{ (x + right.x), (y + right.y) };
+    }
 
     constexpr auto operator+=(const Pos& r) noexcept -> Pos&
     {
@@ -43,7 +49,7 @@ struct Pos
         return *this;
     }
 
-    FN mul_x(const int mx) const noexcept -> Pos { return Pos { x * mx, y }; }
+    FN mul_x(const int mx) const noexcept -> Pos { return Pos{ x * mx, y }; }
 
     FN loop_add(const Pos add, const int max_x, const int max_y) noexcept -> void
     {
@@ -65,12 +71,15 @@ struct Pos
         return *this;
     }
 
-    FN in(const std::vector<Pos>& lst) const noexcept -> bool { return std::ranges::find(lst, *this) != lst.cend(); }
+    FN in(const std::vector<Pos>& lst) const noexcept -> bool
+    {
+        return std::ranges::find(lst, *this) != lst.cend();
+    }
 };
 
-FN inline change_axes(const Pos& val) noexcept -> Pos { return Pos { val.y, val.x }; }
+FN inline change_axes(const Pos& val) noexcept -> Pos { return Pos{ val.y, val.x }; }
 
-template<>
+template <>
 struct FromString<Pos>
 {
     [[nodiscard]] inline constexpr auto
@@ -79,15 +88,15 @@ struct FromString<Pos>
     {
         const auto payload_sus = svtoi(str);
         if (!payload_sus) {
-            return std::unexpected { ParseError<ParseErrorType> { ParseErrorType::Pos_Invalid, payload_sus.error() } };
+            return std::unexpected{ ParseError<ParseErrorType>{ ParseErrorType::Pos_Invalid, payload_sus.error() } };
         };
         const auto y = payload_sus->value % meta.width;
         const auto x = (payload_sus->value - y) / meta.width;
-        return { { Pos { static_cast<int>(x), static_cast<int>(y) }, payload_sus->position } };
+        return { { Pos{ static_cast<int>(x), static_cast<int>(y) }, payload_sus->position } };
     }
 };
 
-template<>
+template <>
 struct AsString<Pos>
 {
     [[nodiscard]] inline auto operator()(const Pos& pos, const AsStringMeta& meta) const noexcept -> std::string

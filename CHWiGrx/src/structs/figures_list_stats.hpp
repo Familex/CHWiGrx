@@ -4,11 +4,11 @@
 
 class FiguresListStats final : public WindowStats
 {
-    size_t figures_in_row_ { 2 };
-    size_t max_figures_in_row_ { PLAYABLE_FIGURES.size() };
-    int curr_scroll_ {};
-    size_t max_scroll_ {};
-    long total_height_of_all_figures_ {};
+    size_t figures_in_row_{ 2 };
+    size_t max_figures_in_row_{ PLAYABLE_FIGURES.size() };
+    int curr_scroll_{};
+    size_t max_scroll_{};
+    long total_height_of_all_figures_{};
 
     // Not constexpr cause of std::ceil
     void recalculate() noexcept override
@@ -90,7 +90,10 @@ public:
         return delta;
     }
 
-    FN get_all_figures_height() const noexcept -> std::size_t { return total_height_of_all_figures_; }
+    FN get_all_figures_height() const noexcept -> std::size_t
+    {
+        return total_height_of_all_figures_;
+    }
 
     FN clear_scrolling() noexcept -> void
     {

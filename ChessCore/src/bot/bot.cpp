@@ -17,22 +17,25 @@ namespace
         return Input();
     }
     const auto& [fig, move] = possible_figure_moves[rand() % possible_figure_moves.size()];
-    return Input { fig->get_pos(), move.second };
+    return Input{ fig->get_pos(), move.second };
 }
 
-[[nodiscard]] Input minimax_move(const bot::Difficulty diff, const ChessGame& board, const Color turn) noexcept { return random_move(diff, board, turn); }
-
-[[nodiscard]] Input alpha_beta_move(const bot::Difficulty diff,const ChessGame& board, const Color turn) noexcept
+[[nodiscard]] Input minimax_move(const bot::Difficulty diff, const ChessGame& board, const Color turn) noexcept
 {
     return random_move(diff, board, turn);
 }
 
-[[nodiscard]] Input monte_carlo_move(const bot::Difficulty diff,const ChessGame& board, const Color turn) noexcept
+[[nodiscard]] Input alpha_beta_move(const bot::Difficulty diff, const ChessGame& board, const Color turn) noexcept
 {
     return random_move(diff, board, turn);
 }
 
-[[nodiscard]] Input neural_network_move(const bot::Difficulty diff,const ChessGame& board, const Color turn) noexcept
+[[nodiscard]] Input monte_carlo_move(const bot::Difficulty diff, const ChessGame& board, const Color turn) noexcept
+{
+    return random_move(diff, board, turn);
+}
+
+[[nodiscard]] Input neural_network_move(const bot::Difficulty diff, const ChessGame& board, const Color turn) noexcept
 {
     return random_move(diff, board, turn);
 }

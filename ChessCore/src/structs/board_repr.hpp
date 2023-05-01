@@ -14,8 +14,8 @@ struct BoardRepr
 {
     /* ---- Fields ---- */
     std::vector<Figure*> figures;
-    Color turn { Color::White };
-    bool idw { true };
+    Color turn{ Color::White };
+    bool idw{ true };
     std::vector<mvmsg::MoveMessage> past;
     std::vector<mvmsg::MoveMessage> future;
     std::vector<Figure*> captured_figures;
@@ -128,21 +128,24 @@ struct BoardRepr
 
     FN get_idw_char() const noexcept -> char { return idw ? 'T' : 'F'; }
 
-    FN get_turn_char() const noexcept -> char { return turn == Color::White ? 'W' : turn == Color::Black ? 'B' : 'E'; }
+    FN get_turn_char() const noexcept -> char
+    {
+        return turn == Color::White ? 'W' : turn == Color::Black ? 'B' : 'E';
+    }
 
     FN empty() const noexcept -> bool { return figures.empty(); }
 };
 
 }    // namespace board_repr
 
-template<>
+template <>
 struct FromString<board_repr::BoardRepr>
 {
 
     [[nodiscard]] auto parse_v2(const std::string_view sv, const FromStringMeta& meta) const noexcept
         -> ParseEither<board_repr::BoardRepr, ParseErrorType>
     {
-        board_repr::BoardRepr result {};
+        board_repr::BoardRepr result{};
 
         result.can_castle = meta.castlings;
 
@@ -150,16 +153,16 @@ struct FromString<board_repr::BoardRepr>
             [&meta](
                 const std::string_view proc_sv, std::vector<Figure*>& out, const std::size_t start_pos
             ) -> std::optional<ParseError<ParseErrorType>> {
-            std::size_t fig_curr_pos {};
+            std::size_t fig_curr_pos{};
 
             while (fig_curr_pos < proc_sv.size()) {
-                if (const auto& figure_sus = FromString<Figure> {}(proc_sv.substr(fig_curr_pos), meta)) {
+                if (const auto& figure_sus = FromString<Figure>{}(proc_sv.substr(fig_curr_pos), meta)) {
                     out.push_back(figfab::FigureFabric::instance().create(&figure_sus.value().value, true).release());
                     fig_curr_pos += figure_sus.value().position;
                 }
                 else {
-                    return ParseError<ParseErrorType> { figure_sus.error().type,
-                                                        figure_sus.error().position + fig_curr_pos + start_pos };
+                    return ParseError<ParseErrorType>{ figure_sus.error().type,
+                                                       figure_sus.error().position + fig_curr_pos + start_pos };
                 }
             }
             return std::nullopt;
@@ -169,18 +172,18 @@ struct FromString<board_repr::BoardRepr>
             [&meta](
                 const std::string_view sv, std::vector<mvmsg::MoveMessage>& out, std::size_t start_pos
             ) -> std::optional<ParseError<ParseErrorType>> {
-            std::size_t move_message_curr_pos {};
+            std::size_t move_message_curr_pos{};
 
             for (const auto& move_message_sv : split(sv, "$"sv)) {
-                if (const auto& move_message_sus = FromString<mvmsg::MoveMessage> {}(move_message_sv, meta)) {
+                if (const auto& move_message_sus = FromString<mvmsg::MoveMessage>{}(move_message_sv, meta)) {
                     out.push_back(move_message_sus.value().value);
                     move_message_curr_pos += move_message_sus.value().position + 1;
                     //                        + 1 because of the '$' delimiter ^^^
                 }
                 else {
-                    return ParseError<ParseErrorType> { move_message_sus.error().type,
-                                                        move_message_sus.error().position + move_message_curr_pos +
-                                                            start_pos };
+                    return ParseError<ParseErrorType>{ move_message_sus.error().type,
+                                                       move_message_sus.error().position + move_message_curr_pos +
+                                                           start_pos };
                 }
             }
             return std::nullopt;
@@ -191,7 +194,7 @@ struct FromString<board_repr::BoardRepr>
             const auto figures = sv.substr(start_pos, sv.find('<') - sv.find('!') - 1);
 
             if (const auto& error_sus = process_figures(figures, result.figures, start_pos)) {
-                return std::unexpected { *error_sus };
+                return std::unexpected{ *error_sus };
             }
         }
         /* Past */ {
@@ -199,7 +202,7 @@ struct FromString<board_repr::BoardRepr>
             const auto past = sv.substr(start_pos, sv.find('>') - sv.find('<') - 1);
 
             if (const auto& error_sus = process_move_message(past, result.past, start_pos)) {
-                return std::unexpected { *error_sus };
+                return std::unexpected{ *error_sus };
             }
         }
         /* Future */ {
@@ -208,7 +211,7 @@ struct FromString<board_repr::BoardRepr>
                 sv.substr(start_pos, sv.find('>', sv.find('>') + 1) - sv.find('<', sv.find('<') + 1) - 1);
 
             if (const auto& error_sus = process_move_message(future, result.future, start_pos)) {
-                return std::unexpected { *error_sus };
+                return std::unexpected{ *error_sus };
             }
         }
         /* Captured */ {
@@ -216,7 +219,7 @@ struct FromString<board_repr::BoardRepr>
             const auto captured = sv.substr(start_pos, sv.size() - sv.find('>', sv.find('>') + 1));
 
             if (const auto& error_sus = process_figures(captured, result.captured_figures, start_pos)) {
-                return std::unexpected { *error_sus };
+                return std::unexpected{ *error_sus };
             }
         }
 
@@ -235,10 +238,11 @@ struct FromString<board_repr::BoardRepr>
         }
     }
 
-    FN operator()(const std::string_view sv) const noexcept -> ParseEither<board_repr::BoardRepr, ParseErrorType>
+    FN
+    operator()(const std::string_view sv) const noexcept -> ParseEither<board_repr::BoardRepr, ParseErrorType>
     {
-        FromStringMeta meta {};
-        std::size_t pos {};
+        FromStringMeta meta{};
+        std::size_t pos{};
 
         if (sv.empty()) {
             return PARSE_STEP_UNEXPECTED(ParseErrorType, General_EmptyString, pos);
@@ -318,31 +322,32 @@ struct FromString<board_repr::BoardRepr>
     }
 };
 
-template<>
+template <>
 struct AsString<board_repr::BoardRepr>
 {
-    FN operator()(const board_repr::BoardRepr& br, const AsStringMeta& meta) const noexcept -> std::string
+    FN
+    operator()(const board_repr::BoardRepr& br, const AsStringMeta& meta) const noexcept -> std::string
     {
         using namespace std::literals::string_literals;
 
-        std::string result {};
+        std::string result{};
         // Header
         {
             result +=
                 std::format("{:0>2}H{}W{}{}{}C", meta.version, HEIGHT, WIDTH, br.get_idw_char(), br.get_turn_char());
             for (const Id castle_id : br.can_castle) {
-                result += AsString<Id> {}(castle_id, meta.min_id) + ',';
+                result += AsString<Id>{}(castle_id, meta.min_id) + ',';
             }
             result.back() = '!';
         }
         // Figures
         for (const auto& fig : br.figures) {
-            result += AsString<const Figure*> {}(fig, meta);
+            result += AsString<const Figure*>{}(fig, meta);
         }
         // Prev moves
         result += '<';
         for (const auto& mm : br.past) {
-            result += AsString<mvmsg::MoveMessage> {}(mm, meta) + '$';
+            result += AsString<mvmsg::MoveMessage>{}(mm, meta) + '$';
         }
         // Future moves
         if (br.past.empty()) {
@@ -353,7 +358,7 @@ struct AsString<board_repr::BoardRepr>
             result += '<';
         }
         for (const auto& mm : br.future) {
-            result += AsString<mvmsg::MoveMessage> {}(mm, meta) + '$';
+            result += AsString<mvmsg::MoveMessage>{}(mm, meta) + '$';
         }
         // Captured figures
         if (br.future.empty()) {
@@ -363,14 +368,14 @@ struct AsString<board_repr::BoardRepr>
             result.back() = '>';
         }
         for (const auto& fig : br.captured_figures) {
-            result += AsString<const Figure*> {}(fig, meta);
+            result += AsString<const Figure*>{}(fig, meta);
         }
         return result;
     }
 
     FN operator()(const board_repr::BoardRepr& br) const noexcept -> std::string
     {
-        AsStringMeta meta {};
+        AsStringMeta meta{};
 
         meta.version = 2;
 

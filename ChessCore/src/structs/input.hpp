@@ -8,14 +8,14 @@
 
 struct Input
 {
-    Pos from {};
-    Pos target {};
+    Pos from{};
+    Pos target{};
 
     CTOR Input() noexcept = default;
 
     CTOR Input(const Pos& from, const Pos& target) noexcept
-      : from { from }
-      , target { target }
+      : from{ from }
+      , target{ target }
     { }
 
     CTOR Input(std::string str)
@@ -23,8 +23,8 @@ struct Input
         // from.first from.second target.first target.second
         str += " ";
         size_t pos = 0;
-        std::vector<int> acc {};
-        for (int i {}; i < 4; ++i) {
+        std::vector<int> acc{};
+        for (int i{}; i < 4; ++i) {
             if (constexpr char delimiter = ' '; (pos = str.find(delimiter)) != std::string::npos) {
                 constexpr size_t delimiter_len = 1;
                 std::string token = str.substr(0, pos);

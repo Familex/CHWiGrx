@@ -6,28 +6,26 @@
 
 struct CreateWindowInput
 {
-    WNDCLASSEX wc { sizeof(WNDCLASSEX) };
-    LPTSTR class_name {};
-    LPTSTR title {};
-    DWORD style {};
-    int x {};
-    int y {};
-    int width {};
-    int height {};
-    HWND parent {};
-    HMENU h_menu {};
-    HINSTANCE h_inst {};
-    LPVOID lp_param {};
-    void (*after_create)(HWND) {};
-    LONG_PTR(*get_wnd_extra)
-    () {};
-    LONG_PTR(*get_cls_extra)
-    () {};
+    WNDCLASSEX wc{ sizeof(WNDCLASSEX) };
+    LPTSTR class_name{};
+    LPTSTR title{};
+    DWORD style{};
+    int x{};
+    int y{};
+    int width{};
+    int height{};
+    HWND parent{};
+    HMENU h_menu{};
+    HINSTANCE h_inst{};
+    LPVOID lp_param{};
+    void (*after_create)(HWND){};
+    LONG_PTR (*get_wnd_extra)(){};
+    LONG_PTR (*get_cls_extra)(){};
 };
 
 struct CreateWindowInputBuilder
 {
-    CreateWindowInput result {};
+    CreateWindowInput result{};
 
     [[nodiscard]] constexpr auto build() const&& noexcept -> CreateWindowInput { return result; }
 

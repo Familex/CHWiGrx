@@ -35,13 +35,14 @@ FN col_to_char(const Color color) noexcept -> char
     }
 }
 
-template<>
+template <>
 struct FromString<Color>
 {
-    FN operator()(const std::string_view sv) const noexcept -> ParseEither<Color, ParseErrorType>
+    FN
+    operator()(const std::string_view sv) const noexcept -> ParseEither<Color, ParseErrorType>
     {
         if (sv.empty()) {
-            return std::unexpected { ParseError<ParseErrorType> { ParseErrorType::Color_CouldNotFound, 0ull } };
+            return std::unexpected{ ParseError<ParseErrorType>{ ParseErrorType::Color_CouldNotFound, 0ull } };
         }
         switch (sv[0]) {
             case 'W':
@@ -51,12 +52,12 @@ struct FromString<Color>
             case 'b':
                 return { { Color::Black, 1ull } };
             default:
-                return std::unexpected { ParseError<ParseErrorType> { ParseErrorType::Color_Invalid, 1ull } };
+                return std::unexpected{ ParseError<ParseErrorType>{ ParseErrorType::Color_Invalid, 1ull } };
         }
     }
 };
 
-template<>
+template <>
 struct AsString<Color>
 {
     FN operator()(const Color color) const noexcept -> std::string
@@ -84,7 +85,7 @@ FN what_next(const Color col) noexcept -> Color
     }
 }
 
-inline const std::set<Color> PLAYABLE_COLORS {
+inline const std::set<Color> PLAYABLE_COLORS{
     Color::White,
     Color::Black,
 };
@@ -122,13 +123,14 @@ FN figure_type_to_char(const FigureType figure_type) noexcept -> char
     }
 }
 
-template<>
+template <>
 struct FromString<FigureType>
 {
-    FN operator()(const std::string_view sv) const noexcept -> ParseEither<FigureType, ParseErrorType>
+    FN
+    operator()(const std::string_view sv) const noexcept -> ParseEither<FigureType, ParseErrorType>
     {
         if (sv.empty()) {
-            return std::unexpected { ParseError<ParseErrorType> { ParseErrorType::FigureType_CouldNotFound, 0ull } };
+            return std::unexpected{ ParseError<ParseErrorType>{ ParseErrorType::FigureType_CouldNotFound, 0ull } };
         }
         switch (sv[0]) {
             case 'K':
@@ -150,12 +152,12 @@ struct FromString<FigureType>
             case 'r':
                 return { { FigureType::Rook, 1ull } };
             default:
-                return std::unexpected { ParseError<ParseErrorType> { ParseErrorType::FigureType_Invalid, 1ull } };
+                return std::unexpected{ ParseError<ParseErrorType>{ ParseErrorType::FigureType_Invalid, 1ull } };
         }
     }
 };
 
-template<>
+template <>
 struct AsString<FigureType>
 {
     FN operator()(const FigureType figure_type) const noexcept -> std::string
@@ -178,11 +180,11 @@ struct AsString<FigureType>
     }
 };
 
-inline const std::set<FigureType> PLAYABLE_FIGURES {
+inline const std::set<FigureType> PLAYABLE_FIGURES{
     FigureType::Pawn, FigureType::Knight, FigureType::Rook, FigureType::Bishop, FigureType::Queen, FigureType::King,
 };
 
-inline const std::set<FigureType> PROMOTION_FIGURES {
+inline const std::set<FigureType> PROMOTION_FIGURES{
     FigureType::Knight,
     FigureType::Rook,
     FigureType::Bishop,

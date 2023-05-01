@@ -5,9 +5,9 @@
 
 #include <charconv>
 #include <expected>
+#include <ranges>
 #include <string>
 #include <vector>
-#include <ranges>
 
 using namespace std::string_literals;
 using namespace std::string_view_literals;

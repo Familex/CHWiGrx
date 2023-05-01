@@ -8,11 +8,11 @@ LRESULT CALLBACK mainproc::main_edit_state_wndproc(
     const LPARAM l_param
 ) noexcept
 {
-    static PAINTSTRUCT ps {};
-    static HBITMAP hbm_mem {};
-    static HGDIOBJ h_old {};
-    static HDC hdc_mem {};
-    static HDC hdc {};
+    static PAINTSTRUCT ps{};
+    static HBITMAP hbm_mem{};
+    static HGDIOBJ h_old{};
+    static HDC hdc_mem{};
+    static HDC hdc{};
 
     switch (message) {
         case WM_COMMAND:
@@ -90,7 +90,7 @@ LRESULT CALLBACK mainproc::main_edit_state_wndproc(
                 motion_input.init_curr_choice_window(
                     h_wnd,
                     curr_choice_edit_mode_wndproc,
-                    Pos { main_window.get_cell_width(), main_window.get_cell_height() }
+                    Pos{ main_window.get_cell_width(), main_window.get_cell_height() }
                 );
             }
             break;
