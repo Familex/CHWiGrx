@@ -1,7 +1,6 @@
 #pragma once
 
-#include "../functions/misc/misc.h"
-#include "../winapi/framework.hpp"
+#include "../declarations.hpp"
 #include "chess_game.hpp"
 
 class MotionInput
@@ -14,7 +13,7 @@ public:
     void clear()
     {
         is_lbutton_down_ = false;
-        DestroyWindow(curr_chose_window_);
+        destroy_window(curr_choice_window_);
         is_curr_choice_moving_ = false;
         deactivate_by_click();
         deactivate_by_pos();
@@ -47,11 +46,11 @@ public:
         is_curr_choice_moving_ = true;
         POINT mouse{};
         GetCursorPos(&mouse);
-        curr_chose_window_ =
+        curr_choice_window_ =
             create_curr_choice_window(h_wnd, in_hand_.value(), mouse, cell_size.x, cell_size.y, callback);
-        RedrawWindow(h_wnd, nullptr, nullptr, RDW_INVALIDATE | RDW_UPDATENOW);
         // Force redraw, because there is an artifact
-        SendMessage(curr_chose_window_, WM_NCLBUTTONDOWN, HTCAPTION, MAKELPARAM(mouse.x, mouse.y));
+        RedrawWindow(h_wnd, nullptr, nullptr, RDW_INVALIDATE | RDW_UPDATENOW);
+        SendMessage(curr_choice_window_, WM_NCLBUTTONDOWN, HTCAPTION, MAKELPARAM(mouse.x, mouse.y));
     }
 
     FN activate_by_click() noexcept -> void
@@ -132,7 +131,7 @@ private:
     int input_order_by_one_{ 0 };
     bool input_order_by_two_{ false };
     bool is_lbutton_down_{ false };
-    HWND curr_chose_window_{};
+    HWND curr_choice_window_{};
     bool is_curr_choice_moving_{ false };
     std::optional<Figure*> in_hand_{ std::nullopt };
     std::vector<std::pair<bool, Pos>> all_moves_{};

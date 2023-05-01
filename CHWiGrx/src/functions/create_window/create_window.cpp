@@ -61,7 +61,4 @@ void destroy_window(HWND& wnd) noexcept
         DestroyWindow(wnd);
         wnd = nullptr;
     }
-    else {
-        std::unreachable();
-    }
 }

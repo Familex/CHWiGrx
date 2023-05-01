@@ -49,8 +49,7 @@ LRESULT CALLBACK mainproc::main_edit_state_wndproc(
                         figures_list_window = create_figures_list_window(h_wnd);
                     }
                     else {
-                        DestroyWindow(figures_list_window);
-                        figures_list_window = nullptr;
+                        destroy_window(figures_list_window);
                     }
                     set_menu_checkbox(h_wnd, IDM_TOGGLE_LIST_WINDOW, figures_list_window != nullptr);
                     break;

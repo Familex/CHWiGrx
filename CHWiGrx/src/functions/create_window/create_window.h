@@ -113,4 +113,4 @@ struct CreateWindowArgsBuilder
 
 auto create_window(CreateWindowArgs&&) noexcept -> std::expected<HWND, DWORD>;
 
-inline void destroy_window(HWND&) noexcept;
+void destroy_window(HWND&) noexcept;
