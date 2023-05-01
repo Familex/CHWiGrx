@@ -16,3 +16,5 @@ HWND create_curr_choice_window(HWND, Figure*, POINT, int, int, const WNDPROC) no
 void change_checkerboard_color_theme(HWND) noexcept;
 
 HWND create_figures_list_window(HWND) noexcept;
+
+bool game_end_check(HWND, Color) noexcept;

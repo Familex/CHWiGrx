@@ -1,9 +1,6 @@
 #include "misc.h"
 
-#include "../../stuff/debug_print.hpp"
-#include "../../variables/constants.hpp"
-#include "../../variables/mutables.hpp"
-#include "../wndproc/wndproc.h"
+#include "../../declarations.hpp"
 
 INT_PTR CALLBACK about_proc(const HWND h_dlg, const UINT message, const WPARAM w_param, const LPARAM l_param) noexcept
 {
@@ -215,4 +212,59 @@ HWND create_figures_list_window(HWND parent) noexcept
         return create_window();
 
     return create_window();
+}
+
+bool game_end_check(HWND h_wnd, Color turn) noexcept
+{
+    if (const GameEndType curr_game_end_state = board.game_end_check(turn);
+        curr_game_end_state != GameEndType::NotGameEnd)
+    {
+        std::wstring body;
+        const std::wstring head = L"Game end";
+        switch (curr_game_end_state) {
+            case GameEndType::Checkmate:
+            {
+                const auto who_next = what_next(turn);
+                body = who_next == Color::White   ? L"White wins!"
+                       : who_next == Color::Black ? L"Black wins!"
+                                                  : L"None wins!";
+            } break;
+
+            case GameEndType::Stalemate:
+                body = turn == Color::White   ? L"Stalemate to white!"
+                       : turn == Color::Black ? L"Stalemate to black!"
+                                              : L"Stalemate?";
+                break;
+
+            case GameEndType::FiftyRule:
+                body = L"Fifty rule";
+                break;
+
+            case GameEndType::InsufficientMaterial:
+                body = L"Insufficient material";
+                break;
+
+            case GameEndType::MoveRepeat:
+                body = L"Move repeat rule";
+                break;
+
+            default:
+                assert(!"unexpected game end");
+                break;
+        }
+        if (const auto result = MessageBox(h_wnd, (body + L"\nCopy board to clip?").c_str(), head.c_str(), MB_YESNO);
+            result == IDYES)
+        {
+            copy_repr_to_clip(h_wnd);
+        }
+        restart();
+        InvalidateRect(h_wnd, nullptr, NULL);
+
+        update_main_window_title(h_wnd);
+        return true;
+    }
+
+    update_main_window_title(h_wnd);
+
+    return false;
 }
