@@ -17,7 +17,7 @@ public:
         is_curr_choice_moving_ = false;
         deactivate_by_click();
         deactivate_by_pos();
-        in_hand_ = std::nullopt;
+        clear_hand();
         input_ = Input{ Pos{ 0, -1 }, Pos{ -1, -1 } };
         all_moves_.clear();
     }

@@ -118,6 +118,7 @@
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <Optimization>MaxSpeed</Optimization>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -154,6 +155,7 @@
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <Optimization>MaxSpeed</Optimization>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -219,7 +221,6 @@
     <ClCompile Include="src\functions\draw\draw.cpp" />
     <ClCompile Include="src\functions\menu\menu.cpp" />
     <ClCompile Include="src\functions\misc\misc.cpp" />
-    <ClCompile Include="src\functions\wndproc\curr_choice_figures_list_wndproc.cpp" />
     <ClCompile Include="src\functions\wndproc\curr_choice_wndproc.cpp" />
     <ClCompile Include="src\functions\wndproc\figures_list_wndproc.cpp" />
     <ClCompile Include="src\functions\wndproc\main_default_wndproc.cpp" />

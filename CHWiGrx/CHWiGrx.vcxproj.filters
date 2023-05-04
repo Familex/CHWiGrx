@@ -170,9 +170,6 @@
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\functions\wndproc\curr_choice_figures_list_wndproc.cpp">
-      <Filter>src\functions\wndproc</Filter>
-    </ClCompile>
     <ClCompile Include="src\functions\wndproc\curr_choice_wndproc.cpp">
       <Filter>src\functions\wndproc</Filter>
     </ClCompile>
