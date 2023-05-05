@@ -9,6 +9,9 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CHWiGrx", "CHWiGrx\CHWiGrx.
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{4962C433-D079-4CF6-B3D5-051A24DAADF3}"
 	ProjectSection(SolutionItems) = preProject
+		.clang-format = .clang-format
+		.gitignore = .gitignore
+		README.md = README.md
 		TODO.md = TODO.md
 	EndProjectSection
 EndProject

@@ -1,75 +1,84 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="Исходные файлы">
-      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
-      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    <Filter Include="bot">
+      <UniqueIdentifier>{e3cda068-076c-47ed-98d8-34ec10718fb8}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Файлы заголовков">
-      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
-      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
-    </Filter>
-    <Filter Include="Файлы ресурсов">
-      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
-      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    <Filter Include="structs">
+      <UniqueIdentifier>{9fa5293f-c7b0-4a12-8af1-4fa36227c716}</UniqueIdentifier>
     </Filter>
     <Filter Include="stuff">
-      <UniqueIdentifier>{d23765ea-c6f7-403c-b59c-4b72cff1989d}</UniqueIdentifier>
+      <UniqueIdentifier>{fd24025b-b6af-4b83-98f8-fc569d5d7f0c}</UniqueIdentifier>
     </Filter>
-    <Filter Include="stuff\h">
-      <UniqueIdentifier>{b94dbd8a-9380-4548-8eac-4da73402c419}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="stuff\src">
-      <UniqueIdentifier>{7d1d16c2-5464-4484-ab61-33a1bf3d2813}</UniqueIdentifier>
+    <Filter Include="src">
+      <UniqueIdentifier>{395d5b68-586f-4f1f-aa7e-39f85853645b}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="FigureBoard.cpp">
-      <Filter>Исходные файлы</Filter>
-    </ClCompile>
-    <ClCompile Include="stuff\stuff.cpp">
-      <Filter>stuff\src</Filter>
-    </ClCompile>
-    <ClCompile Include="stuff\board_repr.cpp">
-      <Filter>stuff\src</Filter>
-    </ClCompile>
-    <ClCompile Include="stuff\figure_fabric.cpp">
-      <Filter>stuff\src</Filter>
-    </ClCompile>
-    <ClCompile Include="stuff\figure.cpp">
-      <Filter>stuff\src</Filter>
-    </ClCompile>
-    <ClCompile Include="stuff\move_rec.cpp">
-      <Filter>stuff\src</Filter>
-    </ClCompile>
-    <ClCompile Include="bot.cpp">
-      <Filter>stuff\src</Filter>
+    <ClCompile Include="src\bot\bot.cpp">
+      <Filter>bot</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="FigureBoard.h">
-      <Filter>Файлы заголовков</Filter>
+    <ClInclude Include="src\bot\bot.h">
+      <Filter>bot</Filter>
     </ClInclude>
-    <ClInclude Include="stuff\board_repr.h">
-      <Filter>stuff\h</Filter>
+    <ClInclude Include="src\chess_game.hpp">
+      <Filter>src</Filter>
     </ClInclude>
-    <ClInclude Include="stuff\figure_fabric.h">
-      <Filter>stuff\h</Filter>
+    <ClInclude Include="src\stuff\cexau.h">
+      <Filter>stuff</Filter>
     </ClInclude>
-    <ClInclude Include="stuff\move_logger.hpp">
-      <Filter>stuff\h</Filter>
+    <ClInclude Include="src\stuff\enums.hpp">
+      <Filter>stuff</Filter>
     </ClInclude>
-    <ClInclude Include="stuff\stuff.h">
-      <Filter>stuff\h</Filter>
+    <ClInclude Include="src\stuff\macro.h">
+      <Filter>stuff</Filter>
     </ClInclude>
-    <ClInclude Include="stuff\figure.h">
-      <Filter>stuff\h</Filter>
+    <ClInclude Include="src\stuff\parse_meta.hpp">
+      <Filter>stuff</Filter>
     </ClInclude>
-    <ClInclude Include="stuff\move_rec.h">
-      <Filter>stuff\h</Filter>
+    <ClInclude Include="src\stuff\parse_step.hpp">
+      <Filter>stuff</Filter>
     </ClInclude>
-    <ClInclude Include="bot.h">
-      <Filter>stuff\h</Filter>
+    <ClInclude Include="src\stuff\parsing.hpp">
+      <Filter>stuff</Filter>
+    </ClInclude>
+    <ClInclude Include="src\stuff\strong_typedef.hpp">
+      <Filter>stuff</Filter>
+    </ClInclude>
+    <ClInclude Include="src\stuff\stuff.hpp">
+      <Filter>stuff</Filter>
+    </ClInclude>
+    <ClInclude Include="src\stuff\visit.hpp">
+      <Filter>stuff</Filter>
+    </ClInclude>
+    <ClInclude Include="src\structs\board_repr.hpp">
+      <Filter>structs</Filter>
+    </ClInclude>
+    <ClInclude Include="src\structs\figure.hpp">
+      <Filter>structs</Filter>
+    </ClInclude>
+    <ClInclude Include="src\structs\figure_board.hpp">
+      <Filter>structs</Filter>
+    </ClInclude>
+    <ClInclude Include="src\structs\figure_fabric.hpp">
+      <Filter>structs</Filter>
+    </ClInclude>
+    <ClInclude Include="src\structs\id.hpp">
+      <Filter>structs</Filter>
+    </ClInclude>
+    <ClInclude Include="src\structs\input.hpp">
+      <Filter>structs</Filter>
+    </ClInclude>
+    <ClInclude Include="src\structs\move_logger.hpp">
+      <Filter>structs</Filter>
+    </ClInclude>
+    <ClInclude Include="src\structs\move_message.hpp">
+      <Filter>structs</Filter>
+    </ClInclude>
+    <ClInclude Include="src\structs\pos.hpp">
+      <Filter>structs</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

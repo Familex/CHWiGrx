@@ -1,138 +1,210 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="Исходные файлы">
-      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
-      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
-    </Filter>
-    <Filter Include="Файлы заголовков">
-      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
-      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
-    </Filter>
-    <Filter Include="Файлы ресурсов">
-      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
-      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
-    </Filter>
-    <Filter Include="Файлы ресурсов\pieces">
-      <UniqueIdentifier>{ebbc46bc-f73c-417d-aa62-1066d38b2e2b}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="callbacks">
-      <UniqueIdentifier>{2b0ec98a-d535-4eca-9cab-ce312a5836ab}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Файлы ресурсов\icons">
+    <Filter Include="icons">
       <UniqueIdentifier>{76b5483f-f3c3-4ac3-b43c-015d9cdbb594}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Файлы ресурсов\other_images">
+    <Filter Include="other images">
       <UniqueIdentifier>{12d77ce8-3848-49c3-9a67-834522f336b2}</UniqueIdentifier>
     </Filter>
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="framework.hpp">
-      <Filter>Файлы заголовков</Filter>
-    </ClInclude>
-    <ClInclude Include="targetver.hpp">
-      <Filter>Файлы заголовков</Filter>
-    </ClInclude>
-    <ClInclude Include="resource.hpp">
-      <Filter>Файлы заголовков</Filter>
-    </ClInclude>
-    <ClInclude Include="declarations.hpp">
-      <Filter>Файлы заголовков</Filter>
-    </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="main.cpp">
-      <Filter>Исходные файлы</Filter>
-    </ClCompile>
-    <ClCompile Include="funcs.cpp">
-      <Filter>Исходные файлы</Filter>
-    </ClCompile>
-    <ClCompile Include="callbacks\main_default_wndproc.cpp">
-      <Filter>callbacks</Filter>
-    </ClCompile>
-    <ClCompile Include="callbacks\curr_choice_figures_list_wndproc.cpp">
-      <Filter>callbacks</Filter>
-    </ClCompile>
-    <ClCompile Include="callbacks\curr_choice_wndproc.cpp">
-      <Filter>callbacks</Filter>
-    </ClCompile>
-    <ClCompile Include="callbacks\figures_list_wndproc.cpp">
-      <Filter>callbacks</Filter>
-    </ClCompile>
-    <ClCompile Include="callbacks\main_edit_state_wndproc.cpp">
-      <Filter>callbacks</Filter>
-    </ClCompile>
-    <ClCompile Include="callbacks\main_game_state_wndproc.cpp">
-      <Filter>callbacks</Filter>
-    </ClCompile>
-    <ClCompile Include="callbacks\moves_list_wndproc.cpp">
-      <Filter>callbacks</Filter>
-    </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <ResourceCompile Include="CHWiGrx.rc">
-      <Filter>Файлы ресурсов</Filter>
-    </ResourceCompile>
+    <Filter Include="pieces">
+      <UniqueIdentifier>{ebbc46bc-f73c-417d-aa62-1066d38b2e2b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="winapi">
+      <UniqueIdentifier>{9e4557aa-7130-406c-af3d-8ecda7536ea2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src">
+      <UniqueIdentifier>{2c89046e-048c-4282-8c40-353ccdb01fcd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\functions">
+      <UniqueIdentifier>{0626db4f-3c39-439a-b797-58af409ea946}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\structs">
+      <UniqueIdentifier>{f49a67f1-b8c2-475f-b05a-77287ffe15e4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\stuff">
+      <UniqueIdentifier>{1285b0b3-df65-47b4-91f7-27c754fa605d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\variables">
+      <UniqueIdentifier>{89dbe2c5-696e-45e0-8434-43bce1865ff2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\functions\board_logic">
+      <UniqueIdentifier>{a2b33a0e-99ae-48ee-b53b-e03b8610170d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\functions\create_window">
+      <UniqueIdentifier>{25110fe6-ca70-45ea-87c2-88fc29907745}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\functions\draw">
+      <UniqueIdentifier>{cfb54a8e-ea3a-4c7f-b811-0ecf8e9c8cce}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\functions\menu">
+      <UniqueIdentifier>{3a4fed2c-7c11-4d05-8ad2-a408c652ea71}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\functions\misc">
+      <UniqueIdentifier>{f6f02b88-caec-4f74-9366-1e987b0b4357}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\functions\wndproc">
+      <UniqueIdentifier>{487567de-5b6d-4a65-a395-e16077a1bbe9}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Image Include="pieces\BR.bmp">
-      <Filter>Файлы ресурсов\pieces</Filter>
+      <Filter>pieces</Filter>
     </Image>
     <Image Include="pieces\BQ.bmp">
-      <Filter>Файлы ресурсов\pieces</Filter>
+      <Filter>pieces</Filter>
     </Image>
     <Image Include="pieces\BB.bmp">
-      <Filter>Файлы ресурсов\pieces</Filter>
+      <Filter>pieces</Filter>
     </Image>
     <Image Include="pieces\BH.bmp">
-      <Filter>Файлы ресурсов\pieces</Filter>
+      <Filter>pieces</Filter>
     </Image>
     <Image Include="pieces\BK.bmp">
-      <Filter>Файлы ресурсов\pieces</Filter>
+      <Filter>pieces</Filter>
     </Image>
     <Image Include="pieces\BP.bmp">
-      <Filter>Файлы ресурсов\pieces</Filter>
+      <Filter>pieces</Filter>
     </Image>
     <Image Include="pieces\WB.bmp">
-      <Filter>Файлы ресурсов\pieces</Filter>
+      <Filter>pieces</Filter>
     </Image>
     <Image Include="pieces\WH.bmp">
-      <Filter>Файлы ресурсов\pieces</Filter>
+      <Filter>pieces</Filter>
     </Image>
     <Image Include="pieces\WK.bmp">
-      <Filter>Файлы ресурсов\pieces</Filter>
+      <Filter>pieces</Filter>
     </Image>
     <Image Include="pieces\WP.bmp">
-      <Filter>Файлы ресурсов\pieces</Filter>
+      <Filter>pieces</Filter>
     </Image>
     <Image Include="pieces\WQ.bmp">
-      <Filter>Файлы ресурсов\pieces</Filter>
+      <Filter>pieces</Filter>
     </Image>
     <Image Include="pieces\WR.bmp">
-      <Filter>Файлы ресурсов\pieces</Filter>
+      <Filter>pieces</Filter>
     </Image>
     <Image Include="icons\game_mode_big.ico">
-      <Filter>Файлы ресурсов\icons</Filter>
+      <Filter>icons</Filter>
     </Image>
     <Image Include="icons\edit_mode.ico">
-      <Filter>Файлы ресурсов\icons</Filter>
+      <Filter>icons</Filter>
     </Image>
     <Image Include="icons\game_mode_small.ico">
-      <Filter>Файлы ресурсов\icons</Filter>
-    </Image>
-    <Image Include="icons\figures_list.ico">
-      <Filter>Файлы ресурсов</Filter>
+      <Filter>icons</Filter>
     </Image>
     <Image Include="other_images\star.bmp">
-      <Filter>Файлы ресурсов\other_images</Filter>
+      <Filter>other images</Filter>
+    </Image>
+    <Image Include="icons\figures_list.ico">
+      <Filter>icons</Filter>
     </Image>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Minimal.ani">
-      <Filter>Файлы ресурсов</Filter>
-    </None>
     <None Include="icons\Minimal.ani">
-      <Filter>Файлы ресурсов\icons</Filter>
+      <Filter>icons</Filter>
     </None>
+    <None Include="Minimal.ani">
+      <Filter>icons</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\winapi\framework.hpp">
+      <Filter>winapi</Filter>
+    </ClInclude>
+    <ClInclude Include="src\winapi\resource.hpp">
+      <Filter>winapi</Filter>
+    </ClInclude>
+    <ClInclude Include="src\winapi\targetver.hpp">
+      <Filter>winapi</Filter>
+    </ClInclude>
+    <ClInclude Include="src\variables\constants.hpp">
+      <Filter>src\variables</Filter>
+    </ClInclude>
+    <ClInclude Include="src\variables\mutables.hpp">
+      <Filter>src\variables</Filter>
+    </ClInclude>
+    <ClInclude Include="src\stuff\debug_print.hpp">
+      <Filter>src\stuff</Filter>
+    </ClInclude>
+    <ClInclude Include="src\stuff\virtual_keys.hpp">
+      <Filter>src\stuff</Filter>
+    </ClInclude>
+    <ClInclude Include="src\structs\figures_list_stats.hpp">
+      <Filter>src\structs</Filter>
+    </ClInclude>
+    <ClInclude Include="src\structs\motion_input.hpp">
+      <Filter>src\structs</Filter>
+    </ClInclude>
+    <ClInclude Include="src\structs\window_state.hpp">
+      <Filter>src\structs</Filter>
+    </ClInclude>
+    <ClInclude Include="src\structs\window_stats.hpp">
+      <Filter>src\structs</Filter>
+    </ClInclude>
+    <ClInclude Include="src\functions\wndproc\wndproc.h">
+      <Filter>src\functions\wndproc</Filter>
+    </ClInclude>
+    <ClInclude Include="src\functions\misc\misc.h">
+      <Filter>src\functions\misc</Filter>
+    </ClInclude>
+    <ClInclude Include="src\functions\menu\menu.h">
+      <Filter>src\functions\menu</Filter>
+    </ClInclude>
+    <ClInclude Include="src\functions\draw\draw.h">
+      <Filter>src\functions\draw</Filter>
+    </ClInclude>
+    <ClInclude Include="src\functions\create_window\create_window.h">
+      <Filter>src\functions\create_window</Filter>
+    </ClInclude>
+    <ClInclude Include="src\functions\board_logic\board_logic.h">
+      <Filter>src\functions\board_logic</Filter>
+    </ClInclude>
+    <ClInclude Include="src\declarations.hpp">
+      <Filter>src</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="src\winapi\CHWiGrx.rc">
+      <Filter>winapi</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\functions\wndproc\curr_choice_wndproc.cpp">
+      <Filter>src\functions\wndproc</Filter>
+    </ClCompile>
+    <ClCompile Include="src\functions\wndproc\figures_list_wndproc.cpp">
+      <Filter>src\functions\wndproc</Filter>
+    </ClCompile>
+    <ClCompile Include="src\functions\wndproc\main_default_wndproc.cpp">
+      <Filter>src\functions\wndproc</Filter>
+    </ClCompile>
+    <ClCompile Include="src\functions\wndproc\main_edit_state_wndproc.cpp">
+      <Filter>src\functions\wndproc</Filter>
+    </ClCompile>
+    <ClCompile Include="src\functions\wndproc\main_game_state_wndproc.cpp">
+      <Filter>src\functions\wndproc</Filter>
+    </ClCompile>
+    <ClCompile Include="src\functions\wndproc\moves_list_wndproc.cpp">
+      <Filter>src\functions\wndproc</Filter>
+    </ClCompile>
+    <ClCompile Include="src\functions\misc\misc.cpp">
+      <Filter>src\functions\misc</Filter>
+    </ClCompile>
+    <ClCompile Include="src\functions\menu\menu.cpp">
+      <Filter>src\functions\menu</Filter>
+    </ClCompile>
+    <ClCompile Include="src\functions\draw\draw.cpp">
+      <Filter>src\functions\draw</Filter>
+    </ClCompile>
+    <ClCompile Include="src\functions\create_window\create_window.cpp">
+      <Filter>src\functions\create_window</Filter>
+    </ClCompile>
+    <ClCompile Include="src\functions\board_logic\board_logic.cpp">
+      <Filter>src\functions\board_logic</Filter>
+    </ClCompile>
+    <ClCompile Include="src\main.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

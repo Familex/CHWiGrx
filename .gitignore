@@ -39,11 +39,12 @@ x64/
 *.suppress
 *.aps
 *.user
+*.hint
 
 # my files
 **/TODO*
 psd/
-*.claudiaideconfig
+private/
 
 # vtune
 **/GPUCache/
