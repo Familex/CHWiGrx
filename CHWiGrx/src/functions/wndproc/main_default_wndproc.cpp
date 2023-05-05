@@ -22,15 +22,15 @@ main_default_wndproc(const HWND h_wnd, const UINT message, const WPARAM w_param,
                         motion_input.clear();
                     }
                     else {
-                        const std::wstring error_message{ parse_error_type_as_wstring(board_repr_sus.error().type) };
+                        const auto& [type, position] = board_repr_sus.error();
+                        const std::wstring error_message{ parse_error_type_as_wstring(type) };
                         MessageBox(h_wnd, error_message.c_str(), L"Board repr parse error", MB_OK);
 
                         /* Debug print */ {
-                            const std::string error_message_utf8{ parse_error_type_as_string(board_repr_sus.error().type
-                            ) };
+                            const std::string error_message_utf8{ parse_error_type_as_string(type) };
                             debug_print("Error:", error_message_utf8);
                             debug_print("\tBoard:", AsString<board_repr::BoardRepr>{}(board.get_repr(turn, true)));
-                            debug_print("\tPos:", board_repr_sus.error().position);
+                            debug_print("\tPos:", position);
                         }
                     }
                 }

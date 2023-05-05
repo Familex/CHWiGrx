@@ -51,7 +51,7 @@ struct Pos
 
     FN mul_x(const int mx) const noexcept -> Pos { return Pos{ x * mx, y }; }
 
-    FN loop_add(const Pos add, const int max_x, const int max_y) noexcept -> void
+    FV loop_add(const Pos& add, const int max_x, const int max_y) noexcept -> void
     {
         this->x += add.x;
         this->y += add.y;
@@ -77,12 +77,12 @@ struct Pos
     }
 };
 
-FN inline change_axes(const Pos& val) noexcept -> Pos { return Pos{ val.y, val.x }; }
+FN change_axes(const Pos& val) noexcept -> Pos { return Pos{ val.y, val.x }; }
 
 template <>
 struct FromString<Pos>
 {
-    [[nodiscard]] inline constexpr auto
+    [[nodiscard]] constexpr auto
     operator()(const std::string_view str, const FromStringMeta& meta) const noexcept
         -> ParseEither<Pos, ParseErrorType>
     {
@@ -99,7 +99,7 @@ struct FromString<Pos>
 template <>
 struct AsString<Pos>
 {
-    [[nodiscard]] inline auto operator()(const Pos& pos, const AsStringMeta& meta) const noexcept -> std::string
+    [[nodiscard]] auto operator()(const Pos& pos, const AsStringMeta& meta) const noexcept -> std::string
     {
         const auto payload = std::to_string(pos.y + pos.x * WIDTH);
         return std::string(meta.max_pos_length - payload.length(), '0') + payload;

@@ -5,7 +5,7 @@
 #include "../misc/misc.h"
 #include "bot/bot.h"
 
-void update_main_window_title(HWND h_wnd) noexcept
+void update_main_window_title(const HWND h_wnd) noexcept
 {
     /* CHWiGrx vs bot [check] */
     std::wstring title = L"CHWiGrx ";
@@ -72,7 +72,7 @@ void on_lbutton_up(
     const HWND h_wnd,
     [[maybe_unused]] WPARAM w_param,
     const LPARAM l_param,
-    const Pos where_fig,
+    const Pos& where_fig,
     const bool use_move_check_and_log
 ) noexcept
 {
@@ -179,7 +179,7 @@ void make_move(const HWND h_wnd) noexcept
         return;
     }
 
-    const auto move_message_sus = board.provide_move(in_hand.value(), input, turn, [c = chose] { return c; });
+    const auto move_message_sus = board.provide_move(*in_hand, input, turn, [c = chose] { return c; });
 
     if (!move_message_sus) {
         InvalidateRect(h_wnd, nullptr, NULL);

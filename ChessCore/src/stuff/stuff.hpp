@@ -34,7 +34,7 @@ FN inline split(const std::string_view str, const std::string_view delimiter) no
     std::vector<std::string_view> acc{};
     std::size_t current{}, previous{};
     while ((current = str.find(delimiter, previous)) != std::string_view::npos) {
-        acc.push_back(str.substr(previous, current - previous));
+        acc.emplace_back(str.substr(previous, current - previous));
         previous = current + delimiter.size();
     }
     if (const auto last = str.substr(previous); !last.empty()) {

@@ -12,7 +12,7 @@ struct AsStringMeta
 
     CTOR AsStringMeta() noexcept = default;
 
-    CTOR AsStringMeta(const Id min_id, const std::size_t max_pos_length, const std::size_t version) noexcept
+    CTOR AsStringMeta(const Id& min_id, const std::size_t max_pos_length, const std::size_t version) noexcept
       : min_id{ min_id }
       , max_pos_length{ max_pos_length }
       , version{ version }

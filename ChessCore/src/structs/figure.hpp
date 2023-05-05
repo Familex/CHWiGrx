@@ -21,13 +21,13 @@ public:
     friend FromString<Figure>;
     friend AsString<Figure>;
 
-    CTOR Figure(const Id id, const Pos& position, const Color color, const FigureType type) noexcept
+    CTOR Figure(const Id& id, const Pos& position, const Color color, const FigureType type) noexcept
       : id_{ id }
       , position_{ position }
       , color_{ color }
       , type_{ type } {};
 
-    FN move_to(const Pos& p) noexcept { position_ = p; }
+    constexpr void move_to(const Pos& p) noexcept { position_ = p; }
 
     FN move_to(const int x, const int y) noexcept
     {
@@ -52,11 +52,11 @@ public:
         return color_ == fig->get_col();
     }
 
-    FN is(const Id id) const noexcept -> bool { return this->id_ == id; }
+    FN is(const Id& id) const noexcept -> bool { return this->id_ == id; }
 
     FN is(const FigureType type) const noexcept -> bool { return this->type_ == type; }
 
-    FN at(const Pos p) const noexcept -> bool { return position_ == p; }
+    FN at(const Pos& p) const noexcept -> bool { return position_ == p; }
 };
 
 FN to_pos_vector(const std::vector<Figure*>& lst) noexcept -> std::vector<Pos>

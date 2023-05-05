@@ -47,7 +47,7 @@ struct BoardRepr
         std::vector<mvmsg::MoveMessage> past = {},
         std::vector<mvmsg::MoveMessage> future = {},
         std::vector<Figure*> captured_figures = {},
-        const std::optional<std::vector<Id>>& can_castle = std::nullopt
+        const std::optional<std::vector<Id>>& can_castle_input = std::nullopt
     ) noexcept
       : figures(figures)
       , turn(turn)
@@ -56,13 +56,13 @@ struct BoardRepr
       , future(std::move(future))
       , captured_figures(std::move(captured_figures))
     {
-        if (can_castle) {
-            this->can_castle = *can_castle;
+        if (can_castle_input) {
+            this->can_castle = *can_castle_input;
         }
         else {
             for (const auto fig : figures) {
                 if (fig->is(FigureType::Rook)) {
-                    this->can_castle.push_back(fig->get_id());
+                    this->can_castle.emplace_back(fig->get_id());
                 }
             }
         }

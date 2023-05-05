@@ -9,7 +9,7 @@
 void draw_figure(
     const HDC hdc,
     const Figure* figure,
-    const Pos begin_paint,
+    const Pos& begin_paint,
     const bool is_transparent,
     const int w,
     const int h
@@ -56,7 +56,7 @@ void draw_figure(
     DeleteDC(hdc_mem);
 }
 
-void draw_figure(const HDC hdc, const Figure* figure, const Pos begin_paint, const bool is_transparent) noexcept
+void draw_figure(const HDC hdc, const Figure* figure, const Pos& begin_paint, const bool is_transparent) noexcept
 {
     draw_figure(hdc, figure, begin_paint, is_transparent, main_window.get_cell_width(), main_window.get_cell_height());
 }
@@ -98,7 +98,7 @@ void draw_figures_on_board(const HDC hdc) noexcept
  * \param hdc_mem Draw context
  * \param input User input to draw
  */
-void draw_input(const HDC hdc_mem, const Input input) noexcept
+void draw_input(const HDC hdc_mem, const Input& input) noexcept
 {
     /// FIXME hardcoded colors
     static const HBRUSH RED{ CreateSolidBrush(RGB(255, 0, 0)) };

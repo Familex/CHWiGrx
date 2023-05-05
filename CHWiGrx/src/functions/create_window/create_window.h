@@ -47,14 +47,14 @@ struct CreateWindowArgsBuilder
 
     CreateWindowArgs result{};
 
-    [[nodiscard]] auto build(HINSTANCE h_inst) && noexcept -> CreateWindowArgs
+    [[nodiscard]] auto build(const HINSTANCE h_inst) && noexcept -> CreateWindowArgs
     {
         result.wc.hInstance = h_inst;
         result.wc.hCursor = LoadCursor(h_inst, MAKEINTRESOURCE(IDC_MINIMAL_CURSOR));
 
         /* class name */ {
             if (std::holds_alternative<UINT>(result.class_name)) {
-                LoadString(
+                const auto res = LoadString(
                     h_inst, std::get<UINT>(result.class_name), result.sz_class_name, create_window_nc::max_load_string
                 );
             }
@@ -74,7 +74,9 @@ struct CreateWindowArgsBuilder
 
         /* title */ {
             if (std::holds_alternative<UINT>(result.title)) {
-                LoadString(h_inst, std::get<UINT>(result.title), result.sz_title, create_window_nc::max_load_string);
+                const auto res = LoadString(
+                    h_inst, std::get<UINT>(result.title), result.sz_title, create_window_nc::max_load_string
+                );
             }
             else {
                 wcsncpy_s(result.sz_title, std::get<LPCTSTR>(result.title), create_window_nc::max_load_string);

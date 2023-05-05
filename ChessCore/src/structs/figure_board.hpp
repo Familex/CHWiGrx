@@ -106,7 +106,7 @@ struct FigureBoard
 
     [[nodiscard]] bool empty() const noexcept { return figures.empty(); }
 
-    [[nodiscard]] bool cont_fig(const Pos position) const noexcept { return figures.contains(position); }
+    [[nodiscard]] bool cont_fig(const Pos& position) const noexcept { return figures.contains(position); }
 
     [[nodiscard]] bool capture_figure(Figure* const it)
     {
@@ -115,7 +115,7 @@ struct FigureBoard
         return true;
     }
 
-    [[nodiscard]] bool capture_figure(const Id id)
+    [[nodiscard]] bool capture_figure(const Id& id)
     {
         if (const auto fig = get_fig(id)) {
             captured_figures.push_back(fig.value());
@@ -125,7 +125,7 @@ struct FigureBoard
         return false;
     }
 
-    void recapture_figure(const Id id)
+    void recapture_figure(const Id& id)
     {
         const auto to_resurrect_id =
             std::ranges::find_if(captured_figures, [&id](auto&& val) { return id == val->get_id(); });
@@ -137,7 +137,7 @@ struct FigureBoard
         captured_figures.erase(to_resurrect_id);
     }
 
-    bool delete_fig(const Pos pos)
+    bool delete_fig(const Pos& pos)
     {
         if (cont_fig(pos)) {
             delete_fig_unsafe(pos);
@@ -146,7 +146,7 @@ struct FigureBoard
         return false;
     }
 
-    void delete_fig_unsafe(const Pos pos)
+    void delete_fig_unsafe(const Pos& pos)
     {
         delete figures[pos];
         figures.erase(pos);
@@ -183,7 +183,7 @@ struct FigureBoard
         figures[fig2->get_pos()] = fig2;
     }
 
-    void move_fig(Figure* fig, const Pos to, const bool capture = true)
+    void move_fig(Figure* fig, const Pos& to, const bool capture = true)
     {
         if (fig->get_pos() == to) {
             return;

@@ -11,7 +11,7 @@ class FigureFabric
 {
 public:
 #if __cpp_constexpr >= 202211L
-    FN static
+    FN inline static
 #else    // Permitting static constexpr variables in constexpr functions
     [[nodiscard]] inline static auto
 #endif
@@ -22,7 +22,7 @@ public:
     }
 
     FN
-    create(const Pos position, const Color color, const FigureType type, const Id new_id) noexcept
+    create(const Pos& position, const Color color, const FigureType type, const Id& new_id) noexcept
         -> std::unique_ptr<Figure>
     {
         this->id_ = std::max(this->id_, new_id + 1_id);
@@ -30,16 +30,16 @@ public:
     }
 
     FN
-    create(const Pos position, const Color color, const FigureType type) noexcept -> std::unique_ptr<Figure>
+    create(const Pos& position, const Color color, const FigureType type) noexcept -> std::unique_ptr<Figure>
     {
         return std::make_unique<Figure>(this->id_++, position, color, type);
     }
 
     void create_in_place(
-        const Pos position,
+        const Pos& position,
         const Color color,
         const FigureType type,
-        const Id new_id,
+        const Id& new_id,
         Figure* const placement
     ) noexcept
     {
@@ -58,7 +58,7 @@ public:
         );
     }
 
-    [[nodiscard]] auto static submit_on(const Figure* who, const Pos on) noexcept -> std::unique_ptr<Figure>
+    [[nodiscard]] auto static submit_on(const Figure* who, const Pos& on) noexcept -> std::unique_ptr<Figure>
     {
         auto tmp(FigureFabric::instance().create(who, true));
         tmp->move_to(on);

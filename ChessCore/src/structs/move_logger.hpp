@@ -16,18 +16,18 @@ public:
         return prev_.back();
     }
 
-    FN add(const mvmsg::MoveMessage& move_rec) noexcept -> void
+    constexpr auto add(const mvmsg::MoveMessage& move_rec) noexcept -> void
     {
         prev_.push_back(move_rec);
         future_.clear();
     }
 
-    FN add_without_reset(const mvmsg::MoveMessage& move_rec) noexcept -> void
+    constexpr auto add_without_reset(const mvmsg::MoveMessage& move_rec) noexcept -> void
     {
         prev_.push_back(move_rec);
     }
 
-    FN reset() noexcept -> void
+    constexpr auto reset() noexcept -> void
     {
         prev_.clear();
         future_.clear();
@@ -69,12 +69,12 @@ public:
         return future_;
     }
 
-    FN set_past(const std::vector<mvmsg::MoveMessage>& past) noexcept -> void
+    constexpr auto set_past(const std::vector<mvmsg::MoveMessage>& past) noexcept -> void
     {
         prev_ = past;
     }
 
-    FN set_future(const std::vector<mvmsg::MoveMessage>& future) noexcept
+    constexpr auto set_future(const std::vector<mvmsg::MoveMessage>& future) noexcept
     {
         future_ = future;
     }

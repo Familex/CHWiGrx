@@ -147,10 +147,10 @@ figures_list_wndproc(const HWND h_wnd, const UINT message, const WPARAM w_param,
             const int height = figures_list.get_height();
             const int width = figures_list.get_width();
             const int curr_scroll = figures_list.get_curr_scroll();
-            const size_t all_figures_height = figures_list.get_all_figures_height();
+            const auto all_figures_height = figures_list.get_all_figures_height();
 
             hdc_mem = CreateCompatibleDC(hdc);
-            hbm_mem = CreateCompatibleBitmap(hdc, static_cast<int>(width), static_cast<int>(all_figures_height));
+            hbm_mem = CreateCompatibleBitmap(hdc, width, static_cast<int>(all_figures_height));
             h_old = SelectObject(hdc_mem, hbm_mem);
 
             /* фон */
@@ -210,11 +210,12 @@ figures_list_wndproc(const HWND h_wnd, const UINT message, const WPARAM w_param,
         case WM_LBUTTONDOWN:
         {
             motion_input.set_lbutton_down();
-            const Pos figure_to_drag = Pos((LOWORD(l_param)) / static_cast<int>(figures_list.get_cell_width()),
-                                           (HIWORD(l_param) + figures_list.get_curr_scroll()) /
-                                               static_cast<int>(figures_list.get_cell_width()))
-                                           .change_axes();
-            const size_t index = figure_to_drag.x * figures_list.get_figures_in_row() + figure_to_drag.y;
+            const Pos figure_to_drag =
+                Pos((LOWORD(l_param)) / figures_list.get_cell_width(),
+                    (HIWORD(l_param) + figures_list.get_curr_scroll()) / figures_list.get_cell_width())
+                    .change_axes();
+            const auto index = static_cast<std::size_t>(figure_to_drag.x) * figures_list.get_figures_in_row() +
+                               static_cast<std::size_t>(figure_to_drag.y);
             if (index >= figures_prototypes[curr_color].size())
                 break;    // there was a click in a non-standard part of the window => ignore
             motion_input.set_in_hand(

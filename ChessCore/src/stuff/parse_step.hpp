@@ -69,7 +69,7 @@ struct ParseStep
             return std::unexpected{ ParseError<Error>{ on_abrupt_halt, get_curr_pos() } };
         }
 
-        if (auto value_sus = parser ? parser.value()(this, sv, meta) : apply_from_string(get_local_sv(sv), meta)) {
+        if (auto value_sus = parser ? (*parser)(this, sv, meta) : apply_from_string(get_local_sv(sv), meta)) {
             if (curr_pos) {
                 *curr_pos += value_sus->position + extra_position;
             }

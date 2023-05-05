@@ -39,7 +39,7 @@ namespace std
 template <>
 struct hash<Id>
 {
-    FN operator()(const Id id) const noexcept -> size_t { return static_cast<IdType>(id); }
+    FN operator()(const Id& id) const noexcept -> size_t { return static_cast<IdType>(id); }
 };
 
 template <>
@@ -69,7 +69,7 @@ struct FromString<Id>
 template <>
 struct AsString<Id>
 {
-    [[nodiscard]] auto operator()(const Id id, const Id min_id) const noexcept -> std::string
+    [[nodiscard]] auto operator()(const Id& id, const Id& min_id) const noexcept -> std::string
     {
         return std::to_string(static_cast<IdType>(id - min_id));
     }

@@ -14,14 +14,14 @@ namespace chess_game
 
 constexpr int EN_PASSANT_INDENT = 4;
 
-FN is_valid_coords(const Pos position) noexcept -> bool
+FN is_valid_coords(const Pos& position) noexcept -> bool
 {
     const int x = position.x;
     const int y = position.y;
     return ((x >= 0) && (x < HEIGHT) && (y >= 0) && (y < WIDTH));
 }
 
-FN is_valid_coords(const Input input) noexcept -> bool
+FN is_valid_coords(const Input& input) noexcept -> bool
 {
     return is_valid_coords(input.from) && is_valid_coords(input.target);
 }
@@ -121,9 +121,9 @@ public:
         return std::forward<Self>(self).board_.get_fig_unsafe(std::forward<T>(value));
     }
 
-    [[nodiscard]] bool cont_fig(const Pos pos) const noexcept { return board_.cont_fig(pos); }
+    [[nodiscard]] bool cont_fig(const Pos& pos) const noexcept { return board_.cont_fig(pos); }
 
-    [[nodiscard]] bool is_empty(const Pos pos) const noexcept { return !cont_fig(pos); }
+    [[nodiscard]] bool is_empty(const Pos& pos) const noexcept { return !cont_fig(pos); }
 
     [[nodiscard]] bool is_empty() const noexcept { return board_.figures.empty(); }
 
@@ -373,7 +373,7 @@ public:
         const auto king = find_king(col);
         if (to_defend == Pos()) {
             if (king.has_value()) {
-                to_defend = king.value()->get_pos();
+                to_defend = (*king)->get_pos();
             }
             else {
                 return false;    // Nothing to defend
@@ -418,7 +418,7 @@ public:
         if (!king_sus.has_value()) {
             return false;    // No king
         }
-        const auto king = king_sus.value();
+        const auto king = *king_sus;
         if (to_defend == Pos())
             to_defend = king->get_pos();
         for (const auto& aspt : get_figures_of(col)) {
@@ -466,7 +466,7 @@ public:
         const auto king_sus = find_king(col);
         if (to_defend == Pos()) {
             if (king_sus.has_value()) {
-                to_defend = king_sus.value()->get_pos();
+                to_defend = (*king_sus)->get_pos();
             }
             else {
                 return false;    // Nothing to defend
@@ -570,7 +570,7 @@ public:
         if (!king_sus.has_value()) {
             return std::nullopt;
         }
-        const auto king = king_sus.value();
+        const auto king = *king_sus;
         const auto king_start_pos = king->get_pos();
         // Is input correct
         if ((in_hand->is(FigureType::King) && input.target.y == king_end_col) ||
@@ -666,7 +666,7 @@ public:
 
     FN get_idw() const noexcept -> bool { return idw_; }
 
-    inline auto set_idw(const bool new_idw) noexcept -> void
+    auto set_idw(const bool new_idw) noexcept -> void
     {
         idw_ = new_idw;
         init_figures_moves();
@@ -674,9 +674,9 @@ public:
 
     [[nodiscard]] auto get_all_figures() const -> std::vector<Figure*> { return board_.get_figures(); }
 
-    void move_fig(Figure* fig, const Pos to, const bool capture = true) { board_.move_fig(fig, to, capture); }
+    void move_fig(Figure* fig, const Pos& to, const bool capture = true) { board_.move_fig(fig, to, capture); }
 
-    auto inline move_fig(const Input input, const bool capture = true) -> void
+    auto move_fig(const Input& input, const bool capture = true) -> void
     {
         if (const auto fig = get_fig(input.from)) {
             move_fig(fig.value(), input.target, capture);
@@ -690,16 +690,16 @@ public:
      */
     void swap_fig(Figure* fig1, Figure* fig2) { board_.swap_fig(fig1, fig2); }
 
-    [[nodiscard]] auto has_castling(const Id id) const noexcept -> bool
+    [[nodiscard]] auto has_castling(const Id& id) const noexcept -> bool
     {
         if (castling_.contains(id))
             return castling_.at(id);
         return false;
     }
 
-    void off_castling(const Id id) noexcept { castling_[id] = false; }
+    void off_castling(const Id& id) noexcept { castling_[id] = false; }
 
-    void on_castling(const Id id) noexcept { castling_[id] = true; }
+    void on_castling(const Id& id) noexcept { castling_[id] = true; }
 
     FN get_last_moves() const noexcept -> const std::vector<mvmsg::MoveMessage>&
     {

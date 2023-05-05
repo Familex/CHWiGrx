@@ -6,7 +6,7 @@
 
 void update_main_window_title(HWND) noexcept;
 
-void on_lbutton_up(HWND, WPARAM, LPARAM, Pos, bool = true) noexcept;
+void on_lbutton_up(HWND, WPARAM, LPARAM, const Pos&, bool = true) noexcept;
 
 void on_lbutton_down(HWND, LPARAM) noexcept;
 

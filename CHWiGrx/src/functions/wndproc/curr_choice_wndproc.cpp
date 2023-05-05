@@ -117,7 +117,7 @@ namespace figures_list
 
 [[nodiscard]] auto get_main_window(const HWND h_wnd) noexcept -> HWND { return GetWindow(GetParent(h_wnd), GW_OWNER); }
 
-void on_success(HWND, const Pos where_fig, bool, WPARAM, LPARAM, Figure* stored_fig) noexcept
+void on_success(HWND, const Pos& where_fig, bool, WPARAM, LPARAM, Figure* stored_fig) noexcept
 {
     stored_fig->move_to(where_fig);
     board.place_fig(stored_fig);
@@ -126,7 +126,7 @@ void on_success(HWND, const Pos where_fig, bool, WPARAM, LPARAM, Figure* stored_
     }
 }
 
-void on_fail(HWND, Pos, bool, WPARAM, LPARAM, const Figure* stored_fig) noexcept { delete stored_fig; }
+void on_fail(HWND, const Pos&, bool, WPARAM, LPARAM, const Figure* stored_fig) noexcept { delete stored_fig; }
 
 void after_check(Figure*) noexcept { motion_input.clear(); }
 
@@ -139,12 +139,12 @@ auto get_empty_array(HWND) noexcept -> std::array<RECT, 0> { return {}; }
 
 auto get_main_window(const HWND wnd) noexcept -> HWND { return GetParent(wnd); }
 
-void on_success(const HWND wnd, const Pos where_fig, const bool target_pos_game_check, WPARAM w, LPARAM l, Figure*) noexcept
+void on_success(const HWND wnd, const Pos& where_fig, const bool target_pos_game_check, WPARAM w, LPARAM l, Figure*) noexcept
 {
     on_lbutton_up(get_main_window(wnd), w, l, where_fig, target_pos_game_check);
 }
 
-void on_fail(HWND, Pos, bool, WPARAM, LPARAM, const Figure* const stored_fig) noexcept
+void on_fail(HWND, const Pos&, bool, WPARAM, LPARAM, const Figure* const stored_fig) noexcept
 {
     // Moved figure out of the board without checking validity => delete it from the board
     board.delete_fig(stored_fig->get_pos());

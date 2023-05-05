@@ -178,49 +178,36 @@ LRESULT CALLBACK mainproc::main_game_state_wndproc(
 
             switch (w_param) {
                 case VK_0:
-                case VK_NUMPAD0:
-                    cord = 0;
-                    break;
                 case VK_1:
-                case VK_NUMPAD1:
-                    cord = 1;
-                    break;
                 case VK_2:
-                case VK_NUMPAD2:
-                    cord = 2;
-                    break;
                 case VK_3:
-                case VK_NUMPAD3:
-                    cord = 3;
-                    break;
                 case VK_4:
-                case VK_NUMPAD4:
-                    cord = 4;
-                    break;
                 case VK_5:
-                case VK_NUMPAD5:
-                    cord = 5;
-                    break;
                 case VK_6:
-                case VK_NUMPAD6:
-                    cord = 6;
-                    break;
                 case VK_7:
-                case VK_NUMPAD7:
-                    cord = 7;
-                    break;
                 case VK_8:
-                case VK_NUMPAD8:
-                    cord = 8;
-                    break;
                 case VK_9:
-                case VK_NUMPAD9:
-                    cord = 9;
+                    cord = static_cast<int>(w_param) - VK_0;
                     break;
+
+                case VK_NUMPAD0:
+                case VK_NUMPAD1:
+                case VK_NUMPAD2:
+                case VK_NUMPAD3:
+                case VK_NUMPAD4:
+                case VK_NUMPAD5:
+                case VK_NUMPAD6:
+                case VK_NUMPAD7:
+                case VK_NUMPAD8:
+                case VK_NUMPAD9:
+                    cord = static_cast<int>(w_param) - VK_NUMPAD0;
+                    break;
+
                 case VK_ESCAPE:
                     motion_input.clear();
                     InvalidateRect(h_wnd, nullptr, NULL);
                     return 0;
+
                 case VK_LEFT:
                 case VK_RIGHT:
                 case VK_UP:
@@ -235,8 +222,10 @@ LRESULT CALLBACK mainproc::main_game_state_wndproc(
                     else
                         motion_input.shift_target(shift, HEIGHT, WIDTH);
                     InvalidateRect(h_wnd, nullptr, NULL);
+
                     return 0;
                 }
+
                 case VK_RETURN:
                     if (motion_input.is_active_by_click()) {
                         make_move(h_wnd);
@@ -244,12 +233,11 @@ LRESULT CALLBACK mainproc::main_game_state_wndproc(
                         InvalidateRect(h_wnd, nullptr, NULL);
                         return 0;
                     }
-                    else {
-                        motion_input.prepare(turn);
-                        motion_input.activate_by_click();
-                    }
+                    motion_input.prepare(turn);
+                    motion_input.activate_by_click();
                     InvalidateRect(h_wnd, nullptr, NULL);
                     return 0;
+
                 default:
                     return 0;
             }

@@ -24,32 +24,26 @@ protected:
     }
 
 public:
-    CTOR WindowStats(const Pos window_pos, const Pos window_size) noexcept
+    CTOR WindowStats(const Pos& window_pos, const Pos& window_size) noexcept
       : window_pos_(window_pos)
       , window_size_(window_size)
     {
-        recalculate();
+        WindowStats::recalculate();
     }
 
     virtual constexpr ~WindowStats() noexcept = default;
 
-    FN virtual set_size(const int x /* LOWORD */, const int y /* HIWORD */) noexcept -> void
+    FV virtual set_size(const int x /* LOWORD */, const int y /* HIWORD */) noexcept -> void
     {
         this->window_size_ = Pos{ x, y };
         recalculate();
     }
 
-    FN set_size(const Pos new_window_size) noexcept -> void
-    {
-        set_size(new_window_size.x, new_window_size.y);
-    }
+    FV set_size(const Pos& new_window_size) noexcept -> void { set_size(new_window_size.x, new_window_size.y); }
 
-    FN virtual set_size(const LPARAM l_param) noexcept -> void
-    {
-        set_size(LOWORD(l_param), HIWORD(l_param));
-    }
+    FV virtual set_size(const LPARAM l_param) noexcept -> void { set_size(LOWORD(l_param), HIWORD(l_param)); }
 
-    FN set_rect(const RECT rect) noexcept -> void
+    FV set_rect(const RECT rect) noexcept -> void
     {
         set_pos(rect.left, rect.top);
         set_size(rect.right - rect.left, rect.bottom - rect.top);
@@ -73,32 +67,29 @@ public:
 
     FN get_cell_height() const noexcept -> int { return cell_size_.y; }
 
-    FN set_prev_lbutton_click(const Pos prev_lbutton_click) noexcept -> void
+    FV set_prev_lbutton_click(const Pos& prev_lbutton_click) noexcept -> void
     {
         this->prev_lbutton_click_ = prev_lbutton_click;
     }
 
     FN get_prev_lbutton_click() const noexcept -> Pos { return prev_lbutton_click_; }
 
-    FN set_pos(const Pos wp) noexcept -> void { window_pos_ = wp; }
+    FV set_pos(const Pos& wp) noexcept -> void { window_pos_ = wp; }
 
-    FN set_pos(const int x, const int y) noexcept -> void
+    FV set_pos(const int x, const int y) noexcept -> void
     {
         window_pos_.x = x;
         window_pos_.y = y;
     }
 
-    FN set_pos(const LPARAM l_param) noexcept -> void
-    {
-        set_pos(LOWORD(l_param), HIWORD(l_param));
-    }
+    FV set_pos(const LPARAM l_param) noexcept -> void { set_pos(LOWORD(l_param), HIWORD(l_param)); }
 
     FN get_window_pos_x() const noexcept -> int { return window_pos_.x; }
 
     FN get_window_pos_y() const noexcept -> int { return window_pos_.y; }
 
     // Is not used
-    FN is_mouse_moved_enough(const Pos mouse) const noexcept -> bool
+    FN is_mouse_moved_enough(const Pos& mouse) const noexcept -> bool
     {
         const auto shift = Pos{ abs(mouse.x - prev_lbutton_click_.x), abs(mouse.y - prev_lbutton_click_.y) };
         return shift.x >= units_to_move_enough_ && shift.y >= units_to_move_enough_;
@@ -114,7 +105,7 @@ public:
         return divide_by_cell_size(LOWORD(l_param), HIWORD(l_param));
     }
 
-    FN get_cell(const Pos start) const noexcept -> RECT
+    FN get_cell(const Pos& start) const noexcept -> RECT
     {
         return { .left = start.x * cell_size_.x + indentation_from_edges_,
                  .top = start.y * cell_size_.y + indentation_from_edges_,

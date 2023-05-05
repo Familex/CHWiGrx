@@ -7,16 +7,16 @@ INT_PTR CALLBACK about_proc(const HWND h_dlg, const UINT message, const WPARAM w
     UNREFERENCED_PARAMETER(l_param);
     switch (message) {
         case WM_INITDIALOG:
-            return static_cast<INT_PTR>(TRUE);
+            return TRUE;
 
         case WM_COMMAND:
             if (LOWORD(w_param) == IDOK || LOWORD(w_param) == IDCANCEL) {
                 EndDialog(h_dlg, LOWORD(w_param));
-                return static_cast<INT_PTR>(TRUE);
+                return TRUE;
             }
             break;
     }
-    return static_cast<INT_PTR>(FALSE);
+    return FALSE;
 }
 
 bool cpy_str_to_clip(const HWND h_wnd, const std::string_view s) noexcept
@@ -108,14 +108,21 @@ std::string take_str_from_clip(const HWND h_wnd) noexcept
  * \param callback Curr choice window wndproc
  * \return Curr choice window handle
  */
-HWND create_curr_choice_window(HWND parent, Figure* in_hand, POINT mouse, int w, int h, const WNDPROC callback) noexcept
+HWND create_curr_choice_window(
+    const HWND parent,
+    Figure* const in_hand,
+    const POINT mouse,
+    const int w,
+    const int h,
+    const WNDPROC callback
+) noexcept
 {
     return *create_window(
         CreateWindowArgsBuilder{}
             .set_wc_wndproc(callback)
             .set_wc_icon(LoadIcon(nullptr, MAKEINTRESOURCE(IDI_GAME_MODE_BIG)))
             .set_wc_icon_sm(LoadIcon(nullptr, MAKEINTRESOURCE(IDI_GAME_MODE_SMALL)))
-            .set_wc_wnd_extra(static_cast<int>(sizeof(in_hand)))
+            .set_wc_wnd_extra(static_cast<int>(sizeof(decltype(in_hand))))
             .set_x(mouse.x - w / 2)
             .set_y(mouse.y - h / 2)
             .set_width(w)
@@ -124,7 +131,7 @@ HWND create_curr_choice_window(HWND parent, Figure* in_hand, POINT mouse, int w,
             .set_style(WS_POPUP | WS_EX_TRANSPARENT | WS_EX_LAYERED)
             .set_class_name(CURR_CHOICE_WINDOW_CLASS_NAME)
             .set_title(L"")
-            .set_after_create([](HWND h_wnd) {
+            .set_after_create([](const HWND h_wnd) {
                 SetWindowPos(h_wnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
                 SetWindowLongPtr(h_wnd, GWL_EXSTYLE, GetWindowLongPtr(h_wnd, GWL_EXSTYLE) | WS_EX_LAYERED);
                 SetLayeredWindowAttributes(h_wnd, TRANSPARENCY_PLACEHOLDER, 0xFF, LWA_COLORKEY);
@@ -138,19 +145,11 @@ HWND create_curr_choice_window(HWND parent, Figure* in_hand, POINT mouse, int w,
 
 void change_checkerboard_color_theme(const HWND h_wnd) noexcept
 {
-    if (window_state == WindowState::Edit) {
-        std::swap(checkerboard_one, checkerboard_two);
-    }
-    else if (window_state == WindowState::Game) {
-        std::swap(checkerboard_one, checkerboard_two);
-    }
-    else {
-        assert(false);
-    }
+    std::swap(checkerboard_one, checkerboard_two);
     InvalidateRect(h_wnd, nullptr, NULL);
 }
 
-HWND create_figures_list_window(HWND parent) noexcept
+HWND create_figures_list_window(const HWND parent) noexcept
 {
     return *create_window(CreateWindowArgsBuilder{}
                               .set_wc_wndproc(figures_list_wndproc)
@@ -167,7 +166,7 @@ HWND create_figures_list_window(HWND parent) noexcept
                               .build(h_inst));
 }
 
-bool game_end_check(HWND h_wnd, Color turn) noexcept
+bool game_end_check(const HWND h_wnd, const Color turn) noexcept
 {
     if (const GameEndType curr_game_end_state = board.game_end_check(turn);
         curr_game_end_state != GameEndType::NotGameEnd)

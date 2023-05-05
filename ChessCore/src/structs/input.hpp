@@ -21,10 +21,12 @@ struct Input
     CTOR Input(std::string str)
     {
         // from.first from.second target.first target.second
+        constexpr auto count = 4;
+
         str += " ";
         size_t pos = 0;
         std::vector<int> acc{};
-        for (int i{}; i < 4; ++i) {
+        for (int i{}; i < count; ++i) {
             if (constexpr char delimiter = ' '; (pos = str.find(delimiter)) != std::string::npos) {
                 constexpr size_t delimiter_len = 1;
                 std::string token = str.substr(0, pos);

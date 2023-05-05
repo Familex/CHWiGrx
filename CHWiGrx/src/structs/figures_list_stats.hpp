@@ -13,21 +13,22 @@ class FiguresListStats final : public WindowStats
     // Not constexpr cause of std::ceil
     void recalculate() noexcept override
     {
-        cell_size_.x = cell_size_.y = static_cast<int>(std::max(0, window_size_.x) / figures_in_row_);
+        cell_size_.x = cell_size_.y = std::max(0, window_size_.x) / static_cast<int>(figures_in_row_);
 
         const int rows_num =
             static_cast<int>(std::ceil(static_cast<double>(max_figures_in_row_) / static_cast<double>(figures_in_row_))
             );
         total_height_of_all_figures_ = rows_num * cell_size_.y;
-        max_scroll_ = std::max(static_cast<int>(total_height_of_all_figures_), window_size_.y);
+        max_scroll_ =
+            static_cast<std::size_t>(std::max(static_cast<int>(total_height_of_all_figures_), window_size_.y));
     }
 
 public:
     [[nodiscard]] explicit FiguresListStats(
-        const Pos window_pos,
-        const Pos window_size,
+        const Pos& window_pos,
+        const Pos& window_size,
         const size_t figures_in_row,
-        const size_t figures_num
+        const size_t
     ) noexcept
       : WindowStats(window_pos, window_size)
       , figures_in_row_(figures_in_row)
@@ -35,7 +36,7 @@ public:
         recalculate();
     }
 
-    FN set_size(const LPARAM l_param) noexcept -> void override
+    FV set_size(const LPARAM l_param) noexcept -> void override
     {
         WindowStats::set_size(LOWORD(l_param), HIWORD(l_param));
     }
@@ -53,7 +54,7 @@ public:
 
     FN get_figures_in_row() const noexcept -> std::size_t { return figures_in_row_; }
 
-    FN inc_figures_in_row() noexcept -> void
+    FV inc_figures_in_row() noexcept -> void
     {
         if (figures_in_row_ >= max_figures_in_row_)
             return;
@@ -62,7 +63,7 @@ public:
         recalculate();
     }
 
-    FN dec_figures_in_row() noexcept -> void
+    FV dec_figures_in_row() noexcept -> void
     {
         if (figures_in_row_ <= 1)
             return;
@@ -95,7 +96,7 @@ public:
         return total_height_of_all_figures_;
     }
 
-    FN clear_scrolling() noexcept -> void
+    FV clear_scrolling() noexcept -> void
     {
         max_scroll_ = 0;
         curr_scroll_ = 0;
