@@ -34,7 +34,7 @@ struct FromStringMeta
     CTOR FromStringMeta(
         const bool idw,
         const Color turn,
-        const std::vector<Id>& castlings,
+        std::vector<Id> castlings,
         const std::size_t height,
         const std::size_t width,
         const std::size_t max_pos_length,
@@ -42,7 +42,7 @@ struct FromStringMeta
     ) noexcept
       : idw{ idw }
       , turn{ turn }
-      , castlings{ castlings }
+      , castlings{ std::move(castlings) }
       , height{ height }
       , width{ width }
       , max_pos_length{ max_pos_length }

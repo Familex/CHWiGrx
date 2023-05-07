@@ -5,7 +5,7 @@
 #include <fstream>
 #include <sstream>
 
-void paste_board_repr(HWND wnd, std::string board_repr) noexcept;
+void paste_board_repr(HWND wnd, std::string_view board_repr) noexcept;
 
 LRESULT CALLBACK
 main_default_wndproc(const HWND h_wnd, const UINT message, const WPARAM w_param, const LPARAM l_param) noexcept
@@ -62,7 +62,7 @@ main_default_wndproc(const HWND h_wnd, const UINT message, const WPARAM w_param,
             }
             debug_print("Dragged file:", file_name);
             {
-                std::ifstream file{ file_name };
+                const std::ifstream file{ file_name };
                 std::stringstream ss;
                 ss << file.rdbuf();
                 paste_board_repr(h_wnd, ss.str());
@@ -101,14 +101,14 @@ main_default_wndproc(const HWND h_wnd, const UINT message, const WPARAM w_param,
             return mainproc::main_edit_state_wndproc(h_wnd, message, w_param, l_param);
     }
 
-    return static_cast<LRESULT>(0);
+    return 0;
 }
 
-void paste_board_repr(const HWND wnd, const std::string board_repr) noexcept
+void paste_board_repr(const HWND wnd, const std::string_view board_repr) noexcept
 {
     if (auto board_repr_sus = FromString<board_repr::BoardRepr>{}(board_repr)) {
-        turn = board_repr_sus.value().value.turn;
-        board.reset(std::move(board_repr_sus.value().value));
+        turn = board_repr_sus->value.turn;
+        board.reset(std::move(board_repr_sus->value));
         motion_input.clear();
     }
     else {

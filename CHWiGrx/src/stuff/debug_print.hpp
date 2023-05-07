@@ -35,7 +35,6 @@ void debug_print([[maybe_unused]] Ts... ts) noexcept
     ((details::print_arg(ts)), ...);
     std::cout << std::endl;
 #else
-    (void)t;
     ((void)ts, ...);
 #endif
 }

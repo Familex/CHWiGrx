@@ -68,6 +68,12 @@ struct BoardRepr
         }
     }
 
+    CTOR BoardRepr(const FromStringMeta& meta)
+      : turn{ meta.turn }
+      , idw{ meta.idw }
+      , can_castle{ meta.castlings }
+    { }
+
     CTOR BoardRepr() noexcept = default;
     // FIXME is destructor will be look like this?
     // I tried to use clear() method and all was broken
@@ -141,24 +147,23 @@ struct BoardRepr
 template <>
 struct FromString<board_repr::BoardRepr>
 {
+    static constexpr auto ALLOWED_EOF_CHARS{ 3 };
 
     [[nodiscard]] auto parse_v2(const std::string_view sv, const FromStringMeta& meta) const noexcept
         -> ParseEither<board_repr::BoardRepr, ParseErrorType>
     {
-        board_repr::BoardRepr result{};
-
-        result.can_castle = meta.castlings;
+        board_repr::BoardRepr result{ meta };
 
         auto process_figures =
-            [&meta](
+            [&meta, this](
                 const std::string_view proc_sv, std::vector<Figure*>& out, const std::size_t start_pos
             ) -> std::optional<ParseError<ParseErrorType>> {
             std::size_t fig_curr_pos{};
 
-            while (fig_curr_pos < proc_sv.size()) {
+            while (fig_curr_pos + ALLOWED_EOF_CHARS < proc_sv.size()) {
                 if (const auto& figure_sus = FromString<Figure>{}(proc_sv.substr(fig_curr_pos), meta)) {
-                    out.push_back(figfab::FigureFabric::instance().create(&figure_sus.value().value, true).release());
-                    fig_curr_pos += figure_sus.value().position;
+                    out.push_back(figfab::FigureFabric::instance().create(&figure_sus->value, true).release());
+                    fig_curr_pos += figure_sus->position;
                 }
                 else {
                     return ParseError<ParseErrorType>{ figure_sus.error().type,
@@ -170,14 +175,14 @@ struct FromString<board_repr::BoardRepr>
 
         auto process_move_message =
             [&meta](
-                const std::string_view sv, std::vector<mvmsg::MoveMessage>& out, std::size_t start_pos
+                const std::string_view proc_sv, std::vector<mvmsg::MoveMessage>& out, const std::size_t start_pos
             ) -> std::optional<ParseError<ParseErrorType>> {
             std::size_t move_message_curr_pos{};
 
-            for (const auto& move_message_sv : split(sv, "$"sv)) {
+            for (const auto& move_message_sv : split(proc_sv, "$"sv)) {
                 if (const auto& move_message_sus = FromString<mvmsg::MoveMessage>{}(move_message_sv, meta)) {
-                    out.push_back(move_message_sus.value().value);
-                    move_message_curr_pos += move_message_sus.value().position + 1;
+                    out.push_back(move_message_sus->value);
+                    move_message_curr_pos += move_message_sus->position + 1;
                     //                        + 1 because of the '$' delimiter ^^^
                 }
                 else {
@@ -216,10 +221,14 @@ struct FromString<board_repr::BoardRepr>
         }
         /* Captured */ {
             const auto start_pos = sv.find('>', sv.find('>') + 1) + 1;
-            const auto captured = sv.substr(start_pos, sv.size() - sv.find('>', sv.find('>') + 1));
 
-            if (const auto& error_sus = process_figures(captured, result.captured_figures, start_pos)) {
-                return std::unexpected{ *error_sus };
+            if (const auto captured = sv.substr(start_pos, sv.size() - sv.find('>', sv.find('>') + 1));
+                captured.length() > ALLOWED_EOF_CHARS)
+            // allow trash on end of string (e.g. \r\n)
+            {
+                if (const auto& error_sus = process_figures(captured, result.captured_figures, start_pos)) {
+                    return std::unexpected{ *error_sus };
+                }
             }
         }
 
