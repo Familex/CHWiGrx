@@ -220,3 +220,65 @@ bool game_end_check(const HWND h_wnd, const Color turn) noexcept
 
     return false;
 }
+
+// https://stackoverflow.com/a/57241985
+DWORD create_console() noexcept
+{
+    if (!AllocConsole()) {
+        return GetLastError();
+    }
+
+#ifdef _DEBUG
+    // std::cout, std::clog, std::cerr, std::cin
+    FILE* f_dummy;
+    freopen_s(&f_dummy, "CONOUT$", "w", stdout);
+    freopen_s(&f_dummy, "CONOUT$", "w", stderr);
+    freopen_s(&f_dummy, "CONIN$", "r", stdin);
+    std::cout.clear();
+    std::clog.clear();
+    std::cerr.clear();
+    std::cin.clear();
+
+    // std::wcout, std::wclog, std::wcerr, std::wcin
+    const HANDLE con_out = CreateFile(
+        TEXT("CONOUT$"),
+        GENERIC_READ | GENERIC_WRITE,
+        FILE_SHARE_READ | FILE_SHARE_WRITE,
+        nullptr,
+        OPEN_EXISTING,
+        FILE_ATTRIBUTE_NORMAL,
+        nullptr
+    );
+    if (con_out == INVALID_HANDLE_VALUE) {
+        return GetLastError();
+    }
+    const HANDLE con_in = CreateFile(
+        TEXT("CONIN$"),
+        GENERIC_READ | GENERIC_WRITE,
+        FILE_SHARE_READ | FILE_SHARE_WRITE,
+        nullptr,
+        OPEN_EXISTING,
+        FILE_ATTRIBUTE_NORMAL,
+        nullptr
+    );
+    if (con_in == INVALID_HANDLE_VALUE) {
+        return GetLastError();
+    }
+    if (!SetStdHandle(STD_OUTPUT_HANDLE, con_out)) {
+        return GetLastError();
+    }
+    if (!SetStdHandle(STD_ERROR_HANDLE, con_out)) {
+        return GetLastError();
+    }
+    if (!SetStdHandle(STD_INPUT_HANDLE, con_in)) {
+        return GetLastError();
+    }
+    std::wcout.clear();
+    std::wclog.clear();
+    std::wcerr.clear();
+    std::wcin.clear();
+
+#endif
+
+    return ERROR_SUCCESS;
+}

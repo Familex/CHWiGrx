@@ -1,5 +1,10 @@
 #include "declarations.hpp"
 
+#ifdef _DEBUG
+#include <fcntl.h>
+#include <io.h>
+#endif
+
 int APIENTRY wWinMain(
     const HINSTANCE hInstance,
     [[maybe_unused]] const HINSTANCE hPrevInstance,
@@ -32,15 +37,14 @@ int APIENTRY wWinMain(
     }
 
 #ifdef _DEBUG
-    if (AllocConsole()) {
-        FILE* tmp;
-        freopen_s(&tmp, "conin$", "r", stdin);
-        freopen_s(&tmp, "conout$", "w", stdout);
-        freopen_s(&tmp, "conout$", "w", stderr);
+    if (const auto error = create_console()) {
+        const auto error_str = std::to_wstring(error);
+        MessageBox(nullptr, error_str.data(), L"Error while creating console", MB_OK | MB_ICONERROR);
     }
 #endif    // _DEBUG
 
     if (!create_window(CreateWindowArgsBuilder{}
+                           .set_ex_style(WS_EX_ACCEPTFILES)
                            .set_wc_wndproc(main_default_wndproc)
                            .set_wc_icon(LoadIcon(hInstance, MAKEINTRESOURCE(IDI_GAME_MODE_BIG)))
                            .set_wc_background(reinterpret_cast<HBRUSH>((COLOR_WINDOW)))

@@ -10,3 +10,6 @@
 #undef WIN32_LEAN_AND_MEAN
 #undef VC_EXTRALEAN
 #undef NOMINMAX
+
+// drag & drop
+#include <shellapi.h>

@@ -18,3 +18,5 @@ void change_checkerboard_color_theme(HWND) noexcept;
 HWND create_figures_list_window(HWND) noexcept;
 
 bool game_end_check(HWND, Color) noexcept;
+
+DWORD create_console() noexcept;

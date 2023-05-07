@@ -8,11 +8,12 @@
 
 namespace create_window_nc
 {
-inline constexpr auto max_load_string = 100;
+inline constexpr auto MAX_LOAD_STRING = 100;
 }
 
 struct CreateWindowArgs
 {
+    DWORD ex_style{};
     WNDCLASSEX wc{ .cbSize = sizeof(WNDCLASSEX) };
     std::variant<LPCTSTR, UINT> class_name{};
     std::variant<LPCTSTR, UINT> title{};
@@ -29,8 +30,8 @@ struct CreateWindowArgs
     LONG_PTR cls_extra_data{};
 
     // through other setters
-    TCHAR sz_title[create_window_nc::max_load_string]{};
-    TCHAR sz_class_name[create_window_nc::max_load_string]{};
+    TCHAR sz_title[create_window_nc::MAX_LOAD_STRING]{};
+    TCHAR sz_class_name[create_window_nc::MAX_LOAD_STRING]{};
 };
 
 struct CreateWindowArgsBuilder
@@ -55,14 +56,14 @@ struct CreateWindowArgsBuilder
         /* class name */ {
             if (std::holds_alternative<UINT>(result.class_name)) {
                 const auto res = LoadString(
-                    h_inst, std::get<UINT>(result.class_name), result.sz_class_name, create_window_nc::max_load_string
+                    h_inst, std::get<UINT>(result.class_name), result.sz_class_name, create_window_nc::MAX_LOAD_STRING
                 );
             }
             else {
                 wcsncpy_s(
-                    result.sz_class_name, std::get<LPCTSTR>(result.class_name), create_window_nc::max_load_string
+                    result.sz_class_name, std::get<LPCTSTR>(result.class_name), create_window_nc::MAX_LOAD_STRING
                 );
-                result.sz_class_name[create_window_nc::max_load_string - 1] = '\0';
+                result.sz_class_name[create_window_nc::MAX_LOAD_STRING - 1] = '\0';
             }
 
             result.wc.lpszClassName = result.sz_class_name;
@@ -75,18 +76,19 @@ struct CreateWindowArgsBuilder
         /* title */ {
             if (std::holds_alternative<UINT>(result.title)) {
                 const auto res = LoadString(
-                    h_inst, std::get<UINT>(result.title), result.sz_title, create_window_nc::max_load_string
+                    h_inst, std::get<UINT>(result.title), result.sz_title, create_window_nc::MAX_LOAD_STRING
                 );
             }
             else {
-                wcsncpy_s(result.sz_title, std::get<LPCTSTR>(result.title), create_window_nc::max_load_string);
-                result.sz_title[create_window_nc::max_load_string - 1] = '\0';
+                wcsncpy_s(result.sz_title, std::get<LPCTSTR>(result.title), create_window_nc::MAX_LOAD_STRING);
+                result.sz_title[create_window_nc::MAX_LOAD_STRING - 1] = '\0';
             }
         }
 
         return result;
     }
 
+    DECLARE_SETTER(set_ex_style, ex_style)
     DECLARE_SETTER(set_wc_style, wc.style)
     DECLARE_SETTER(set_wc_wndproc, wc.lpfnWndProc)
     DECLARE_SETTER(set_wc_cls_extra, wc.cbClsExtra)

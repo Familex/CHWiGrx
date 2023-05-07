@@ -4,22 +4,21 @@
 
 /**
  * \breif Registers a window class and creates a window
- * \param h_inst
  * \param args Parameters for the window creation
  * \return Window handle if successful, otherwise the winapi error code
  */
 auto create_window(CreateWindowArgs&& args) noexcept -> std::expected<HWND, DWORD>
 {
     if (!UnregisterClass(args.sz_class_name, GetModuleHandle(nullptr))) {
-        const auto error = GetLastError();
-        if (error != ERROR_CLASS_DOES_NOT_EXIST) {
+        if (const auto error = GetLastError(); error != ERROR_CLASS_DOES_NOT_EXIST) {
             return std::unexpected{ error };
         }
     }
     if (!RegisterClassEx(&args.wc)) {
         return std::unexpected{ GetLastError() };
     }
-    HWND wnd = CreateWindow(
+    HWND wnd = CreateWindowEx(
+        args.ex_style,
         args.sz_class_name,
         args.sz_title,
         args.style,
