@@ -12,8 +12,13 @@ int APIENTRY wWinMain(
     [[maybe_unused]] int nCmdShow
 )
 {
-    // init h_inst
     h_inst = hInstance;
+
+    /* winapi stuff init */ {
+        constexpr auto i =
+            INITCOMMONCONTROLSEX{ .dwSize = sizeof(INITCOMMONCONTROLSEX), .dwICC = ICC_LISTVIEW_CLASSES };
+        InitCommonControlsEx(&i);
+    }
 
     /* init bitmaps */ {
         /* pieces */ {

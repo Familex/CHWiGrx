@@ -9,13 +9,15 @@
  */
 auto create_window(CreateWindowArgs&& args) noexcept -> std::expected<HWND, DWORD>
 {
-    if (!UnregisterClass(args.sz_class_name, GetModuleHandle(nullptr))) {
-        if (const auto error = GetLastError(); error != ERROR_CLASS_DOES_NOT_EXIST) {
-            return std::unexpected{ error };
+    if (args.register_class) {
+        if (!UnregisterClass(args.sz_class_name, GetModuleHandle(nullptr))) {
+            if (const auto error = GetLastError(); error != ERROR_CLASS_DOES_NOT_EXIST) {
+                return std::unexpected{ error };
+            }
         }
-    }
-    if (!RegisterClassEx(&args.wc)) {
-        return std::unexpected{ GetLastError() };
+        if (!RegisterClassEx(&args.wc)) {
+            return std::unexpected{ GetLastError() };
+        }
     }
     HWND wnd = CreateWindowEx(
         args.ex_style,

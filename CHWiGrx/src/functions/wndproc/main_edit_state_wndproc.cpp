@@ -46,7 +46,7 @@ LRESULT CALLBACK mainproc::main_edit_state_wndproc(
 
                 case IDM_TOGGLE_LIST_WINDOW:
                     if (figures_list_window == nullptr) {
-                        figures_list_window = create_figures_list_window(h_wnd);
+                        figures_list_window = new_window::figures_list(h_wnd);
                     }
                     else {
                         destroy_window(figures_list_window);

@@ -44,6 +44,7 @@ void update_game_menu_variables(const HWND h_wnd) noexcept
              IDM_SET_CHOICE_TO_ROOK,
              IDM_SET_CHOICE_TO_BISHOP,
              IDM_SET_CHOICE_TO_KNIGHT,
+             IDM_WINDOW_MOVELOG,
          })
     {
         set_menu_checkbox(h_wnd, menu_id, false);
@@ -72,6 +73,10 @@ void update_game_menu_variables(const HWND h_wnd) noexcept
         default:
             assert(("Unknown chose", false));
             break;
+    }
+
+    if (moves_list_window) {
+        set_menu_checkbox(h_wnd, IDM_WINDOW_MOVELOG, true);
     }
 }
 

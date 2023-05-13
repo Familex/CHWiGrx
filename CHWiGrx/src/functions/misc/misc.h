@@ -11,12 +11,19 @@ bool cpy_str_to_clip(HWND, std::string_view) noexcept;
 
 std::string take_str_from_clip(HWND) noexcept;
 
-HWND create_curr_choice_window(HWND, Figure*, POINT, int, int, const WNDPROC) noexcept;
+namespace new_window
+{
+HWND curr_choice(HWND, const Figure*, POINT, int, int, WNDPROC) noexcept;
+
+HWND figures_list(HWND) noexcept;
+
+HWND moves_log(HWND) noexcept;
+}    // namespace new_window
 
 void change_checkerboard_color_theme(HWND) noexcept;
-
-HWND create_figures_list_window(HWND) noexcept;
 
 bool game_end_check(HWND, Color) noexcept;
 
 DWORD create_console() noexcept;
+
+std::size_t get_icon_from_type(FigureType) noexcept;

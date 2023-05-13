@@ -124,7 +124,10 @@ figures_list_wndproc(const HWND h_wnd, const UINT message, const WPARAM w_param,
             si.nPage = figures_list.get_height();
             si.nPos = figures_list.get_curr_scroll();
             SetScrollInfo(h_wnd, SB_VERT, &si, TRUE);
-        } break;
+
+            break;
+        }
+
         case WM_GETMINMAXINFO:
         {
             const auto lp_mmi = reinterpret_cast<LPMINMAXINFO>(l_param);

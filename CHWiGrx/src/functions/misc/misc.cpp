@@ -98,58 +98,16 @@ std::string take_str_from_clip(const HWND h_wnd) noexcept
     return text;
 }
 
-/**
- * \brief Create a curr choice window
- * \param parent Parent window
- * \param in_hand Figure, what will be drawn in curr choice window
- * \param mouse Mouse initial position
- * \param w Curr choice window width
- * \param h Curr choice window height
- * \param callback Curr choice window wndproc
- * \return Curr choice window handle
- */
-HWND create_curr_choice_window(
-    const HWND parent,
-    Figure* const in_hand,
-    const POINT mouse,
-    const int w,
-    const int h,
-    const WNDPROC callback
-) noexcept
-{
-    return *create_window(
-        CreateWindowArgsBuilder{}
-            .set_wc_wndproc(callback)
-            .set_wc_icon(LoadIcon(nullptr, MAKEINTRESOURCE(IDI_GAME_MODE_BIG)))
-            .set_wc_icon_sm(LoadIcon(nullptr, MAKEINTRESOURCE(IDI_GAME_MODE_SMALL)))
-            .set_wc_wnd_extra(static_cast<int>(sizeof(decltype(in_hand))))
-            .set_x(mouse.x - w / 2)
-            .set_y(mouse.y - h / 2)
-            .set_width(w)
-            .set_height(h)
-            .set_parent(parent)
-            .set_style(WS_POPUP | WS_EX_TRANSPARENT | WS_EX_LAYERED)
-            .set_class_name(CURR_CHOICE_WINDOW_CLASS_NAME)
-            .set_title(L"")
-            .set_after_create([](const HWND h_wnd) {
-                SetWindowPos(h_wnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
-                SetWindowLongPtr(h_wnd, GWL_EXSTYLE, GetWindowLongPtr(h_wnd, GWL_EXSTYLE) | WS_EX_LAYERED);
-                SetLayeredWindowAttributes(h_wnd, TRANSPARENCY_PLACEHOLDER, 0xFF, LWA_COLORKEY);
-            })
-            .set_wnd_extra_data(
-                reinterpret_cast<LONG_PTR>(figfab::FigureFabric::instance().create(in_hand, true).release())
-            )
-            .build(h_inst)
-    );
-}
-
 void change_checkerboard_color_theme(const HWND h_wnd) noexcept
 {
     std::swap(checkerboard_one, checkerboard_two);
     InvalidateRect(h_wnd, nullptr, NULL);
 }
 
-HWND create_figures_list_window(const HWND parent) noexcept
+namespace new_window
+{
+
+HWND figures_list(const HWND parent) noexcept
 {
     return *create_window(CreateWindowArgsBuilder{}
                               .set_wc_wndproc(figures_list_wndproc)
@@ -160,11 +118,71 @@ HWND create_figures_list_window(const HWND parent) noexcept
                               .set_style(WS_OVERLAPPEDWINDOW | WS_VSCROLL | WS_HSCROLL)
                               .set_x(FIGURES_LIST_WINDOW_DEFAULT_POS.x)
                               .set_y(FIGURES_LIST_WINDOW_DEFAULT_POS.y)
-                              .set_width(figures_list.get_width_with_extra())
-                              .set_height(figures_list.get_height_with_extra())
+                              .set_width(::figures_list.get_width_with_extra())
+                              .set_height(::figures_list.get_height_with_extra())
                               .set_parent(parent)
                               .build(h_inst));
 }
+
+/**
+ * \brief Create a curr choice window
+ * \param parent Parent window
+ * \param in_hand Figure, what will be drawn in curr choice window
+ * \param mouse Mouse initial position
+ * \param w Curr choice window width
+ * \param h Curr choice window height
+ * \param callback Curr choice window wndproc
+ * \return Curr choice window handle
+ */
+HWND curr_choice(
+    const HWND parent,
+    const Figure* const in_hand,
+    const POINT mouse,
+    const int w,
+    const int h,
+    const WNDPROC callback
+) noexcept
+{
+    return *create_window(CreateWindowArgsBuilder{}
+                              .set_ex_style(WS_EX_LAYERED | WS_EX_NOACTIVATE)
+                              .set_wc_wndproc(callback)
+                              .set_wc_icon(LoadIcon(nullptr, MAKEINTRESOURCE(IDI_GAME_MODE_BIG)))
+                              .set_wc_icon_sm(LoadIcon(nullptr, MAKEINTRESOURCE(IDI_GAME_MODE_SMALL)))
+                              .set_wc_wnd_extra(static_cast<int>(sizeof(in_hand)))
+                              .set_x(mouse.x - w / 2)
+                              .set_y(mouse.y - h / 2)
+                              .set_width(w)
+                              .set_height(h)
+                              .set_parent(parent)
+                              .set_style(WS_POPUP | WS_EX_TRANSPARENT | WS_EX_LAYERED)
+                              .set_class_name(CURR_CHOICE_WINDOW_CLASS_NAME)
+                              .set_title(L"")
+                              .set_after_create([](const HWND h_wnd) {
+                                  SetWindowPos(h_wnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
+                                  SetLayeredWindowAttributes(h_wnd, TRANSPARENCY_PLACEHOLDER, 0xFF, LWA_COLORKEY);
+                              })
+                              .set_wnd_extra_data(reinterpret_cast<LONG_PTR>(
+                                  figfab::FigureFabric::instance().create(in_hand, true).release()
+                              ))
+                              .build(h_inst));
+}
+
+HWND moves_log(const HWND parent) noexcept
+{
+    return *create_window(
+        CreateWindowArgsBuilder{}
+            .register_class(false)
+            .set_wc_wndproc(moves_list_wndproc)
+            .set_ex_style(WS_EX_CLIENTEDGE)
+            .set_class_name(WC_LISTVIEW)
+            .set_title(TEXT("Moves log"))
+            .set_style(WS_TABSTOP | WS_CHILD | WS_BORDER | WS_VISIBLE | LVS_AUTOARRANGE | LVS_REPORT | LVS_OWNERDATA)
+            .set_parent(parent)
+            .build(h_inst)
+    );
+}
+
+}    // namespace new_window
 
 bool game_end_check(const HWND h_wnd, const Color turn) noexcept
 {
@@ -222,6 +240,7 @@ bool game_end_check(const HWND h_wnd, const Color turn) noexcept
 }
 
 // https://stackoverflow.com/a/57241985
+// does not work for wcout...
 DWORD create_console() noexcept
 {
     if (!AllocConsole()) {
@@ -282,3 +301,6 @@ DWORD create_console() noexcept
 
     return ERROR_SUCCESS;
 }
+
+// FIXME impl
+std::size_t get_icon_from_type(const FigureType) noexcept { return NULL; }

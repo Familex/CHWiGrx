@@ -1,5 +1,8 @@
 #pragma once
 
+// list view
+#pragma comment(lib, "comctl32")
+
 #include "resource.hpp"
 #include "targetver.hpp"
 
@@ -13,3 +16,6 @@
 
 // drag & drop
 #include <shellapi.h>
+
+// list view
+#include <commctrl.h>

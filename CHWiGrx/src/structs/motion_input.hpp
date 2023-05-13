@@ -47,7 +47,7 @@ public:
         POINT mouse{};
         GetCursorPos(&mouse);
         curr_choice_window_ =
-            create_curr_choice_window(h_wnd, in_hand_.value(), mouse, cell_size.x, cell_size.y, callback);
+            new_window::curr_choice(h_wnd, in_hand_.value(), mouse, cell_size.x, cell_size.y, callback);
         // Force redraw, because there is an artifact
         RedrawWindow(h_wnd, nullptr, nullptr, RDW_INVALIDATE | RDW_UPDATENOW);
         SendMessage(curr_choice_window_, WM_NCLBUTTONDOWN, HTCAPTION, MAKELPARAM(mouse.x, mouse.y));

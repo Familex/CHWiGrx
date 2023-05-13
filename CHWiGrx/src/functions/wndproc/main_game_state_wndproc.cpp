@@ -74,7 +74,29 @@ LRESULT CALLBACK mainproc::main_game_state_wndproc(
                         item_info.fState = MFS_CHECKED;
                     }
                     SetMenuItemInfoW(h_menu, IDM_TOGGLE_SAVE_ALL_MOVES, FALSE, &item_info);
-                } break;
+
+                    break;
+                }
+
+                case IDM_WINDOW_MOVELOG:
+                {
+                    if (!moves_list_window) {
+                        moves_list_window = *create_window(CreateWindowArgsBuilder{}
+                                                               .set_class_name(TEXT("CHWIGRX:MOVES_LOG"))
+                                                               .set_style(WS_OVERLAPPEDWINDOW)
+                                                               .set_title(TEXT("Moves Log"))
+                                                               .set_wc_wndproc(moves_list_wndproc)
+                                                               .set_parent(h_wnd)
+                                                               .build(h_inst));
+                    }
+                    else {
+                        destroy_window(moves_list_window);
+                    }
+
+                    update_game_menu_variables(h_wnd);
+
+                    break;
+                }
 
                 case IDM_SET_CHOICE_TO_ROOK:
                 case IDM_SET_CHOICE_TO_KNIGHT:
@@ -111,8 +133,11 @@ LRESULT CALLBACK mainproc::main_game_state_wndproc(
                     update_edit_menu_variables(h_wnd);
                     change_checkerboard_color_theme(h_wnd);
                     board.reset_move_logger();
-                    figures_list_window = create_figures_list_window(h_wnd);
-                } break;
+                    figures_list_window = new_window::figures_list(h_wnd);
+                    destroy_window(moves_list_window);
+
+                    break;
+                }
 
                 /* ---- Bot ------------------------------------------- */
                 case IDM_TOGGLE_BOT:

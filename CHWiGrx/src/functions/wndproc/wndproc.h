@@ -5,9 +5,9 @@
 namespace mainproc
 {
 
-LRESULT main_game_state_wndproc(HWND, UINT, WPARAM, LPARAM) noexcept;
+LRESULT CALLBACK main_game_state_wndproc(HWND, UINT, WPARAM, LPARAM) noexcept;
 
-LRESULT main_edit_state_wndproc(HWND, UINT, WPARAM, LPARAM) noexcept;
+LRESULT CALLBACK main_edit_state_wndproc(HWND, UINT, WPARAM, LPARAM) noexcept;
 
 }    // namespace mainproc
 
