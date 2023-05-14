@@ -302,5 +302,75 @@ DWORD create_console() noexcept
     return ERROR_SUCCESS;
 }
 
-// FIXME impl
-std::size_t get_icon_from_type(const FigureType) noexcept { return NULL; }
+std::size_t get_icon(const mvmsg::MoveMessage& mm) noexcept
+{
+    const auto& by_color = pieces_bitmaps.find(col_to_char(mm.first.get_col()));
+    const auto& by_type = by_color->second.find(figure_type_to_char(mm.first.get_type()));
+    return std::distance(std::begin(pieces_bitmaps), by_color) * PLAYABLE_FIGURES.size() +
+           std::distance(std::begin(by_color->second), by_type);
+}
+
+HIMAGELIST init_move_log_bitmaps() noexcept
+{
+    auto list = ImageList_Create(64, 64, ILC_COLORDDB | ILC_MASK, 1, 0);
+    for (const auto& [key_col, val_outher] : pieces_bitmaps) {
+        for (const auto& [key_type, val_bitmap] : val_outher) {
+            /* does not work
+            BITMAP mask{};
+            GetObject(val_bitmap, sizeof(mask), &mask);
+            unsigned char* pixels = new unsigned char[mask.bmWidth * 4 * mask.bmHeight];
+            const auto h_mask = CreateBitmapIndirect(&mask);
+            BITMAPINFOHEADER header{ .biSize = sizeof(BITMAPINFOHEADER),
+                                     .biWidth = mask.bmWidth,
+                                     .biHeight = mask.bmHeight,
+                                     .biPlanes = 1,
+                                     .biBitCount = 32,
+                                     .biCompression = BI_RGB,
+                                     .biSizeImage =
+                                         4 * static_cast<DWORD>(mask.bmWidth) * static_cast<DWORD>(mask.bmHeight),
+                                     .biClrUsed = 0,
+                                     .biClrImportant = 0 };
+            GetDIBits(
+                CreateCompatibleDC(nullptr),
+                h_mask,
+                0,
+                mask.bmHeight,
+                pixels,
+                reinterpret_cast<BITMAPINFO*>(&header),
+                DIB_RGB_COLORS
+            );
+            for (auto i = 0; i < mask.bmWidth; ++i) {
+                for (auto j = 0; j < mask.bmHeight; ++j) {
+                    auto& r = pixels[(mask.bmWidth * j + i) + 2];
+                    auto& g = pixels[(mask.bmWidth * j + i) + 1];
+                    auto& b = pixels[(mask.bmWidth * j + i) + 0];
+                    const auto color = RGB(r, g, b);
+                    if (color != TRANSPARENCY_PLACEHOLDER) {
+                        r = 0;
+                        g = 0;
+                        b = 0;
+                    }
+                    else {
+                        r = 0xFF;
+                        g = 0xFF;
+                        b = 0xFF;
+                    }
+                }
+            }
+            */
+            ImageList_Add(list, val_bitmap, nullptr);
+            /*
+            delete[] pixels;
+            DeleteObject(h_mask);
+            */
+        }
+    }
+    return list;
+}
+
+void update_moves_list() noexcept
+{
+    if (moves_list_list_view) {
+        ListView_SetItemCount(moves_list_list_view, board.get_last_moves().size() + board.get_future_moves().size());
+    }
+}

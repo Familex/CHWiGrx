@@ -29,6 +29,7 @@ inline std::map<char, std::map<char, HBITMAP>> pieces_bitmaps;
 inline std::map<const char*, HBITMAP> other_bitmaps;
 inline HWND figures_list_window = nullptr;
 inline HWND moves_list_window = nullptr;
+inline HWND moves_list_list_view = nullptr;
 
 inline WindowStats main_window{ Pos{ 300, 300 }, Pos{ 498, 498 } };
 inline FiguresListStats figures_list{ FIGURES_LIST_WINDOW_DEFAULT_POS,

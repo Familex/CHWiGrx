@@ -2,6 +2,7 @@
 
 #include "../../winapi/framework.hpp"
 #include "structs/figure.hpp"
+#include "structs/move_message.hpp"
 
 #include <string>
 
@@ -26,4 +27,8 @@ bool game_end_check(HWND, Color) noexcept;
 
 DWORD create_console() noexcept;
 
-std::size_t get_icon_from_type(FigureType) noexcept;
+std::size_t get_icon(const mvmsg::MoveMessage&) noexcept;
+
+HIMAGELIST init_move_log_bitmaps() noexcept;
+
+void update_moves_list() noexcept;

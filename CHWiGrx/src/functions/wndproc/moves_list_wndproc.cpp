@@ -8,21 +8,12 @@
 LRESULT CALLBACK
 moves_list_wndproc(const HWND h_wnd, const UINT u_msg, const WPARAM w_param, const LPARAM l_param) noexcept
 {
-    static std::vector<mvmsg::MoveMessage> display_prev_move_recs;
-    static std::vector<mvmsg::MoveMessage> display_future_move_recs;
-    static HWND list_view{};
-
     switch (u_msg) {
         case WM_CREATE:
         {
-            /* stole data from board */ {
-                display_prev_move_recs = board.get_last_moves();
-                display_future_move_recs = board.get_future_moves();
-            }
-
             /* list view */ {
-                list_view = new_window::moves_log(h_wnd);
-                ListView_DeleteAllItems(list_view);
+                moves_list_list_view = new_window::moves_log(h_wnd);
+                ListView_DeleteAllItems(moves_list_list_view);
 
                 /* cols + item count */ {
                     LV_COLUMN lv_col{ .mask = LVCF_FMT | LVCF_WIDTH | LVCF_TEXT | LVCF_SUBITEM,
@@ -30,8 +21,17 @@ moves_list_wndproc(const HWND h_wnd, const UINT u_msg, const WPARAM w_param, con
                                       .cx = 120,
                                       .pszText = const_cast<LPTSTR>(TEXT("Main Col")) };
 
-                    ListView_InsertColumn(list_view, 0, &lv_col);
-                    ListView_SetItemCount(list_view, display_prev_move_recs.size() + display_future_move_recs.size());
+                    ListView_InsertColumn(moves_list_list_view, 0, &lv_col);
+                    ListView_SetItemCount(
+                        moves_list_list_view, board.get_last_moves().size() + board.get_future_moves().size()
+                    );
+                }
+
+                /* icons */ {
+                    if (const auto& imglst = init_move_log_bitmaps()) {
+                        ListView_SetImageList(moves_list_list_view, imglst, LVSIL_NORMAL);
+                        ListView_SetImageList(moves_list_list_view, imglst, LVSIL_SMALL);
+                    }
                 }
             }
 
@@ -48,9 +48,10 @@ moves_list_wndproc(const HWND h_wnd, const UINT u_msg, const WPARAM w_param, con
                     LV_DISPINFO* in = reinterpret_cast<LV_DISPINFO*>(l_param);
                     TCHAR sz_string[MAX_PATH]{};
 
-                    const auto& rec = in->item.iItem < display_prev_move_recs.size()
-                                          ? display_prev_move_recs.at(in->item.iItem)
-                                          : display_future_move_recs.at(in->item.iItem);
+                    const auto& prev = board.get_last_moves();
+                    const auto& future = board.get_future_moves();
+                    const auto& rec =
+                        in->item.iItem < prev.size() ? prev.at(in->item.iItem) : future.at(in->item.iItem);
 
                     if (in->item.iSubItem) {
                         if (in->item.mask & LVIF_TEXT) {
@@ -74,7 +75,7 @@ moves_list_wndproc(const HWND h_wnd, const UINT u_msg, const WPARAM w_param, con
                         }
 
                         if (in->item.mask & LVIF_IMAGE) {
-                            in->item.iImage = get_icon_from_type(rec.first.get_type());
+                            in->item.iImage = get_icon(rec);
                         }
                     }
 
@@ -98,7 +99,7 @@ moves_list_wndproc(const HWND h_wnd, const UINT u_msg, const WPARAM w_param, con
                 case LVN_ODFINDITEM:
                 {
                     LPNMLVFINDITEM lpFindItem = (LPNMLVFINDITEM)l_param;
-                    /* FIXME 
+                    /* FIXME
                     this is sent when ListView needs a particular item. Return -1 if the item is not found.
                     */
 
@@ -113,7 +114,7 @@ moves_list_wndproc(const HWND h_wnd, const UINT u_msg, const WPARAM w_param, con
         {
             RECT rc;
             GetClientRect(h_wnd, &rc);
-            MoveWindow(list_view, rc.left, rc.top, rc.right - rc.left, rc.bottom - rc.top, TRUE);
+            MoveWindow(moves_list_list_view, rc.left, rc.top, rc.right - rc.left, rc.bottom - rc.top, TRUE);
 
             break;
         }
@@ -131,6 +132,8 @@ moves_list_wndproc(const HWND h_wnd, const UINT u_msg, const WPARAM w_param, con
         {
             const HWND owner = GetWindow(h_wnd, GW_OWNER);    // It should be GetParent, but it returns NULL 😢.
             set_menu_checkbox(owner, IDM_WINDOW_MOVELOG, false);
+            moves_list_window = nullptr;
+            moves_list_list_view = nullptr;
 
             break;
         }
