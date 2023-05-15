@@ -113,6 +113,7 @@ HWND figures_list(const HWND parent) noexcept
                               .set_wc_wndproc(figures_list_wndproc)
                               .set_wc_icon(LoadIcon(h_inst, MAKEINTRESOURCE(IDI_FIGURES_LIST)))
                               .set_wc_icon_sm(LoadIcon(h_inst, MAKEINTRESOURCE(IDI_FIGURES_LIST)))
+                              .set_wc_background(CHECKERBOARD_DARK)
                               .set_class_name(FIGURES_LIST_WINDOW_CLASS_NAME)
                               .set_title(FIGURES_LIST_WINDOW_TITLE)
                               .set_style(WS_OVERLAPPEDWINDOW | WS_VSCROLL | WS_HSCROLL)

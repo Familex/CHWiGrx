@@ -80,6 +80,7 @@ figures_list_wndproc(const HWND h_wnd, const UINT message, const WPARAM w_param,
                 SWP_NOMOVE
             );
 
+            InvalidateRect(h_wnd, nullptr, FALSE);
             break;
         }
 
@@ -101,17 +102,16 @@ figures_list_wndproc(const HWND h_wnd, const UINT message, const WPARAM w_param,
                     delta = figures_list.add_to_curr_scroll(10);
                     break;
                 case SB_THUMBPOSITION:
+                case SB_THUMBTRACK:
                     delta = figures_list.set_curr_scroll(HIWORD(w_param));
                     break;
             }
-
-            ScrollWindowEx(h_wnd, 0, -delta, nullptr, nullptr, nullptr, nullptr, SW_INVALIDATE);
-            UpdateWindow(h_wnd);
 
             si.fMask = SIF_POS;
             si.nPos = figures_list.get_curr_scroll();
             SetScrollInfo(h_wnd, SB_VERT, &si, TRUE);
 
+            InvalidateRect(h_wnd, nullptr, FALSE);
             break;
         }
 
@@ -125,6 +125,7 @@ figures_list_wndproc(const HWND h_wnd, const UINT message, const WPARAM w_param,
             si.nPos = figures_list.get_curr_scroll();
             SetScrollInfo(h_wnd, SB_VERT, &si, TRUE);
 
+            InvalidateRect(h_wnd, nullptr, FALSE);
             break;
         }
 
@@ -142,7 +143,6 @@ figures_list_wndproc(const HWND h_wnd, const UINT message, const WPARAM w_param,
         {
             static HDC hdc;
             static HDC hdc_mem;
-            static HGDIOBJ h_old;
             static HBITMAP hbm_mem;
             hdc = BeginPaint(h_wnd, &ps);
             const PRECT prect = &ps.rcPaint;
@@ -154,14 +154,17 @@ figures_list_wndproc(const HWND h_wnd, const UINT message, const WPARAM w_param,
 
             hdc_mem = CreateCompatibleDC(hdc);
             hbm_mem = CreateCompatibleBitmap(hdc, width, static_cast<int>(all_figures_height));
-            h_old = SelectObject(hdc_mem, hbm_mem);
+            const auto h_old = SelectObject(hdc_mem, hbm_mem);
 
-            /* фон */
-            const RECT full_rect = { .left = prect->left,
-                                     .top = prect->top + curr_scroll,
-                                     .right = prect->right,
-                                     .bottom = prect->bottom + curr_scroll };
-            FillRect(hdc_mem, &full_rect, CHECKERBOARD_DARK);
+            // background
+            // FIXME use wc.hbrBackground
+            {
+                const RECT full_rect = { .left = prect->left,
+                                         .top = prect->top + curr_scroll,
+                                         .right = prect->right,
+                                         .bottom = prect->bottom + curr_scroll };
+                FillRect(hdc_mem, &full_rect, CHECKERBOARD_DARK);
+            }
 
             /* Отрисовка фигур */
             for (std::size_t index = 0; index < figures_prototypes[curr_color].size(); ++index) {
