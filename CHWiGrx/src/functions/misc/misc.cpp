@@ -315,54 +315,9 @@ HIMAGELIST init_move_log_bitmaps() noexcept
     auto list = ImageList_Create(64, 64, ILC_COLORDDB | ILC_MASK, 1, 0);
     for (const auto& [key_col, val_outher] : pieces_bitmaps) {
         for (const auto& [key_type, val_bitmap] : val_outher) {
-            /* does not work
-            BITMAP mask{};
-            GetObject(val_bitmap, sizeof(mask), &mask);
-            unsigned char* pixels = new unsigned char[mask.bmWidth * 4 * mask.bmHeight];
-            const auto h_mask = CreateBitmapIndirect(&mask);
-            BITMAPINFOHEADER header{ .biSize = sizeof(BITMAPINFOHEADER),
-                                     .biWidth = mask.bmWidth,
-                                     .biHeight = mask.bmHeight,
-                                     .biPlanes = 1,
-                                     .biBitCount = 32,
-                                     .biCompression = BI_RGB,
-                                     .biSizeImage =
-                                         4 * static_cast<DWORD>(mask.bmWidth) * static_cast<DWORD>(mask.bmHeight),
-                                     .biClrUsed = 0,
-                                     .biClrImportant = 0 };
-            GetDIBits(
-                CreateCompatibleDC(nullptr),
-                h_mask,
-                0,
-                mask.bmHeight,
-                pixels,
-                reinterpret_cast<BITMAPINFO*>(&header),
-                DIB_RGB_COLORS
-            );
-            for (auto i = 0; i < mask.bmWidth; ++i) {
-                for (auto j = 0; j < mask.bmHeight; ++j) {
-                    auto& r = pixels[(mask.bmWidth * j + i) + 2];
-                    auto& g = pixels[(mask.bmWidth * j + i) + 1];
-                    auto& b = pixels[(mask.bmWidth * j + i) + 0];
-                    const auto color = RGB(r, g, b);
-                    if (color != TRANSPARENCY_PLACEHOLDER) {
-                        r = 0;
-                        g = 0;
-                        b = 0;
-                    }
-                    else {
-                        r = 0xFF;
-                        g = 0xFF;
-                        b = 0xFF;
-                    }
-                }
-            }
-            */
-            ImageList_Add(list, val_bitmap, nullptr);
-            /*
-            delete[] pixels;
-            DeleteObject(h_mask);
-            */
+            const auto mask = generate_mask_from_bitmap(val_bitmap, TRANSPARENCY_PLACEHOLDER);
+            ImageList_Add(list, val_bitmap, mask);
+            DeleteObject(mask);
         }
     }
     return list;
@@ -373,4 +328,31 @@ void update_moves_list() noexcept
     if (moves_list_list_view) {
         ListView_SetItemCount(moves_list_list_view, board.get_last_moves().size() + board.get_future_moves().size());
     }
+}
+
+// http://www.winprog.org/tutorial/transparency.html
+// FIXME use std::unique_ptr (HBITMAP, DeleteObject)
+HBITMAP generate_mask_from_bitmap(const HBITMAP bitmap, const COLORREF transparent) noexcept
+{
+    // Create monochrome (1 bit) mask bitmap.
+    BITMAP mask{};
+    GetObject(bitmap, sizeof(BITMAP), &mask);
+    auto h_mask = CreateBitmap(mask.bmWidth, mask.bmHeight, 1, 1, NULL);
+
+    auto dc_bitmap = CreateCompatibleDC(nullptr);
+    auto dc_mask = CreateCompatibleDC(nullptr);
+
+    SelectObject(dc_bitmap, bitmap);
+    SelectObject(dc_mask, h_mask);
+
+    SetBkColor(dc_bitmap, transparent);
+    BitBlt(dc_mask, 0, 0, mask.bmWidth, mask.bmHeight, dc_bitmap, 0, 0, SRCCOPY);
+    // original say that with that mask will be more transparent
+    // BitBlt(dc_bitmap, 0, 0, mask.bmWidth, mask.bmHeight, dc_mask, 0, 0, SRCINVERT);
+
+    // Clean up.
+    DeleteDC(dc_bitmap);
+    DeleteDC(dc_mask);
+
+    return h_mask;
 }

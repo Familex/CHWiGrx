@@ -32,3 +32,5 @@ std::size_t get_icon(const mvmsg::MoveMessage&) noexcept;
 HIMAGELIST init_move_log_bitmaps() noexcept;
 
 void update_moves_list() noexcept;
+
+HBITMAP generate_mask_from_bitmap(HBITMAP, COLORREF) noexcept;
