@@ -3,6 +3,7 @@
 #include "../../winapi/framework.hpp"
 #include "structs/figure.hpp"
 #include "structs/move_message.hpp"
+#include "stuff/enums.hpp"
 
 #include <string>
 
@@ -34,3 +35,8 @@ HIMAGELIST init_move_log_bitmaps() noexcept;
 void update_moves_list() noexcept;
 
 HBITMAP generate_mask_from_bitmap(HBITMAP, COLORREF) noexcept;
+
+namespace misc
+{
+std::wstring to_wstring(FigureType) noexcept;
+}    // namespace misc

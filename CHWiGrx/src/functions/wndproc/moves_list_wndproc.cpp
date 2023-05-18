@@ -1,6 +1,7 @@
 #include "../../declarations.hpp"
 #include "wndproc.h"
 
+#include <format>
 #include <stdio.h>
 #include <tchar.h>
 #include <vector>
@@ -8,6 +9,11 @@
 LRESULT CALLBACK
 moves_list_wndproc(const HWND h_wnd, const UINT u_msg, const WPARAM w_param, const LPARAM l_param) noexcept
 {
+    enum class Column : std::size_t {
+        Move,
+        Figure
+    };
+
     switch (u_msg) {
         case WM_CREATE:
         {
@@ -15,13 +21,29 @@ moves_list_wndproc(const HWND h_wnd, const UINT u_msg, const WPARAM w_param, con
                 moves_list_list_view = new_window::moves_log(h_wnd);
                 ListView_DeleteAllItems(moves_list_list_view);
 
-                /* cols + item count */ {
-                    LV_COLUMN lv_col{ .mask = LVCF_FMT | LVCF_WIDTH | LVCF_TEXT | LVCF_SUBITEM,
-                                      .fmt = LVCFMT_LEFT,
-                                      .cx = 120,
-                                      .pszText = const_cast<LPTSTR>(TEXT("Main Col")) };
+                /* columns */ {
+                    using TextCol = std::pair<LPCTSTR, Column>;
 
-                    ListView_InsertColumn(moves_list_list_view, 0, &lv_col);
+                    /* init */ {
+                        for (const auto [name, ind] :
+                             { TextCol{ TEXT("Move"), Column::Move }, TextCol{ TEXT("Figure"), Column::Figure } })
+                        {
+                            LV_COLUMN lv_col{ .mask = LVCF_FMT | LVCF_WIDTH | LVCF_TEXT | LVCF_SUBITEM,
+                                              .fmt = LVCFMT_LEFT,
+                                              .cx = 120,
+                                              .pszText = const_cast<LPTSTR>(name) };
+
+                            ListView_InsertColumn(moves_list_list_view, static_cast<std::size_t>(ind), &lv_col);
+                        }
+                    }
+
+                    /* width */ {
+                        ListView_SetColumnWidth(moves_list_list_view, static_cast<std::size_t>(Column::Move), 210);
+                        ListView_SetColumnWidth(moves_list_list_view, static_cast<std::size_t>(Column::Figure), 120);
+                    }
+                }
+
+                /* item count */ {
                     ListView_SetItemCount(
                         moves_list_list_view, board.get_last_moves().size() + board.get_future_moves().size()
                     );
@@ -55,27 +77,33 @@ moves_list_wndproc(const HWND h_wnd, const UINT u_msg, const WPARAM w_param, con
 
                     if (in->item.iSubItem) {
                         if (in->item.mask & LVIF_TEXT) {
-                            // detailed stuff
+                            switch (static_cast<Column>(in->item.iSubItem)) {
+                                case Column::Figure:
+                                {
+                                    const auto text = misc::to_wstring(rec.first.get_type());
+
+                                    _tcsncpy_s(in->item.pszText, in->item.cchTextMax, text.c_str(), _TRUNCATE);
+
+                                    break;
+                                }
+                            }
                         }
                     }
                     else {
                         if (in->item.mask & LVIF_TEXT) {
-                            _sntprintf_s(
-                                sz_string,
-                                MAX_PATH,
-                                _TRUNCATE,
-                                TEXT("Move from (%d, %d) to (%d, %d)"),
+                            const auto text = std::format(
+                                TEXT("Move from ({}, {}) to ({}, {})"),
                                 rec.input.from.x,
                                 rec.input.from.y,
                                 rec.input.target.x,
                                 rec.input.target.y
                             );
 
-                            _tcsncpy_s(in->item.pszText, in->item.cchTextMax, sz_string, _TRUNCATE);
+                            _tcsncpy_s(in->item.pszText, in->item.cchTextMax, text.c_str(), _TRUNCATE);
                         }
 
                         if (in->item.mask & LVIF_IMAGE) {
-                            in->item.iImage = get_icon(rec);
+                            in->item.iImage = static_cast<int>(get_icon(rec));
                         }
                     }
 
@@ -86,8 +114,8 @@ moves_list_wndproc(const HWND h_wnd, const UINT u_msg, const WPARAM w_param, con
                 {
                     LPNMLVCACHEHINT lpCacheHint = (LPNMLVCACHEHINT)l_param;
                     /* FIXME
-                    this is sent when the ListView is about to ask for a range of items. On this notification,
-                    you should load the specified items into your local cache. It is still
+                    this is sent when the ListView is about to ask for a range of items. On this
+                    notification, you should load the specified items into your local cache. It is still
                     possible to get an LVN_GETDISPINFO for an item that has not been cached,
                     therefore, your application must take into account the chance of this
                     occurring.
@@ -100,7 +128,8 @@ moves_list_wndproc(const HWND h_wnd, const UINT u_msg, const WPARAM w_param, con
                 {
                     LPNMLVFINDITEM lpFindItem = (LPNMLVFINDITEM)l_param;
                     /* FIXME
-                    this is sent when ListView needs a particular item. Return -1 if the item is not found.
+                    this is sent when ListView needs a particular item. Return -1 if the item is not
+                    found.
                     */
 
                     break;

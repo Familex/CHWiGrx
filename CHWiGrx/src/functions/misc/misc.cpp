@@ -357,3 +357,33 @@ HBITMAP generate_mask_from_bitmap(const HBITMAP bitmap, const COLORREF transpare
 
     return h_mask;
 }
+
+namespace misc
+{
+std::wstring to_wstring(const FigureType type) noexcept
+{
+    constexpr auto max_len = MAX_PATH;
+    TCHAR out[max_len]{ L"Unknown" };
+    switch (type) {
+        case FigureType::Pawn:
+            LoadString(h_inst, IDS_FIGURE_TYPE_PAWN, out, max_len);
+            break;
+        case FigureType::Bishop:
+            LoadString(h_inst, IDS_FIGURE_TYPE_BISHOP, out, max_len);
+            break;
+        case FigureType::Rook:
+            LoadString(h_inst, IDS_FIGURE_TYPE_ROOK, out, max_len);
+            break;
+        case FigureType::Knight:
+            LoadString(h_inst, IDS_FIGURE_TYPE_KNIGHT, out, max_len);
+            break;
+        case FigureType::Queen:
+            LoadString(h_inst, IDS_FIGURE_TYPE_QUEEN, out, max_len);
+            break;
+        case FigureType::King:
+            LoadString(h_inst, IDS_FIGURE_TYPE_KING, out, max_len);
+            break;
+    }
+    return out;
+}
+}    // namespace misc
