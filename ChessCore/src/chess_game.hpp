@@ -75,6 +75,13 @@ public:
         return idw_ ? name - 'a' : WIDTH - (name - 'a') - 1;
     }
 
+    FN pos_to_string(const Pos& pos) const noexcept -> std::string
+    {
+        const auto x = idw_ ? HEIGHT - pos.x : pos.x + 1;
+        const auto y = idw_ ? pos.y : WIDTH - pos.y - 1;
+        return std::string{ static_cast<char>('A' + static_cast<char>(y)), 1 } + std::to_string(x);
+    }
+
     void reset(board_repr::BoardRepr&& map) noexcept
     {
         move_logger_.reset();

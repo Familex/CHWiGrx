@@ -11,7 +11,8 @@ moves_list_wndproc(const HWND h_wnd, const UINT u_msg, const WPARAM w_param, con
 {
     enum class Column : std::size_t {
         Figure,
-        Move
+        From,
+        Target
     };
 
     switch (u_msg) {
@@ -25,8 +26,9 @@ moves_list_wndproc(const HWND h_wnd, const UINT u_msg, const WPARAM w_param, con
                     using TextCol = std::pair<LPCTSTR, Column>;
 
                     /* init */ {
-                        for (const auto [name, ind] :
-                             { TextCol{ TEXT("Move"), Column::Move }, TextCol{ TEXT("Figure"), Column::Figure } })
+                        for (const auto [name, ind] : { TextCol{ TEXT("From"), Column::From },
+                                                        TextCol{ TEXT("Target"), Column::Target },
+                                                        TextCol{ TEXT("Figure"), Column::Figure } })
                         {
                             LV_COLUMN lv_col{ .mask = LVCF_FMT | LVCF_WIDTH | LVCF_TEXT | LVCF_SUBITEM,
                                               .fmt = LVCFMT_LEFT,
@@ -38,8 +40,11 @@ moves_list_wndproc(const HWND h_wnd, const UINT u_msg, const WPARAM w_param, con
                     }
 
                     /* width */ {
-                        ListView_SetColumnWidth(moves_list_list_view, static_cast<std::size_t>(Column::Move), 150);
-                        ListView_SetColumnWidth(moves_list_list_view, static_cast<std::size_t>(Column::Figure), 64 + 48);
+                        ListView_SetColumnWidth(moves_list_list_view, static_cast<std::size_t>(Column::From), 50);
+                        ListView_SetColumnWidth(moves_list_list_view, static_cast<std::size_t>(Column::Target), 50);
+                        ListView_SetColumnWidth(
+                            moves_list_list_view, static_cast<std::size_t>(Column::Figure), 64 + 48
+                        );
                     }
                 }
 
@@ -72,25 +77,26 @@ moves_list_wndproc(const HWND h_wnd, const UINT u_msg, const WPARAM w_param, con
 
                     const auto& prev = board.get_last_moves();
                     const auto& future = board.get_future_moves();
-                    const auto& rec =
-                        in->item.iItem < prev.size() ? prev.at(in->item.iItem) : future.at(in->item.iItem);
+                    const std::optional<mvmsg::MoveMessage> rec =
+                        in->item.iItem == prev.size()  ? std::nullopt
+                        : in->item.iItem < prev.size() ? std::optional{ prev.at(in->item.iItem) }
+                                                       : std::optional{ future.at(future.size() - (in->item.iItem - prev.size() - 1) - 1) };
 
                     if (in->item.iSubItem) {
                         if (in->item.mask & LVIF_TEXT) {
                             switch (static_cast<Column>(in->item.iSubItem)) {
-                                case Column::Move:
+                                case Column::From:
                                 {
-                                    insert_text(
-                                        in->item,
-                                        std::format(
-                                            TEXT("Move from ({}, {}) to ({}, {})"),
-                                            rec.input.from.x,
-                                            rec.input.from.y,
-                                            rec.input.target.x,
-                                            rec.input.target.y
-                                        )
-                                            .c_str()
-                                    );
+                                    const auto text = rec ? board.pos_to_string(rec->input.from) : "";
+                                    insert_text(in->item, std::wstring{ text.begin(), text.end() }.c_str());
+
+                                    break;
+                                }
+
+                                case Column::Target:
+                                {
+                                    const auto text = rec ? board.pos_to_string(rec->input.target) : "";
+                                    insert_text(in->item, std::wstring{ text.begin(), text.end() }.c_str());
 
                                     break;
                                 }
@@ -99,11 +105,13 @@ moves_list_wndproc(const HWND h_wnd, const UINT u_msg, const WPARAM w_param, con
                     }
                     else {
                         if (in->item.mask & LVIF_TEXT) {
-                            insert_text(in->item, misc::to_wstring(rec.first.get_type()).c_str());
+                            insert_text(in->item, rec ? misc::to_wstring(rec->first.get_type()).c_str() : L"");
                         }
 
                         if (in->item.mask & LVIF_IMAGE) {
-                            in->item.iImage = static_cast<int>(get_icon(rec));
+                            if (rec) {
+                                in->item.iImage = static_cast<int>(get_icon(*rec));
+                            }
                         }
                     }
 

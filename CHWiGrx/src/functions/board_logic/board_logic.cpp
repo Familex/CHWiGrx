@@ -147,6 +147,7 @@ void restart() noexcept
     board.reset(std::move(start_board_repr_copy));
     motion_input.clear();
     turn = start_board_repr.turn;
+    on_game_board_change(board);
 }
 
 bool copy_repr_to_clip(const HWND h_wnd) noexcept

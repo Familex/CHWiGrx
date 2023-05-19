@@ -21,6 +21,7 @@ main_default_wndproc(const HWND h_wnd, const UINT message, const WPARAM w_param,
                 case IDM_PASTE_MAP:
                 {
                     paste_board_repr(h_wnd, take_str_from_clip(h_wnd));
+                    on_game_board_change(board);
                 }
                     InvalidateRect(h_wnd, nullptr, NULL);
                     break;
@@ -110,6 +111,7 @@ void paste_board_repr(const HWND wnd, const std::string_view board_repr) noexcep
         turn = board_repr_sus->value.turn;
         board.reset(std::move(board_repr_sus->value));
         motion_input.clear();
+        on_game_board_change(board);
     }
     else {
         const auto& [type, position] = board_repr_sus.error();

@@ -326,10 +326,15 @@ HIMAGELIST init_move_log_bitmaps() noexcept
 
 void update_moves_list(const HWND moves_list_list_view, const ChessGame& board) noexcept
 {
+    constexpr auto separator = 1;
     if (moves_list_list_view) {
-        ListView_SetItemCount(moves_list_list_view, board.get_last_moves().size() + board.get_future_moves().size());
+        ListView_SetItemCount(
+            moves_list_list_view, board.get_last_moves().size() + board.get_future_moves().size() + separator
+        );
     }
 }
+
+void on_game_board_change(const ChessGame& board) noexcept { update_moves_list(moves_list_list_view, board); }
 
 // http://www.winprog.org/tutorial/transparency.html
 // FIXME use std::unique_ptr (HBITMAP, DeleteObject)

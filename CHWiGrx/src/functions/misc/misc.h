@@ -32,6 +32,8 @@ HIMAGELIST init_move_log_bitmaps() noexcept;
 
 void update_moves_list(HWND, const ChessGame&) noexcept;
 
+void on_game_board_change(const ChessGame&) noexcept;
+
 [[nodiscard]] HBITMAP generate_mask_from_bitmap(HBITMAP, COLORREF) noexcept;
 
 namespace misc

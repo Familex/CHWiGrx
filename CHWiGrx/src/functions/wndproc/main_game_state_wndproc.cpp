@@ -22,6 +22,7 @@ LRESULT CALLBACK mainproc::main_game_state_wndproc(
                     if (board.undo_move()) {
                         motion_input.clear();
                         turn = what_next(turn);
+                        on_game_board_change(board);
                     }
                     break;
 
@@ -29,6 +30,7 @@ LRESULT CALLBACK mainproc::main_game_state_wndproc(
                     if (board.restore_move()) {
                         motion_input.clear();
                         turn = what_next(turn);
+                        on_game_board_change(board);
                         InvalidateRect(h_wnd, nullptr, NULL);
                         UpdateWindow(h_wnd);
                         game_end_check(h_wnd, what_next(turn));
