@@ -56,7 +56,7 @@ int APIENTRY wWinMain(
                            .set_wc_icon_sm(LoadIcon(hInstance, MAKEINTRESOURCE(IDI_GAME_MODE_SMALL)))
                            .set_title(static_cast<UINT>(IDS_APP_TITLE))
                            .set_class_name(static_cast<UINT>(IDC_CHWIGRX))
-                           .set_style(WS_OVERLAPPEDWINDOW)
+                           .set_style(WS_OVERLAPPEDWINDOW - WS_MAXIMIZEBOX)
                            .set_x(main_window.get_window_pos_x())
                            .set_y(main_window.get_window_pos_y())
                            .set_width(main_window.get_width())
