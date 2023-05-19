@@ -34,9 +34,30 @@ void update_moves_list(HWND, const ChessGame&) noexcept;
 
 void on_game_board_change(const ChessGame&) noexcept;
 
-[[nodiscard]] HBITMAP generate_mask_from_bitmap(HBITMAP, COLORREF) noexcept;
+namespace misc::bitmap
+{
+class Wrapper final
+{
+    HBITMAP value_;
 
-[[nodiscard]] HBITMAP resize_bitmap(HBITMAP, std::size_t, std::size_t, std::size_t, std::size_t) noexcept;
+public:
+    explicit Wrapper(HBITMAP&& value) noexcept
+      : value_{ value }
+    { }
+
+    explicit Wrapper(Wrapper&&) noexcept = default;
+    Wrapper& operator=(Wrapper&&) noexcept = default;
+
+    ~Wrapper() noexcept { DeleteObject(value_); }
+
+    operator HBITMAP&() noexcept { return value_; }
+    operator HBITMAP const&() const noexcept { return value_; }
+};
+}    // namespace misc::bitmap
+
+[[nodiscard]] misc::bitmap::Wrapper generate_mask_from_bitmap(HBITMAP, COLORREF) noexcept;
+
+[[nodiscard]] misc::bitmap::Wrapper resize_bitmap(HBITMAP, std::size_t, std::size_t, std::size_t, std::size_t) noexcept;
 
 namespace misc
 {

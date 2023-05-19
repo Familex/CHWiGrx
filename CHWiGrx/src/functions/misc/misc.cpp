@@ -321,8 +321,6 @@ HIMAGELIST init_move_log_bitmaps() noexcept
             );
             const auto mask = generate_mask_from_bitmap(resized, TRANSPARENCY_PLACEHOLDER);
             ImageList_Add(list, resized, mask);
-            DeleteObject(resized);
-            DeleteObject(mask);
         }
     }
     return list;
@@ -341,8 +339,7 @@ void update_moves_list(const HWND moves_list_list_view, const ChessGame& board) 
 void on_game_board_change(const ChessGame& board) noexcept { update_moves_list(moves_list_list_view, board); }
 
 // http://www.winprog.org/tutorial/transparency.html
-// FIXME use std::unique_ptr (HBITMAP, DeleteObject)
-HBITMAP generate_mask_from_bitmap(const HBITMAP bitmap, const COLORREF transparent) noexcept
+misc::bitmap::Wrapper generate_mask_from_bitmap(const HBITMAP bitmap, const COLORREF transparent) noexcept
 {
     // create monochrome (1 bit) mask bitmap
     BITMAP mask{};
@@ -364,10 +361,10 @@ HBITMAP generate_mask_from_bitmap(const HBITMAP bitmap, const COLORREF transpare
     DeleteDC(dc_bitmap);
     DeleteDC(dc_mask);
 
-    return h_mask;
+    return misc::bitmap::Wrapper{ std::move(h_mask) };
 }
 
-HBITMAP resize_bitmap(
+misc::bitmap::Wrapper resize_bitmap(
     HBITMAP source,
     std::size_t source_width,
     std::size_t source_height,
@@ -402,7 +399,11 @@ HBITMAP resize_bitmap(
     DeleteDC(source_dc);
     DeleteDC(result_dc);
 
-    return result;
+    auto deleter = [](HBITMAP m) {
+        DeleteObject(m);
+    };
+
+    return misc::bitmap::Wrapper{ std::move(result) };
 }
 
 namespace misc
