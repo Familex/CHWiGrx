@@ -2,6 +2,45 @@
 
 #include "../../declarations.hpp"
 
+[[nodiscard]] CreateWindowArgs CreateWindowArgsBuilder::build(const HINSTANCE h_inst) && noexcept
+{
+    result.wc.hInstance = h_inst;
+    if (!result.wc.hCursor) {
+        result.wc.hCursor = misc::load_animated_cursor(IDC_MINIMAL_CURSOR, RT_ANICURSOR);
+    }
+
+    /* class name */ {
+        if (std::holds_alternative<UINT>(result.class_name)) {
+            const auto res = LoadString(
+                h_inst, std::get<UINT>(result.class_name), result.sz_class_name, create_window_nc::MAX_LOAD_STRING
+            );
+        }
+        else {
+            wcsncpy_s(result.sz_class_name, std::get<LPCTSTR>(result.class_name), create_window_nc::MAX_LOAD_STRING);
+            result.sz_class_name[create_window_nc::MAX_LOAD_STRING - 1] = '\0';
+        }
+
+        result.wc.lpszClassName = result.sz_class_name;
+
+        if (std::holds_alternative<UINT>(result.class_name)) {
+            result.wc.lpszMenuName = MAKEINTRESOURCE(std::get<UINT>(result.class_name));
+        }
+    }
+
+    /* title */ {
+        if (std::holds_alternative<UINT>(result.title)) {
+            const auto res =
+                LoadString(h_inst, std::get<UINT>(result.title), result.sz_title, create_window_nc::MAX_LOAD_STRING);
+        }
+        else {
+            wcsncpy_s(result.sz_title, std::get<LPCTSTR>(result.title), create_window_nc::MAX_LOAD_STRING);
+            result.sz_title[create_window_nc::MAX_LOAD_STRING - 1] = '\0';
+        }
+    }
+
+    return result;
+}
+
 /**
  * \breif Registers a window class and creates a window
  * \param args Parameters for the window creation

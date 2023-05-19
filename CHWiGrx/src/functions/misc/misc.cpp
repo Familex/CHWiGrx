@@ -438,3 +438,26 @@ std::wstring misc::to_wstring(const FigureType type) noexcept
     }
     return out;
 }
+
+HCURSOR misc::load_animated_cursor(UINT nID, LPCTSTR pszResouceType) noexcept
+{
+    HCURSOR cursor = nullptr;
+    HRSRC resource = FindResource(h_inst, MAKEINTRESOURCE(nID), pszResouceType);
+    if (resource) {
+        const auto resource_size = SizeofResource(h_inst, resource);
+        if (resource_size > 0) {
+            const auto resource_global = LoadResource(h_inst, resource);
+            if (resource_global) {
+                const auto ptr_resource = reinterpret_cast<LPBYTE>(LockResource(resource_global));
+                if (ptr_resource) {
+                    cursor =
+                        reinterpret_cast<HCURSOR>(CreateIconFromResource(ptr_resource, resource_size, FALSE, 0x00030000)
+                        );
+                    UnlockResource(ptr_resource);
+                }
+                FreeResource(resource_global);
+            }
+        }
+    }
+    return cursor;
+}

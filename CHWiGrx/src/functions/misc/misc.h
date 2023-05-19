@@ -62,4 +62,6 @@ void on_game_board_change(const ChessGame&) noexcept;
 
 [[nodiscard]] std::wstring to_wstring(FigureType) noexcept;
 
+[[nodiscard]] HCURSOR load_animated_cursor(UINT, LPCTSTR) noexcept;
+
 }    // namespace misc
