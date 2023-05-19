@@ -324,7 +324,7 @@ HIMAGELIST init_move_log_bitmaps() noexcept
     return list;
 }
 
-void update_moves_list() noexcept
+void update_moves_list(const HWND moves_list_list_view, const ChessGame& board) noexcept
 {
     if (moves_list_list_view) {
         ListView_SetItemCount(moves_list_list_view, board.get_last_moves().size() + board.get_future_moves().size());
@@ -335,7 +335,7 @@ void update_moves_list() noexcept
 // FIXME use std::unique_ptr (HBITMAP, DeleteObject)
 HBITMAP generate_mask_from_bitmap(const HBITMAP bitmap, const COLORREF transparent) noexcept
 {
-    // Create monochrome (1 bit) mask bitmap.
+    // create monochrome (1 bit) mask bitmap
     BITMAP mask{};
     GetObject(bitmap, sizeof(BITMAP), &mask);
     auto h_mask = CreateBitmap(mask.bmWidth, mask.bmHeight, 1, 1, NULL);
@@ -348,10 +348,10 @@ HBITMAP generate_mask_from_bitmap(const HBITMAP bitmap, const COLORREF transpare
 
     SetBkColor(dc_bitmap, transparent);
     BitBlt(dc_mask, 0, 0, mask.bmWidth, mask.bmHeight, dc_bitmap, 0, 0, SRCCOPY);
-    // original say that with that mask will be more transparent
+    // original say that with that mask will be more transparent, but it modifies original bitmap
     // BitBlt(dc_bitmap, 0, 0, mask.bmWidth, mask.bmHeight, dc_mask, 0, 0, SRCINVERT);
 
-    // Clean up.
+    // clean up
     DeleteDC(dc_bitmap);
     DeleteDC(dc_mask);
 

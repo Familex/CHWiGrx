@@ -188,7 +188,7 @@ void make_move(const HWND h_wnd) noexcept
 
     debug_print("Curr move was:", AsString<mvmsg::MoveMessage>{}(*move_message_sus, AsStringMeta{ 0_id, 2, 2 }));
 
-    update_moves_list();
+    update_moves_list(moves_list_list_view, board);
 
     turn = what_next(turn);
     InvalidateRect(h_wnd, nullptr, NULL);

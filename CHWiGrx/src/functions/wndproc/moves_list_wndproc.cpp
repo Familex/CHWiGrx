@@ -10,8 +10,8 @@ LRESULT CALLBACK
 moves_list_wndproc(const HWND h_wnd, const UINT u_msg, const WPARAM w_param, const LPARAM l_param) noexcept
 {
     enum class Column : std::size_t {
-        Move,
-        Figure
+        Figure,
+        Move
     };
 
     switch (u_msg) {
@@ -38,16 +38,13 @@ moves_list_wndproc(const HWND h_wnd, const UINT u_msg, const WPARAM w_param, con
                     }
 
                     /* width */ {
-                        ListView_SetColumnWidth(moves_list_list_view, static_cast<std::size_t>(Column::Move), 210);
-                        ListView_SetColumnWidth(moves_list_list_view, static_cast<std::size_t>(Column::Figure), 120);
+                        ListView_SetColumnWidth(moves_list_list_view, static_cast<std::size_t>(Column::Move), 150);
+                        ListView_SetColumnWidth(moves_list_list_view, static_cast<std::size_t>(Column::Figure), 64 + 48);
                     }
                 }
 
-                /* item count */ {
-                    ListView_SetItemCount(
-                        moves_list_list_view, board.get_last_moves().size() + board.get_future_moves().size()
-                    );
-                }
+                /* item count */
+                update_moves_list(moves_list_list_view, board);
 
                 /* icons */ {
                     if (const auto& imglst = init_move_log_bitmaps()) {
@@ -63,6 +60,9 @@ moves_list_wndproc(const HWND h_wnd, const UINT u_msg, const WPARAM w_param, con
         case WM_NOTIFY:
         {
             LPNMHDR lpnmh = reinterpret_cast<LPNMHDR>(l_param);
+            const auto insert_text = [&](LVITEM& item, const TCHAR* str) {
+                _tcsncpy_s(item.pszText, item.cchTextMax, str, _TRUNCATE);
+            };
 
             switch (lpnmh->code) {
                 case LVN_GETDISPINFO:
@@ -78,11 +78,19 @@ moves_list_wndproc(const HWND h_wnd, const UINT u_msg, const WPARAM w_param, con
                     if (in->item.iSubItem) {
                         if (in->item.mask & LVIF_TEXT) {
                             switch (static_cast<Column>(in->item.iSubItem)) {
-                                case Column::Figure:
+                                case Column::Move:
                                 {
-                                    const auto text = misc::to_wstring(rec.first.get_type());
-
-                                    _tcsncpy_s(in->item.pszText, in->item.cchTextMax, text.c_str(), _TRUNCATE);
+                                    insert_text(
+                                        in->item,
+                                        std::format(
+                                            TEXT("Move from ({}, {}) to ({}, {})"),
+                                            rec.input.from.x,
+                                            rec.input.from.y,
+                                            rec.input.target.x,
+                                            rec.input.target.y
+                                        )
+                                            .c_str()
+                                    );
 
                                     break;
                                 }
@@ -91,15 +99,7 @@ moves_list_wndproc(const HWND h_wnd, const UINT u_msg, const WPARAM w_param, con
                     }
                     else {
                         if (in->item.mask & LVIF_TEXT) {
-                            const auto text = std::format(
-                                TEXT("Move from ({}, {}) to ({}, {})"),
-                                rec.input.from.x,
-                                rec.input.from.y,
-                                rec.input.target.x,
-                                rec.input.target.y
-                            );
-
-                            _tcsncpy_s(in->item.pszText, in->item.cchTextMax, text.c_str(), _TRUNCATE);
+                            insert_text(in->item, misc::to_wstring(rec.first.get_type()).c_str());
                         }
 
                         if (in->item.mask & LVIF_IMAGE) {
