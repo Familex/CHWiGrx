@@ -123,31 +123,6 @@ moves_list_wndproc(const HWND h_wnd, const UINT u_msg, const WPARAM w_param, con
 
                     break;
                 }
-
-                case LVN_ODCACHEHINT:
-                {
-                    LPNMLVCACHEHINT lpCacheHint = (LPNMLVCACHEHINT)l_param;
-                    /* FIXME
-                    this is sent when the ListView is about to ask for a range of items. On this
-                    notification, you should load the specified items into your local cache. It is still
-                    possible to get an LVN_GETDISPINFO for an item that has not been cached,
-                    therefore, your application must take into account the chance of this
-                    occurring.
-                    */
-
-                    break;
-                }
-
-                case LVN_ODFINDITEM:
-                {
-                    LPNMLVFINDITEM lpFindItem = (LPNMLVFINDITEM)l_param;
-                    /* FIXME
-                    this is sent when ListView needs a particular item. Return -1 if the item is not
-                    found.
-                    */
-
-                    break;
-                }
             }
 
             break;

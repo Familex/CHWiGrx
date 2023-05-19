@@ -34,3 +34,7 @@ inline constexpr auto MAIN_WINDOW_CHOICE_TO_DESTROY_TIMER_ID{ 1 };
 inline constexpr auto FIGURES_LIST_CHOICE_TO_DESTROY_TIMER_ID{ 2 };
 inline constexpr auto TO_DESTROY_ELAPSE_DEFAULT_IN_MS{ 5 };
 inline constexpr COLORREF TRANSPARENCY_PLACEHOLDER{ RGB(0xFF, 0x0, 0x0) };
+inline constexpr std::size_t MOVE_LOG_ICONS_WIDTH{ 32 };
+inline constexpr std::size_t MOVE_LOG_ICONS_HEIGHT{ 32 };
+inline constexpr std::size_t PIECE_SOURCE_WIDTH{ 64 };
+inline constexpr std::size_t PIECE_SOURCE_HEIGHT{ 64 };

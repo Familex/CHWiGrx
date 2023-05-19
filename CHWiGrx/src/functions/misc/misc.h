@@ -36,6 +36,8 @@ void on_game_board_change(const ChessGame&) noexcept;
 
 [[nodiscard]] HBITMAP generate_mask_from_bitmap(HBITMAP, COLORREF) noexcept;
 
+[[nodiscard]] HBITMAP resize_bitmap(HBITMAP, std::size_t, std::size_t, std::size_t, std::size_t) noexcept;
+
 namespace misc
 {
 [[nodiscard]] std::wstring to_wstring(FigureType) noexcept;

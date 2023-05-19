@@ -313,11 +313,15 @@ std::size_t get_icon(const mvmsg::MoveMessage& mm) noexcept
 
 HIMAGELIST init_move_log_bitmaps() noexcept
 {
-    auto list = ImageList_Create(64, 64, ILC_COLORDDB | ILC_MASK, 1, 0);
+    auto list = ImageList_Create(MOVE_LOG_ICONS_WIDTH, MOVE_LOG_ICONS_HEIGHT, ILC_COLORDDB | ILC_MASK, 1, 0);
     for (const auto& [key_col, val_outher] : pieces_bitmaps) {
         for (const auto& [key_type, val_bitmap] : val_outher) {
-            const auto mask = generate_mask_from_bitmap(val_bitmap, TRANSPARENCY_PLACEHOLDER);
-            ImageList_Add(list, val_bitmap, mask);
+            const auto resized = resize_bitmap(
+                val_bitmap, PIECE_SOURCE_WIDTH, PIECE_SOURCE_HEIGHT, MOVE_LOG_ICONS_WIDTH, MOVE_LOG_ICONS_HEIGHT
+            );
+            const auto mask = generate_mask_from_bitmap(resized, TRANSPARENCY_PLACEHOLDER);
+            ImageList_Add(list, resized, mask);
+            DeleteObject(resized);
             DeleteObject(mask);
         }
     }
@@ -361,6 +365,44 @@ HBITMAP generate_mask_from_bitmap(const HBITMAP bitmap, const COLORREF transpare
     DeleteDC(dc_mask);
 
     return h_mask;
+}
+
+HBITMAP resize_bitmap(
+    HBITMAP source,
+    std::size_t source_width,
+    std::size_t source_height,
+    std::size_t width,
+    std::size_t height
+) noexcept
+{
+    auto source_dc = CreateCompatibleDC(nullptr);
+    SelectObject(source_dc, source);
+
+    auto result_dc = CreateCompatibleDC(nullptr);
+    auto result = CreateCompatibleBitmap(source_dc, static_cast<int>(width), static_cast<int>(height));
+    SelectObject(result_dc, result);
+
+    SetStretchBltMode(result_dc, STRETCH_DELETESCANS);
+
+    StretchBlt(
+        result_dc,
+        0,
+        0,
+        static_cast<int>(width),
+        static_cast<int>(height),
+        source_dc,
+        0,
+        0,
+        static_cast<int>(source_width),
+        static_cast<int>(source_height),
+        SRCCOPY
+    );
+
+    // clean up
+    DeleteDC(source_dc);
+    DeleteDC(result_dc);
+
+    return result;
 }
 
 namespace misc
