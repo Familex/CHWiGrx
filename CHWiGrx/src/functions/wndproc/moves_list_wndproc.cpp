@@ -78,9 +78,15 @@ moves_list_wndproc(const HWND h_wnd, const UINT u_msg, const WPARAM w_param, con
                     const auto& prev = board.get_last_moves();
                     const auto& future = board.get_future_moves();
                     const std::optional<mvmsg::MoveMessage> rec =
-                        in->item.iItem == prev.size()  ? std::nullopt
-                        : in->item.iItem < prev.size() ? std::optional{ prev.at(in->item.iItem) }
-                                                       : std::optional{ future.at(future.size() - (in->item.iItem - prev.size() - 1) - 1) };
+                        prev.empty() != future.empty()
+                            ? (in->item.iItem < prev.size()
+                                   ? std::optional{ prev.at(in->item.iItem) }
+                                   : std::optional{ future.at(future.size() - (in->item.iItem - prev.size()) - 1) })
+                            : (in->item.iItem == prev.size() ? std::nullopt
+                               : in->item.iItem < prev.size()
+                                   ? std::optional{ prev.at(in->item.iItem) }
+                                   : std::optional{ future.at(future.size() - (in->item.iItem - prev.size() - 1) - 1) }
+                              );
 
                     if (in->item.iSubItem) {
                         if (in->item.mask & LVIF_TEXT) {

@@ -326,11 +326,11 @@ HIMAGELIST init_move_log_bitmaps() noexcept
 
 void update_moves_list(const HWND moves_list_list_view, const ChessGame& board) noexcept
 {
-    constexpr auto separator = 1;
+    const auto& prev = board.get_last_moves();
+    const auto& future = board.get_future_moves();
+    const auto separator = static_cast<int>(!prev.empty() && !future.empty());
     if (moves_list_list_view) {
-        ListView_SetItemCount(
-            moves_list_list_view, board.get_last_moves().size() + board.get_future_moves().size() + separator
-        );
+        ListView_SetItemCount(moves_list_list_view, prev.size() + future.size() + separator);
     }
 }
 
