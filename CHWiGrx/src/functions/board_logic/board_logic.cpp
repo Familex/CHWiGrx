@@ -147,19 +147,19 @@ void restart() noexcept
     board.reset(std::move(start_board_repr_copy));
     motion_input.clear();
     turn = start_board_repr.turn;
-    on_game_board_change(board);
+    misc::on_game_board_change(board);
 }
 
 bool copy_repr_to_clip(const HWND h_wnd) noexcept
 {
     const board_repr::BoardRepr board_repr{ board.get_repr(turn, save_all_moves) };
     const auto board_repr_str = AsString<board_repr::BoardRepr>{}(board_repr);
-    return cpy_str_to_clip(h_wnd, board_repr_str);
+    return misc::cpy_str_to_clip(h_wnd, board_repr_str);
 }
 
 auto take_repr_from_clip(const HWND h_wnd) noexcept -> ParseEither<board_repr::BoardRepr, ParseErrorType>
 {
-    return FromString<board_repr::BoardRepr>{}(take_str_from_clip(h_wnd));
+    return FromString<board_repr::BoardRepr>{}(misc::take_str_from_clip(h_wnd));
 }
 
 void make_move(const HWND h_wnd) noexcept
@@ -189,13 +189,13 @@ void make_move(const HWND h_wnd) noexcept
 
     debug_print("Curr move was:", AsString<mvmsg::MoveMessage>{}(*move_message_sus, AsStringMeta{ 0_id, 2, 2 }));
 
-    update_moves_list(moves_list_list_view, board);
+    misc::update_moves_list(moves_list_list_view, board);
 
     turn = what_next(turn);
     InvalidateRect(h_wnd, nullptr, NULL);
     UpdateWindow(h_wnd);
 
-    game_end_check(h_wnd, turn);
+    misc::game_end_check(h_wnd, turn);
 
     if (is_bot_move()) {
         make_move(h_wnd);

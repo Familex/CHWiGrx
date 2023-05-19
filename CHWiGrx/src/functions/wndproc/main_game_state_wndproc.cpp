@@ -22,7 +22,7 @@ LRESULT CALLBACK mainproc::main_game_state_wndproc(
                     if (board.undo_move()) {
                         motion_input.clear();
                         turn = what_next(turn);
-                        on_game_board_change(board);
+                        misc::on_game_board_change(board);
                     }
                     break;
 
@@ -30,10 +30,10 @@ LRESULT CALLBACK mainproc::main_game_state_wndproc(
                     if (board.restore_move()) {
                         motion_input.clear();
                         turn = what_next(turn);
-                        on_game_board_change(board);
+                        misc::on_game_board_change(board);
                         InvalidateRect(h_wnd, nullptr, NULL);
                         UpdateWindow(h_wnd);
-                        game_end_check(h_wnd, what_next(turn));
+                        misc::game_end_check(h_wnd, what_next(turn));
                     }
                     break;
 
@@ -133,9 +133,9 @@ LRESULT CALLBACK mainproc::main_game_state_wndproc(
                     // board prepare
                     motion_input.clear();
                     update_edit_menu_variables(h_wnd);
-                    change_checkerboard_color_theme(h_wnd);
+                    misc::change_checkerboard_color_theme(h_wnd);
                     board.reset_move_logger();
-                    figures_list_window = new_window::figures_list(h_wnd);
+                    figures_list_window = misc::new_window::figures_list(h_wnd);
                     destroy_window(moves_list_window);
 
                     break;
@@ -188,7 +188,7 @@ LRESULT CALLBACK mainproc::main_game_state_wndproc(
                     break;
 
                 case IDM_ABOUT:
-                    DialogBox(h_inst, MAKEINTRESOURCE(IDD_ABOUTBOX), h_wnd, about_proc);
+                    DialogBox(h_inst, MAKEINTRESOURCE(IDD_ABOUTBOX), h_wnd, misc::about_proc);
                     break;
 
                 default:

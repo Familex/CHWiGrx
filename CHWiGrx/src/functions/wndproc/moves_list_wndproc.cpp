@@ -19,7 +19,7 @@ moves_list_wndproc(const HWND h_wnd, const UINT u_msg, const WPARAM w_param, con
         case WM_CREATE:
         {
             /* list view */ {
-                moves_list_list_view = new_window::moves_log(h_wnd);
+                moves_list_list_view = misc::new_window::moves_log(h_wnd);
                 ListView_DeleteAllItems(moves_list_list_view);
 
                 /* columns */ {
@@ -49,10 +49,10 @@ moves_list_wndproc(const HWND h_wnd, const UINT u_msg, const WPARAM w_param, con
                 }
 
                 /* item count */
-                update_moves_list(moves_list_list_view, board);
+                misc::update_moves_list(moves_list_list_view, board);
 
                 /* icons */ {
-                    if (const auto& imglst = init_move_log_bitmaps()) {
+                    if (const auto& imglst = misc::init_move_log_bitmaps()) {
                         ListView_SetImageList(moves_list_list_view, imglst, LVSIL_NORMAL);
                         ListView_SetImageList(moves_list_list_view, imglst, LVSIL_SMALL);
                     }
@@ -116,7 +116,7 @@ moves_list_wndproc(const HWND h_wnd, const UINT u_msg, const WPARAM w_param, con
 
                         if (in->item.mask & LVIF_IMAGE) {
                             if (rec) {
-                                in->item.iImage = static_cast<int>(get_icon(*rec));
+                                in->item.iImage = static_cast<int>(misc::get_icon(*rec));
                             }
                         }
                     }

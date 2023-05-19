@@ -33,7 +33,7 @@ LRESULT CALLBACK mainproc::main_edit_state_wndproc(
 
                     DestroyWindow(figures_list_window);
                     SetMenu(h_wnd, LoadMenu(h_inst, MAKEINTRESOURCE(IDC_CHWIGRX)));
-                    change_checkerboard_color_theme(h_wnd);
+                    misc::change_checkerboard_color_theme(h_wnd);
                     update_bot_menu_variables(h_wnd);
                 } break;
 
@@ -45,11 +45,11 @@ LRESULT CALLBACK mainproc::main_edit_state_wndproc(
                 } break;
 
                 case IDM_TOGGLE_LIST_WINDOW:
-                    if (figures_list_window == nullptr) {
-                        figures_list_window = new_window::figures_list(h_wnd);
+                    if (figures_list_window) {
+                        destroy_window(figures_list_window);
                     }
                     else {
-                        destroy_window(figures_list_window);
+                        figures_list_window = misc::new_window::figures_list(h_wnd);
                     }
                     set_menu_checkbox(h_wnd, IDM_TOGGLE_LIST_WINDOW, figures_list_window != nullptr);
                     break;
