@@ -95,6 +95,7 @@ HWND misc::new_window::figures_list(const HWND parent) noexcept
                               .set_width(::figures_list.get_width_with_extra())
                               .set_height(::figures_list.get_height_with_extra())
                               .set_parent(parent)
+                              .unregister_class(false)
                               .build(h_inst));
 }
 
@@ -530,7 +531,7 @@ void misc::set_window_mode(const HWND wnd, const WindowState mode) noexcept
         }
 
         default:
-            assert(!"unknown state");
+            std::unreachable();
             break;
     }
 }

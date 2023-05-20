@@ -32,6 +32,7 @@ struct CreateWindowArgs
 
     // logic
     bool register_class{ true };
+    bool unregister_class{ true };
 
     // through other setters
     TCHAR sz_title[create_window_nc::MAX_LOAD_STRING]{};
@@ -77,6 +78,7 @@ struct CreateWindowArgsBuilder
     DECLARE_SETTER(set_cls_extra_data, cls_extra_data)
 
     DECLARE_SETTER(register_class, register_class)
+    DECLARE_SETTER(unregister_class, unregister_class)
 
 #undef DECLARE_SETTER
 };
