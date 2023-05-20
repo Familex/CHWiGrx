@@ -54,10 +54,13 @@ auto create_window(CreateWindowArgs&& args) noexcept -> std::expected<HWND, DWOR
 {
     /* register/unregister class */ {
         WNDCLASSEX prev_wc{};
-        const auto is_class_exists{ GetClassInfoEx(args.wc.hInstance, args.sz_class_name, &prev_wc) != FALSE };
+        auto is_class_exists{ GetClassInfoEx(args.wc.hInstance, args.sz_class_name, &prev_wc) != FALSE };
         if (args.unregister_class && is_class_exists) {
             if (!UnregisterClass(args.sz_class_name, args.wc.hInstance)) {
                 return std::unexpected{ GetLastError() };
+            }
+            else {
+                is_class_exists = false;
             }
         }
         if (args.register_class && !is_class_exists && !RegisterClassEx(&args.wc)) {
