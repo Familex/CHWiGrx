@@ -88,7 +88,7 @@ HWND misc::new_window::figures_list(const HWND parent) noexcept
                               .set_wc_icon_sm(LoadIcon(h_inst, MAKEINTRESOURCE(IDI_FIGURES_LIST)))
                               .set_wc_background(CHECKERBOARD_DARK)
                               .set_class_name(FIGURES_LIST_WINDOW_CLASS_NAME)
-                              .set_title(FIGURES_LIST_WINDOW_TITLE)
+                              .set_title(static_cast<UINT>(IDS_FIGURES_LIST_TITLE))
                               .set_style(WS_OVERLAPPEDWINDOW | WS_VSCROLL | WS_HSCROLL)
                               .set_x(FIGURES_LIST_WINDOW_DEFAULT_POS.x)
                               .set_y(FIGURES_LIST_WINDOW_DEFAULT_POS.y)
@@ -265,39 +265,42 @@ bool misc::game_end_check(const HWND h_wnd, const Color turn) noexcept
         curr_game_end_state != GameEndType::NotGameEnd)
     {
         std::wstring body;
-        const std::wstring head = L"Game end";
         switch (curr_game_end_state) {
             case GameEndType::Checkmate:
-            {
-                const auto who_next = what_next(turn);
-                body = who_next == Color::White   ? L"White wins!"
-                       : who_next == Color::Black ? L"Black wins!"
-                                                  : L"None wins!";
-            } break;
+                body = misc::load_resource_string(
+                    what_next(turn) == Color::White ? IDS_GAME_END_WHITE_WON : IDS_GAME_END_BLACK_WON
+                );
+                break;
 
             case GameEndType::Stalemate:
-                body = turn == Color::White   ? L"Stalemate to white!"
-                       : turn == Color::Black ? L"Stalemate to black!"
-                                              : L"Stalemate?";
+                body = misc::load_resource_string(
+                    turn == Color::White ? IDS_GAME_END_WHITE_STALEMATE : IDS_GAME_END_BLACK_STALEMATE
+                );
+
                 break;
 
             case GameEndType::FiftyRule:
-                body = L"Fifty rule";
+                body = misc::load_resource_string(IDS_GAME_END_FIFTY_RULE);
                 break;
 
             case GameEndType::InsufficientMaterial:
-                body = L"Insufficient material";
+                body = misc::load_resource_string(IDS_GAME_END_INSUFFICIENT_MATERIAL);
                 break;
 
             case GameEndType::MoveRepeat:
-                body = L"Move repeat rule";
+                body = misc::load_resource_string(IDS_GAME_END_MOVE_REPEAT_RULE);
                 break;
 
             default:
                 assert(!"unexpected game end");
                 break;
         }
-        if (const auto result = MessageBox(h_wnd, (body + L"\nCopy board to clip?").c_str(), head.c_str(), MB_YESNO);
+        if (const auto result = MessageBox(
+                h_wnd,
+                (body + TEXT('\n') + misc::load_resource_string(IDS_COPY_BOARD_REQUEST) + TEXT('?')).c_str(),
+                misc::load_resource_string(IDS_GAME_END_TITLE).c_str(),
+                MB_YESNO
+            );
             result == IDYES)
         {
             copy_repr_to_clip(h_wnd);

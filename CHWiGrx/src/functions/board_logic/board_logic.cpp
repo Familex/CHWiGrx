@@ -8,61 +8,60 @@
 void update_main_window_title(const HWND h_wnd) noexcept
 {
     /* CHWiGrx vs bot [check] */
-    std::wstring title = L"CHWiGrx ";
-    title.reserve(64);    // hardcoded (CHWiGrx vs NeuralNetwork bot diff.NaN [Check to Black])
+    auto title = misc::load_resource_string(IDS_GAME_MODE_TITLE_BEGIN) + TEXT(' ');
 
     if (bot_type) {
-        title += L"vs ";
+        title += misc::load_resource_string(IDS_GAME_MODE_TITLE_VERSUS) + TEXT(' ');
 
         switch (*bot_type) {
             case bot::Type::Random:
-                title += L"Random ";
+                title += misc::load_resource_string(IDS_BOT_RANDOM) + TEXT(' ');
                 break;
             case bot::Type::Minimax:
-                title += L"Minimax ";
+                title += misc::load_resource_string(IDS_BOT_MINIMAX) + TEXT(' ');
                 break;
             case bot::Type::AlphaBeta:
-                title += L"AlphaBeta ";
+                title += misc::load_resource_string(IDS_BOT_ALPHABETA) + TEXT(' ');
                 break;
             case bot::Type::MonteCarlo:
-                title += L"MonteCarlo ";
+                title += misc::load_resource_string(IDS_BOT_MONTECARLO) + TEXT(' ');
                 break;
             case bot::Type::NeuralNetwork:
-                title += L"NeuralNetwork ";
+                title += misc::load_resource_string(IDS_BOT_NEURALNETWORK) + TEXT(' ');
                 break;
             default:
-                title += L"Undefined ";
+                title += misc::load_resource_string(NULL) + TEXT(' ');
                 break;
         }
 
-        title += L"bot ";
-
         switch (bot_difficulty) {
             case bot::Difficulty::D0:
-                title += L"diff.0 ";
+                title += misc::load_resource_string(IDS_BOT_DIFFICULTY_0) + TEXT(' ');
                 break;
             case bot::Difficulty::D1:
-                title += L"diff.1 ";
+                title += misc::load_resource_string(IDS_BOT_DIFFICULTY_1) + TEXT(' ');
                 break;
             case bot::Difficulty::D2:
-                title += L"diff.2 ";
+                title += misc::load_resource_string(IDS_BOT_DIFFICULTY_2) + TEXT(' ');
                 break;
             case bot::Difficulty::D3:
-                title += L"diff.3 ";
+                title += misc::load_resource_string(IDS_BOT_DIFFICULTY_3) + TEXT(' ');
                 break;
             default:
-                title += L"diff.NaN ";
+                title += misc::load_resource_string(NULL) + TEXT(' ');
                 break;
         }
     }
 
     if (board.is_empty()) {
-        title += L"[Empty board]";
+        title += TEXT('[') + misc::load_resource_string(IDS_GAME_MODE_TITLE_EMPTY) + TEXT(']');
     }
     else if (board.check_for_when(turn)) {
-        title += L"[Check to ";
-        title += turn == Color::White ? L"White" : turn == Color::Black ? L"Black" : L"None";
-        title += L"]";
+        title += TEXT('{') +
+                 misc::load_resource_string(
+                     turn == Color::White ? IDS_GAME_MODE_TITLE_WHITE_CHECK : IDS_GAME_MODE_TITLE_BLACK_CHECK
+                 ) +
+                 TEXT('}');
     }
 
     SetWindowText(h_wnd, title.c_str());

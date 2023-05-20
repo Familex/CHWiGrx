@@ -228,6 +228,7 @@
     <ClCompile Include="src\functions\wndproc\main_game_state_wndproc.cpp" />
     <ClCompile Include="src\functions\wndproc\moves_list_wndproc.cpp" />
     <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\variables\constants.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

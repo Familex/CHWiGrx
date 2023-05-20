@@ -23,17 +23,20 @@ moves_list_wndproc(const HWND h_wnd, const UINT u_msg, const WPARAM w_param, con
                 ListView_DeleteAllItems(moves_list_list_view);
 
                 /* columns */ {
-                    using TextCol = std::pair<LPCTSTR, Column>;
+                    using TextCol = std::pair<LPTSTR, Column>;
 
                     /* init */ {
-                        for (const auto [name, ind] : { TextCol{ TEXT("From"), Column::From },
-                                                        TextCol{ TEXT("Target"), Column::Target },
-                                                        TextCol{ TEXT("Figure"), Column::Figure } })
+                        auto str_from = misc::load_resource_string(IDS_MOVE_LOG_FROM);
+                        auto str_target = misc::load_resource_string(IDS_MOVE_LOG_TARGET);
+                        auto str_figure = misc::load_resource_string(IDS_MOVE_LOG_FIGURE);
+                        for (auto [name, ind] : { TextCol{ str_from.data(), Column::From },
+                                                  TextCol{ str_target.data(), Column::Target },
+                                                  TextCol{ str_figure.data(), Column::Figure } })
                         {
                             LV_COLUMN lv_col{ .mask = LVCF_FMT | LVCF_WIDTH | LVCF_TEXT | LVCF_SUBITEM,
                                               .fmt = LVCFMT_LEFT,
                                               .cx = 120,
-                                              .pszText = const_cast<LPTSTR>(name) };
+                                              .pszText = name };
 
                             ListView_InsertColumn(moves_list_list_view, static_cast<std::size_t>(ind), &lv_col);
                         }
@@ -41,9 +44,9 @@ moves_list_wndproc(const HWND h_wnd, const UINT u_msg, const WPARAM w_param, con
 
                     /* width */ {
                         ListView_SetColumnWidth(moves_list_list_view, static_cast<std::size_t>(Column::From), 45);
-                        ListView_SetColumnWidth(moves_list_list_view, static_cast<std::size_t>(Column::Target), 45);
+                        ListView_SetColumnWidth(moves_list_list_view, static_cast<std::size_t>(Column::Target), 52);
                         ListView_SetColumnWidth(
-                            moves_list_list_view, static_cast<std::size_t>(Column::Figure), 64 + 48
+                            moves_list_list_view, static_cast<std::size_t>(Column::Figure), MOVE_LOG_ICONS_WIDTH + 48
                         );
                     }
                 }

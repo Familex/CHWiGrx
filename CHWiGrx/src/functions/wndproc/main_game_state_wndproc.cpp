@@ -86,7 +86,7 @@ LRESULT CALLBACK mainproc::main_game_state_wndproc(
                         moves_list_window = *create_window(CreateWindowArgsBuilder{}
                                                                .set_class_name(TEXT("CHWIGRX:MOVES_LOG"))
                                                                .set_style(WS_OVERLAPPEDWINDOW)
-                                                               .set_title(TEXT("Moves Log"))
+                                                               .set_title(static_cast<UINT>(IDS_MOVE_LOG_TITLE))
                                                                .set_wc_wndproc(moves_list_wndproc)
                                                                .set_parent(h_wnd)
                                                                .build(h_inst));

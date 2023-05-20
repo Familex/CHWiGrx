@@ -44,7 +44,12 @@ int APIENTRY wWinMain(
 #ifdef _DEBUG
     if (const auto error = misc::create_console()) {
         const auto error_str = std::to_wstring(error);
-        MessageBox(nullptr, error_str.data(), L"Error while creating console", MB_OK | MB_ICONERROR);
+        MessageBox(
+            nullptr,
+            error_str.data(),
+            misc::load_resource_string(IDS_CREATE_CONSOLE_ERROR).c_str(),
+            MB_OK | MB_ICONERROR
+        );
     }
 #endif    // _DEBUG
 

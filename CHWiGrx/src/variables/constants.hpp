@@ -26,7 +26,6 @@ inline const int HEADER_HEIGHT{ GetSystemMetrics(SM_CXPADDEDBORDER) + GetSystemM
                                 GetSystemMetrics(SM_CYCAPTION) + GetSystemMetrics(SM_CYFRAME) };
 inline const int SCROLLBAR_THICKNESS{ GetSystemMetrics(SM_CXVSCROLL) };
 inline const LPCTSTR FIGURES_LIST_WINDOW_CLASS_NAME{ L"CHWIGRX:LIST" };
-inline const LPCTSTR FIGURES_LIST_WINDOW_TITLE{ L"Figures list" };
 inline const LPCTSTR CURR_CHOICE_WINDOW_CLASS_NAME{ L"CHWIGRX:CHOICE" };
 inline constexpr Pos FIGURES_LIST_WINDOW_DEFAULT_POS{ CW_USEDEFAULT, CW_USEDEFAULT };
 inline constexpr Pos FIGURES_LIST_WINDOW_DEFAULT_DIMENSIONS{ 300, 300 };
