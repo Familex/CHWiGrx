@@ -60,6 +60,8 @@ void update_moves_list(HWND, const ChessGame&) noexcept;
 
 void on_game_board_change(const ChessGame&) noexcept;
 
+[[nodiscard]] std::wstring load_resource_string(UINT) noexcept;
+
 [[nodiscard]] std::wstring to_wstring(FigureType) noexcept;
 
 [[nodiscard]] std::wstring to_wstring(const std::string&) noexcept;

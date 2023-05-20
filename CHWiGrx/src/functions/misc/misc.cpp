@@ -412,31 +412,31 @@ void misc::update_moves_list(const HWND moves_list_list_view, const ChessGame& b
 
 void misc::on_game_board_change(const ChessGame& board) noexcept { update_moves_list(moves_list_list_view, board); }
 
-std::wstring misc::to_wstring(const FigureType type) noexcept
+std::wstring misc::load_resource_string(const UINT id) noexcept
 {
     constexpr auto max_len = MAX_PATH;
-    TCHAR out[max_len]{ L"Unknown" };
+    TCHAR result[max_len]{ TEXT("Unknown resource id") };
+    LoadString(h_inst, id, result, max_len);
+    return result;
+}
+
+std::wstring misc::to_wstring(const FigureType type) noexcept
+{
     switch (type) {
         case FigureType::Pawn:
-            LoadString(h_inst, IDS_FIGURE_TYPE_PAWN, out, max_len);
-            break;
+            return load_resource_string(IDS_FIGURE_TYPE_PAWN);
         case FigureType::Bishop:
-            LoadString(h_inst, IDS_FIGURE_TYPE_BISHOP, out, max_len);
-            break;
+            return load_resource_string(IDS_FIGURE_TYPE_BISHOP);
         case FigureType::Rook:
-            LoadString(h_inst, IDS_FIGURE_TYPE_ROOK, out, max_len);
-            break;
+            return load_resource_string(IDS_FIGURE_TYPE_ROOK);
         case FigureType::Knight:
-            LoadString(h_inst, IDS_FIGURE_TYPE_KNIGHT, out, max_len);
-            break;
+            return load_resource_string(IDS_FIGURE_TYPE_KNIGHT);
         case FigureType::Queen:
-            LoadString(h_inst, IDS_FIGURE_TYPE_QUEEN, out, max_len);
-            break;
+            return load_resource_string(IDS_FIGURE_TYPE_QUEEN);
         case FigureType::King:
-            LoadString(h_inst, IDS_FIGURE_TYPE_KING, out, max_len);
-            break;
+            return load_resource_string(IDS_FIGURE_TYPE_KING);
     }
-    return out;
+    return load_resource_string(NULL);
 }
 
 std::wstring misc::to_wstring(const std::string& source) noexcept
