@@ -40,8 +40,8 @@ moves_list_wndproc(const HWND h_wnd, const UINT u_msg, const WPARAM w_param, con
                     }
 
                     /* width */ {
-                        ListView_SetColumnWidth(moves_list_list_view, static_cast<std::size_t>(Column::From), 50);
-                        ListView_SetColumnWidth(moves_list_list_view, static_cast<std::size_t>(Column::Target), 50);
+                        ListView_SetColumnWidth(moves_list_list_view, static_cast<std::size_t>(Column::From), 45);
+                        ListView_SetColumnWidth(moves_list_list_view, static_cast<std::size_t>(Column::Target), 45);
                         ListView_SetColumnWidth(
                             moves_list_list_view, static_cast<std::size_t>(Column::Figure), 64 + 48
                         );
@@ -94,7 +94,7 @@ moves_list_wndproc(const HWND h_wnd, const UINT u_msg, const WPARAM w_param, con
                                 case Column::From:
                                 {
                                     const auto text = rec ? board.pos_to_string(rec->input.from) : "";
-                                    insert_text(in->item, std::wstring{ text.begin(), text.end() }.c_str());
+                                    insert_text(in->item, misc::to_wstring(text).c_str());
 
                                     break;
                                 }
@@ -102,7 +102,7 @@ moves_list_wndproc(const HWND h_wnd, const UINT u_msg, const WPARAM w_param, con
                                 case Column::Target:
                                 {
                                     const auto text = rec ? board.pos_to_string(rec->input.target) : "";
-                                    insert_text(in->item, std::wstring{ text.begin(), text.end() }.c_str());
+                                    insert_text(in->item, misc::to_wstring(text).c_str());
 
                                     break;
                                 }

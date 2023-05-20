@@ -439,6 +439,16 @@ std::wstring misc::to_wstring(const FigureType type) noexcept
     return out;
 }
 
+std::wstring misc::to_wstring(const std::string& source) noexcept
+{
+    constexpr auto max_len = 0x100;
+    WCHAR result[max_len]{};
+
+    MultiByteToWideChar(CP_ACP, MB_PRECOMPOSED, source.c_str(), static_cast<int>(source.length()), result, max_len);
+
+    return result;
+}
+
 HCURSOR misc::load_animated_cursor(UINT nID, LPCTSTR pszResouceType) noexcept
 {
     HCURSOR cursor = nullptr;

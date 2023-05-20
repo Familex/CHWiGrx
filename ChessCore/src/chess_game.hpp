@@ -79,7 +79,7 @@ public:
     {
         const auto x = idw_ ? HEIGHT - pos.x : pos.x + 1;
         const auto y = idw_ ? pos.y : WIDTH - pos.y - 1;
-        return std::string{ static_cast<char>('A' + static_cast<char>(y)), 1 } + std::to_string(x);
+        return static_cast<char>('A' + y) + std::to_string(x);
     }
 
     void reset(board_repr::BoardRepr&& map) noexcept
