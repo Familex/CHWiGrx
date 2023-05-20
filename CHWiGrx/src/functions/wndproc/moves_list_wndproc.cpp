@@ -19,7 +19,7 @@ moves_list_wndproc(const HWND h_wnd, const UINT u_msg, const WPARAM w_param, con
         case WM_CREATE:
         {
             /* list view */ {
-                moves_list_list_view = misc::new_window::moves_log(h_wnd);
+                moves_list_list_view = misc::new_window::move_log_list_view(h_wnd);
                 ListView_DeleteAllItems(moves_list_list_view);
 
                 /* columns */ {

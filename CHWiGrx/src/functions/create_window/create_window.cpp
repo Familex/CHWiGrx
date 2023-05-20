@@ -16,8 +16,10 @@
             );
         }
         else {
-            wcsncpy_s(result.sz_class_name, std::get<LPCTSTR>(result.class_name), create_window_nc::MAX_LOAD_STRING);
-            result.sz_class_name[create_window_nc::MAX_LOAD_STRING - 1] = '\0';
+            if (const auto class_name_str = std::get<LPCTSTR>(result.class_name)) {
+                wcsncpy_s(result.sz_class_name, class_name_str, create_window_nc::MAX_LOAD_STRING);
+                result.sz_class_name[create_window_nc::MAX_LOAD_STRING - 1] = '\0';
+            }
         }
 
         result.wc.lpszClassName = result.sz_class_name;
@@ -33,8 +35,10 @@
                 LoadString(h_inst, std::get<UINT>(result.title), result.sz_title, create_window_nc::MAX_LOAD_STRING);
         }
         else {
-            wcsncpy_s(result.sz_title, std::get<LPCTSTR>(result.title), create_window_nc::MAX_LOAD_STRING);
-            result.sz_title[create_window_nc::MAX_LOAD_STRING - 1] = '\0';
+            if (const auto title_str = std::get<LPCTSTR>(result.title)) {
+                wcsncpy_s(result.sz_title, title_str, create_window_nc::MAX_LOAD_STRING);
+                result.sz_title[create_window_nc::MAX_LOAD_STRING - 1] = '\0';
+            }
         }
     }
 
@@ -49,9 +53,9 @@
 auto create_window(CreateWindowArgs&& args) noexcept -> std::expected<HWND, DWORD>
 {
     if (args.register_class) {
-        if (!UnregisterClass(args.sz_class_name, GetModuleHandle(nullptr))) {
-            if (const auto error = GetLastError(); error != ERROR_CLASS_DOES_NOT_EXIST) {
-                return std::unexpected{ error };
+        if (WNDCLASSEX prev_wc{}; GetClassInfoEx(args.wc.hInstance, args.sz_class_name, &prev_wc)) {
+            if (!UnregisterClass(args.sz_class_name, args.wc.hInstance)) {
+                return std::unexpected{ GetLastError() };
             }
         }
         if (!RegisterClassEx(&args.wc)) {

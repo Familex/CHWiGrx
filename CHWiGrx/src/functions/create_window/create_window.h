@@ -15,10 +15,10 @@ struct CreateWindowArgs
 {
     // data
     DWORD ex_style{};
-    WNDCLASSEX wc{ .cbSize = sizeof(WNDCLASSEX) };
+    WNDCLASSEX wc{ .cbSize = sizeof(WNDCLASSEX), .style = CS_VREDRAW | CS_HREDRAW };
     std::variant<LPCTSTR, UINT> class_name{};
     std::variant<LPCTSTR, UINT> title{};
-    DWORD style{ CS_VREDRAW | CS_HREDRAW };
+    DWORD style{ WS_OVERLAPPEDWINDOW };
     int x{ CW_USEDEFAULT };
     int y{ CW_USEDEFAULT };
     int width{ CW_USEDEFAULT };

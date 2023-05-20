@@ -19,23 +19,8 @@ LRESULT CALLBACK mainproc::main_edit_state_wndproc(
         {
             switch (const int wm_id = LOWORD(w_param)) {
                 case IDM_SET_GAME_WINDOW_MODE:
-                {
-                    window_state = WindowState::Game;
-                    // set icon
-                    auto h_big_game_icon = LoadImage(
-                        h_inst, MAKEINTRESOURCE(IDI_GAME_MODE_BIG), IMAGE_ICON, 0, 0, LR_DEFAULTSIZE | LR_SHARED
-                    );
-                    auto h_mini_game_icon = LoadImage(
-                        h_inst, MAKEINTRESOURCE(IDI_GAME_MODE_SMALL), IMAGE_ICON, 0, 0, LR_DEFAULTSIZE | LR_SHARED
-                    );
-                    SendMessage(h_wnd, WM_SETICON, ICON_BIG, reinterpret_cast<LPARAM>(h_big_game_icon));
-                    SendMessage(h_wnd, WM_SETICON, ICON_SMALL, reinterpret_cast<LPARAM>(h_mini_game_icon));
-
-                    DestroyWindow(figures_list_window);
-                    SetMenu(h_wnd, LoadMenu(h_inst, MAKEINTRESOURCE(IDC_CHWIGRX)));
-                    misc::change_checkerboard_color_theme(h_wnd);
-                    update_bot_menu_variables(h_wnd);
-                } break;
+                    misc::set_window_mode(h_wnd, WindowState::Game);
+                    break;
 
                 case IDM_CLEAR_BOARD:
                 {
@@ -51,6 +36,7 @@ LRESULT CALLBACK mainproc::main_edit_state_wndproc(
                     else {
                         figures_list_window = misc::new_window::figures_list(h_wnd);
                     }
+
                     set_menu_checkbox(h_wnd, IDM_TOGGLE_LIST_WINDOW, figures_list_window != nullptr);
                     break;
 

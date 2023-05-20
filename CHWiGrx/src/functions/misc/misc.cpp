@@ -120,9 +120,10 @@ HWND misc::new_window::curr_choice(
     return *create_window(CreateWindowArgsBuilder{}
                               .set_ex_style(WS_EX_LAYERED | WS_EX_NOACTIVATE)
                               .set_wc_wndproc(callback)
-                              .set_wc_icon(LoadIcon(nullptr, MAKEINTRESOURCE(IDI_GAME_MODE_BIG)))
-                              .set_wc_icon_sm(LoadIcon(nullptr, MAKEINTRESOURCE(IDI_GAME_MODE_SMALL)))
+                              .set_wc_icon(LoadIcon(h_inst, MAKEINTRESOURCE(IDI_GAME_MODE_BIG)))
+                              .set_wc_icon_sm(LoadIcon(h_inst, MAKEINTRESOURCE(IDI_GAME_MODE_SMALL)))
                               .set_wc_wnd_extra(static_cast<int>(sizeof(in_hand)))
+                              .set_wc_style(CS_SAVEBITS)
                               .set_x(mouse.x - w / 2)
                               .set_y(mouse.y - h / 2)
                               .set_width(w)
@@ -141,15 +142,24 @@ HWND misc::new_window::curr_choice(
                               .build(h_inst));
 }
 
-HWND misc::new_window::moves_log(const HWND parent) noexcept
+HWND misc::new_window::move_log(const HWND parent) noexcept
+{
+    return *create_window(CreateWindowArgsBuilder{}
+                              .set_class_name(TEXT("CHWIGRX:MOVES_LOG"))
+                              .set_style(WS_OVERLAPPEDWINDOW)
+                              .set_title(static_cast<UINT>(IDS_MOVE_LOG_TITLE))
+                              .set_wc_wndproc(moves_list_wndproc)
+                              .set_parent(parent)
+                              .build(h_inst));
+}
+
+HWND misc::new_window::move_log_list_view(const HWND parent) noexcept
 {
     return *create_window(
         CreateWindowArgsBuilder{}
             .register_class(false)
-            .set_wc_wndproc(moves_list_wndproc)
             .set_ex_style(WS_EX_CLIENTEDGE)
             .set_class_name(WC_LISTVIEW)
-            .set_title(TEXT("Moves log"))
             .set_style(WS_TABSTOP | WS_CHILD | WS_BORDER | WS_VISIBLE | LVS_AUTOARRANGE | LVS_REPORT | LVS_OWNERDATA)
             .set_parent(parent)
             .build(h_inst)
@@ -473,4 +483,54 @@ HCURSOR misc::load_animated_cursor(UINT nID, LPCTSTR pszResouceType) noexcept
         }
     }
     return cursor;
+}
+
+void misc::set_window_mode(const HWND wnd, const WindowState mode) noexcept
+{
+    ::window_state = mode;
+    misc::change_checkerboard_color_theme(wnd);
+
+    switch (mode) {
+        case WindowState::Game:
+        {
+            const auto h_big_game_icon =
+                LoadImage(::h_inst, MAKEINTRESOURCE(IDI_GAME_MODE_BIG), IMAGE_ICON, 0, 0, LR_DEFAULTSIZE | LR_SHARED);
+            const auto h_mini_game_icon =
+                LoadImage(::h_inst, MAKEINTRESOURCE(IDI_GAME_MODE_SMALL), IMAGE_ICON, 0, 0, LR_DEFAULTSIZE | LR_SHARED);
+            SendMessage(wnd, WM_SETICON, ICON_BIG, reinterpret_cast<LPARAM>(h_big_game_icon));
+            SendMessage(wnd, WM_SETICON, ICON_SMALL, reinterpret_cast<LPARAM>(h_mini_game_icon));
+
+            SetMenu(wnd, LoadMenu(::h_inst, MAKEINTRESOURCE(IDC_CHWIGRX)));
+
+            update_bot_menu_variables(wnd);
+
+            destroy_window(::figures_list_window);
+
+            break;
+        }
+
+        case WindowState::Edit:
+        {
+            const auto h_edit_icon =
+                LoadImage(::h_inst, MAKEINTRESOURCE(IDI_EDIT_MODE), IMAGE_ICON, 0, 0, LR_DEFAULTSIZE | LR_SHARED);
+            SendMessage(wnd, WM_SETICON, ICON_SMALL, reinterpret_cast<LPARAM>(h_edit_icon));
+            SendMessage(wnd, WM_SETICON, ICON_BIG, reinterpret_cast<LPARAM>(h_edit_icon));
+
+            SetMenu(wnd, LoadMenu(::h_inst, MAKEINTRESOURCE(IDR_CHWIGRX_EDIT_MENU)));
+
+            ::motion_input.clear();
+            ::board.reset_move_logger();
+
+            update_edit_menu_variables(wnd);
+
+            ::figures_list_window = misc::new_window::figures_list(wnd);
+            destroy_window(::moves_list_window);
+
+            break;
+        }
+
+        default:
+            assert(!"unknown state");
+            break;
+    }
 }

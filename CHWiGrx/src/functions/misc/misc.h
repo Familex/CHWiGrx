@@ -1,5 +1,6 @@
 #pragma once
 
+#include "../../structs/window_state.hpp"
 #include "../../winapi/framework.hpp"
 #include "chess_game.hpp"
 
@@ -37,7 +38,9 @@ HWND curr_choice(HWND, const Figure*, POINT, int, int, WNDPROC) noexcept;
 
 HWND figures_list(HWND) noexcept;
 
-HWND moves_log(HWND) noexcept;
+HWND move_log(HWND) noexcept;
+
+HWND move_log_list_view(HWND) noexcept;
 }    // namespace new_window
 
 INT_PTR CALLBACK about_proc(HWND, UINT, WPARAM, LPARAM) noexcept;
@@ -68,5 +71,6 @@ void on_game_board_change(const ChessGame&) noexcept;
 
 [[nodiscard]] HCURSOR load_animated_cursor(UINT, LPCTSTR) noexcept;
 
+void set_window_mode(HWND, WindowState) noexcept;
 
 }    // namespace misc

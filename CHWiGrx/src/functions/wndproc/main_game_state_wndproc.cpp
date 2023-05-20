@@ -82,17 +82,11 @@ LRESULT CALLBACK mainproc::main_game_state_wndproc(
 
                 case IDM_WINDOW_MOVELOG:
                 {
-                    if (!moves_list_window) {
-                        moves_list_window = *create_window(CreateWindowArgsBuilder{}
-                                                               .set_class_name(TEXT("CHWIGRX:MOVES_LOG"))
-                                                               .set_style(WS_OVERLAPPEDWINDOW)
-                                                               .set_title(static_cast<UINT>(IDS_MOVE_LOG_TITLE))
-                                                               .set_wc_wndproc(moves_list_wndproc)
-                                                               .set_parent(h_wnd)
-                                                               .build(h_inst));
+                    if (moves_list_window) {
+                        destroy_window(moves_list_window);
                     }
                     else {
-                        destroy_window(moves_list_window);
+                        moves_list_window = misc::new_window::move_log(h_wnd);
                     }
 
                     update_game_menu_variables(h_wnd);
@@ -121,25 +115,8 @@ LRESULT CALLBACK mainproc::main_game_state_wndproc(
                 } break;
 
                 case IDM_SET_EDITOR_WINDOW_MODE:
-                {
-                    window_state = WindowState::Edit;
-                    // set icon
-                    auto h_edit_icon =
-                        LoadImage(h_inst, MAKEINTRESOURCE(IDI_EDIT_MODE), IMAGE_ICON, 0, 0, LR_DEFAULTSIZE | LR_SHARED);
-                    SendMessage(h_wnd, WM_SETICON, ICON_SMALL, reinterpret_cast<LPARAM>(h_edit_icon));
-                    SendMessage(h_wnd, WM_SETICON, ICON_BIG, reinterpret_cast<LPARAM>(h_edit_icon));
-                    // set menu
-                    SetMenu(h_wnd, LoadMenu(h_inst, MAKEINTRESOURCE(IDR_CHWIGRX_EDIT_MENU)));
-                    // board prepare
-                    motion_input.clear();
-                    update_edit_menu_variables(h_wnd);
-                    misc::change_checkerboard_color_theme(h_wnd);
-                    board.reset_move_logger();
-                    figures_list_window = misc::new_window::figures_list(h_wnd);
-                    destroy_window(moves_list_window);
-
+                    misc::set_window_mode(h_wnd, WindowState::Edit);
                     break;
-                }
 
                 /* ---- Bot ------------------------------------------- */
                 case IDM_TOGGLE_BOT:
