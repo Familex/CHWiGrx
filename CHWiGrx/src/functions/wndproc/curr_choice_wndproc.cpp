@@ -41,10 +41,10 @@ template <
 LRESULT CALLBACK
 curr_choice_wndproc(const HWND h_wnd, const UINT u_msg, const WPARAM w_param, const LPARAM l_param) noexcept
 {
-    static constexpr int TO_DESTROY_TIMER_ID{ MAIN_WINDOW_CHOICE_TO_DESTROY_TIMER_ID };
+    static constexpr int TO_DESTROY_TIMER_ID{ constants::MAIN_WINDOW_CHOICE_TO_DESTROY_TIMER_ID };
     switch (u_msg) {
         case WM_CREATE:
-            SetTimer(h_wnd, TO_DESTROY_TIMER_ID, TO_DESTROY_ELAPSE_DEFAULT_IN_MS, nullptr);
+            SetTimer(h_wnd, TO_DESTROY_TIMER_ID, constants::TO_DESTROY_ELAPSE_DEFAULT_IN_MS, nullptr);
             break;
         case WM_TIMER:
             if (w_param == TO_DESTROY_TIMER_ID) {
@@ -66,7 +66,7 @@ curr_choice_wndproc(const HWND h_wnd, const UINT u_msg, const WPARAM w_param, co
 
             const auto to_ignore = get_to_ignore(h_wnd);
 
-            if (const Pos where_fig = main_window.get_figure_under_mouse(cur_pos);
+            if (const Pos where_fig = mutables::main_window.get_figure_under_mouse(cur_pos);
                 (target_pos_game_check || is_valid_coords(where_fig)) &&
                 !std::ranges::any_of(to_ignore, [cur_pos](const RECT rc) {
                     return rc.top <= cur_pos.y && cur_pos.y <= rc.bottom && rc.left <= cur_pos.x &&
@@ -120,15 +120,15 @@ namespace figures_list
 void on_success(HWND, const Pos& where_fig, bool, WPARAM, LPARAM, Figure* stored_fig) noexcept
 {
     stored_fig->move_to(where_fig);
-    board.place_fig(stored_fig);
+    ::mutables::board.place_fig(stored_fig);
     if (stored_fig->is(FigureType::Rook)) {
-        board.on_castling(stored_fig->get_id());
+        ::mutables::board.on_castling(stored_fig->get_id());
     }
 }
 
 void on_fail(HWND, const Pos&, bool, WPARAM, LPARAM, const Figure* stored_fig) noexcept { delete stored_fig; }
 
-void after_check(Figure*) noexcept { motion_input.clear(); }
+void after_check(Figure*) noexcept { ::mutables::motion_input.clear(); }
 
 }    // namespace figures_list
 
@@ -147,8 +147,8 @@ void on_success(const HWND wnd, const Pos& where_fig, const bool target_pos_game
 void on_fail(HWND, const Pos&, bool, WPARAM, LPARAM, const Figure* const stored_fig) noexcept
 {
     // Moved figure out of the board without checking validity => delete it from the board
-    board.delete_fig(stored_fig->get_pos());
-    motion_input.clear();
+    mutables::board.delete_fig(stored_fig->get_pos());
+    mutables::motion_input.clear();
 }
 
 void after_check(const Figure* const stored_fig) noexcept { delete stored_fig; }

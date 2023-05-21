@@ -21,7 +21,7 @@ main_default_wndproc(const HWND h_wnd, const UINT message, const WPARAM w_param,
                 case IDM_PASTE_MAP:
                 {
                     paste_board_repr(h_wnd, misc::take_str_from_clip(h_wnd));
-                    misc::on_game_board_change(board);
+                    misc::on_game_board_change(mutables::board);
                 }
                     InvalidateRect(h_wnd, nullptr, NULL);
                     break;
@@ -32,8 +32,10 @@ main_default_wndproc(const HWND h_wnd, const UINT message, const WPARAM w_param,
                     GetWindowRect(h_wnd, &rect);
 
                     const int quad_side = (rect.right - rect.left + rect.bottom - rect.top) / 2;
-                    main_window.set_size(quad_side, quad_side + HEADER_HEIGHT);
-                    SetWindowPos(h_wnd, nullptr, 0, 0, quad_side, quad_side + HEADER_HEIGHT, SWP_NOZORDER | SWP_NOMOVE);
+                    mutables::main_window.set_size(quad_side, quad_side + constants::HEADER_HEIGHT);
+                    SetWindowPos(
+                        h_wnd, nullptr, 0, 0, quad_side, quad_side + constants::HEADER_HEIGHT, SWP_NOZORDER | SWP_NOMOVE
+                    );
                 } break;
 
                 case IDM_EXIT:
@@ -79,11 +81,11 @@ main_default_wndproc(const HWND h_wnd, const UINT message, const WPARAM w_param,
             break;
 
         case WM_MOVE:
-            main_window.set_pos(l_param);
+            mutables::main_window.set_pos(l_param);
             break;
 
         case WM_SIZE:
-            main_window.set_size(l_param);
+            mutables::main_window.set_size(l_param);
             InvalidateRect(h_wnd, nullptr, NULL);
             break;
 
@@ -95,7 +97,7 @@ main_default_wndproc(const HWND h_wnd, const UINT message, const WPARAM w_param,
             break;
     }
 
-    switch (window_state) {
+    switch (mutables::window_state) {
         case WindowState::Game:
             return mainproc::main_game_state_wndproc(h_wnd, message, w_param, l_param);
         case WindowState::Edit:
@@ -108,20 +110,20 @@ main_default_wndproc(const HWND h_wnd, const UINT message, const WPARAM w_param,
 void paste_board_repr(const HWND wnd, const std::string_view board_repr) noexcept
 {
     if (auto board_repr_sus = FromString<board_repr::BoardRepr>{}(board_repr)) {
-        turn = board_repr_sus->value.turn;
-        board.reset(std::move(board_repr_sus->value));
-        motion_input.clear();
-        misc::on_game_board_change(board);
+        mutables::turn = board_repr_sus->value.turn;
+        mutables::board.reset(std::move(board_repr_sus->value));
+        mutables::motion_input.clear();
+        misc::on_game_board_change(mutables::board);
     }
     else {
         const auto& [type, position] = board_repr_sus.error();
         const std::wstring error_message{ parse_error_type_as_wstring(type) };
-        MessageBox(wnd, error_message.c_str(), L"Board repr parse error", MB_OK);
+        MessageBox(wnd, error_message.c_str(), L"board repr parse error", MB_OK);
 
         /* Debug print */ {
             const std::string error_message_utf8{ parse_error_type_as_string(type) };
             debug_print("Error:", error_message_utf8);
-            debug_print("\tBoard:", AsString<board_repr::BoardRepr>{}(board.get_repr(turn, true)));
+            debug_print("\tBoard:", AsString<board_repr::BoardRepr>{}(mutables::board.get_repr(mutables::turn, true)));
             debug_print("\tPos:", position);
         }
     }

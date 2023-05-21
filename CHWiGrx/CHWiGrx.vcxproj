@@ -229,6 +229,7 @@
     <ClCompile Include="src\functions\wndproc\moves_list_wndproc.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\variables\constants.cpp" />
+    <ClCompile Include="src\variables\mutables.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

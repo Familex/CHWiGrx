@@ -209,5 +209,8 @@
     <ClCompile Include="src\variables\constants.cpp">
       <Filter>src\variables</Filter>
     </ClCompile>
+    <ClCompile Include="src\variables\mutables.cpp">
+      <Filter>src\variables</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

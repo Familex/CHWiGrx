@@ -19,22 +19,25 @@ void draw_figure(
     const int h_beg = begin_paint.x * h;
     int h_end = h_beg + h;
     int w_end = w_beg + h;
-    const HBITMAP h_bitmap = pieces_bitmaps[col_to_char(figure->get_col())][figure_type_to_char(figure->get_type())];
+    const HBITMAP h_bitmap =
+        mutables::pieces_bitmaps[col_to_char(figure->get_col())][figure_type_to_char(figure->get_type())];
     BITMAP bm{};
     GetObject(h_bitmap, sizeof(BITMAP), &bm);
     const HDC hdc_mem = CreateCompatibleDC(hdc);
     SelectObject(hdc_mem, h_bitmap);
     SetStretchBltMode(hdc, STRETCH_DELETESCANS);
     if (is_transparent) {
-        TransparentBlt(hdc, w_beg, h_beg, w, h, hdc_mem, 0, 0, bm.bmWidth, bm.bmHeight, TRANSPARENCY_PLACEHOLDER);
+        TransparentBlt(
+            hdc, w_beg, h_beg, w, h, hdc_mem, 0, 0, bm.bmWidth, bm.bmHeight, constants::TRANSPARENCY_PLACEHOLDER
+        );
     }
     else {
         StretchBlt(hdc, w_beg, h_beg, w, h, hdc_mem, 0, 0, bm.bmWidth, bm.bmHeight, SRCCOPY);
     }
 
     // if it's a castling rook, add a star to right top corner
-    if (board.has_castling(figure->get_id())) {
-        const HBITMAP h_star_bitmap = other_bitmaps["star"];
+    if (mutables::board.has_castling(figure->get_id())) {
+        const HBITMAP h_star_bitmap = mutables::other_bitmaps["star"];
         GetObject(h_star_bitmap, sizeof(BITMAP), &bm);
         SelectObject(hdc_mem, h_star_bitmap);    // <- new hOldBitmap?
         SetStretchBltMode(hdc, STRETCH_DELETESCANS);
@@ -49,7 +52,7 @@ void draw_figure(
             0,
             bm.bmWidth,
             bm.bmHeight,
-            TRANSPARENCY_PLACEHOLDER
+            constants::TRANSPARENCY_PLACEHOLDER
         );
     }
 
@@ -58,7 +61,14 @@ void draw_figure(
 
 void draw_figure(const HDC hdc, const Figure* figure, const Pos& begin_paint, const bool is_transparent) noexcept
 {
-    draw_figure(hdc, figure, begin_paint, is_transparent, main_window.get_cell_width(), main_window.get_cell_height());
+    draw_figure(
+        hdc,
+        figure,
+        begin_paint,
+        is_transparent,
+        mutables::main_window.get_cell_width(),
+        mutables::main_window.get_cell_height()
+    );
 }
 
 /**
@@ -69,12 +79,12 @@ void draw_board(const HDC hdc) noexcept
 {
     for (int i{}; i < HEIGHT; ++i) {
         for (int j{}; j < WIDTH; ++j) {
-            const RECT cell = main_window.get_cell(i, j);
+            const RECT cell = mutables::main_window.get_cell(i, j);
             if ((i + j) % 2) {
-                FillRect(hdc, &cell, checkerboard_one);
+                FillRect(hdc, &cell, mutables::checkerboard_one);
             }
             else {
-                FillRect(hdc, &cell, checkerboard_two);
+                FillRect(hdc, &cell, mutables::checkerboard_two);
             }
         }
     }
@@ -86,8 +96,8 @@ void draw_board(const HDC hdc) noexcept
  */
 void draw_figures_on_board(const HDC hdc) noexcept
 {
-    for (const auto& figure : board.get_all_figures()) {
-        if (!motion_input.is_figure_dragged(figure->get_id())) {
+    for (const auto& figure : mutables::board.get_all_figures()) {
+        if (!mutables::motion_input.is_figure_dragged(figure->get_id())) {
             draw_figure(hdc, figure, figure->get_pos());
         }
     }
@@ -103,8 +113,8 @@ void draw_input(const HDC hdc_mem, const Input& input) noexcept
     /// FIXME hardcoded colors
     static const HBRUSH RED{ CreateSolidBrush(RGB(255, 0, 0)) };
     static const HBRUSH BLUE{ CreateSolidBrush(RGB(0, 0, 255)) };
-    const RECT from_cell = main_window.get_cell(change_axes(input.from));
-    const RECT target_cell = main_window.get_cell(change_axes(input.target));
+    const RECT from_cell = mutables::main_window.get_cell(change_axes(input.from));
+    const RECT target_cell = mutables::main_window.get_cell(change_axes(input.target));
     FillRect(hdc_mem, &from_cell, RED);
     FillRect(hdc_mem, &target_cell, BLUE);
 }

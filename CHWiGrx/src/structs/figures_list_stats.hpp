@@ -44,12 +44,12 @@ public:
     [[nodiscard]] auto get_width_with_extra() const noexcept -> int override
     {
         // FIXME There may be no slider
-        return WindowStats::get_width_with_extra() + SCROLLBAR_THICKNESS;
+        return WindowStats::get_width_with_extra() + constants::SCROLLBAR_THICKNESS;
     }
 
     [[nodiscard]] auto get_height_with_extra() const noexcept -> int override
     {
-        return WindowStats::get_height_with_extra() + SCROLLBAR_THICKNESS;
+        return WindowStats::get_height_with_extra() + constants::SCROLLBAR_THICKNESS;
     }
 
     FN get_figures_in_row() const noexcept -> std::size_t { return figures_in_row_; }

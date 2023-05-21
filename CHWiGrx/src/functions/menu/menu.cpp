@@ -23,12 +23,12 @@ void update_edit_menu_variables(const HWND h_wnd) noexcept
         set_menu_checkbox(h_wnd, menu_id, false);
     }
 
-    if (turn == Color::White)
+    if (mutables::turn == Color::White)
         set_menu_checkbox(h_wnd, IDM_WHITE_START, true);
-    else if (turn == Color::Black)
+    else if (mutables::turn == Color::Black)
         set_menu_checkbox(h_wnd, IDM_BLACK_START, true);
 
-    if (board.get_idw() == true)
+    if (mutables::board.get_idw() == true)
         set_menu_checkbox(h_wnd, IDM_IDW_TRUE, true);
     else
         set_menu_checkbox(h_wnd, IDM_IDW_FALSE, true);
@@ -50,10 +50,10 @@ void update_game_menu_variables(const HWND h_wnd) noexcept
         set_menu_checkbox(h_wnd, menu_id, false);
     }
 
-    if (save_all_moves)
+    if (mutables::save_all_moves)
         set_menu_checkbox(h_wnd, IDM_TOGGLE_SAVE_ALL_MOVES, true);
 
-    switch (chose) {
+    switch (mutables::chose) {
         case FigureType::Queen:
             set_menu_checkbox(h_wnd, IDM_SET_CHOICE_TO_QUEEN, true);
             break;
@@ -71,11 +71,11 @@ void update_game_menu_variables(const HWND h_wnd) noexcept
             break;
 
         default:
-            assert(("Unknown chose", false));
+            assert(("Unknown mutables::chose", false));
             break;
     }
 
-    if (moves_list_window) {
+    if (mutables::moves_list_window) {
         set_menu_checkbox(h_wnd, IDM_WINDOW_MOVELOG, true);
     }
 }
@@ -95,26 +95,26 @@ void update_bot_menu_variables(const HWND h_wnd) noexcept
         set_menu_checkbox(h_wnd, menu_id, false);
     }
 
-    if (bot_type) {
+    if (mutables::bot_type) {
         set_menu_checkbox(h_wnd, IDM_TOGGLE_BOT, true);
 
-        if (bot_turn == Color::White)
+        if (mutables::bot_turn == Color::White)
             set_menu_checkbox(h_wnd, IDM_BOTCOLOR_WHITE, true);
-        else if (bot_turn == Color::Black)
+        else if (mutables::bot_turn == Color::Black)
             set_menu_checkbox(h_wnd, IDM_BOTCOLOR_BLACK, true);
 
-        if (bot_difficulty == bot::Difficulty::D0)
+        if (mutables::bot_difficulty == bot::Difficulty::D0)
             set_menu_checkbox(h_wnd, IDM_BOTDIFFICULTY_EASY, true);
-        else if (bot_difficulty == bot::Difficulty::D1)
+        else if (mutables::bot_difficulty == bot::Difficulty::D1)
             set_menu_checkbox(h_wnd, IDM_BOTDIFFICULTY_NORMAL, true);
-        else if (bot_difficulty == bot::Difficulty::D2)
+        else if (mutables::bot_difficulty == bot::Difficulty::D2)
             set_menu_checkbox(h_wnd, IDM_BOTDIFFICULTY_HARD, true);
-        else if (bot_difficulty == bot::Difficulty::D3)
+        else if (mutables::bot_difficulty == bot::Difficulty::D3)
             set_menu_checkbox(h_wnd, IDM_BOTDIFFICULTY_VERYHARD, true);
 
-        if (bot_type == bot::Type::Random)
+        if (mutables::bot_type == bot::Type::Random)
             set_menu_checkbox(h_wnd, IDM_BOTTYPE_RANDOM, true);
-        else if (bot_type == bot::Type::NeuralNetwork)
+        else if (mutables::bot_type == bot::Type::NeuralNetwork)
             ;    // placeholder;
     }
     else {

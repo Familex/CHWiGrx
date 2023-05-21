@@ -11,7 +11,7 @@ class WindowStats
 {
 protected:
     const int units_to_move_enough_{ 2 };
-    const Pos extra_window_size_{ 0, HEADER_HEIGHT };
+    const Pos extra_window_size_{ 0, constants::HEADER_HEIGHT };
     Pos window_pos_;
     Pos prev_lbutton_click_{};
     Pos window_size_;

@@ -24,39 +24,39 @@ LRESULT CALLBACK mainproc::main_edit_state_wndproc(
 
                 case IDM_CLEAR_BOARD:
                 {
-                    board.reset(board_repr::BoardRepr({}, turn, board.get_idw()));
-                    motion_input.clear();
+                    mutables::board.reset(board_repr::BoardRepr({}, mutables::turn, mutables::board.get_idw()));
+                    mutables::motion_input.clear();
                     InvalidateRect(h_wnd, nullptr, NULL);
                 } break;
 
                 case IDM_TOGGLE_LIST_WINDOW:
-                    if (figures_list_window) {
-                        destroy_window(figures_list_window);
+                    if (mutables::figures_list_window) {
+                        destroy_window(mutables::figures_list_window);
                     }
                     else {
-                        figures_list_window = misc::new_window::figures_list(h_wnd);
+                        mutables::figures_list_window = misc::new_window::figures_list(h_wnd);
                     }
 
-                    set_menu_checkbox(h_wnd, IDM_TOGGLE_LIST_WINDOW, figures_list_window != nullptr);
+                    set_menu_checkbox(h_wnd, IDM_TOGGLE_LIST_WINDOW, mutables::figures_list_window != nullptr);
                     break;
 
                 case IDM_WHITE_START:
-                    turn = Color::White;
+                    mutables::turn = Color::White;
                     update_edit_menu_variables(h_wnd);
                     break;
 
                 case IDM_BLACK_START:
-                    turn = Color::Black;
+                    mutables::turn = Color::Black;
                     update_edit_menu_variables(h_wnd);
                     break;
 
                 case IDM_IDW_TRUE:
-                    board.set_idw(true);
+                    mutables::board.set_idw(true);
                     update_edit_menu_variables(h_wnd);
                     break;
 
                 case IDM_IDW_FALSE:
-                    board.set_idw(false);
+                    mutables::board.set_idw(false);
                     update_edit_menu_variables(h_wnd);
                     break;
 
@@ -66,16 +66,18 @@ LRESULT CALLBACK mainproc::main_edit_state_wndproc(
         } break;
 
         case WM_LBUTTONUP:
-            on_lbutton_up(h_wnd, w_param, l_param, main_window.divide_by_cell_size(l_param).change_axes(), false);
+            on_lbutton_up(
+                h_wnd, w_param, l_param, mutables::main_window.divide_by_cell_size(l_param).change_axes(), false
+            );
             InvalidateRect(h_wnd, nullptr, NULL);
             break;
 
         case WM_MOUSEMOVE:
-            if (!motion_input.is_active_by_click() && motion_input.is_drags()) {
-                motion_input.init_curr_choice_window(
+            if (!mutables::motion_input.is_active_by_click() && mutables::motion_input.is_drags()) {
+                mutables::motion_input.init_curr_choice_window(
                     h_wnd,
                     curr_choice_edit_mode_wndproc,
-                    Pos{ main_window.get_cell_width(), main_window.get_cell_height() }
+                    Pos{ mutables::main_window.get_cell_width(), mutables::main_window.get_cell_height() }
                 );
             }
             break;
@@ -85,15 +87,18 @@ LRESULT CALLBACK mainproc::main_edit_state_wndproc(
             hdc = BeginPaint(h_wnd, &ps);
 
             hdc_mem = CreateCompatibleDC(hdc);
-            hbm_mem = CreateCompatibleBitmap(hdc, main_window.get_width(), main_window.get_height());
+            hbm_mem =
+                CreateCompatibleBitmap(hdc, mutables::main_window.get_width(), mutables::main_window.get_height());
             h_old = SelectObject(hdc_mem, hbm_mem);
 
             draw_board(hdc_mem);
-            draw_input(hdc_mem, motion_input.get_input());
+            draw_input(hdc_mem, mutables::motion_input.get_input());
             draw_figures_on_board(hdc_mem);
 
             // Copying the temporary buffer to the main one
-            BitBlt(hdc, 0, 0, main_window.get_width(), main_window.get_height(), hdc_mem, 0, 0, SRCCOPY);
+            BitBlt(
+                hdc, 0, 0, mutables::main_window.get_width(), mutables::main_window.get_height(), hdc_mem, 0, 0, SRCCOPY
+            );
 
             SelectObject(hdc_mem, h_old);
             DeleteObject(hbm_mem);

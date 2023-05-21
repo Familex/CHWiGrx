@@ -22,10 +22,7 @@ public:
         future_.clear();
     }
 
-    FV add_without_reset(const mvmsg::MoveMessage& move_rec) noexcept -> void
-    {
-        prev_.push_back(move_rec);
-    }
+    FV add_without_reset(const mvmsg::MoveMessage& move_rec) noexcept -> void { prev_.push_back(move_rec); }
 
     FV reset() noexcept -> void
     {
@@ -69,15 +66,9 @@ public:
         return future_;
     }
 
-    FV set_past(const std::vector<mvmsg::MoveMessage>& past) noexcept -> void
-    {
-        prev_ = past;
-    }
+    FV set_past(const std::vector<mvmsg::MoveMessage>& past) noexcept -> void { prev_ = past; }
 
-    FV set_future(const std::vector<mvmsg::MoveMessage>& future) noexcept
-    {
-        future_ = future;
-    }
+    FV set_future(const std::vector<mvmsg::MoveMessage>& future) noexcept { future_ = future; }
 
     FN is_fifty_move_rule_was_triggered() const noexcept -> bool
     {

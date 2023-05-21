@@ -84,19 +84,19 @@ HWND misc::new_window::figures_list(const HWND parent) noexcept
 {
     return *create_window(CreateWindowArgsBuilder{}
                               .set_wc_wndproc(figures_list_wndproc)
-                              .set_wc_icon(LoadIcon(h_inst, MAKEINTRESOURCE(IDI_FIGURES_LIST)))
-                              .set_wc_icon_sm(LoadIcon(h_inst, MAKEINTRESOURCE(IDI_FIGURES_LIST)))
-                              .set_wc_background(CHECKERBOARD_DARK)
-                              .set_class_name(FIGURES_LIST_WINDOW_CLASS_NAME)
+                              .set_wc_icon(LoadIcon(constants::h_inst, MAKEINTRESOURCE(IDI_FIGURES_LIST)))
+                              .set_wc_icon_sm(LoadIcon(constants::h_inst, MAKEINTRESOURCE(IDI_FIGURES_LIST)))
+                              .set_wc_background(constants::CHECKERBOARD_DARK)
+                              .set_class_name(constants::FIGURES_LIST_WINDOW_CLASS_NAME)
                               .set_title(static_cast<UINT>(IDS_FIGURES_LIST_TITLE))
                               .set_style(WS_OVERLAPPEDWINDOW | WS_VSCROLL | WS_HSCROLL)
-                              .set_x(FIGURES_LIST_WINDOW_DEFAULT_POS.x)
-                              .set_y(FIGURES_LIST_WINDOW_DEFAULT_POS.y)
-                              .set_width(::figures_list.get_width_with_extra())
-                              .set_height(::figures_list.get_height_with_extra())
+                              .set_x(constants::FIGURES_LIST_WINDOW_DEFAULT_POS.x)
+                              .set_y(constants::FIGURES_LIST_WINDOW_DEFAULT_POS.y)
+                              .set_width(mutables::figures_list.get_width_with_extra())
+                              .set_height(mutables::figures_list.get_height_with_extra())
                               .set_parent(parent)
                               .unregister_class(false)
-                              .build(h_inst));
+                              .build(constants::h_inst));
 }
 
 /**
@@ -118,29 +118,31 @@ HWND misc::new_window::curr_choice(
     const WNDPROC callback
 ) noexcept
 {
-    return *create_window(CreateWindowArgsBuilder{}
-                              .set_ex_style(WS_EX_LAYERED | WS_EX_NOACTIVATE)
-                              .set_wc_wndproc(callback)
-                              .set_wc_icon(LoadIcon(h_inst, MAKEINTRESOURCE(IDI_GAME_MODE_BIG)))
-                              .set_wc_icon_sm(LoadIcon(h_inst, MAKEINTRESOURCE(IDI_GAME_MODE_SMALL)))
-                              .set_wc_wnd_extra(static_cast<int>(sizeof(in_hand)))
-                              .set_wc_style(CS_SAVEBITS)
-                              .set_x(mouse.x - w / 2)
-                              .set_y(mouse.y - h / 2)
-                              .set_width(w)
-                              .set_height(h)
-                              .set_parent(parent)
-                              .set_style(WS_POPUP | WS_EX_TRANSPARENT | WS_EX_LAYERED)
-                              .set_class_name(CURR_CHOICE_WINDOW_CLASS_NAME)
-                              .set_title(L"")
-                              .set_after_create([](const HWND h_wnd) {
-                                  SetWindowPos(h_wnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
-                                  SetLayeredWindowAttributes(h_wnd, TRANSPARENCY_PLACEHOLDER, 0xFF, LWA_COLORKEY);
-                              })
-                              .set_wnd_extra_data(reinterpret_cast<LONG_PTR>(
-                                  figfab::FigureFabric::instance().create(in_hand, true).release()
-                              ))
-                              .build(h_inst));
+    return *create_window(
+        CreateWindowArgsBuilder{}
+            .set_ex_style(WS_EX_LAYERED | WS_EX_NOACTIVATE)
+            .set_wc_wndproc(callback)
+            .set_wc_icon(LoadIcon(constants::h_inst, MAKEINTRESOURCE(IDI_GAME_MODE_BIG)))
+            .set_wc_icon_sm(LoadIcon(constants::h_inst, MAKEINTRESOURCE(IDI_GAME_MODE_SMALL)))
+            .set_wc_wnd_extra(static_cast<int>(sizeof(in_hand)))
+            .set_wc_style(CS_SAVEBITS)
+            .set_x(mouse.x - w / 2)
+            .set_y(mouse.y - h / 2)
+            .set_width(w)
+            .set_height(h)
+            .set_parent(parent)
+            .set_style(WS_POPUP | WS_EX_TRANSPARENT | WS_EX_LAYERED)
+            .set_class_name(constants::CURR_CHOICE_WINDOW_CLASS_NAME)
+            .set_title(L"")
+            .set_after_create([](const HWND h_wnd) {
+                SetWindowPos(h_wnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
+                SetLayeredWindowAttributes(h_wnd, constants::TRANSPARENCY_PLACEHOLDER, 0xFF, LWA_COLORKEY);
+            })
+            .set_wnd_extra_data(
+                reinterpret_cast<LONG_PTR>(figfab::FigureFabric::instance().create(in_hand, true).release())
+            )
+            .build(constants::h_inst)
+    );
 }
 
 HWND misc::new_window::move_log(const HWND parent) noexcept
@@ -151,7 +153,7 @@ HWND misc::new_window::move_log(const HWND parent) noexcept
                               .set_title(static_cast<UINT>(IDS_MOVE_LOG_TITLE))
                               .set_wc_wndproc(moves_list_wndproc)
                               .set_parent(parent)
-                              .build(h_inst));
+                              .build(constants::h_inst));
 }
 
 HWND misc::new_window::move_log_list_view(const HWND parent) noexcept
@@ -162,9 +164,9 @@ HWND misc::new_window::move_log_list_view(const HWND parent) noexcept
             .set_ex_style(WS_EX_CLIENTEDGE)
             .set_class_name(WC_LISTVIEW)
             .set_style(WS_TABSTOP | WS_CHILD | WS_BORDER | WS_VISIBLE | LVS_AUTOARRANGE | LVS_REPORT | LVS_OWNERDATA)
-            .set_after_create([](HWND self) { ListView_SetBkColor(self, CHECKERBOARD_BRIGHT_COLOR); })
+            .set_after_create([](HWND self) { ListView_SetBkColor(self, constants::CHECKERBOARD_BRIGHT_COLOR); })
             .set_parent(parent)
-            .build(h_inst)
+            .build(constants::h_inst)
     );
 }
 
@@ -267,13 +269,13 @@ std::string misc::take_str_from_clip(const HWND h_wnd) noexcept
 
 void misc::change_checkerboard_color_theme(const HWND h_wnd) noexcept
 {
-    std::swap(checkerboard_one, checkerboard_two);
+    std::swap(mutables::checkerboard_one, mutables::checkerboard_two);
     InvalidateRect(h_wnd, nullptr, NULL);
 }
 
 bool misc::game_end_check(const HWND h_wnd, const Color turn) noexcept
 {
-    if (const GameEndType curr_game_end_state = board.game_end_check(turn);
+    if (const GameEndType curr_game_end_state = mutables::board.game_end_check(turn);
         curr_game_end_state != GameEndType::NotGameEnd)
     {
         std::wstring body;
@@ -394,21 +396,27 @@ DWORD misc::create_console() noexcept
 
 std::size_t misc::get_icon(const mvmsg::MoveMessage& mm) noexcept
 {
-    const auto& by_color = pieces_bitmaps.find(col_to_char(mm.first.get_col()));
+    const auto& by_color = mutables::pieces_bitmaps.find(col_to_char(mm.first.get_col()));
     const auto& by_type = by_color->second.find(figure_type_to_char(mm.first.get_type()));
-    return std::distance(std::begin(pieces_bitmaps), by_color) * PLAYABLE_FIGURES.size() +
+    return std::distance(std::begin(mutables::pieces_bitmaps), by_color) * PLAYABLE_FIGURES.size() +
            std::distance(std::begin(by_color->second), by_type);
 }
 
 HIMAGELIST misc::init_move_log_bitmaps() noexcept
 {
-    auto list = ImageList_Create(MOVE_LOG_ICONS_WIDTH, MOVE_LOG_ICONS_HEIGHT, ILC_COLORDDB | ILC_MASK, 1, 0);
-    for (const auto& [key_col, val_outher] : pieces_bitmaps) {
+    auto list = ImageList_Create(
+        constants::MOVE_LOG_ICONS_WIDTH, constants::MOVE_LOG_ICONS_HEIGHT, ILC_COLORDDB | ILC_MASK, 1, 0
+    );
+    for (const auto& [key_col, val_outher] : mutables::pieces_bitmaps) {
         for (const auto& [key_type, val_bitmap] : val_outher) {
             const auto resized = bitmap::resize(
-                val_bitmap, PIECE_SOURCE_WIDTH, PIECE_SOURCE_HEIGHT, MOVE_LOG_ICONS_WIDTH, MOVE_LOG_ICONS_HEIGHT
+                val_bitmap,
+                constants::PIECE_SOURCE_WIDTH,
+                constants::PIECE_SOURCE_HEIGHT,
+                constants::MOVE_LOG_ICONS_WIDTH,
+                constants::MOVE_LOG_ICONS_HEIGHT
             );
-            const auto mask = bitmap::create_mask(resized, TRANSPARENCY_PLACEHOLDER);
+            const auto mask = bitmap::create_mask(resized, constants::TRANSPARENCY_PLACEHOLDER);
             ImageList_Add(list, resized, mask);
         }
     }
@@ -425,13 +433,16 @@ void misc::update_moves_list(const HWND moves_list_list_view, const ChessGame& b
     }
 }
 
-void misc::on_game_board_change(const ChessGame& board) noexcept { update_moves_list(moves_list_list_view, board); }
+void misc::on_game_board_change(const ChessGame& board) noexcept
+{
+    update_moves_list(mutables::moves_list_list_view, board);
+}
 
 std::wstring misc::load_resource_string(const UINT id) noexcept
 {
     constexpr auto max_len = MAX_PATH;
     TCHAR result[max_len]{ TEXT("Unknown resource id") };
-    LoadString(h_inst, id, result, max_len);
+    LoadString(constants::h_inst, id, result, max_len);
     return result;
 }
 
@@ -467,11 +478,11 @@ std::wstring misc::to_wstring(const std::string& source) noexcept
 HCURSOR misc::load_animated_cursor(UINT nID, LPCTSTR pszResouceType) noexcept
 {
     HCURSOR cursor = nullptr;
-    HRSRC resource = FindResource(h_inst, MAKEINTRESOURCE(nID), pszResouceType);
+    HRSRC resource = FindResource(constants::h_inst, MAKEINTRESOURCE(nID), pszResouceType);
     if (resource) {
-        const auto resource_size = SizeofResource(h_inst, resource);
+        const auto resource_size = SizeofResource(constants::h_inst, resource);
         if (resource_size > 0) {
-            const auto resource_global = LoadResource(h_inst, resource);
+            const auto resource_global = LoadResource(constants::h_inst, resource);
             if (resource_global) {
                 const auto ptr_resource = reinterpret_cast<LPBYTE>(LockResource(resource_global));
                 if (ptr_resource) {
@@ -489,44 +500,47 @@ HCURSOR misc::load_animated_cursor(UINT nID, LPCTSTR pszResouceType) noexcept
 
 void misc::set_window_mode(const HWND wnd, const WindowState mode) noexcept
 {
-    ::window_state = mode;
+    mutables::window_state = mode;
     misc::change_checkerboard_color_theme(wnd);
 
     switch (mode) {
         case WindowState::Game:
         {
-            const auto h_big_game_icon =
-                LoadImage(::h_inst, MAKEINTRESOURCE(IDI_GAME_MODE_BIG), IMAGE_ICON, 0, 0, LR_DEFAULTSIZE | LR_SHARED);
-            const auto h_mini_game_icon =
-                LoadImage(::h_inst, MAKEINTRESOURCE(IDI_GAME_MODE_SMALL), IMAGE_ICON, 0, 0, LR_DEFAULTSIZE | LR_SHARED);
+            const auto h_big_game_icon = LoadImage(
+                constants::h_inst, MAKEINTRESOURCE(IDI_GAME_MODE_BIG), IMAGE_ICON, 0, 0, LR_DEFAULTSIZE | LR_SHARED
+            );
+            const auto h_mini_game_icon = LoadImage(
+                constants::h_inst, MAKEINTRESOURCE(IDI_GAME_MODE_SMALL), IMAGE_ICON, 0, 0, LR_DEFAULTSIZE | LR_SHARED
+            );
             SendMessage(wnd, WM_SETICON, ICON_BIG, reinterpret_cast<LPARAM>(h_big_game_icon));
             SendMessage(wnd, WM_SETICON, ICON_SMALL, reinterpret_cast<LPARAM>(h_mini_game_icon));
 
-            SetMenu(wnd, LoadMenu(::h_inst, MAKEINTRESOURCE(IDC_CHWIGRX)));
+            SetMenu(wnd, LoadMenu(constants::h_inst, MAKEINTRESOURCE(IDC_CHWIGRX)));
 
             update_bot_menu_variables(wnd);
 
-            destroy_window(::figures_list_window);
+            destroy_window(mutables::figures_list_window);
 
             break;
         }
 
         case WindowState::Edit:
         {
-            const auto h_edit_icon =
-                LoadImage(::h_inst, MAKEINTRESOURCE(IDI_EDIT_MODE), IMAGE_ICON, 0, 0, LR_DEFAULTSIZE | LR_SHARED);
+            const auto h_edit_icon = LoadImage(
+                constants::h_inst, MAKEINTRESOURCE(IDI_EDIT_MODE), IMAGE_ICON, 0, 0, LR_DEFAULTSIZE | LR_SHARED
+            );
             SendMessage(wnd, WM_SETICON, ICON_SMALL, reinterpret_cast<LPARAM>(h_edit_icon));
             SendMessage(wnd, WM_SETICON, ICON_BIG, reinterpret_cast<LPARAM>(h_edit_icon));
 
-            SetMenu(wnd, LoadMenu(::h_inst, MAKEINTRESOURCE(IDR_CHWIGRX_EDIT_MENU)));
+            SetMenu(wnd, LoadMenu(constants::h_inst, MAKEINTRESOURCE(IDR_CHWIGRX_EDIT_MENU)));
 
-            ::motion_input.clear();
-            ::board.reset_move_logger();
+            mutables::motion_input.clear();
+            mutables::board.reset_move_logger();
 
             update_edit_menu_variables(wnd);
 
-            ::figures_list_window = misc::new_window::figures_list(wnd);
-            destroy_window(::moves_list_window);
+            mutables::figures_list_window = misc::new_window::figures_list(wnd);
+            destroy_window(mutables::moves_list_window);
 
             break;
         }

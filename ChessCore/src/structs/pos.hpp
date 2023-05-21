@@ -82,8 +82,7 @@ FN change_axes(const Pos& val) noexcept -> Pos { return Pos{ val.y, val.x }; }
 template <>
 struct FromString<Pos>
 {
-    [[nodiscard]] constexpr auto
-    operator()(const std::string_view str, const FromStringMeta& meta) const noexcept
+    [[nodiscard]] constexpr auto operator()(const std::string_view str, const FromStringMeta& meta) const noexcept
         -> ParseEither<Pos, ParseErrorType>
     {
         const auto payload_sus = svtoi(str);

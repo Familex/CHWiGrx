@@ -19,38 +19,38 @@ LRESULT CALLBACK mainproc::main_game_state_wndproc(
         {
             switch (const int wm_id = LOWORD(w_param)) {
                 case IDM_UNDO:
-                    if (board.undo_move()) {
-                        motion_input.clear();
-                        turn = what_next(turn);
-                        misc::on_game_board_change(board);
+                    if (mutables::board.undo_move()) {
+                        mutables::motion_input.clear();
+                        mutables::turn = what_next(mutables::turn);
+                        misc::on_game_board_change(mutables::board);
                     }
                     break;
 
                 case IDM_RESTORE_MOVE:
-                    if (board.restore_move()) {
-                        motion_input.clear();
-                        turn = what_next(turn);
-                        misc::on_game_board_change(board);
+                    if (mutables::board.restore_move()) {
+                        mutables::motion_input.clear();
+                        mutables::turn = what_next(mutables::turn);
+                        misc::on_game_board_change(mutables::board);
                         InvalidateRect(h_wnd, nullptr, NULL);
                         UpdateWindow(h_wnd);
-                        misc::game_end_check(h_wnd, what_next(turn));
+                        misc::game_end_check(h_wnd, what_next(mutables::turn));
                     }
                     break;
 
                 case IDM_PASTE_START_MAP:
                 {
                     if (const auto br = take_repr_from_clip(h_wnd)) {
-                        start_board_repr = br->value;
+                        mutables::start_board_repr = br->value;
                     }
                 } break;
 
                 case IDM_RESET_START_MAP_IDW:
-                    start_board_repr = DEFAULT_CHESS_BOARD_IDW;
+                    mutables::start_board_repr = constants::DEFAULT_CHESS_BOARD_IDW;
                     restart();
                     break;
 
                 case IDM_RESET_START_MAP_NIDW:
-                    start_board_repr = DEFAULT_CHESS_BOARD_NIDW;
+                    mutables::start_board_repr = constants::DEFAULT_CHESS_BOARD_NIDW;
                     restart();
                     break;
 
@@ -68,11 +68,11 @@ LRESULT CALLBACK mainproc::main_game_state_wndproc(
                     if (!GetMenuItemInfo(h_menu, IDM_TOGGLE_SAVE_ALL_MOVES, FALSE, &item_info))
                         return 0;
                     if (item_info.fState == MFS_CHECKED) {
-                        save_all_moves = false;
+                        mutables::save_all_moves = false;
                         item_info.fState = MFS_UNCHECKED;
                     }
                     else {
-                        save_all_moves = true;
+                        mutables::save_all_moves = true;
                         item_info.fState = MFS_CHECKED;
                     }
                     SetMenuItemInfoW(h_menu, IDM_TOGGLE_SAVE_ALL_MOVES, FALSE, &item_info);
@@ -82,11 +82,11 @@ LRESULT CALLBACK mainproc::main_game_state_wndproc(
 
                 case IDM_WINDOW_MOVELOG:
                 {
-                    if (moves_list_window) {
-                        destroy_window(moves_list_window);
+                    if (mutables::moves_list_window) {
+                        destroy_window(mutables::moves_list_window);
                     }
                     else {
-                        moves_list_window = misc::new_window::move_log(h_wnd);
+                        mutables::moves_list_window = misc::new_window::move_log(h_wnd);
                     }
 
                     update_game_menu_variables(h_wnd);
@@ -101,17 +101,17 @@ LRESULT CALLBACK mainproc::main_game_state_wndproc(
                 {
                     // FIXME move to menu.cpp
                     const UINT item_menu_to_set_id = wm_id;
-                    const UINT curr_item_menu_state = chose == FigureType::Queen    ? IDM_SET_CHOICE_TO_QUEEN
-                                                      : chose == FigureType::Rook   ? IDM_SET_CHOICE_TO_ROOK
-                                                      : chose == FigureType::Knight ? IDM_SET_CHOICE_TO_KNIGHT
-                                                      : chose == FigureType::Bishop ? IDM_SET_CHOICE_TO_BISHOP
-                                                                                    : NULL;
+                    const UINT curr_item_menu_state = mutables::chose == FigureType::Queen    ? IDM_SET_CHOICE_TO_QUEEN
+                                                      : mutables::chose == FigureType::Rook   ? IDM_SET_CHOICE_TO_ROOK
+                                                      : mutables::chose == FigureType::Knight ? IDM_SET_CHOICE_TO_KNIGHT
+                                                      : mutables::chose == FigureType::Bishop ? IDM_SET_CHOICE_TO_BISHOP
+                                                                                              : NULL;
                     set_menu_checkbox(h_wnd, curr_item_menu_state, false);
                     set_menu_checkbox(h_wnd, item_menu_to_set_id, true);
-                    chose = wm_id == IDM_SET_CHOICE_TO_QUEEN    ? FigureType::Queen
-                            : wm_id == IDM_SET_CHOICE_TO_ROOK   ? FigureType::Rook
-                            : wm_id == IDM_SET_CHOICE_TO_KNIGHT ? FigureType::Knight
-                                                                : FigureType::Bishop;
+                    mutables::chose = wm_id == IDM_SET_CHOICE_TO_QUEEN    ? FigureType::Queen
+                                      : wm_id == IDM_SET_CHOICE_TO_ROOK   ? FigureType::Rook
+                                      : wm_id == IDM_SET_CHOICE_TO_KNIGHT ? FigureType::Knight
+                                                                          : FigureType::Bishop;
                 } break;
 
                 case IDM_SET_EDITOR_WINDOW_MODE:
@@ -120,52 +120,52 @@ LRESULT CALLBACK mainproc::main_game_state_wndproc(
 
                 /* ---- Bot ------------------------------------------- */
                 case IDM_TOGGLE_BOT:
-                    if (bot_type) {
-                        bot_type = std::nullopt;
+                    if (mutables::bot_type) {
+                        mutables::bot_type = std::nullopt;
                     }
                     else {
-                        bot_type = bot::Type::Random;
+                        mutables::bot_type = bot::Type::Random;
                     }
                     update_bot_menu_variables(h_wnd);
                     break;
 
                 case IDM_BOTDIFFICULTY_EASY:
-                    bot_difficulty = bot::Difficulty::D0;
+                    mutables::bot_difficulty = bot::Difficulty::D0;
                     update_bot_menu_variables(h_wnd);
                     break;
 
                 case IDM_BOTDIFFICULTY_NORMAL:
-                    bot_difficulty = bot::Difficulty::D1;
+                    mutables::bot_difficulty = bot::Difficulty::D1;
                     update_bot_menu_variables(h_wnd);
                     break;
 
                 case IDM_BOTDIFFICULTY_HARD:
-                    bot_difficulty = bot::Difficulty::D2;
+                    mutables::bot_difficulty = bot::Difficulty::D2;
                     update_bot_menu_variables(h_wnd);
                     break;
 
                 case IDM_BOTDIFFICULTY_VERYHARD:
-                    bot_difficulty = bot::Difficulty::D3;
+                    mutables::bot_difficulty = bot::Difficulty::D3;
                     update_bot_menu_variables(h_wnd);
                     break;
 
                 case IDM_BOTTYPE_RANDOM:
-                    bot_type = bot::Type::Random;
+                    mutables::bot_type = bot::Type::Random;
                     update_bot_menu_variables(h_wnd);
                     break;
 
                 case IDM_BOTCOLOR_WHITE:
-                    bot_turn = Color::White;
+                    mutables::bot_turn = Color::White;
                     update_bot_menu_variables(h_wnd);
                     break;
 
                 case IDM_BOTCOLOR_BLACK:
-                    bot_turn = Color::Black;
+                    mutables::bot_turn = Color::Black;
                     update_bot_menu_variables(h_wnd);
                     break;
 
                 case IDM_ABOUT:
-                    DialogBox(h_inst, MAKEINTRESOURCE(IDD_ABOUTBOX), h_wnd, misc::about_proc);
+                    DialogBox(constants::h_inst, MAKEINTRESOURCE(IDD_ABOUTBOX), h_wnd, misc::about_proc);
                     break;
 
                 default:
@@ -208,7 +208,7 @@ LRESULT CALLBACK mainproc::main_game_state_wndproc(
                     break;
 
                 case VK_ESCAPE:
-                    motion_input.clear();
+                    mutables::motion_input.clear();
                     InvalidateRect(h_wnd, nullptr, NULL);
                     return 0;
 
@@ -221,49 +221,49 @@ LRESULT CALLBACK mainproc::main_game_state_wndproc(
                                          ? Pos(0, -1)
                                          : (w_param == VK_RIGHT ? Pos(0, 1)
                                                                 : (w_param == VK_UP ? Pos(-1, 0) : Pos(1, 0))) };
-                    if (!motion_input.is_active_by_click())
-                        motion_input.shift_from(shift, HEIGHT, WIDTH);
+                    if (!mutables::motion_input.is_active_by_click())
+                        mutables::motion_input.shift_from(shift, HEIGHT, WIDTH);
                     else
-                        motion_input.shift_target(shift, HEIGHT, WIDTH);
+                        mutables::motion_input.shift_target(shift, HEIGHT, WIDTH);
                     InvalidateRect(h_wnd, nullptr, NULL);
 
                     return 0;
                 }
 
                 case VK_RETURN:
-                    if (motion_input.is_active_by_click()) {
+                    if (mutables::motion_input.is_active_by_click()) {
                         make_move(h_wnd);
-                        motion_input.clear();
+                        mutables::motion_input.clear();
                         InvalidateRect(h_wnd, nullptr, NULL);
                         return 0;
                     }
-                    motion_input.prepare(turn);
-                    motion_input.activate_by_click();
+                    mutables::motion_input.prepare(mutables::turn);
+                    mutables::motion_input.activate_by_click();
                     InvalidateRect(h_wnd, nullptr, NULL);
                     return 0;
 
                 default:
                     return 0;
             }
-            switch (motion_input.get_state_by_pos()) {
+            switch (mutables::motion_input.get_state_by_pos()) {
                 case 0:
-                    motion_input.set_from_x(cord);
-                    motion_input.by_pos_to_next();
+                    mutables::motion_input.set_from_x(cord);
+                    mutables::motion_input.by_pos_to_next();
                     break;
                 case 1:
-                    motion_input.set_from_y(cord);
-                    motion_input.prepare(turn);
-                    motion_input.activate_by_click();
-                    motion_input.by_pos_to_next();
+                    mutables::motion_input.set_from_y(cord);
+                    mutables::motion_input.prepare(mutables::turn);
+                    mutables::motion_input.activate_by_click();
+                    mutables::motion_input.by_pos_to_next();
                     break;
                 case 2:
-                    motion_input.set_target_x(cord);
-                    motion_input.by_pos_to_next();
+                    mutables::motion_input.set_target_x(cord);
+                    mutables::motion_input.by_pos_to_next();
                     break;
                 case 3:
-                    motion_input.set_target_y(cord);
+                    mutables::motion_input.set_target_y(cord);
                     make_move(h_wnd);
-                    motion_input.clear();
+                    mutables::motion_input.clear();
                     break;
                 default:
                     std::unreachable();
@@ -273,29 +273,31 @@ LRESULT CALLBACK mainproc::main_game_state_wndproc(
             break;
 
         case WM_RBUTTONDOWN:
-            motion_input.clear();
+            mutables::motion_input.clear();
             InvalidateRect(h_wnd, nullptr, NULL);
 
-            debug_print("Curr board:", AsString<board_repr::BoardRepr>{}(board.get_repr(turn, true)));
+            debug_print(
+                "Curr board:", AsString<board_repr::BoardRepr>{}(mutables::board.get_repr(mutables::turn, true))
+            );
 
             break;
 
         case WM_LBUTTONUP:
-            on_lbutton_up(h_wnd, w_param, l_param, main_window.divide_by_cell_size(l_param).change_axes());
+            on_lbutton_up(h_wnd, w_param, l_param, mutables::main_window.divide_by_cell_size(l_param).change_axes());
             InvalidateRect(h_wnd, nullptr, NULL);
             break;
 
         case WM_MOUSEMOVE:
-            if (motion_input.is_drags()) {
-                if (motion_input.is_active_by_click()) {
+            if (mutables::motion_input.is_drags()) {
+                if (mutables::motion_input.is_active_by_click()) {
                     // Move cancel on target cell drag
-                    motion_input.clear();
+                    mutables::motion_input.clear();
                 }
                 else {
-                    motion_input.init_curr_choice_window(
+                    mutables::motion_input.init_curr_choice_window(
                         h_wnd,
                         curr_choice_game_mode_wndproc,
-                        Pos{ main_window.get_cell_width(), main_window.get_cell_height() }
+                        Pos{ mutables::main_window.get_cell_width(), mutables::main_window.get_cell_height() }
                     );
                 }
             }
@@ -303,20 +305,21 @@ LRESULT CALLBACK mainproc::main_game_state_wndproc(
 
         case WM_PAINT:
         {
-            const Input input = motion_input.get_input();
+            const Input input = mutables::motion_input.get_input();
             hdc = BeginPaint(h_wnd, &ps);
             hdc_mem = CreateCompatibleDC(hdc);
-            hbm_mem = CreateCompatibleBitmap(hdc, main_window.get_width(), main_window.get_height());
+            hbm_mem =
+                CreateCompatibleBitmap(hdc, mutables::main_window.get_width(), mutables::main_window.get_height());
             h_old = SelectObject(hdc_mem, hbm_mem);
 
             draw_board(hdc_mem);
 
             /* Возможные ходы текущей фигуры */
             {
-                for (const auto& [is_eat, move_pos] : motion_input.get_possible_moves()) {
+                for (const auto& [is_eat, move_pos] : mutables::motion_input.get_possible_moves()) {
                     static const HBRUSH GREEN{ CreateSolidBrush(RGB(0, 255, 0)) };
                     static const HBRUSH DARK_GREEN{ CreateSolidBrush(RGB(0, 150, 0)) };
-                    const RECT cell = main_window.get_cell(change_axes(move_pos));
+                    const RECT cell = mutables::main_window.get_cell(change_axes(move_pos));
                     if (is_eat) {
                         FillRect(hdc_mem, &cell, DARK_GREEN);
                     }
@@ -331,7 +334,9 @@ LRESULT CALLBACK mainproc::main_game_state_wndproc(
             draw_figures_on_board(hdc_mem);
 
             /* Копирование временного буфера в основной */
-            BitBlt(hdc, 0, 0, main_window.get_width(), main_window.get_height(), hdc_mem, 0, 0, SRCCOPY);
+            BitBlt(
+                hdc, 0, 0, mutables::main_window.get_width(), mutables::main_window.get_height(), hdc_mem, 0, 0, SRCCOPY
+            );
 
             SelectObject(hdc_mem, h_old);
             DeleteObject(hbm_mem);

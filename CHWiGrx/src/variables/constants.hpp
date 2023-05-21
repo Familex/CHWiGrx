@@ -4,6 +4,8 @@
 #include "structs/board_repr.hpp"
 #include "structs/figure.hpp"
 
+namespace constants
+{
 inline HINSTANCE h_inst;
 inline const COLORREF CHECKERBOARD_DARK_COLOR{ RGB(0x32, 0x32, 0x32) };
 inline const COLORREF CHECKERBOARD_BRIGHT_COLOR{ RGB(0x80, 0x80, 0x80) };
@@ -39,3 +41,4 @@ inline constexpr std::size_t MOVE_LOG_ICONS_WIDTH{ 32 };
 inline constexpr std::size_t MOVE_LOG_ICONS_HEIGHT{ 32 };
 inline constexpr std::size_t PIECE_SOURCE_WIDTH{ 64 };
 inline constexpr std::size_t PIECE_SOURCE_HEIGHT{ 64 };
+}    // namespace constants

@@ -19,8 +19,8 @@ moves_list_wndproc(const HWND h_wnd, const UINT u_msg, const WPARAM w_param, con
         case WM_CREATE:
         {
             /* list view */ {
-                moves_list_list_view = misc::new_window::move_log_list_view(h_wnd);
-                ListView_DeleteAllItems(moves_list_list_view);
+                mutables::moves_list_list_view = misc::new_window::move_log_list_view(h_wnd);
+                ListView_DeleteAllItems(mutables::moves_list_list_view);
 
                 /* columns */ {
                     using TextCol = std::pair<LPTSTR, Column>;
@@ -38,26 +38,34 @@ moves_list_wndproc(const HWND h_wnd, const UINT u_msg, const WPARAM w_param, con
                                               .cx = 120,
                                               .pszText = name };
 
-                            ListView_InsertColumn(moves_list_list_view, static_cast<std::size_t>(ind), &lv_col);
+                            ListView_InsertColumn(
+                                mutables::moves_list_list_view, static_cast<std::size_t>(ind), &lv_col
+                            );
                         }
                     }
 
                     /* width */ {
-                        ListView_SetColumnWidth(moves_list_list_view, static_cast<std::size_t>(Column::From), 45);
-                        ListView_SetColumnWidth(moves_list_list_view, static_cast<std::size_t>(Column::Target), 52);
                         ListView_SetColumnWidth(
-                            moves_list_list_view, static_cast<std::size_t>(Column::Figure), MOVE_LOG_ICONS_WIDTH + 48
+                            mutables::moves_list_list_view, static_cast<std::size_t>(Column::From), 45
+                        );
+                        ListView_SetColumnWidth(
+                            mutables::moves_list_list_view, static_cast<std::size_t>(Column::Target), 52
+                        );
+                        ListView_SetColumnWidth(
+                            mutables::moves_list_list_view,
+                            static_cast<std::size_t>(Column::Figure),
+                            constants::MOVE_LOG_ICONS_WIDTH + 48
                         );
                     }
                 }
 
                 /* item count */
-                misc::update_moves_list(moves_list_list_view, board);
+                misc::update_moves_list(mutables::moves_list_list_view, mutables::board);
 
                 /* icons */ {
                     if (const auto& imglst = misc::init_move_log_bitmaps()) {
-                        ListView_SetImageList(moves_list_list_view, imglst, LVSIL_NORMAL);
-                        ListView_SetImageList(moves_list_list_view, imglst, LVSIL_SMALL);
+                        ListView_SetImageList(mutables::moves_list_list_view, imglst, LVSIL_NORMAL);
+                        ListView_SetImageList(mutables::moves_list_list_view, imglst, LVSIL_SMALL);
                     }
                 }
             }
@@ -78,8 +86,8 @@ moves_list_wndproc(const HWND h_wnd, const UINT u_msg, const WPARAM w_param, con
                     LV_DISPINFO* in = reinterpret_cast<LV_DISPINFO*>(l_param);
                     TCHAR sz_string[MAX_PATH]{};
 
-                    const auto& prev = board.get_last_moves();
-                    const auto& future = board.get_future_moves();
+                    const auto& prev = mutables::board.get_last_moves();
+                    const auto& future = mutables::board.get_future_moves();
                     const std::optional<mvmsg::MoveMessage> rec =
                         prev.empty() != future.empty()
                             ? (in->item.iItem < prev.size()
@@ -96,7 +104,7 @@ moves_list_wndproc(const HWND h_wnd, const UINT u_msg, const WPARAM w_param, con
                             switch (static_cast<Column>(in->item.iSubItem)) {
                                 case Column::From:
                                 {
-                                    const auto text = rec ? board.pos_to_string(rec->input.from) : "";
+                                    const auto text = rec ? mutables::board.pos_to_string(rec->input.from) : "";
                                     insert_text(in->item, misc::to_wstring(text).c_str());
 
                                     break;
@@ -104,7 +112,7 @@ moves_list_wndproc(const HWND h_wnd, const UINT u_msg, const WPARAM w_param, con
 
                                 case Column::Target:
                                 {
-                                    const auto text = rec ? board.pos_to_string(rec->input.target) : "";
+                                    const auto text = rec ? mutables::board.pos_to_string(rec->input.target) : "";
                                     insert_text(in->item, misc::to_wstring(text).c_str());
 
                                     break;
@@ -135,7 +143,7 @@ moves_list_wndproc(const HWND h_wnd, const UINT u_msg, const WPARAM w_param, con
                         case CDDS_PREPAINT:
                             return CDRF_NOTIFYITEMDRAW;
                         case CDDS_ITEMPREPAINT:
-                            lvcd->clrTextBk = CHECKERBOARD_BRIGHT_COLOR;
+                            lvcd->clrTextBk = constants::CHECKERBOARD_BRIGHT_COLOR;
                             return CDRF_NEWFONT;
                         case CDDS_SUBITEM | CDDS_ITEMPREPAINT:
                             return CDRF_NEWFONT;
@@ -151,7 +159,7 @@ moves_list_wndproc(const HWND h_wnd, const UINT u_msg, const WPARAM w_param, con
         {
             RECT rc;
             GetClientRect(h_wnd, &rc);
-            MoveWindow(moves_list_list_view, rc.left, rc.top, rc.right - rc.left, rc.bottom - rc.top, TRUE);
+            MoveWindow(mutables::moves_list_list_view, rc.left, rc.top, rc.right - rc.left, rc.bottom - rc.top, TRUE);
 
             break;
         }
@@ -169,8 +177,8 @@ moves_list_wndproc(const HWND h_wnd, const UINT u_msg, const WPARAM w_param, con
         {
             const HWND owner = GetWindow(h_wnd, GW_OWNER);    // It should be GetParent, but it returns NULL 😢.
             set_menu_checkbox(owner, IDM_WINDOW_MOVELOG, false);
-            moves_list_window = nullptr;
-            moves_list_list_view = nullptr;
+            mutables::moves_list_window = nullptr;
+            mutables::moves_list_list_view = nullptr;
 
             break;
         }
