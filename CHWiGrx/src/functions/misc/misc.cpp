@@ -162,6 +162,7 @@ HWND misc::new_window::move_log_list_view(const HWND parent) noexcept
             .set_ex_style(WS_EX_CLIENTEDGE)
             .set_class_name(WC_LISTVIEW)
             .set_style(WS_TABSTOP | WS_CHILD | WS_BORDER | WS_VISIBLE | LVS_AUTOARRANGE | LVS_REPORT | LVS_OWNERDATA)
+            .set_after_create([](HWND self) { ListView_SetBkColor(self, CHECKERBOARD_BRIGHT_COLOR); })
             .set_parent(parent)
             .build(h_inst)
     );

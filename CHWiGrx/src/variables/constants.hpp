@@ -5,8 +5,10 @@
 #include "structs/figure.hpp"
 
 inline HINSTANCE h_inst;
-inline const HBRUSH CHECKERBOARD_DARK{ CreateSolidBrush(RGB(0x32, 0x32, 0x32)) };
-inline const HBRUSH CHECKERBOARD_BRIGHT{ CreateSolidBrush(RGB(0x80, 0x80, 0x80)) };
+inline const COLORREF CHECKERBOARD_DARK_COLOR{ RGB(0x32, 0x32, 0x32) };
+inline const COLORREF CHECKERBOARD_BRIGHT_COLOR{ RGB(0x80, 0x80, 0x80) };
+inline const HBRUSH CHECKERBOARD_DARK{ CreateSolidBrush(CHECKERBOARD_DARK_COLOR) };
+inline const HBRUSH CHECKERBOARD_BRIGHT{ CreateSolidBrush(CHECKERBOARD_BRIGHT_COLOR) };
 inline const auto DEFAULT_CHESS_BOARD_IDW{
     FromString<board_repr::BoardRepr>{}("02H8W8TWC0,7,25,32!"
                                         "0.00BR1.01BH2.02BB3.03BK4.04BQ5.05BB6.06BH7.07BR8.08BP9.09BP10.10BP11.11BP13."

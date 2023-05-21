@@ -126,6 +126,22 @@ moves_list_wndproc(const HWND h_wnd, const UINT u_msg, const WPARAM w_param, con
 
                     break;
                 }
+
+                // https://stackoverflow.com/a/23449467
+                case NM_CUSTOMDRAW:
+                {
+                    auto lvcd{ reinterpret_cast<LPNMLVCUSTOMDRAW>(l_param) };
+                    switch (lvcd->nmcd.dwDrawStage) {
+                        case CDDS_PREPAINT:
+                            return CDRF_NOTIFYITEMDRAW;
+                        case CDDS_ITEMPREPAINT:
+                            lvcd->clrTextBk = CHECKERBOARD_BRIGHT_COLOR;
+                            return CDRF_NEWFONT;
+                        case CDDS_SUBITEM | CDDS_ITEMPREPAINT:
+                            return CDRF_NEWFONT;
+                    }
+                    return TRUE;
+                }
             }
 
             break;
