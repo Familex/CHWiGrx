@@ -13,10 +13,16 @@
     <Filter Include="src">
       <UniqueIdentifier>{395d5b68-586f-4f1f-aa7e-39f85853645b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="parse">
+      <UniqueIdentifier>{aa5dc77e-1c0a-4d6e-b6ff-a582ccb4b224}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\bot\bot.cpp">
       <Filter>bot</Filter>
+    </ClCompile>
+    <ClCompile Include="src\parse\parse_rule.hpp">
+      <Filter>parse</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -33,15 +39,6 @@
       <Filter>stuff</Filter>
     </ClInclude>
     <ClInclude Include="src\stuff\macro.h">
-      <Filter>stuff</Filter>
-    </ClInclude>
-    <ClInclude Include="src\stuff\parse_meta.hpp">
-      <Filter>stuff</Filter>
-    </ClInclude>
-    <ClInclude Include="src\stuff\parse_step.hpp">
-      <Filter>stuff</Filter>
-    </ClInclude>
-    <ClInclude Include="src\stuff\parsing.hpp">
       <Filter>stuff</Filter>
     </ClInclude>
     <ClInclude Include="src\stuff\strong_typedef.hpp">
@@ -79,6 +76,15 @@
     </ClInclude>
     <ClInclude Include="src\structs\pos.hpp">
       <Filter>structs</Filter>
+    </ClInclude>
+    <ClInclude Include="src\parse\parse_error.hpp">
+      <Filter>parse</Filter>
+    </ClInclude>
+    <ClInclude Include="src\parse\parse_meta.hpp">
+      <Filter>parse</Filter>
+    </ClInclude>
+    <ClInclude Include="src\parse\parse_step.hpp">
+      <Filter>parse</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

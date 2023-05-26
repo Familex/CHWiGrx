@@ -2,9 +2,9 @@
 
 #include "../stuff/enums.hpp"
 #include "../stuff/macro.h"
-#include "../stuff/parse_meta.hpp"
-#include "../stuff/parse_step.hpp"
-#include "../stuff/parsing.hpp"
+#include "../parse/parse_meta.hpp"
+#include "../parse/parse_step.hpp"
+#include "../parse/parse_error.hpp"
 #include "../stuff/stuff.hpp"
 #include "pos.hpp"
 

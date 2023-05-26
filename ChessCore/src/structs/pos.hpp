@@ -1,8 +1,8 @@
 #pragma once
 
 #include "../stuff/macro.h"
-#include "../stuff/parse_meta.hpp"
-#include "../stuff/parsing.hpp"
+#include "../parse/parse_meta.hpp"
+#include "../parse/parse_error.hpp"
 
 #include <string>
 #include <vector>

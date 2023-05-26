@@ -20,10 +20,14 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\bot\bot.cpp" />
+    <ClCompile Include="src\parse\parse_rule.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\bot\bot.h" />
     <ClInclude Include="src\chess_game.hpp" />
+    <ClInclude Include="src\parse\parse_error.hpp" />
+    <ClInclude Include="src\parse\parse_meta.hpp" />
+    <ClInclude Include="src\parse\parse_step.hpp" />
     <ClInclude Include="src\structs\board_repr.hpp" />
     <ClInclude Include="src\structs\figure.hpp" />
     <ClInclude Include="src\structs\figure_board.hpp" />
@@ -36,9 +40,6 @@
     <ClInclude Include="src\stuff\cexau.h" />
     <ClInclude Include="src\stuff\enums.hpp" />
     <ClInclude Include="src\stuff\macro.h" />
-    <ClInclude Include="src\stuff\parse_meta.hpp" />
-    <ClInclude Include="src\stuff\parse_step.hpp" />
-    <ClInclude Include="src\stuff\parsing.hpp" />
     <ClInclude Include="src\stuff\strong_typedef.hpp" />
     <ClInclude Include="src\stuff\stuff.hpp" />
     <ClInclude Include="src\stuff\visit.hpp" />

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../stuff/macro.h"
-#include "../stuff/parsing.hpp"
+#include "../parse/parse_error.hpp"
 #include "../stuff/strong_typedef.hpp"
 #include "../stuff/stuff.hpp"
 
