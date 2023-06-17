@@ -2,7 +2,17 @@
 
 A chessboard simulator written in __C++23__ using __winapi__.
 
-![](Screenshots/game_mode.jpg)
+|game mode|edit mode|
+|:-------:|:-------:|
+|![](Screenshots/game_mode.jpg)|![](Screenshots/edit_mode.png)|
+
+|moves log (game mode)|figures list (edit mode)|
+|:-------------------:|:----------------------:|
+|![](Screenshots/moves_log.png)|![](Screenshots/figures_list.png)|
+
+|game menu|edit menu|
+|:-------:|:-------:|
+|![](Screenshots/game_menu.png)|![](Screenshots/edit_menu.png)|
 
 # Setup
 
