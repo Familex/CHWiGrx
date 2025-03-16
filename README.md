@@ -14,7 +14,7 @@ A chessboard simulator written in __C++23__ using __winapi__.
 |:-------:|:-------:|
 |![](Screenshots/game_menu.png)|![](Screenshots/edit_menu.png)|
 
-# Setup
+## Setup
 
 1. Open [Chess.sln](./Chess.sln) with Visual Studio 2022.
 
@@ -30,3 +30,15 @@ A chessboard simulator written in __C++23__ using __winapi__.
 
 ![](Screenshots/setup3.jpg)
 
+## CMake
+
+Currently CMake only works with MinGW compiler.
+
+## Nix
+
+This repository is a flake.
+
+Build it using `nix build` in project root.
+
+Execute `nix develop` in project root to enter the shell with
+installed dependencies and development tools.

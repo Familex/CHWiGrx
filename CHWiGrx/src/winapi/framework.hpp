@@ -1,7 +1,9 @@
 #pragma once
 
-// list view
 #pragma comment(lib, "comctl32")
+//      ^^^^^^^^^^^^^^^^^^^^^^^^ for list view
+#pragma comment(lib, "msimg32.lib")
+//      ^^^^^^^^^^^^^^^^^^^^^^^^^^^ for TransparentBlt
 
 #include "resource.hpp"
 #include "targetver.hpp"

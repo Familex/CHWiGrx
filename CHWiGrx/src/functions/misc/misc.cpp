@@ -170,10 +170,13 @@ HWND misc::new_window::move_log_list_view(const HWND parent) noexcept
     );
 }
 
-INT_PTR CALLBACK
-misc::about_proc(const HWND h_dlg, const UINT message, const WPARAM w_param, const LPARAM l_param) noexcept
+INT_PTR CALLBACK misc::about_proc(
+    const HWND h_dlg,
+    const UINT message,
+    const WPARAM w_param,
+    [[maybe_unused]] const LPARAM l_param
+) noexcept
 {
-    UNREFERENCED_PARAMETER(l_param);
     switch (message) {
         case WM_INITDIALOG:
             return TRUE;

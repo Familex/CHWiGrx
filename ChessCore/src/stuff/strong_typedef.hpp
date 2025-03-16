@@ -35,69 +35,58 @@ public:
 
 namespace strong_typedef_utils
 {
-// Find way to declare this without implementation
-template <typename Tag, typename T>
-FN underlying_type_impl(StrongTypedef<Tag, T>) noexcept -> T;
-
-template <typename T>
-using UnderlyingType = decltype(underlying_type_impl(std::declval<T>()));
-
-template <class StrongTypedef>
+template <class StrongTypedef, class UnderlyingType>
 struct Addition
 {
-    using type = UnderlyingType<StrongTypedef>;
-
     constexpr friend StrongTypedef& operator+=(StrongTypedef& lhs, const StrongTypedef& rhs)
     {
-        static_cast<type&>(lhs) += static_cast<const type&>(rhs);
+        static_cast<UnderlyingType&>(lhs) += static_cast<const UnderlyingType&>(rhs);
         return lhs;
     }
 
     [[nodiscard]] constexpr friend StrongTypedef operator+(const StrongTypedef& lhs, const StrongTypedef& rhs)
     {
-        return StrongTypedef(static_cast<const type&>(lhs) + static_cast<const type&>(rhs));
+        return StrongTypedef(static_cast<const UnderlyingType&>(lhs) + static_cast<const UnderlyingType&>(rhs));
     }
 
     constexpr friend StrongTypedef operator++(StrongTypedef& lhs)
     {
-        ++static_cast<type&>(lhs);
+        ++static_cast<UnderlyingType&>(lhs);
         return lhs;
     }
 
     constexpr friend StrongTypedef operator++(StrongTypedef& lhs, int)
     {
         auto tmp = lhs;
-        ++static_cast<type&>(lhs);
+        ++static_cast<UnderlyingType&>(lhs);
         return tmp;
     }
 };
 
-template <class StrongTypedef>
+template <class StrongTypedef, class UnderlyingType>
 struct Subtraction
 {
-    using type = UnderlyingType<StrongTypedef>;
-
     constexpr friend StrongTypedef& operator-=(StrongTypedef& lhs, const StrongTypedef& rhs)
     {
-        static_cast<type&>(lhs) -= static_cast<const type&>(rhs);
+        static_cast<UnderlyingType&>(lhs) -= static_cast<const UnderlyingType&>(rhs);
         return lhs;
     }
 
     [[nodiscard]] constexpr friend StrongTypedef operator-(const StrongTypedef& lhs, const StrongTypedef& rhs)
     {
-        return StrongTypedef(static_cast<const type&>(lhs) - static_cast<const type&>(rhs));
+        return StrongTypedef(static_cast<const UnderlyingType&>(lhs) - static_cast<const UnderlyingType&>(rhs));
     }
 
     constexpr friend StrongTypedef operator--(StrongTypedef& lhs)
     {
-        --static_cast<type&>(lhs);
+        --static_cast<UnderlyingType&>(lhs);
         return lhs;
     }
 
     constexpr friend StrongTypedef operator--(StrongTypedef& lhs, int)
     {
         auto tmp = lhs;
-        --static_cast<type&>(lhs);
+        --static_cast<UnderlyingType&>(lhs);
         return tmp;
     }
 };

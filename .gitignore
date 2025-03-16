@@ -41,10 +41,17 @@ x64/
 *.user
 *.hint
 
+# cmake artifacts
+/build/
+
 # my files
 **/TODO*
 psd/
 private/
+# clangd
+/.cache
+/result
+/compile_commands.json
 
 # vtune
 **/GPUCache/

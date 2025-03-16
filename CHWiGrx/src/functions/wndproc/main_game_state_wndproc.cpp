@@ -314,7 +314,7 @@ LRESULT CALLBACK mainproc::main_game_state_wndproc(
 
             draw_board(hdc_mem);
 
-            /* Возможные ходы текущей фигуры */
+            /* Possible moves */
             {
                 for (const auto& [is_eat, move_pos] : mutables::motion_input.get_possible_moves()) {
                     static const HBRUSH GREEN{ CreateSolidBrush(RGB(0, 255, 0)) };
@@ -333,7 +333,7 @@ LRESULT CALLBACK mainproc::main_game_state_wndproc(
 
             draw_figures_on_board(hdc_mem);
 
-            /* Копирование временного буфера в основной */
+            /* Swap backbuffer */
             BitBlt(
                 hdc, 0, 0, mutables::main_window.get_width(), mutables::main_window.get_height(), hdc_mem, 0, 0, SRCCOPY
             );

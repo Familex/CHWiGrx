@@ -2,6 +2,8 @@
 
 #include "window_stats.hpp"
 
+#include <cmath>
+
 class FiguresListStats final : public WindowStats
 {
     size_t figures_in_row_{ 2 };

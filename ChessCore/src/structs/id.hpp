@@ -1,7 +1,7 @@
 #pragma once
 
-#include "../stuff/macro.h"
 #include "../parse/parse_error.hpp"
+#include "../stuff/macro.h"
 #include "../stuff/strong_typedef.hpp"
 #include "../stuff/stuff.hpp"
 
@@ -14,8 +14,8 @@ struct IdTag
 { };
 struct Id
   : StrongTypedef<IdTag, IdType>
-  , strong_typedef_utils::Addition<Id>
-  , strong_typedef_utils::Subtraction<Id>
+  , strong_typedef_utils::Addition<Id, IdType>
+  , strong_typedef_utils::Subtraction<Id, IdType>
 {
     using StrongTypedef::StrongTypedef;
 
@@ -43,11 +43,12 @@ struct hash<Id>
 };
 
 template <>
-struct std::formatter<Id> : std::formatter<std::string>
+struct formatter<Id> : formatter<string>
 {
     [[nodiscard]] inline auto format(Id id, format_context& ctx) const noexcept
     {
-        return formatter<std::string>::format(std::format("{}", static_cast<IdType>(id)), ctx);
+        // FIXME ::std:: thing looks hacky
+        return formatter<string>::format(::std::format<IdType>("{}", static_cast<IdType>(id)), ctx);
     }
 };
 }    // namespace std

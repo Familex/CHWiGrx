@@ -1,8 +1,5 @@
 #include "draw.h"
 
-#pragma comment(lib, "Msimg32.lib")
-//      ^^^^^^^^^^^^^^^^^^^^^^^^^^^ for TransparentBlt
-
 #include "../../variables/constants.hpp"
 #include "../../variables/mutables.hpp"
 

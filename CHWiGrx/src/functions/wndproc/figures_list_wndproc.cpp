@@ -167,7 +167,7 @@ figures_list_wndproc(const HWND h_wnd, const UINT message, const WPARAM w_param,
                 FillRect(hdc_mem, &full_rect, constants::CHECKERBOARD_DARK);
             }
 
-            /* Отрисовка фигур */
+            /* Figure draw */
             for (std::size_t index = 0; index < figures_prototypes[curr_color].size(); ++index) {
                 const int x = static_cast<int>(index / mutables::figures_list.get_figures_in_row());
                 const int y = static_cast<int>(index % mutables::figures_list.get_figures_in_row());

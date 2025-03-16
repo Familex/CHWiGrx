@@ -1,11 +1,12 @@
 #pragma once
 
-#include "macro.h"
 #include "../parse/parse_error.hpp"
+#include "macro.h"
 
 #include <optional>
 #include <set>
 #include <string>
+#include <utility>
 
 enum class GameEndType {
     Checkmate,
