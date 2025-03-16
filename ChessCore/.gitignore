@@ -1,0 +1,24 @@
+# recursive whitelist gitignore
+*
+!*/
+!.gitignore
+
+# Visual Studio project
+!*.vcxproj
+!*.vcxproj.filters
+!cpp.hint
+
+# sources
+!*.h
+!*.hpp
+!*.c
+!*.cpp
+!*.ixx
+
+# assets
+!*.rc
+!*.png
+!*.jpg
+!*.bmp
+!*.ani
+!*.ico

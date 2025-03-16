@@ -1,58 +1,20 @@
-# Prerequisites
-*.d
+# whitelist gitignore
+/*
+!.gitignore
 
-# Compiled Object files
-*.slo
-*.lo
-*.o
-*.obj
+# sources
+!/CHWiGrx/
+!/ChessCore
+!/Testing
 
-# Precompiled Headers
-*.gch
-*.pch
+# dev tools
+!CMakeLists.txt
+!Chess.sln
+!.clang-format
+!flake.nix
+!flake.lock
 
-# Compiled Dynamic libraries
-*.so
-*.dylib
-*.dll
-
-# Fortran module files
-*.mod
-*.smod
-
-# Compiled Static libraries
-*.lai
-*.la
-*.a
-*.lib
-
-# Executables
-*.exe
-*.out
-*.app
-
-# vs artifacts
-.vs/
-x64/
-[Dd]ebug/
-[Rr]elease/
-*.suppress
-*.aps
-*.user
-*.hint
-
-# cmake artifacts
-/build/
-
-# my files
-**/TODO*
-psd/
-private/
-# clangd
-/.cache
-/result
-/compile_commands.json
-
-# vtune
-**/GPUCache/
-**/VTune Profiler Results/
+# docs
+!README.md
+!/Screenshots
+!LICENSE
