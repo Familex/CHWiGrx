@@ -14,10 +14,10 @@ file (
 )
 
 # Compile winapi resource file
-set(resource_file "${CMAKE_CURRENT_SOURCE_DIR}/CHWiGrx/src/winapi/CHWiGrx.rc")
-set(resource_file_utf8 "${resource_file}.utf8")
-set(resource_res "${CMAKE_CURRENT_BINARY_DIR}/CHWiGrx.o")
-add_custom_command(
+set (resource_file "${CMAKE_CURRENT_SOURCE_DIR}/CHWiGrx/src/winapi/CHWiGrx.rc")
+set (resource_file_utf8 "${resource_file}.utf8")
+set (resource_res "${CMAKE_CURRENT_BINARY_DIR}/CHWiGrx.o")
+add_custom_command (
     OUTPUT ${resource_res}
     COMMAND iconv -f UTF-16LE -t UTF-8 ${resource_file} -o ${resource_file_utf8}
     COMMAND ${CMAKE_RC_COMPILER} -J rc -o ${resource_res} ${resource_file_utf8}
@@ -48,6 +48,13 @@ target_compile_definitions (
   "_WIN32_WINNT=0x0A00" # FIXME downgrade from _WIN32_WINNT_WIN10 to _WIN32_WINNT_WIN7?
   "_UNICODE" "UNICODE"
 )
+
+if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+  target_compile_definitions (
+    CHWiGrx PRIVATE
+    "_DEBUG"
+  )
+endif ()
 
 target_link_libraries (
   CHWiGrx PUBLIC
