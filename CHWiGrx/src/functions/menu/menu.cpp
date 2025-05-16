@@ -114,8 +114,9 @@ void update_bot_menu_variables(const HWND h_wnd) noexcept
 
         if (mutables::bot_type == bot::Type::Random)
             set_menu_checkbox(h_wnd, IDM_BOTTYPE_RANDOM, true);
-        else if (mutables::bot_type == bot::Type::NeuralNetwork)
-            ;    // placeholder;
+        else if (mutables::bot_type == bot::Type::NeuralNetwork) {
+            // placeholder
+        }
     }
     else {
         // without bot

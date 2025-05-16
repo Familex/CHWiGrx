@@ -21,9 +21,6 @@
     <ClCompile Include="src\bot\bot.cpp">
       <Filter>bot</Filter>
     </ClCompile>
-    <ClCompile Include="src\parse\parse_rule.hpp">
-      <Filter>parse</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\bot\bot.h">
